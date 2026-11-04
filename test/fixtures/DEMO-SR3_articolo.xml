@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Dati articolo di prova nel formato XML <partsmanagement>: relè di sicurezza di un costruttore
+  inventato (DEMO). Codici, dati e descrizioni sono fittizi, scritti per i test di OpenWiring.
+
+  Struttura: root <partsmanagement>, un <part> per articolo, almeno una <variant> per ogni <part>.
+  P_ARTICLE_PARTNR va definito solo sul tag <part>; P_ARTICLE_PARTTYPE = 1 (componente).
+  Il modello funzione (punti di connessione) non è incluso.
+-->
+<partsmanagement>
+
+  <part P_ARTICLE_PARTNR="DEMO.SR3-24"
+        P_ARTICLE_PARTTYPE="1"
+        P_ARTICLE_TYPENR="SR3-24"
+        P_ARTICLE_ORDERNR="SR324V"
+        P_ARTICLE_MANUFACTURER="DEMO"
+        P_ARTICLE_SUPPLIER="DEMO"
+        P_ARTICLE_DESCR1="Relè di sicurezza SR3 - arresto d'emergenza"
+        P_ARTICLE_DESCR2="24 V c.a./c.c. - 3 contatti NA di sicurezza - morsetti a vite"
+        P_ARTICLE_WEIGHT="0,2"
+        P_ARTICLE_MOUNTINGSITE="Superficie di montaggio"
+        P_ARTICLE_TECHNICALCHARACTERISTIC="Ue 24 V c.a./c.c. - 3 contatti NA di sicurezza 13-14 / 23-24 / 33-34 - AC-15 230 V 1 A - DC-13 24 V 1 A - tempo di risposta &lt;= 25 ms - IP20 morsetti - da -10 a +50 °C"
+        P_ARTICLE_NOTE="Ingresso a 1 o 2 canali - avvio manuale o automatico - 2 LED diagnostici.">
+    <variant P_ARTICLE_VARIANT_DESCRIPTION="Morsetti a vite"
+             P_ARTICLE_WIDTH="22,5"
+             P_ARTICLE_HEIGHT="100"
+             P_ARTICLE_DEPTH="115"
+             P_ARTICLE_MOUNTINGTYPE="Guida DIN 35 mm EN/IEC 60715"
+             P_ARTICLE_MACRO="$(MD_MACROS)\DEMO\SR3.ema"/>
+  </part>
+
+  <part P_ARTICLE_PARTNR="DEMO.SR3-24P"
+        P_ARTICLE_PARTTYPE="1"
+        P_ARTICLE_TYPENR="SR3-24P"
+        P_ARTICLE_ORDERNR="SR324VP"
+        P_ARTICLE_MANUFACTURER="DEMO"
+        P_ARTICLE_SUPPLIER="DEMO"
+        P_ARTICLE_DESCR1="Relè di sicurezza SR3 - arresto d'emergenza"
+        P_ARTICLE_DESCR2="24 V c.a./c.c. - 3 contatti NA di sicurezza - morsettiere estraibili"
+        P_ARTICLE_WEIGHT="0,2"
+        P_ARTICLE_MOUNTINGSITE="Superficie di montaggio"
+        P_ARTICLE_TECHNICALCHARACTERISTIC="Ue 24 V c.a./c.c. - 3 contatti NA di sicurezza 13-14 / 23-24 / 33-34 - AC-15 230 V 1 A - DC-13 24 V 1 A - tempo di risposta &lt;= 25 ms - IP20 morsetti - da -10 a +50 °C"
+        P_ARTICLE_NOTE="Versione P con morsettiere estraibili.">
+    <variant P_ARTICLE_VARIANT_DESCRIPTION="Morsettiere estraibili"
+             P_ARTICLE_WIDTH="22,5"
+             P_ARTICLE_HEIGHT="100"
+             P_ARTICLE_DEPTH="115"
+             P_ARTICLE_MOUNTINGTYPE="Guida DIN 35 mm EN/IEC 60715"
+             P_ARTICLE_MACRO="$(MD_MACROS)\DEMO\SR3.ema"/>
+  </part>
+
+</partsmanagement>

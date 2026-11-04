@@ -1,0 +1,57 @@
+name: Release
+
+# Solo a mano (Actions ▸ Release ▸ Run workflow, scegliendo il tag): crea la versione portable per
+# Windows sulle macchine di GitHub e la allega alla release del tag (o a una bozza nuova). I pacchetti
+# di ogni versione (macOS .dmg e Windows .zip) si creano in locale: vedi README, «Pacchetti di
+# installazione e rilasci».
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bozza di release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Crea la bozza se non esiste
+          gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1 || \
+            gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft \
+              --title "OpenWiring ${GITHUB_REF_NAME}" \
+              --notes "Versione portable per Windows x64. App non firmata: vedi README, sezione Installazione."
+
+  build:
+    needs: draft
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win portable --x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx electron-builder ${{ matrix.target }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Allega gli installer alla bozza
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Allega (o sostituisce) gli installer
+          shopt -s nullglob
+          files=(release/*.dmg release/*.exe release/*.zip)
+          [ ${#files[@]} -gt 0 ] || { echo "Nessun installer in release/"; exit 1; }
+          gh release upload "${GITHUB_REF_NAME}" "${files[@]}" --repo "${GITHUB_REPOSITORY}" --clobber

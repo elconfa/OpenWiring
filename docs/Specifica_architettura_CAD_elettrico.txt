@@ -1,0 +1,600 @@
+SPECIFICA INIZIALE
+Programma grafico per schemi elettrici di automazione industriale
+Documento di indirizzo architetturale — versione 1.0
+Data: 20 ottobre 2026
+
+======================================================================
+1. SCOPO DEL DOCUMENTO
+======================================================================
+
+Questo documento definisce una direzione iniziale per progettare un programma grafico destinato alla creazione, modifica, verifica, revisione ed emissione di schemi elettrici per l'automazione industriale.
+
+L'obiettivo non è soltanto disegnare simboli e fili. Il programma dovrà mantenere la coerenza elettrica e documentale del progetto, gestire le revisioni senza perdere lo storico e produrre documentazione affidabile per il cablaggio.
+
+Il documento è una base di progettazione: alcune decisioni di dettaglio, in particolare il modello delle connessioni elettriche e la tecnologia dell'editor grafico, dovranno essere confermate durante la fase di analisi e prototipazione.
+
+Principi guida:
+- Le revisioni rilasciate non devono mai essere sovrascritte.
+- Ogni oggetto deve avere un'identità interna stabile, indipendente dalla sua rappresentazione grafica.
+- Le connessioni elettriche devono essere dati strutturati, non semplici linee disegnate.
+- I rimandi devono essere derivati da relazioni strutturate e aggiornati automaticamente.
+- Le modifiche automatiche devono essere tracciabili e spiegabili.
+- Il rilascio deve contenere un progetto completo e coerente, non un insieme di pagine appartenenti a revisioni diverse.
+
+======================================================================
+2. STATI DEL PROGETTO E REVISIONI
+======================================================================
+
+Il progetto utilizza tre stati operativi.
+
+2.1 IN_PROGRESS
+Il progetto è in lavorazione ordinaria. Il progettista può aggiungere, modificare, spostare ed eliminare pagine e oggetti, creare connessioni e aggiornare le proprietà.
+
+2.2 DONE
+La revisione è stata verificata e rilasciata al cablatore. Il contenuto rilasciato è immutabile. Non è consentito modificare direttamente questa revisione.
+
+2.3 REVIEW
+È in corso una revisione derivata dall'ultima versione rilasciata. Il progettista può modificare pagine esistenti, aggiungere pagine, eliminare pagine e modificare oggetti. Le modifiche automatiche alle pagine dipendenti sono incluse nella stessa revisione.
+
+Distinzione fondamentale:
+- Lo stato descrive cosa si può fare con una revisione.
+- La revisione identifica una specifica versione coerente del progetto.
+
+Flusso tipico:
+DONE R02 -> creazione REVIEW R03 -> modifiche -> aggiornamento dipendenze -> validazione -> confronto -> approvazione -> DONE R03.
+
+Se la revisione viene annullata, la versione rilasciata precedente rimane intatta. Una revisione rilasciata non viene mai riaperta in scrittura.
+
+Nella prima versione del programma è consigliabile consentire una sola revisione di lavoro attiva per progetto. La gestione di revisioni parallele può essere aggiunta successivamente.
+
+======================================================================
+3. REGOLE DI VERSIONAMENTO E STORICO
+======================================================================
+
+Ogni revisione deve poter essere ricostruita e consultata esattamente come era al momento del rilascio.
+
+Ogni pagina conserva un'identità interna stabile. Ogni oggetto elettrico conserva un'identità interna stabile. Il numero visualizzato della pagina, la posizione grafica o il testo di un rimando non devono essere usati come identificativi primari.
+
+Esempio:
+- ID pagina: pg_8f12...
+- Numero visualizzato: =EAA/12
+- Revisione: R03
+
+Le versioni precedenti rimangono consultabili. Una nuova revisione deriva da una revisione precedente e registra la relazione di derivazione.
+
+Comportamento per le pagine:
+- Pagina modificata: conserva il proprio ID; il suo stato nella nuova revisione cambia.
+- Pagina nuova: riceve un nuovo ID e un numero disponibile.
+- Pagina eliminata: è marcata come eliminata nella nuova revisione; lo storico non viene cancellato.
+- Pagina rinumerata deliberatamente: mantiene lo stesso ID, ma cambia il numero visualizzato e vengono aggiornati i rimandi derivati.
+- Pagina invariata: rimane logicamente identica alla versione precedente.
+
+Per il primo prototipo si raccomanda di memorizzare uno snapshot completo per ogni revisione. È più semplice da verificare rispetto a un sistema complesso di differenze incrementali. In futuro si potrà ottimizzare lo spazio riutilizzando i dati invariati, purché sia sempre possibile ricostruire ogni revisione.
+
+======================================================================
+4. NUMERAZIONE STABILE DELLE PAGINE
+======================================================================
+
+La numerazione deve essere stabile. Il programma non rinumera automaticamente tutte le pagine quando una pagina viene aggiunta o eliminata.
+
+Regole:
+- I numeri esistenti non cambiano automaticamente.
+- I buchi lasciati da pagine eliminate rimangono buchi.
+- I numeri storicamente assegnati non vengono riutilizzati automaticamente.
+- L'aggiunta di una pagina propone un numero libero successivo al massimo numero mai assegnato nel gruppo.
+- Il progettista può assegnare manualmente un numero libero, se necessario.
+- La rinumerazione deliberata deve essere un'operazione esplicita, tracciata e seguita dall'aggiornamento dei rimandi.
+- Per progetti suddivisi in sezioni, la numerazione va gestita per gruppo, mantenendo un ID globale univoco.
+
+Esempio:
+=EAA/10 attiva
+=EAA/11 eliminata
+=EAA/12 attiva
+=EAA/13 nuova
+=EAA/14 attiva
+
+Il numero 11 rimane libero nella revisione corrente. La pagina 12 non viene spostata automaticamente al numero 11.
+
+Pseudocodice per proporre un numero:
+    candidate = last_assigned + 1
+    while candidate in historically_assigned_numbers:
+        candidate += 1
+    return candidate
+
+La conferma del numero deve aggiornare il registro storico dei numeri assegnati.
+
+======================================================================
+5. ARCHITETTURA SOFTWARE
+======================================================================
+
+L'applicazione è suddivisa in moduli separati.
+
+5.1 Editor grafico
+Gestisce fogli, simboli, fili, testi, cartigli, proprietà e interazioni dell'utente. L'editor non deve contenere da solo tutta la logica elettrica.
+
+5.2 Modello elettrico centrale
+Contiene componenti, simboli logici, pin, nodi, segmenti di filo, connessioni, morsetti e reti. È la fonte strutturata della verità elettrica.
+
+5.3 Motore delle revisioni
+Crea revisioni, gestisce snapshot, immutabilità, storico, differenze e confronto tra versioni.
+
+5.4 Motore delle dipendenze
+Calcola quali oggetti e pagine dipendono da una modifica. Aggiorna i dati derivati e registra la causa degli aggiornamenti automatici.
+
+5.5 Validatore
+Esegue controlli d'integrità del database, coerenza elettrica e coerenza documentale.
+
+5.6 Motore di rilascio
+Genera PDF, distinte, liste fili, liste morsetti, rapporti delle differenze, manifest e checksum.
+
+Tecnologia iniziale consigliata:
+- Python per la logica applicativa e il prototipo.
+- SQLite per il database di un'applicazione desktop con un progettista alla volta.
+- Editor grafico disaccoppiato dalla logica di progetto.
+- PostgreSQL da valutare in futuro se sarà necessario lavorare in contemporanea da più postazioni.
+
+La scelta della libreria grafica e della tecnologia di rendering va fatta separatamente, dopo aver verificato i requisiti di zoom, selezione, griglie, snapping, simboli, stampa e prestazioni.
+
+======================================================================
+6. MODELLO DATI INIZIALE
+======================================================================
+
+Le seguenti tabelle sono una proposta concettuale. I tipi e i vincoli definitivi vanno precisati nell'implementazione.
+
+6.1 projects
+Campi essenziali:
+- id
+- name
+- working_revision_id
+- released_revision_id
+- created_at
+- updated_at
+
+Rappresenta il progetto e identifica la revisione in lavorazione e quella rilasciata.
+
+6.2 revisions
+Campi essenziali:
+- id
+- project_id
+- number
+- status
+- parent_revision_id
+- created_at
+- created_by
+- released_at
+- released_by
+- change_reason
+
+Rappresenta una versione completa e coerente del progetto. Il numero di revisione deve essere univoco all'interno del progetto.
+
+6.3 pages
+Campi essenziali:
+- id
+- project_id
+- created_at_revision_id
+
+Contiene l'identità stabile delle pagine, non lo stato corrente del foglio.
+
+6.4 revision_pages
+Campi essenziali:
+- revision_id
+- page_id
+- page_number
+- title
+- page_status
+- properties
+
+Descrive la pagina nella specifica revisione. page_status può rappresentare, ad esempio, attiva o eliminata. I vincoli devono impedire numeri duplicati tra le pagine attive dello stesso gruppo e della stessa revisione.
+
+6.5 objects
+Campi essenziali:
+- id
+- project_id
+- type
+- created_at_revision_id
+
+Contiene l'identità stabile di componenti, simboli, fili, pin logici, morsetti e altri oggetti.
+
+6.6 revision_objects
+Campi essenziali:
+- revision_id
+- object_id
+- page_id
+- properties
+- geometry
+- object_status
+
+Contiene proprietà e geometria dell'oggetto nella specifica revisione. I dati variabili possono essere serializzati in JSON, ma i campi necessari alle query e ai controlli d'integrità dovrebbero essere colonne esplicite.
+
+6.7 connections
+Campi essenziali:
+- revision_id
+- source_id
+- source_pin
+- target_id
+- target_pin
+- connection_type
+
+Rappresenta connessioni elettriche strutturate. La forma definitiva deve essere progettata insieme al modello di nodi, segmenti e reti.
+
+6.8 cross_references
+Campi essenziali:
+- revision_id
+- source_id
+- target_id
+- reference_type
+
+Rappresenta relazioni logiche che devono essere visualizzate come rimandi, ad esempio tra contatti e bobine di uno stesso dispositivo.
+
+6.9 change_log
+Campi essenziali:
+- id
+- revision_id
+- object_id
+- change_type
+- origin
+- caused_by_object_id
+- details
+- created_at
+- created_by
+
+Registra cosa è cambiato, come è cambiato e perché. origin distingue almeno le modifiche manuali da quelle automatiche.
+
+6.10 release_artifacts
+Campi essenziali:
+- id
+- revision_id
+- artifact_type
+- path_or_uri
+- checksum
+- created_at
+
+Registra gli artefatti generati per il rilascio e i relativi checksum.
+
+Vincoli generali:
+- Chiavi primarie univoche.
+- Chiavi esterne per tutte le relazioni interne.
+- Nessun rimando a un oggetto inesistente nella revisione.
+- Nessuna modifica ai contenuti di una revisione rilasciata.
+- Rilascio atomico: il pacchetto viene pubblicato interamente oppure non viene pubblicato.
+- Le cancellazioni storiche sono logiche, non distruttive.
+
+======================================================================
+7. MODELLO ELETTRICO: CONNESSIONI E RIMANDI
+======================================================================
+
+Il modello elettrico deve essere separato dalla rappresentazione grafica.
+
+Un filo disegnato è una rappresentazione grafica. La connessione elettrica è una relazione logica tra pin, nodi e segmenti di filo. Un rimando stampato è una rappresentazione generata a partire da relazioni strutturate.
+
+Non bisogna usare il testo visibile di un rimando come fonte primaria della relazione.
+
+Esempio di rimando funzionale:
+- Contatto ausiliario KM1 sulla pagina =EAA/18.
+- Bobina KM1 sulla pagina =EAA/12.
+- Relazione logica memorizzata tra gli ID stabili del contatto e della bobina.
+- Numero pagina, coordinate e testo del rimando vengono generati dalla revisione corrente.
+
+Se la bobina viene spostata sulla pagina =EAA/15, il sistema aggiorna il rimando visualizzato senza cercare e sostituire manualmente il testo in ogni foglio.
+
+Distinguere almeno tre categorie:
+1. Connessione elettrica: collega pin, nodi e segmenti e determina la continuità elettrica.
+2. Rimando funzionale: collega logicamente simboli o oggetti, per esempio contatti e bobine.
+3. Rimando grafico: testo o simbolo visualizzato sul foglio, generato automaticamente.
+
+Un rimando grafico non deve creare da solo una connessione elettrica.
+
+Per i collegamenti distribuiti tra più pagine, il modello deve supportare identificativi di rete, nodi, segmenti e punti di connessione. Due fili con lo stesso nome visualizzato non devono essere considerati automaticamente connessi, a meno che le regole esplicite del progetto non lo prevedano.
+
+Decisione ancora da formalizzare:
+- Modello centrato su segmenti di filo collegati direttamente tra pin.
+- Oppure modello centrato su reti elettriche (net) che possono contenere più segmenti e attraversare più pagine.
+
+La seconda opzione è generalmente più flessibile per un CAD industriale. Richiede però una modellazione esplicita di nodi, segmenti, punti di connessione e collegamenti interpagina.
+
+======================================================================
+8. MOTORE DELLE DIPENDENZE E AGGIORNAMENTI AUTOMATICI
+======================================================================
+
+Ogni oggetto può dipendere da altri oggetti. Il sistema deve rappresentare queste relazioni in un grafo orientato.
+
+Quando un oggetto cambia:
+1. Individuare le dipendenze dirette e indirette.
+2. Marcare come da ricalcolare gli oggetti dipendenti.
+3. Ricalcolare rimandi, coordinate di destinazione e altri dati derivati.
+4. Confrontare il risultato con lo stato precedente.
+5. Registrare soltanto i cambiamenti effettivi.
+6. Marcare le pagine interessate.
+7. Eseguire la validazione del progetto.
+
+Esempio:
+- Il progettista sposta la bobina KM1 sulla pagina 12.
+- Il rimando del contatto KM1 sulla pagina 18 deve essere ricalcolato.
+- Un altro riferimento sulla pagina 25 può dover essere aggiornato.
+- La distinta materiali non deve essere modificata se non è cambiato alcun dato che la riguarda.
+
+Pseudocodice:
+    dirty_objects = set(changed_objects)
+    pending = list(changed_objects)
+
+    while pending:
+        object_id = pending.pop()
+        for dependent_id in dependency_graph.get(object_id, []):
+            if dependent_id not in dirty_objects:
+                dirty_objects.add(dependent_id)
+                pending.append(dependent_id)
+
+Il grafo deve avere una direzione definita: un arco da un oggetto sorgente a un oggetto dipendente significa che una modifica alla sorgente può richiedere il ricalcolo del dipendente.
+
+Il risultato è l'insieme degli oggetti da rivalutare, non necessariamente l'insieme degli oggetti che saranno effettivamente modificati. Dopo il ricalcolo, si confrontano i valori e si registrano solo le differenze reali.
+
+Per il prototipo il grafo può essere ricostruito quando necessario. In seguito si può aggiornare in modo incrementale.
+
+Ogni aggiornamento automatico deve essere tracciabile:
+- oggetto modificato;
+- tipo di modifica;
+- origine manuale o automatica;
+- oggetto che ha causato l'aggiornamento;
+- revisione di origine;
+- data e autore, quando disponibili.
+
+======================================================================
+9. STATO DELLE PAGINE DURANTE LA REVIEW
+======================================================================
+
+Ogni pagina deve avere uno stato rispetto alla revisione corrente:
+- Invariata.
+- Modificata manualmente.
+- Modificata automaticamente.
+- Nuova.
+- Eliminata.
+- Da verificare.
+
+La pagina conserva il proprio ID stabile. Lo stato è relativo alla revisione corrente, non una proprietà permanente dell'identità della pagina.
+
+Esempio:
+- Pagina =EAA/12: modificata manualmente.
+- Pagina =EAA/18: rimando aggiornato automaticamente.
+- Pagina =EAA/25: coordinate di rimando aggiornate automaticamente.
+- Altre pagine: invariate.
+
+Il programma deve offrire una vista “Mostra tutte le modifiche della revisione”, con:
+- elenco delle pagine interessate;
+- distinzione tra modifiche manuali e automatiche;
+- confronto prima/dopo;
+- collegamento diretto alla pagina e all'oggetto;
+- spiegazione della causa delle modifiche automatiche.
+
+Le pagine aggiornate automaticamente non richiedono revisioni indipendenti. Tutte le modifiche appartengono a un'unica revisione coerente del progetto.
+
+======================================================================
+10. CONFRONTO TRA REVISIONI
+======================================================================
+
+Il confronto deve avvenire a livello di dati e oggetti, non soltanto confrontando PDF o immagini.
+
+Categorie da confrontare:
+- Pagine aggiunte, eliminate o rinominate.
+- Simboli aggiunti, eliminati o modificati.
+- Fili e connessioni aggiunti, rimossi o modificati.
+- Proprietà dei componenti, sigle e codici articolo.
+- Rimandi aggiornati automaticamente.
+- Oggetti spostati senza modifiche elettriche.
+- Distinte, liste fili, liste morsetti e altri documenti derivati.
+- Errori e avvisi introdotti.
+
+Esempio di rapporto:
+- =EAA/12 — Bobina KM1 — posizione modificata — manuale.
+- =EAA/18 — Rimando KM1 — destinazione aggiornata — automatico.
+- =EAA/25 — Rimando KM1 — coordinate aggiornate — automatico.
+- =EAA/26 — Nuovo circuito — pagina aggiunta — manuale.
+
+Il sistema deve conservare anche la causa di ogni modifica. Questo consente di spiegare perché una pagina è cambiata e quale operazione ha generato l'aggiornamento.
+
+Il confronto grafico resta utile come strumento aggiuntivo, ma non sostituisce il confronto strutturato dei dati.
+
+======================================================================
+11. VALIDAZIONE PRIMA DEL RILASCIO
+======================================================================
+
+I controlli sono suddivisi in tre livelli.
+
+11.1 Integrità del database
+- ID univoci.
+- Chiavi esterne valide.
+- Pagine e oggetti coerenti con la revisione.
+- Connessioni e rimandi che puntano a oggetti esistenti.
+- Numeri di pagina non duplicati tra le pagine attive dello stesso gruppo.
+- Revisione ricostruibile e coerente.
+
+11.2 Coerenza elettrica
+- Pin validi.
+- Connessioni coerenti.
+- Reti e nodi validi.
+- Continuità dei collegamenti secondo le regole del modello.
+- Morsetti e riferimenti coerenti.
+- Rimandi funzionali risolti.
+- Coerenza tra simboli, proprietà e componenti.
+
+11.3 Coerenza documentale
+- Numeri di pagina e rimandi stampati corretti.
+- Cartigli coerenti con la revisione.
+- Distinte e liste accessorie aggiornate.
+- PDF e documenti esportati generati dalla revisione corretta.
+- Nessuna mescolanza involontaria di pagine appartenenti a rilasci differenti.
+
+Gli errori bloccanti impediscono il rilascio. Gli avvisi possono essere accettati da un utente autorizzato solo con una motivazione registrata.
+
+Questi controlli non sostituiscono la verifica progettuale né la validazione di sicurezza della macchina secondo le norme applicabili.
+
+======================================================================
+12. RILASCIO AL CABLATORE
+======================================================================
+
+Ogni rilascio deve produrre un pacchetto completo e identificabile.
+
+Struttura di esempio:
+Progetto_ABC/
+    Release_R03/
+        Schemi_completi.pdf
+        Distinta_materiali.xlsx
+        Lista_fili.xlsx
+        Lista_morsetti.xlsx
+        Rapporto_revisioni.pdf
+        Manifest.json
+        Checksums.sha256
+    Archive/
+        Release_R01/
+        Release_R02/
+
+Il pacchetto deve includere:
+- tutti gli schemi aggiornati;
+- le liste e le distinte richieste;
+- un rapporto delle differenze rispetto alla revisione precedente;
+- un manifest con ID progetto, ID revisione, revisione precedente, data, autore e file inclusi;
+- checksum per verificare l'integrità dei file.
+
+Il rapporto delle differenze deve contenere:
+- revisione precedente e nuova;
+- data, autore e motivo della modifica;
+- pagine interessate;
+- modifiche manuali e automatiche;
+- controlli effettuati;
+- avvisi accettati e relativa motivazione.
+
+La nuova revisione completa diventa la base per le revisioni future. Il cablatore non deve ricostruire il progetto combinando pagine di emissioni differenti.
+
+Se il cablaggio della revisione precedente è già iniziato, il programma deve rendere evidente che esiste una nuova emissione e mostrare le differenze rispetto alla precedente.
+
+======================================================================
+13. REGOLE DI IMMUTABILITÀ E AFFIDABILITÀ
+======================================================================
+
+- Una revisione rilasciata non è modificabile.
+- Una nuova revisione deriva da una revisione specifica.
+- Una modifica non deve alterare indirettamente una revisione storica.
+- Le operazioni complesse devono essere eseguite in transazioni, così da evitare stati parziali.
+- Gli aggiornamenti automatici devono essere deterministici e ripetibili.
+- Il rilascio deve congelare i dati e generare gli artefatti a partire da quella precisa revisione.
+- I checksum devono essere associati ai file rilasciati.
+- L'archivio deve consentire di ricostruire e consultare ogni emissione precedente.
+
+Per la prima versione, evitare funzioni che modifichino silenziosamente molte pagine. Il programma deve mostrare le conseguenze della modifica e registrarle nel rapporto.
+
+======================================================================
+14. PIANO DI SVILUPPO
+======================================================================
+
+Fase 1 — Modello dati e versionamento
+- Progetti, pagine, oggetti e revisioni.
+- Creazione di snapshot.
+- Identità stabili.
+- Blocco delle revisioni rilasciate.
+- Numerazione stabile e registro dei numeri usati.
+
+Fase 2 — Editor grafico di base
+- Creazione e modifica delle pagine.
+- Inserimento e spostamento di oggetti.
+- Simboli e proprietà.
+- Geometria, griglia, snapping, selezione e zoom.
+
+Fase 3 — Modello elettrico
+- Pin, nodi, segmenti, reti e connessioni.
+- Relazioni funzionali tra oggetti.
+- Rimandi generati dal modello.
+- Regole di continuità e identificazione delle reti.
+
+Fase 4 — Motore delle dipendenze
+- Grafo delle dipendenze.
+- Aggiornamenti automatici.
+- Tracciamento delle cause.
+- Elenco delle pagine coinvolte.
+
+Fase 5 — Confronto e validazione
+- Differenze tra revisioni.
+- Confronto strutturato degli oggetti.
+- Validazione globale.
+- Gestione degli errori bloccanti e degli avvisi.
+
+Fase 6 — Rilascio
+- Generazione PDF.
+- Distinte e liste.
+- Rapporto delle differenze.
+- Manifest e checksum.
+- Archivio immutabile delle emissioni.
+
+La prima versione utile dovrebbe garantire già:
+1. Nessuna sovrascrittura delle revisioni rilasciate.
+2. Identità stabili di pagine e oggetti.
+3. Numerazione stabile con buchi.
+4. Rimandi strutturati, non basati soltanto su testo.
+5. Tracciamento delle modifiche automatiche.
+6. Validazione prima del rilascio.
+7. Esportazione completa e rapporto delle differenze.
+
+======================================================================
+15. DECISIONI ANCORA DA CONFERMARE
+======================================================================
+
+Prima di sviluppare il modello elettrico definitivo, occorre decidere:
+
+1. Connessioni: collegamenti modellati principalmente come fili fisici tra pin oppure come reti elettriche (net) composte da nodi e segmenti, anche distribuiti tra pagine.
+2. Editor grafico: tecnologia e libreria per disegno vettoriale, selezione, snapping, zoom, gestione simboli e stampa.
+3. Standard grafici: formati pagina, cartigli, convenzioni di siglatura e rappresentazione dei rimandi.
+4. Oggetti e librerie: formato delle librerie di simboli, proprietà, varianti e articoli.
+5. Esportazioni: formati richiesti per schemi, distinte, fili, morsetti e documentazione.
+6. Collaborazione: se il primo rilascio è per un singolo progettista oppure se sono necessari più utenti contemporanei.
+
+La scelta più importante è il modello delle connessioni. Un modello basato su reti elettriche con nodi, segmenti e punti di connessione è generalmente più flessibile per un CAD industriale, ma deve essere progettato con cura.
+
+======================================================================
+16. CRITERI DI ACCETTAZIONE DEL PROTOTIPO
+======================================================================
+
+Il prototipo può essere considerato pronto per la fase successiva quando supera almeno questi test:
+
+Test A — Immutabilità
+1. Creare e rilasciare R01.
+2. Creare R02 derivata da R01.
+3. Modificare una pagina in R02.
+4. Verificare che R01 sia identica a prima.
+
+Test B — Numerazione stabile
+1. Creare le pagine 10, 11 e 12.
+2. Eliminare la pagina 11 in una nuova revisione.
+3. Aggiungere una nuova pagina.
+4. Verificare che la pagina 12 mantenga il proprio numero e che il numero 11 non venga riutilizzato automaticamente.
+
+Test C — Rimando automatico
+1. Creare una bobina e un contatto collegati da un rimando funzionale.
+2. Spostare la bobina o cambiarne la pagina nella revisione di lavoro.
+3. Verificare che il rimando venga ricalcolato.
+4. Verificare che il registro indichi la causa automatica.
+5. Verificare che la revisione rilasciata precedente non cambi.
+
+Test D — Dipendenze
+1. Modificare un oggetto da cui dipendono più rimandi.
+2. Verificare che tutte le dipendenze siano individuate.
+3. Verificare che vengano marcate solo le pagine realmente interessate dopo il confronto.
+
+Test E — Rilascio completo
+1. Rilasciare una revisione.
+2. Verificare che il pacchetto contenga tutti gli schemi e i documenti richiesti.
+3. Verificare il rapporto delle differenze.
+4. Verificare i checksum.
+5. Verificare che il pacchetto sia identificato univocamente dalla revisione.
+
+Test F — Validazione
+1. Introdurre deliberatamente un rimando non risolto.
+2. Verificare che il validatore lo segnali.
+3. Verificare che il rilascio venga bloccato se l'errore è classificato come bloccante.
+
+======================================================================
+17. PRINCIPIO CONCLUSIVO
+======================================================================
+
+Il programma deve essere progettato come un sistema di dati elettrici versionati con un editor grafico, non come un semplice disegno con una cronologia aggiunta in seguito.
+
+La fonte primaria è il modello strutturato di pagine, oggetti, connessioni e relazioni. Il disegno, i rimandi stampati, le distinte e le liste sono rappresentazioni generate a partire da quel modello.
+
+Questo approccio consente di mantenere lo storico, propagare correttamente le modifiche, individuare le pagine interessate, validare il progetto e consegnare al cablatore una revisione completa e verificabile.

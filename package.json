@@ -1,0 +1,134 @@
+{
+  "name": "openwiring",
+  "productName": "OpenWiring",
+  "version": "2.0.0",
+  "description": "CAD elettrico open source per schemi multifilari, quadri, morsettiere, cavi e PLC (macOS e Windows)",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "test": "vitest run",
+    "foto": "vitest run test/realProject.test.ts",
+    "dev": "vite",
+    "guide": "node scripts/update-guide.mjs",
+    "prebuild": "node scripts/update-guide.mjs",
+    "build": "vite build",
+    "typecheck": "tsc",
+    "electron": "npm run guide && vite build && electron .",
+    "electron:dev": "OPENWIRING_DEV=1 electron .",
+    "sample-edz": "node scripts/make-sample-edz.mjs",
+    "dist:mac": "npm run guide && vite build && electron-builder --mac",
+    "dist:win": "npm run guide && vite build && electron-builder --win",
+    "dist:win-zip": "npm run guide && vite build && electron-builder --win zip --x64",
+    "cli": "vite build --config vite.cli.config.ts && node dist-cli/openwiring.mjs"
+  },
+  "keywords": [
+    "electrical",
+    "cad",
+    "ecad",
+    "schematic",
+    "wiring",
+    "terminal",
+    "plc",
+    "panel",
+    "electron"
+  ],
+  "author": "Massimo Confalonieri",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@xmldom/xmldom": "^0.8.15",
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3",
+    "fflate": "^0.8.3",
+    "happy-dom": "^21.0.1",
+    "jspdf": "^4.2.1",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.7.284",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "svg2pdf.js": "^2.8.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^4.1.11",
+    "zustand": "^5.0.15"
+  },
+  "build": {
+    "appId": "app.openwiring",
+    "productName": "OpenWiring",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "fileAssociations": [
+      {
+        "ext": "ecad",
+        "name": "Progetto OpenWiring",
+        "role": "Editor"
+      }
+    ],
+    "mac": {
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "category": "public.app-category.productivity",
+      "identity": "-",
+      "hardenedRuntime": false
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elconfa/OpenWiring.git"
+  },
+  "homepage": "https://github.com/elconfa/OpenWiring#readme",
+  "dependencies": {
+    "7z-wasm": "^1.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/elconfa/OpenWiring/issues"
+  }
+}

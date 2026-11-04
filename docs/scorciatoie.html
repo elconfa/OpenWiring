@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>OpenWiring – Scorciatoie e comandi</title>
+<style>
+  @page { size: A4; margin: 12mm 12mm 12mm 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 8.6pt; color: #1a1a1a; margin: 0; line-height: 1.32; }
+  h1 { font-size: 16pt; margin: 0 0 1mm; }
+  .sub { color: #555; margin-bottom: 4mm; }
+  h2 { font-size: 11pt; margin: 4mm 0 1.5mm; padding-bottom: 0.8mm; border-bottom: 1.5px solid #2a5db0; color: #2a5db0; break-after: avoid; }
+  h3 { font-size: 9.2pt; margin: 2.5mm 0 1mm; break-after: avoid; }
+  .cols { column-count: 2; column-gap: 7mm; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 2mm; break-inside: avoid; }
+  td { padding: 0.7mm 1.2mm; vertical-align: top; border-bottom: 0.5px solid #ddd; }
+  td:first-child { white-space: nowrap; width: 1%; padding-right: 3mm; }
+  kbd { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 7.8pt; background: #f1f3f6; border: 0.6px solid #b9c0ca; border-radius: 3px; padding: 0 1.2mm; display: inline-block; line-height: 1.45; }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 7.8pt; background: #f1f3f6; padding: 0 0.8mm; border-radius: 2px; }
+  .note { color: #555; font-size: 7.8pt; margin: 0 0 2mm; }
+  .box { border: 0.8px solid #c8d3e6; background: #f6f9fe; border-radius: 4px; padding: 1.8mm 2.5mm; margin: 1.5mm 0 2.5mm; break-inside: avoid; }
+  .page-break { break-before: page; }
+  table.cmd td:nth-child(2) { white-space: nowrap; width: 1%; padding-right: 3mm; color: #2a5db0; font-weight: 600; }
+  footer { margin-top: 3mm; color: #888; font-size: 7pt; text-align: right; }
+</style>
+</head>
+<body>
+
+<h1>OpenWiring – Scorciatoie e comandi da tastiera</h1>
+<div class="sub">Versione 1.6 · <kbd>Ctrl</kbd> su Windows/Linux corrisponde a <kbd>⌘</kbd> su macOS · I tasti singoli non agiscono mentre si scrive in una casella</div>
+
+<h2>Generali e schema elettrico</h2>
+<div class="cols">
+
+<h3>File e finestre</h3>
+<table>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Apri progetto</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Salva</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Maiusc</kbd>+<kbd>S</kbd></td><td>Salva con nome</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Stampa / PDF</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>Cerca e sostituisci</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td><td>Assistente IA (apre / chiude)</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>Chiude menu e finestra delle proprietà</td></tr>
+<tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>Con un menu aperto: menu precedente / successivo</td></tr>
+</table>
+
+<h3>Modifica</h3>
+<table>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>Annulla</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Maiusc</kbd>+<kbd>Z</kbd> · <kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Ripeti</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>X</kbd> / <kbd>C</kbd></td><td>Taglia / Copia la selezione</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>V</kbd></td><td>Incolla: gli elementi seguono il puntatore, clic per posarli, <kbd>Esc</kbd> annulla. Senza elementi copiati incolla un'immagine dagli appunti</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Duplica</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Seleziona tutto nella pagina</td></tr>
+<tr><td><kbd>Canc</kbd> · <kbd>⌫</kbd></td><td>Elimina la selezione</td></tr>
+<tr><td><kbd>R</kbd></td><td>Ruota la selezione (solo nelle rotazioni ammesse dal simbolo); durante l'inserimento ruota il simbolo da posare</td></tr>
+<tr><td><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd></td><td>Sposta la selezione di 4 mm</td></tr>
+<tr><td><kbd>Maiusc</kbd>+frecce</td><td>Sposta la selezione di 16 mm</td></tr>
+</table>
+
+<h3>Disegno</h3>
+<table>
+<tr><td><kbd>W</kbd></td><td>Filo</td></tr>
+<tr><td><kbd>V</kbd></td><td>Collegamento rapido in verticale (clic tra due punti uno sopra l'altro)</td></tr>
+<tr><td><kbd>H</kbd></td><td>Collegamento rapido in orizzontale</td></tr>
+<tr><td><kbd>N</kbd></td><td>Allinea i numeri filo lungo una linea tracciata</td></tr>
+<tr><td><kbd>Invio</kbd> · doppio clic</td><td>Finisce il filo in corso</td></tr>
+<tr><td>Tasto destro</td><td>Finisce il filo; fuori dal filo torna alla selezione, altrimenti menu contestuale</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>Finisce o annulla il filo, poi torna alla selezione</td></tr>
+<tr><td>Inserisci ▸ Filo in alto / in basso</td><td>Filo nella posizione fissa successiva (Impostazioni progetto ▸ Posizioni fisse)</td></tr>
+</table>
+
+<h3>Vista e pagine</h3>
+<table>
+<tr><td><kbd>F</kbd></td><td>Adatta la pagina alla finestra</td></tr>
+<tr><td><kbd>PagSu</kbd> / <kbd>PagGiù</kbd></td><td>Pagina precedente / successiva</td></tr>
+<tr><td>Rotellina</td><td>Zoom sul punto del mouse</td></tr>
+<tr><td>Tasto centrale · <kbd>Alt</kbd>+trascina</td><td>Sposta la vista</td></tr>
+</table>
+
+<h3>Mouse sullo schema</h3>
+<table>
+<tr><td>Riquadro verso destra</td><td>Seleziona gli elementi interamente dentro</td></tr>
+<tr><td>Riquadro verso sinistra</td><td>Seleziona anche gli elementi toccati</td></tr>
+<tr><td><kbd>Maiusc</kbd> / <kbd>Ctrl</kbd>+clic</td><td>Aggiunge o toglie dalla selezione</td></tr>
+<tr><td>Doppio clic</td><td>Testo: editor del testo · simbolo, filo: proprietà · cartiglio: proprietà della pagina</td></tr>
+<tr><td>Trascina un testo</td><td>Sposta i numeri filo; sigle, designazioni e testi dei morsetti solo con «Testi dei simboli spostabili sullo schema» acceso nelle impostazioni del progetto</td></tr>
+<tr><td><kbd>Ctrl</kbd>+clic (Mac)</td><td>Come il tasto destro</td></tr>
+</table>
+</div>
+
+<h2 class="page-break">Editor dei simboli (CAD)</h2>
+<p class="note">Nell'editor dei simboli le lettere scritte vanno nella <b>riga di comando</b> sotto il disegno: R e S non ruotano e non scalano più la selezione, si usano <code>RO</code> e <code>SC</code>.</p>
+<div class="cols">
+
+<h3>Aiuti al disegno (barra di stato)</h3>
+<table>
+<tr><td><kbd>F3</kbd></td><td>OSNAP: aggancio a estremi, punti medi, centri, quadranti, intersezioni, punti di connessione</td></tr>
+<tr><td><kbd>F8</kbd></td><td>ORTO: solo orizzontale e verticale</td></tr>
+<tr><td><kbd>Maiusc</kbd> tenuto</td><td>Inverte ORTO per il punto in corso</td></tr>
+<tr><td><kbd>F9</kbd></td><td>GRIGLIA: aggancio alla griglia</td></tr>
+<tr><td><kbd>F10</kbd></td><td>POLARE: aggancio agli angoli multipli del passo (15/30/45/90°)</td></tr>
+</table>
+
+<h3>Tasti</h3>
+<table>
+<tr><td><kbd>Invio</kbd> · <kbd>Spazio</kbd></td><td>Esegue quanto scritto; a vuoto conferma o termina il comando; senza comando ripete l'ultimo</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>In ordine: cancella il testo scritto, esce dai testi per rotazione, annulla il comando, svuota la selezione</td></tr>
+<tr><td><kbd>⌫</kbd></td><td>Cancella l'ultimo carattere scritto; senza testo elimina la selezione</td></tr>
+<tr><td><kbd>Canc</kbd></td><td>Elimina la selezione; con la maniglia calda su un vertice di polilinea toglie il vertice</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Annulla / Ripeti (anche <kbd>Ctrl</kbd>+<kbd>Maiusc</kbd>+<kbd>Z</kbd>)</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Seleziona tutto</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd></td><td>Copia / Taglia / Incolla (gli elementi seguono il puntatore)</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Duplica e posa col mouse</td></tr>
+<tr><td><kbd>R</kbd></td><td>Solo mentre si posa un punto di connessione o si incolla: ruota</td></tr>
+<tr><td>Frecce</td><td>Spostano la selezione di 0,5 mm; con <kbd>Maiusc</kbd> o con punti di connessione di un passo di griglia</td></tr>
+<tr><td>Rotellina</td><td>Zoom sul punto del mouse</td></tr>
+</table>
+
+<h3>Selezione e maniglie</h3>
+<table>
+<tr><td>Clic</td><td>Seleziona l'elemento evidenziato; con <kbd>Maiusc</kbd>/<kbd>Ctrl</kbd> aggiunge o toglie</td></tr>
+<tr><td>Trascina dal vuoto</td><td>Riquadro: verso destra elementi interi, verso sinistra anche toccati</td></tr>
+<tr><td>Due clic nel vuoto</td><td>Riquadro a finestra senza trascinare</td></tr>
+<tr><td>Trascina un selezionato</td><td>Sposta la selezione</td></tr>
+<tr><td>Trascina una maniglia</td><td>Stira; gli estremi in comune si muovono insieme</td></tr>
+<tr><td>Clic su una maniglia</td><td>Maniglia calda (rossa): <kbd>Spazio</kbd> cambia modo stira → sposta → ruota → scala → specchia; si può scrivere un punto, un angolo o un fattore</td></tr>
+<tr><td><b>+</b> sul lato · doppio clic</td><td>Aggiunge un vertice alla polilinea</td></tr>
+<tr><td><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+clic su vertice</td><td>Toglie il vertice</td></tr>
+</table>
+<h3>Testi sullo schema per rotazione</h3>
+<p class="note">Pulsanti «Disegno · Testi 0° · 90° · 180° · 270°» nella barra dell'editor: si vede il simbolo ruotato e si trascinano sigla, righe, designazioni, numero e sigla della morsettiera; frecce per spostare il testo scelto (<kbd>Maiusc</kbd> 2 mm), <kbd>R</kbd> per girarlo (orizzontale, verticale dal basso, dall'alto), <kbd>Canc</kbd> o ↺ per la posizione automatica. «Disegno», <kbd>Esc</kbd>, uno strumento o un comando tornano al disegno. In Proprietà: «Rotazioni ammesse» e «Specchiabile».</p>
+</div>
+
+<h3>Esempi di riga di comando</h3>
+<table>
+<tr><td><code>L</code> <code>0,0</code> <code>@10,0</code> <code>@0,6</code> <code>C</code></td><td>Triangolo rettangolo chiuso</td></tr>
+<tr><td><code>REC</code> <code>-3,-5</code> <code>@6,10</code></td><td>Bobina 6 × 10 mm centrata</td></tr>
+<tr><td><code>C</code> clic <code>1.5</code></td><td>Cerchio di raggio 1,5 mm</td></tr>
+<tr><td><code>RO</code> clic <code>30</code></td><td>Ruota la selezione di 30° (contatto inclinato)</td></tr>
+<tr><td><code>CO</code> clic <code>@0,-12</code> <kbd>Invio</kbd></td><td>Copia 12 mm più in basso</td></tr>
+<tr><td>F8 attivo, <code>L</code> clic, mouse a destra, <code>8</code></td><td>Linea orizzontale lunga 8 mm</td></tr>
+</table>
+
+
+<h2 class="page-break">Riga di comando dell'editor dei simboli</h2>
+<div class="box">
+<b>Come si usa.</b> Si scrive il nome (o l'alias) del comando e si preme <kbd>Invio</kbd> o <kbd>Spazio</kbd>. La riga indica cosa chiedere: si risponde con un clic oppure scrivendo un valore. I comandi di disegno restano attivi (si disegnano più elementi di fila) fino a <kbd>Esc</kbd>. Linea, rettangolo, cerchio, ellisse e arco si possono anche disegnare trascinando. I comandi di modifica usano la selezione corrente; se non c'è, la chiedono (selezionare e premere <kbd>Invio</kbd>).
+</div>
+
+<div class="cols">
+<h3>Come scrivere punti e valori</h3>
+<table>
+<tr><td><code>10,5</code></td><td>Punto assoluto x=10, y=5 (mm, origine del simbolo)</td></tr>
+<tr><td><code>#10,5</code></td><td>Assoluto anche dove si aspetta un relativo</td></tr>
+<tr><td><code>@20,0</code></td><td>Relativo all'ultimo punto: 20 a destra</td></tr>
+<tr><td><code>@10&lt;45</code></td><td>Polare relativo: distanza 10 a 45°</td></tr>
+<tr><td><code>10&lt;90</code></td><td>Polare dall'origine</td></tr>
+<tr><td><code>15</code></td><td>Numero solo: distanza diretta verso il mouse (con ORTO/POLARE è molto comodo)</td></tr>
+<tr><td><code>2,5;7,5</code></td><td>Con il punto e virgola come separatore la virgola è il decimale</td></tr>
+</table>
+
+<h3 style="break-before:column">Opzioni nei comandi</h3>
+<table>
+<tr><td><code>C</code> · <code>CH</code> · <code>chiudi</code></td><td>Linea / polilinea: chiude sul primo punto</td></tr>
+<tr><td><code>U</code> · <code>AN</code> · <code>annulla</code></td><td>Linea / polilinea: toglie l'ultimo punto</td></tr>
+<tr><td><code>S</code> / <code>N</code></td><td>Specchia: cancellare gli originali? (Invio = No, tiene la copia)</td></tr>
+</table>
+<p class="note">Come in AutoCAD la <b>y è verso l'alto</b> e gli angoli sono in gradi, <b>antiorari</b>, 0° verso destra. Decimali col punto (<code>2.5</code>) salvo con il separatore <code>;</code>.</p>
+</div>
+
+<h3>Comandi</h3>
+<table class="cmd">
+<tr><td><code>L</code></td><td>LINEA</td><td>Primo punto, poi punti successivi: ogni tratto è una linea separata. <code>C</code> chiude, <code>U</code> toglie l'ultimo punto, <kbd>Invio</kbd> ricomincia. Alias: <code>line</code>, <code>linea</code></td></tr>
+<tr><td><code>PL</code></td><td>POLILINEA</td><td>Come la linea ma crea un unico poligono. <kbd>Invio</kbd> o doppio clic finisce aperta, <code>C</code> la chiude. Alias: <code>pline</code>, <code>poly</code>, <code>polilinea</code></td></tr>
+<tr><td><code>C</code></td><td>CERCHIO</td><td>Centro, poi raggio scritto (es. <code>2.5</code>) o un punto della circonferenza. Alias: <code>circle</code>, <code>cerchio</code></td></tr>
+<tr><td><code>REC</code></td><td>RETTANGOLO</td><td>Primo angolo, poi angolo opposto; <code>@larghezza,altezza</code> per le misure. Alias: <code>rett</code>, <code>rettangolo</code>, <code>rectang</code></td></tr>
+<tr><td><code>A</code></td><td>ARCO</td><td>Per tre punti: iniziale, un punto sull'arco, finale. Alias: <code>arc</code>, <code>arco</code></td></tr>
+<tr><td><code>EL</code></td><td>ELLISSE</td><td>Centro, poi angolo del riquadro dei semiassi (<code>@rx,ry</code>). Alias: <code>ellipse</code>, <code>ellisse</code></td></tr>
+<tr><td><code>T</code></td><td>TESTO</td><td>Punto di inserimento; il testo si scrive subito nel pannello a destra. Alias: <code>dt</code>, <code>text</code>, <code>testo</code></td></tr>
+<tr><td><code>M</code></td><td>SPOSTA</td><td>Punto base, poi secondo punto o spostamento (<code>@5,0</code> o distanza). Alias: <code>move</code>, <code>sposta</code></td></tr>
+<tr><td><code>CO</code></td><td>COPIA</td><td>Punto base, poi una o più destinazioni; <kbd>Invio</kbd> per finire. Alias: <code>cp</code>, <code>copy</code>, <code>copia</code></td></tr>
+<tr><td><code>RO</code></td><td>RUOTA</td><td>Punto base, poi angolo in gradi antiorari (anche non multiplo di 90°) o un punto. Rettangoli ed ellissi non allineati diventano polilinee. Alias: <code>rotate</code>, <code>ruota</code></td></tr>
+<tr><td><code>MI</code></td><td>SPECCHIA</td><td>Due punti dell'asse, poi <code>S</code>/<code>N</code>: cancellare gli originali? Alias: <code>mirror</code>, <code>specchia</code></td></tr>
+<tr><td><code>SC</code></td><td>SCALA</td><td>Punto base, poi fattore (es. <code>0.5</code>) o un punto. Alias: <code>scale</code>, <code>scala</code></td></tr>
+<tr><td><code>E</code></td><td>CANCELLA</td><td>Elimina la selezione; senza selezione la chiede. Alias: <code>erase</code>, <code>cancella</code>, <code>canc</code></td></tr>
+<tr><td><code>TR</code></td><td>TAGLIA</td><td>Clic sulla parte da togliere: si taglia fino agli elementi che la incrociano. Alias: <code>trim</code>, <code>taglia</code></td></tr>
+<tr><td><code>EX</code></td><td>ESTENDI</td><td>Clic vicino all'estremo: la linea si allunga fino al primo elemento. Alias: <code>extend</code>, <code>estendi</code></td></tr>
+<tr><td><code>O</code></td><td>OFFSET</td><td>Distanza (<kbd>Invio</kbd> tiene la precedente), poi clic sull'elemento e sul lato. Alias: <code>offset</code></td></tr>
+<tr><td><code>DI</code></td><td>MISURA</td><td>Due punti: distanza, Δx, Δy e angolo nella barra in basso. Alias: <code>dist</code>, <code>misura</code></td></tr>
+<tr><td><code>Z</code></td><td>ZOOM</td><td>Adatta la vista al simbolo. Alias: <code>zoom</code></td></tr>
+<tr><td><code>U</code></td><td>ANNULLA</td><td>Annulla l'ultima modifica. Alias: <code>undo</code>, <code>annulla</code> · <code>redo</code>/<code>ripeti</code> per ripetere</td></tr>
+</table>
+
+<footer>OpenWiring · github.com/elconfa/OpenWiring</footer>
+</body>
+</html>
