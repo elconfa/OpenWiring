@@ -1,0 +1,57 @@
+name: "💡 Proposta · Feature request"
+description: Una funzione nuova o un miglioramento · A new function or an improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Raccontaci il problema di lavoro che vuoi risolvere, non solo la soluzione: ci aiuta a trovare quella giusta.
+        Tell us the work problem you want to solve, not only the solution.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area del programma · Area
+      options:
+        - Schema e simboli · Schematic and symbols
+        - Sigle, rimandi, numeri filo · Tags, cross-references, wire numbers
+        - Morsettiere, cavi, connettori · Terminals, cables, connectors
+        - PLC e reti · PLC and networks
+        - Articoli e import · Parts and import
+        - Liste, stampa ed esportazioni · Reports, print, export
+        - Layout del quadro · Cabinet layout
+        - Assistente IA · AI assistant
+        - Interfaccia e traduzioni · UI and translations
+        - Altro · Other
+    validations:
+      required: true
+  - type: textarea
+    id: problema
+    attributes:
+      label: Cosa vorresti fare · What would you like to do
+      placeholder: "Quando disegno… vorrei poter… · When I draw… I would like to…"
+    validations:
+      required: true
+  - type: textarea
+    id: oggi
+    attributes:
+      label: Come lo fai oggi (o in un altro CAD) · How you do it today (or in another CAD)
+  - type: textarea
+    id: esempio
+    attributes:
+      label: Esempio · Example
+      description: Schema, foto, norma di riferimento (IEC 81346, IEC 60617…) · Drawing, picture, reference standard
+  - type: dropdown
+    id: importanza
+    attributes:
+      label: Quanto è importante per te? · How important is it for you?
+      options:
+        - Mi impedisce di usarlo sui progetti veri · Blocks me from using it on real jobs
+        - Mi farebbe risparmiare tempo · Would save me time
+        - Sarebbe comodo · Nice to have
+  - type: checkboxes
+    id: aiuto
+    attributes:
+      label: Contributo · Contribution
+      options:
+        - label: Posso aiutare a provarla o fornire esempi · I can help test it or provide examples
+        - label: Posso aiutare a scrivere il codice · I can help write the code

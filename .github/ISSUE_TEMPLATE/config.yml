@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "📖 Manuale · Manual"
+    url: https://github.com/elconfa/OpenWiring/blob/main/docs/manuale/en/00-indice.md
+    about: Come si usa ogni funzione, in 6 lingue · How to use every function, in 6 languages
+  - name: "⬇️ Download"
+    url: https://github.com/elconfa/OpenWiring/releases/latest
+    about: Ultima versione per macOS e Windows · Latest version for macOS and Windows

@@ -1,0 +1,24 @@
+name: "🌍 Traduzione · Translation"
+description: Testo tradotto male o mancante nell'interfaccia o nel manuale · Wrong or missing translation
+labels: ["traduzione"]
+body:
+  - type: dropdown
+    id: lingua
+    attributes:
+      label: Lingua · Language
+      options: [English, Français, Deutsch, Español, Русский, Italiano, Nuova lingua · New language]
+    validations:
+      required: true
+  - type: input
+    id: dove
+    attributes:
+      label: Dove si trova · Where
+      placeholder: "Menu Progetto ▸ … / manuale capitolo 05"
+    validations:
+      required: true
+  - type: textarea
+    id: testo
+    attributes:
+      label: Testo attuale e testo corretto · Current and suggested text
+    validations:
+      required: true

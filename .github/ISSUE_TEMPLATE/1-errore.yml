@@ -1,0 +1,85 @@
+name: "🐞 Errore · Bug"
+description: Qualcosa non funziona come previsto · Something does not work as expected
+labels: ["bug", "da verificare"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie della segnalazione! Prima di scrivere cerca tra le [issue aperte](https://github.com/elconfa/OpenWiring/issues) e nel [manuale](https://github.com/elconfa/OpenWiring/blob/main/docs/manuale/it/00-indice.md).
+        Thanks for reporting! Please search the [open issues](https://github.com/elconfa/OpenWiring/issues) and the [manual](https://github.com/elconfa/OpenWiring/blob/main/docs/manuale/en/00-indice.md) first.
+  - type: input
+    id: versione
+    attributes:
+      label: Versione · Version
+      description: Aiuto ▸ Informazioni · Help ▸ About
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: sistema
+    attributes:
+      label: Sistema · Operating system
+      options:
+        - macOS Apple Silicon
+        - macOS Intel
+        - Windows 11
+        - Windows 10
+        - Altro · Other
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area del programma · Area
+      options:
+        - Schema e simboli · Schematic and symbols
+        - Sigle, rimandi, numeri filo · Tags, cross-references, wire numbers
+        - Morsettiere, cavi, connettori · Terminals, cables, connectors
+        - PLC e reti · PLC and networks
+        - Articoli e import EDZ/XML/CSV · Parts and import
+        - Liste, stampa ed esportazioni (PDF, DXF, Excel) · Reports, print, export
+        - Layout del quadro · Cabinet layout
+        - Assistente IA · AI assistant
+        - Installazione e avvio · Install and start-up
+        - Interfaccia e traduzioni · UI and translations
+        - Altro · Other
+    validations:
+      required: true
+  - type: textarea
+    id: passi
+    attributes:
+      label: Passi per riprodurre · Steps to reproduce
+      placeholder: |
+        1. Apri il progetto… · Open the project…
+        2. Seleziona… · Select…
+        3. Premi… · Press…
+    validations:
+      required: true
+  - type: textarea
+    id: atteso
+    attributes:
+      label: Cosa ti aspettavi · Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: ottenuto
+    attributes:
+      label: Cosa è successo · Actual result
+      description: Messaggi della vista report, foto dello schermo · Messages from the report view, screenshots
+    validations:
+      required: true
+  - type: textarea
+    id: file
+    attributes:
+      label: Progetto di prova · Test project
+      description: |
+        Se puoi, trascina qui un piccolo progetto `.ecad` (compresso in .zip) **senza dati riservati**.
+        If possible, drag a small `.ecad` project (zipped) here, **without confidential data**.
+  - type: dropdown
+    id: frequenza
+    attributes:
+      label: Succede sempre? · Does it always happen?
+      options:
+        - Sempre · Always
+        - A volte · Sometimes
+        - Una volta sola · Only once
