@@ -73,11 +73,11 @@ abschalten und die Anschlüsse von Hand eintragen (*Eigenschaften ▸ Anschlussp
 
 ### Querverweise
 
-![Der Querverweis vom Kontakt zur Spule](../img/it/rimando-contatto.png)
+![Der Querverweis vom Kontakt zur Spule](../img/en/rimando-contatto.png)
 
 *Unter jedem Kontakt `-2K1` steht `/2.2`: die Spule liegt auf Seite 2, Spalte 2.*
 
-![Der Kontaktspiegel der Spule](../img/it/contatti-bobina.png)
+![Der Kontaktspiegel der Spule](../img/en/contatti-bobina.png)
 
 *Der Kontaktspiegel von `-2K1` unten auf Seite 2: links der Linie die Haupt- und Schließerkontakte, rechts
 die Öffner, jeweils mit Position.*
@@ -109,7 +109,7 @@ zeichnen (Paarquerverweis)…*, dann ein Klick an die Stelle, an der sie gezeich
 
 ## Geräteeigenschaften
 
-![Die Eigenschaften einer Spule](../img/it/proprieta-dispositivo.png)
+![Die Eigenschaften einer Spule](../img/en/proprieta-dispositivo.png)
 
 *Die Eigenschaften der Spule `-2K1` im Beispielprojekt.*
 
@@ -127,7 +127,7 @@ gelten sie auch für die Kontakte. Ist ein Artikel zugewiesen, zeigen leere Feld
 
 ## Drahtnummern
 
-![Die Drahtnummern](../img/it/numeri-filo.png)
+![Die Drahtnummern](../img/en/numeri-filo.png)
 
 *Drahtnummern auf Seite 1: `1.01`, `1.03`… über dem Schütz, dieselben Nummern darunter, weil die Klemmen
 `-X1` die Nummer nicht ändern.*
@@ -196,7 +196,7 @@ Zähler überspringt sie, auch wenn sie auf einer anderen Seite stehen.
 
 ## Querschnitt und Farbe der Drähte
 
-![Die Eigenschaften eines Drahts](../img/it/proprieta-filo.png)
+![Die Eigenschaften eines Drahts](../img/en/proprieta-filo.png)
 
 *Die Eigenschaften eines Drahts: Nummer, Netz, Verbindungen, Potenzial, Querschnitt und Farbe.*
 
@@ -214,7 +214,7 @@ Zähler überspringt sie, auch wenn sie auf einer anderen Seite stehen.
 Um einen Leiter durch das ganze Projekt zu verfolgen: einen Draht auswählen und in den Eigenschaften
 **Auf allen Seiten hervorheben** drücken (oder Rechtsklick ▸ *Potenzial hervorheben*).
 
-![Ein hervorgehobenes Potenzial](../img/it/potenziale-evidenziato.png)
+![Ein hervorgehobenes Potenzial](../img/en/potenziale-evidenziato.png)
 
 *Der Leiter `2.02` orange hervorgehoben; die Statusleiste unten listet die Seiten auf, auf denen er vorkommt.*
 

@@ -4,7 +4,7 @@ Schematics are drawn in Italian and can also be printed in **English** or **Germ
 together. The language of the program interface is a separate setting
 ([chapter 1](01-introduzione.md#interface-language)).
 
-![The schematic in two languages](../img/it/schema-inglese.png)
+![The schematic in two languages](../img/en/schema-inglese.png)
 
 *Page 2 in English with the Italian below: «Emergency stop / Arresto di emergenza».*
 
@@ -14,7 +14,7 @@ The *Translations* tab of the Lists view (or *Project ▸ Translations…*) list
 the project: page titles, free texts, device descriptions, locations, PLC comments, title block fields. For
 each one there are the English translation, the German one and where it appears.
 
-![The dictionary](../img/it/traduzioni.png)
+![The dictionary](../img/en/traduzioni.png)
 
 *The dictionary of the example project.*
 

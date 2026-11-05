@@ -2,7 +2,7 @@
 
 ## Bornes en el esquema
 
-![Bornes en el esquema](../img/it/morsetti-schema.png)
+![Bornes en el esquema](../img/en/morsetti-schema.png)
 
 *Los bornes `-X1:1…4` de la página 1: la sigla de la regleta aparece solo en el primero de la fila.*
 
@@ -27,7 +27,7 @@ horizontal (símbolo girado) el número está arriba y la sigla abajo.
 
 La pestaña **Regletas** muestra las regletas del proyecto y sus bornes en una tabla.
 
-![La vista Regletas](../img/it/morsettiere.png)
+![La vista Regletas](../img/en/morsettiere.png)
 
 *La regleta `-X1` del proyecto de ejemplo: destinos externos e internos, números de hilo, artículos y
 accesorios.*
@@ -91,7 +91,7 @@ seccionables). Todo entra automáticamente en la lista de materiales y en la lis
 **Generar esquemas de regletas** crea una página por regleta (varias hojas a partir de 40 bornes) con
 destinos, números de hilo, puentes, separadores, reservas y posiciones con enlace, también en el PDF.
 
-![El esquema de la regleta](../img/it/schema-morsettiera.png)
+![El esquema de la regleta](../img/en/schema-morsettiera.png)
 
 *La parte superior del esquema de la regleta `-X1`.*
 

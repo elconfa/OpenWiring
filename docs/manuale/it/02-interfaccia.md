@@ -6,8 +6,8 @@
 
 | N. | Parte | A cosa serve |
 |---|---|---|
-| 1 | Barra dei menu | tutti i comandi: *File, Modifica, Visualizza, Inserisci, Progetto, Liste, Aiuto* |
-| 2 | Barra strumenti | i comandi di disegno più usati |
+| 1 | Barra multifunzione: schede | *File* e le schede *Home, Inserisci, Pagine, Progetto, Liste, Revisioni, Visualizza, Aiuto* |
+| 2 | Barra multifunzione: comandi | i comandi della scheda aperta, divisi in gruppi con il nome sotto |
 | 3 | Albero del modello | pagine, dispositivi, struttura =/+, morsettiere, cavi, articoli del progetto |
 | 4 | Proprietà | i dati dell'elemento selezionato, della pagina o del progetto |
 | 5 | Area di disegno | la pagina di schema corrente |
@@ -16,52 +16,56 @@
 | 8 | Barra di stato | suggerimenti sul comando attivo, file, pagina, coordinate del cursore |
 | 9 | Schede delle viste | Schema, Dispositivi, PLC, Morsettiere, Articoli, Liste |
 
-## Barra dei menu
+## Barra multifunzione
 
-![Il menu File](../img/it/menu-file.png)
+I comandi sono raccolti in **schede**; ogni scheda li divide in gruppi con il nome scritto sotto. Il nome del
+tasto rapido compare nel suggerimento di ogni pulsante. Il **doppio clic** su una scheda riduce la barra ai soli
+nomi delle schede (un clic la riapre per un comando); *Visualizza ▸ Barra dei comandi ▸ Stile* sceglie tra
+barra multifunzione, barra multifunzione compatta e **menu classici**, per chi preferisce i menu a tendina.
+*Cerca un comando…* (⌘K) trova qualsiasi comando scrivendone il nome.
 
-*Il menu File: progetti, import ed export.*
+![La scheda File](../img/it/menu-file.png)
 
-Ogni comando del programma è in un menu; accanto alle voci compaiono le scorciatoie da tastiera. Con un menu
-aperto, le frecce ← → passano al menu vicino ed Esc lo chiude.
+*La scheda File: avvio, progetti recenti, nuovo, apri, salva, importa, esporta, stampa e PDF, impostazioni.*
 
-| Menu | Contiene |
+| Scheda | Contiene |
 |---|---|
-| *File* | nuovo, apri, salva, progetto di esempio, pagine in testo per gli assistenti IA, **Importa** (articoli EDZ/XML/CSV, simboli QElectroTech, schema da PDF, macro, confronto) ed **Esporta** (PDF, stampa, DXF, etichette, PLCopen, articoli, dizionario) |
-| *Modifica* | annulla e ripeti, taglia, copia, incolla, duplica, elimina, seleziona tutto, ruota, specchia, cerca e sostituisci |
-| *Visualizza* | viste, adatta pagina, pagina precedente e successiva, tema chiaro o scuro, foglio bianco o scuro, lingua degli schemi, lingua dell'interfaccia, scritte sotto le icone |
-| *Inserisci* | filo, cavo, riquadro di quadro, testo, immagine, bus di conduttori, collegamenti di rete per protocollo, pagine di ogni tipo, pagine automatiche |
-| *Progetto* | proprietà, proprietà definite dall'utente, verifica, assistente IA, rinumerazioni, cartiglio, luoghi, reti IP, traduzioni, revisioni, modelli |
-| *Liste* | controlli, traduzioni e tutte le liste del progetto, PDF completo |
-| *Aiuto* | manuale, scorciatoie, guida per agenti IA, sito del progetto, informazioni (versione, autore, marchi e dati di terzi) |
+| *File* | nuovo, apri, apri accanto, salva, **Importa** (articoli EDZ/XML/CSV, simboli QElectroTech, schema da PDF, macro) ed **Esporta** (PDF, DXF, etichette, PLCopen, articoli, dizionario), stampa, impostazioni, informazioni |
+| *Home* | appunti, disegno (seleziona, filo, fili rapidi, morsetti in fila, testo), modifica (ruota, specchia, allinea, elimina), trova (cerca, adatta, pagina precedente e successiva), verifica, PDF e stampa |
+| *Inserisci* | simboli e macro, collegamenti (bus fili, bus di rete, cavo, sezione), luoghi, grafica (testo, immagine, disegno DXF) |
+| *Pagine* | nuova pagina di ogni tipo, pagine automatiche (liste, disegni dei cavi, piedinature), organizza, foglio (cartiglio, formato e cornice) |
+| *Progetto* | impostazioni e proprietà, profili, numerazione di dispositivi e fili, articoli, reti IP e indirizzi, traduzioni, assistente IA |
+| *Liste* | controlli, liste, lista I/O PLC, liste personalizzate, viste (dispositivi, morsettiere, connettori, cavi, ripartitori, calcoli), PDF completo, etichette, PLCopen |
+| *Revisioni* | revisioni, rilascio, modifiche della revisione, confronto con un altro progetto, salva come modello |
+| *Visualizza* | riquadri, tema, foglio, lingua dell'interfaccia e degli schemi, griglia, miniature, mappa del foglio, menu a raggiera, stile della barra |
+| *Aiuto* | manuale, giro guidato, scorciatoie, guida per agenti IA, aggiornamenti, informazioni, sito del progetto |
 
-![Il menu Progetto](../img/it/menu-progetto.png)
+![La scheda Progetto](../img/it/menu-progetto.png)
 
-*Il menu Progetto.*
+*La scheda Progetto.*
 
-## Barra strumenti
+## Barra Home e strumenti sul disegno
 
-![La barra strumenti](../img/it/barra-strumenti.png)
+![La scheda Home](../img/it/barra-strumenti.png)
+
+La scheda *Home* raccoglie i comandi usati di continuo. Sopra lo schema c'è anche una piccola barra mobile con
+gli strumenti di disegno (selezione, filo, fili rapidi, rimandi, morsetti, testo): si accende e si spegne da
+*Visualizza ▸ Strumenti sul disegno*.
 
 | Pulsante | Azione |
 |---|---|
-| *Nuovo, Apri, Salva* | gestione del file di progetto |
-| *Annulla, Ripeti* | ⌘Z e ⇧⌘Z |
 | *Seleziona* | torna alla selezione (anche con Esc) |
-| *Filo* | disegna fili (tasto **W**) |
-| *Bus* e l'elenco dei protocolli | disegna un collegamento di rete (Profinet, EtherCAT, Modbus…) |
-| *Bus fili* | raggruppa i fili in un bus di conduttori ([capitolo 5](05-disegnare.md#bus-di-conduttori)) |
-| *Quadro* | riquadro di un quadro nello schema di rete |
-| *Cavo* | linea di definizione di un cavo |
+| *Filo* | disegna i fili (tasto **W**) |
+| *Rapido V*, *Rapido H* | filo verticale od orizzontale in un colpo solo |
+| *Morsetti in fila* | una fila di morsetti sui fili attraversati |
 | *Testo* | testo libero sulla pagina |
-| *Ruota, Elimina* | sulla selezione (tasti **R** e **Canc**) |
+| *Ruota, Specchia, Elimina* | sulla selezione (tasti **R** e **Canc**) |
+| *Cerca* | trova e sostituisci (⌘F) |
 | *Adatta* | mostra tutta la pagina (tasto **F**) |
-| *Cerca* | cerca e sostituisci (⌘F) |
-| *Verifica* | controlli di progetto |
-| *EDZ* | importa articoli dei produttori |
-| *PDF* | esporta il progetto in PDF |
+| *Verifica* | controlli del progetto |
+| *PDF*, *Stampa…* | esporta in PDF o stampa |
 
-Togliendo *Visualizza ▸ Scritte sotto le icone* la barra diventa una riga di sole icone, più bassa.
+Nella barra di accesso rapido in alto a sinistra ci sono *Salva*, *Annulla* e *Ripeti* (⌘S, ⌘Z, ⇧⌘Z).
 
 ## Albero del modello
 

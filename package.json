@@ -18,7 +18,8 @@
     "dist:mac": "npm run guide && vite build && electron-builder --mac",
     "dist:win": "npm run guide && vite build && electron-builder --win",
     "dist:win-zip": "npm run guide && vite build && electron-builder --win zip --x64",
-    "cli": "vite build --config vite.cli.config.ts && node dist-cli/openwiring.mjs"
+    "cli": "vite build --config vite.cli.config.ts && node dist-cli/openwiring.mjs",
+    "site": "node scripts/build-site.mjs"
   },
   "keywords": [
     "electrical",
@@ -45,6 +46,7 @@
     "fflate": "^0.8.3",
     "happy-dom": "^21.0.1",
     "jspdf": "^4.2.1",
+    "marked": "^15.0.12",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.7.284",
     "react": "^19.3.1",

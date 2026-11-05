@@ -35,7 +35,7 @@ activado, la descripción y los datos técnicos aparecen debajo de la sigla del 
 La pestaña **Dispositivos** (arriba a la derecha) muestra todos los dispositivos del proyecto en una tabla
 que se edita como una hoja de cálculo.
 
-![El navegador de dispositivos](../img/it/navigatore-dispositivi.png)
+![El navegador de dispositivos](../img/en/navigatore-dispositivi.png)
 
 *El navegador con los 17 dispositivos del proyecto de ejemplo. Los valores en gris cursiva vienen del
 artículo o de la ubicación de la página.*
@@ -83,7 +83,7 @@ En el árbol, el nodo **Estructura =Instalación +Ubicación** agrupa los dispos
 función o sin ubicación quedan al final, en *sin función (=)* y *sin ubicación (+)*. Un clic en un
 dispositivo lo abre en el esquema.
 
-![La estructura en el árbol](../img/it/struttura.png)
+![La estructura en el árbol](../img/en/struttura.png)
 
 *En el proyecto de ejemplo los dispositivos no tienen función: están todos en «sin función», repartidos
 entre los cuadros `+Q1` y `+Q2`.*
@@ -96,7 +96,7 @@ dibujado en el esquema de red, o la de su página.
 La pestaña **Artículos** es la biblioteca personal de artículos, guardada en el ordenador y disponible en
 todos los proyectos.
 
-![La gestión de artículos](../img/it/articoli.png)
+![La gestión de artículos](../img/en/articoli.png)
 
 *Un contactor importado de un EDZ: datos, imagen, modelo de función y símbolo.*
 

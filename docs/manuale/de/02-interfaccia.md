@@ -1,13 +1,13 @@
 # 2. Die Oberfläche
 
-![Das OpenWiring-Fenster mit nummerierten Bereichen](../img/it/interfaccia.png)
+![Das OpenWiring-Fenster mit nummerierten Bereichen](../img/en/interfaccia.png)
 
-*Das OpenWiring-Fenster mit dem Beispielprojekt (italienische Oberfläche).*
+*Das OpenWiring-Fenster mit dem Beispielprojekt.*
 
 | Nr. | Bereich | Wozu er dient |
 |---|---|---|
-| 1 | Menüleiste | alle Befehle: *Datei, Bearbeiten, Ansicht, Einfügen, Projekt, Listen, Hilfe* |
-| 2 | Symbolleiste | die meistgenutzten Zeichenbefehle |
+| 1 | Registerkarten des Menübands | *Datei* und die Registerkarten *Start, Einfügen, Seiten, Projekt, Listen, Revisionen, Ansicht, Hilfe* |
+| 2 | Befehle des Menübands | die Befehle der offenen Registerkarte, in Gruppen mit dem Namen darunter |
 | 3 | Modellbaum | Seiten, Geräte, Struktur =/+, Klemmleisten, Kabel, Projektartikel |
 | 4 | Eigenschaften | die Daten des ausgewählten Elements, der Seite oder des Projekts |
 | 5 | Zeichenbereich | die aktuelle Schaltplanseite |
@@ -16,57 +16,60 @@
 | 8 | Statusleiste | Hinweise zum aktiven Befehl, Datei, Seite, Cursorkoordinaten |
 | 9 | Ansichtsregister | Schaltplan, Geräte, SPS, Klemmleisten, Artikel, Listen |
 
-## Menüleiste
+## Menüband
 
-![Das Menü Datei](../img/it/menu-file.png)
+Die Befehle sind in **Registerkarten** zusammengefasst; jede Karte teilt sie in Gruppen, deren Name darunter steht.
+Das Tastenkürzel erscheint im Tooltip jeder Schaltfläche. Ein **Doppelklick** auf eine Registerkarte reduziert das
+Menüband auf die Kartennamen (ein Klick öffnet es wieder für einen Befehl); *Ansicht ▸ Befehlsleiste ▸ Stil* wählt
+zwischen Menüband, kompaktem Menüband und **klassischen Menüs** für alle, die Aufklappmenüs bevorzugen.
+*Befehl suchen…* (⌘K) findet jeden Befehl über seinen Namen.
 
-*Das Menü Datei: Projekte, Import und Export.*
+![Die Registerkarte Datei](../img/en/menu-file.png)
 
-Jeder Befehl des Programms steht in einem Menü; neben den Einträgen stehen die Tastenkürzel. Bei geöffnetem
-Menü wechseln die Pfeiltasten ← → zum Nachbarmenü, Esc schließt es.
+*Die Registerkarte Datei: Start, zuletzt verwendete Projekte, neu, öffnen, speichern, importieren, exportieren, drucken und PDF, Einstellungen.*
 
-| Menü | Enthält |
+| Registerkarte | Inhalt |
 |---|---|
-| *Datei* | neu, öffnen, speichern, Beispielprojekt, Seiten als Text für KI-Assistenten, **Importieren** (Artikel EDZ/XML/CSV, QElectroTech-Symbole, Schaltplan aus PDF, Makros, Vergleich) und **Exportieren** (PDF, Drucken, DXF, Etiketten, PLCopen, Artikel, Wörterbuch) |
-| *Bearbeiten* | rückgängig und wiederholen, ausschneiden, kopieren, einfügen, duplizieren, löschen, alles auswählen, drehen, spiegeln, suchen und ersetzen |
-| *Ansicht* | Ansichten, Seite einpassen, vorherige und nächste Seite, helles oder dunkles Design, weißes oder dunkles Blatt, Sprache der Schaltpläne, Sprache der Oberfläche, Beschriftung unter den Symbolen |
-| *Einfügen* | Draht, Kabel, Schrankrahmen, Text, Bild, Leiterbus, Netzwerkverbindungen nach Protokoll, Seiten aller Arten, automatische Seiten |
-| *Projekt* | Eigenschaften, benutzerdefinierte Eigenschaften, Prüfung, KI-Assistent, Neunummerierungen, Schriftfeld, Orte, IP-Netze, Übersetzungen, Revisionen, Vorlagen |
-| *Listen* | Prüfungen, Übersetzungen und alle Projektlisten, vollständiges PDF |
-| *Hilfe* | Handbuch, Tastenkürzel, Leitfaden für KI-Agenten, Projektwebsite, Informationen (Version, Autor, Marken und Daten Dritter) |
+| *Datei* | neu, öffnen, daneben öffnen, speichern, **Importieren** (Artikel EDZ/XML/CSV, QElectroTech-Symbole, Schaltplan aus PDF, Makros) und **Exportieren** (PDF, DXF, Beschriftungen, PLCopen, Artikel, Wörterbuch), drucken, Einstellungen, Info |
+| *Start* | Zwischenablage, Zeichnen (Auswahl, Draht, Schnelldrähte, Klemmenreihe, Text), Bearbeiten (drehen, spiegeln, ausrichten, löschen), Suchen (Suche, einpassen, vorherige und nächste Seite), Prüfung, PDF und Druck |
+| *Einfügen* | Symbole und Makros, Verbindungen (Drahtbündel, Netzwerkbus, Kabel, Querschnitt), Orte, Grafik (Text, Bild, DXF-Zeichnung) |
+| *Seiten* | neue Seite jeder Art, automatische Seiten (Listen, Kabelzeichnungen, Steckerbelegungen), organisieren, Blatt (Schriftfeld, Format und Rahmen) |
+| *Projekt* | Einstellungen und Eigenschaften, Profile, Nummerierung von Betriebsmitteln und Drähten, Artikel, IP-Netze und Adressen, Übersetzungen, KI-Assistent |
+| *Listen* | Prüfungen, Listen, SPS-E/A-Liste, eigene Listen, Ansichten (Betriebsmittel, Klemmleisten, Stecker, Kabel, Verteiler, Berechnungen), vollständiges PDF, Beschriftungen, PLCopen |
+| *Revisionen* | Revisionen, Freigabe, Änderungen der Revision, Vergleich mit einem anderen Projekt, als Vorlage speichern |
+| *Ansicht* | Fenster, Design, Blatt, Sprache der Oberfläche und der Schaltpläne, Raster, Miniaturen, Blattübersicht, Radialmenü, Stil des Menübands |
+| *Hilfe* | Handbuch, geführte Tour, Tastenkürzel, Anleitung für KI-Agenten, Updates, Info, Projektwebsite |
 
-![Das Menü Projekt](../img/it/menu-progetto.png)
+![Die Registerkarte Projekt](../img/en/menu-progetto.png)
 
-*Das Menü Projekt.*
+*Die Registerkarte Projekt.*
 
-## Symbolleiste
+## Registerkarte Start und Werkzeuge auf der Zeichnung
 
-![Die Symbolleiste](../img/it/barra-strumenti.png)
+![Die Registerkarte Start](../img/en/barra-strumenti.png)
+
+Die Registerkarte *Start* sammelt die ständig benutzten Befehle. Über dem Schaltplan gibt es außerdem eine kleine
+schwebende Leiste mit den Zeichenwerkzeugen (Auswahl, Draht, Schnelldrähte, Unterbrechungsstellen, Klemmen, Text):
+ein- und ausschalten unter *Ansicht ▸ Werkzeuge auf der Zeichnung*.
 
 | Schaltfläche | Aktion |
 |---|---|
-| *Neu, Öffnen, Speichern* | Verwaltung der Projektdatei |
-| *Rückgängig, Wiederholen* | ⌘Z und ⇧⌘Z |
 | *Auswählen* | zurück zur Auswahl (auch mit Esc) |
 | *Draht* | Drähte zeichnen (Taste **W**) |
-| *Bus* und die Protokollliste | eine Netzwerkverbindung zeichnen (Profinet, EtherCAT, Modbus…) |
-| *Leiterbus* | Drähte zu einem Leiterbus zusammenfassen ([Kapitel 5](05-disegnare.md#leiterbusse)) |
-| *Schaltschrank* | Rahmen eines Schaltschranks im Netzwerkplan |
-| *Kabel* | Kabeldefinitionslinie |
+| *Schnell V*, *Schnell H* | senkrechter oder waagerechter Draht in einem Zug |
+| *Klemmenreihe* | eine Reihe Klemmen auf den gekreuzten Drähten |
 | *Text* | freier Text auf der Seite |
-| *Drehen, Löschen* | auf die Auswahl (Tasten **R** und **Entf**) |
-| *Einpassen* | ganze Seite anzeigen (Taste **F**) |
+| *Drehen, Spiegeln, Löschen* | auf die Auswahl (Tasten **R** und **Entf**) |
 | *Suchen* | suchen und ersetzen (⌘F) |
+| *Einpassen* | ganze Seite zeigen (Taste **F**) |
 | *Prüfung* | Projektprüfungen |
-| *EDZ* | Herstellerartikel importieren |
-| *PDF* | Projekt als PDF exportieren |
+| *PDF*, *Drucken…* | als PDF exportieren oder drucken |
 
-Wird *Ansicht ▸ Beschriftung unter den Symbolen* ausgeschaltet, wird die Leiste zu einer niedrigeren Zeile
-nur mit Symbolen.
+Die Schnellzugriffsleiste oben links enthält *Speichern*, *Rückgängig* und *Wiederholen* (⌘S, ⌘Z, ⇧⌘Z).
 
 ## Modellbaum
 
-![Der Modellbaum](../img/it/albero.png)
+![Der Modellbaum](../img/en/albero.png)
 
 Der Baum zeigt das Projekt und lässt sich mit den Dreiecken ▸ ▾ auf- und zuklappen:
 
@@ -93,7 +96,7 @@ Kursivschrift sind Vorschläge oder Werte aus dem Artikel.
 
 ## Bibliothek
 
-![Die Symbolbibliothek](../img/it/libreria-simboli.png)
+![Die Symbolbibliothek](../img/en/libreria-simboli.png)
 
 Die rechte Spalte hat drei Register:
 
@@ -107,7 +110,7 @@ Die rechte Spalte hat drei Register:
 
 ## Kontextmenü
 
-![Das Kontextmenü](../img/it/menu-contestuale.png)
+![Das Kontextmenü](../img/en/menu-contestuale.png)
 
 Ein Rechtsklick auf ein Element öffnet die häufigsten Befehle: ausschneiden, kopieren, hier einfügen,
 duplizieren, drehen, spiegeln, löschen, Makro aus Auswahl erstellen, **Eigenschaften kopieren** und **Eigenschaften von -X einfügen** (alle Gerätedaten außer dem BMK, [Kapitel 7](07-dispositivi-e-articoli.md#eigenschaften-kopieren)), Bauteil bearbeiten, zu Favoriten hinzufügen, Potenzial

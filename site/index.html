@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenWiring · Open-source electrical CAD</title>
+<meta name="description" content="OpenWiring is a free, open-source electrical CAD for industrial control panels: schematics with automatic cross-references, terminal strips, cables, PLC I/O and networks. macOS and Windows.">
+<meta property="og:title" content="OpenWiring · Open-source electrical CAD">
+<meta property="og:description" content="Schematics, terminal strips, cables, PLC and networks. Free and open source for macOS and Windows.">
+<meta property="og:image" content="https://elconfa.github.io/OpenWiring/manual/img/en/sito-schema.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#07090d">
+<link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="logo" href="#top"><img src="assets/icon.png" alt="">OpenWiring</a>
+    <nav class="nav-links">
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#download" data-i18n="nav.download">Download</a>
+      <a href="manual/" data-i18n="nav.manual">Manual</a>
+      <a href="#news" data-i18n="nav.news">News</a>
+      <a href="#community" data-i18n="nav.community">Community</a>
+    </nav>
+    <div class="nav-right">
+      <div class="lang-switch" role="group" aria-label="Language"><button data-lang="en">EN</button><button data-lang="it">IT</button></div>
+      <a class="star" href="https://github.com/elconfa/OpenWiring" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" width="16" height="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span class="label">GitHub</span><span class="count" id="stars">★</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="grid-bg"></div>
+  <svg class="circuit" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+    <path d="M0 120 H240 V260 H380"/><circle cx="240" cy="120" r="3"/>
+    <path class="amber" d="M0 420 H120 V330 H300 V470 H420"/><circle class="amber" cx="300" cy="330" r="3"/>
+    <path d="M1440 160 H1200 V300 H1060"/><circle cx="1200" cy="160" r="3"/>
+    <path class="amber" d="M1440 450 H1310 V360 H1140 V500 H1020"/><circle class="amber" cx="1140" cy="360" r="3"/>
+    <path d="M60 560 H340"/><path d="M1100 580 H1400"/>
+  </svg>
+  <div class="glow"></div>
+  <div class="wrap">
+    <div class="hero-text">
+      <a class="eyebrow reveal" href="#news"><b>v{{version}}</b><span data-i18n="hero.eyebrow">First public release · open source under GPL-3.0</span></a>
+      <h1 class="reveal"><span data-i18n="hero.t1">Electrical CAD that</span><br><span class="grad" data-i18n="hero.t2">understands your wiring.</span></h1>
+      <p class="lead reveal" data-i18n="hero.lead">Draw connected devices, not lines. OpenWiring derives cross-references, wire numbers, terminal strips, cables, PLC and network addresses, and turns them into complete control-panel documentation.</p>
+      <div class="cta reveal">
+        <a class="btn primary" id="cta-dl" href="#download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+          <span><span data-i18n="hero.download">Download</span> <span id="cta-os"></span></span>
+        </a>
+        <a class="btn" href="manual/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z"/><path d="M4 19a2 2 0 0 1 2-2h13"/></svg>
+          <span data-i18n="hero.manual">Read the manual</span>
+        </a>
+      </div>
+      <div class="meta reveal"><span>macOS · Windows</span><span data-i18n="hero.m2">6 languages</span><span data-i18n="hero.m3">No account, no cloud</span><span data-i18n="hero.m4">Free forever</span></div>
+    </div>
+    <div class="shot-hero reveal" id="hero-shot">
+      <div class="window">
+        <div class="bar"><i></i><i></i><i></i><span>Pump motor starter.ecad — OpenWiring</span></div>
+        <img src="manual/img/en/sito-schema.png" alt="OpenWiring main window with a control circuit" width="2880" height="1800">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FORMATI ============ -->
+<div class="formats wrap reveal">
+  <p data-i18n="formats.title">Works with the tools you already use</p>
+  <div class="chips">
+    <span class="chip">PDF</span><span class="chip">DXF / DWG</span><span class="chip">Excel</span><span class="chip">TIA Portal</span>
+    <span class="chip">CODESYS</span><span class="chip">TwinCAT</span><span class="chip">PLCopen XML</span>
+    <span class="chip in">EDZ</span><span class="chip in">XML</span><span class="chip in">CSV</span><span class="chip in">QElectroTech</span>
+  </div>
+</div>
+
+<!-- ============ COME FUNZIONA ============ -->
+<section id="how">
+  <div class="wrap">
+    <div class="head center reveal">
+      <p class="kicker" data-i18n="how.kicker">How it works</p>
+      <h2 data-i18n="how.title">One model. Every document.</h2>
+      <p class="sub" data-i18n="how.sub">The schematic is a graph of real devices and conductors. Everything else is derived from it and stays in sync.</p>
+    </div>
+    <div class="derive">
+      <div class="card reveal">
+        <span class="step">01 · <span data-i18n="how.s1">Draw</span></span>
+        <h3 data-i18n="how.h1">Place devices and wires</h3>
+        <p data-i18n="how.p1">Symbols snap to the grid, wires break on connection points, tags follow IEC 81346.</p>
+        <div class="code"><span class="t">-2K1</span> coil · A1–A2<br><span class="t">-2S2</span> NO 13–14<br><span class="t">-X1</span>:3 → <span class="t">-1M1</span>:U1</div>
+      </div>
+      <div class="card mid reveal">
+        <span class="step">02 · <span data-i18n="how.s2">Derive</span></span>
+        <h3 data-i18n="how.h2">OpenWiring does the bookkeeping</h3>
+        <p data-i18n="how.p2">Cross-references, contact images, wire numbers, potentials and PLC addresses are computed live.</p>
+        <div class="code"><span class="t">-2K1</span> 13–14 <span class="a">/2.4</span> · 23–24 <span class="a">/2.6</span><br>wire <span class="a">2.03</span> · <span class="a">+24V</span><br><span class="t">-3A1</span> DI 0.2 → <span class="a">%IX0.2</span></div>
+      </div>
+      <div class="card reveal">
+        <span class="step">03 · <span data-i18n="how.s3">Deliver</span></span>
+        <h3 data-i18n="how.h3">Complete documentation</h3>
+        <p data-i18n="how.p3">Checked schematics, terminal and cable diagrams, lists, labels and PLC tags, ready for the workshop.</p>
+        <div class="code"><span class="g">✓</span> 0 errors · 2 warnings<br><span class="g">✓</span> 42 pages → PDF<br><span class="g">✓</span> tags → TIA Portal</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FUNZIONI CON FOTO ============ -->
+<section id="features" style="padding-top:40px">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="kicker" data-i18n="feat.kicker">Features</p>
+      <h2 data-i18n="feat.title">Built for people who draw control panels every day.</h2>
+    </div>
+
+    <div class="feature reveal">
+      <div class="txt">
+        <h3 data-i18n="f1.h">Schematics with automatic cross-references</h3>
+        <p data-i18n="f1.p">A3 pages with frame and title block, an IEC 60617 symbol library and wires that behave like conductors.</p>
+        <ul class="ticks">
+          <li data-i18n="f1.l1">Coil and contacts linked by tag, with contact image</li>
+          <li data-i18n="f1.l2">Interruption points that pair by name, star sources</li>
+          <li data-i18n="f1.l3">Wire numbers by pattern: <code>{pagina}.{n:2}</code>, per cabinet, reserved ranges</li>
+          <li data-i18n="f1.l4">Schematics in two languages at once from a dictionary</li>
+        </ul>
+      </div>
+      <div class="frame"><img src="manual/img/en/schema-inglese.png" alt="Control circuit with cross-references" loading="lazy"></div>
+    </div>
+
+    <div class="feature rev reveal">
+      <div class="txt">
+        <h3 data-i18n="f2.h">Terminal strips, cables and connectors</h3>
+        <p data-i18n="f2.p">Terminals are read from the schematic, sorted and documented without retyping anything.</p>
+        <ul class="ticks">
+          <li data-i18n="f2.l1">Multi-level terminals, jumpers, spares and accessories</li>
+          <li data-i18n="f2.l2">Cables with conductors, colours and shields; cable lists</li>
+          <li data-i18n="f2.l3">Automatic terminal strip and cable diagram pages</li>
+        </ul>
+      </div>
+      <div class="frame"><img src="manual/img/en/morsettiere.png" alt="Terminal strip editor" loading="lazy"></div>
+    </div>
+
+    <div class="feature reveal">
+      <div class="txt">
+        <h3 data-i18n="f3.h">PLC and industrial networks</h3>
+        <p data-i18n="f3.p">Cards, stations and I/O points on the schematic, with addresses in the format of your PLC.</p>
+        <ul class="ticks">
+          <li>Siemens TIA <code>I0.0</code> · IEC 61131 <code>%IX0.0</code> · TwinCAT <code>AT %I*</code></li>
+          <li data-i18n="f3.l2">Tag tables for TIA Portal, GVL and PLCopen XML for CODESYS and TwinCAT</li>
+          <li data-i18n="f3.l3">Profinet, EtherCAT and Modbus diagrams; IP and Profinet name table</li>
+        </ul>
+      </div>
+      <div class="frame"><img src="manual/img/en/vista-plc.png" alt="PLC view" loading="lazy"></div>
+    </div>
+
+    <div class="feature rev reveal">
+      <div class="txt">
+        <h3 data-i18n="f4.h">Cabinet layout and wiring</h3>
+        <p data-i18n="f4.p">Place the devices of the schematic on the mounting plate and get the numbers the workshop needs.</p>
+        <ul class="ticks">
+          <li data-i18n="f4.l1">DIN rails and cable ducts with fill level</li>
+          <li data-i18n="f4.l2">Automatic placement, drilling plan, estimated wire lengths</li>
+          <li data-i18n="f4.l3">Wiring sequence and marking labels for common printers</li>
+        </ul>
+      </div>
+      <div class="frame"><img src="manual/img/en/layout.png" alt="Cabinet layout" loading="lazy"></div>
+    </div>
+
+    <div class="feature reveal">
+      <div class="txt">
+        <h3 data-i18n="f5.h">An AI assistant that edits the project</h3>
+        <p data-i18n="f5.p">Ask in plain words: add a motor starter, renumber a page, explain a check. Use your own Claude, ChatGPT or Gemini key; nothing leaves your computer otherwise.</p>
+        <ul class="ticks">
+          <li data-i18n="f5.l1">Every change can be undone like any other edit</li>
+          <li data-i18n="f5.l2">A plain-text project format designed for AI agents</li>
+          <li data-i18n="f5.l3">Command line for batch exports and checks</li>
+        </ul>
+      </div>
+      <div class="frame"><img src="manual/img/en/assistente-ia.png" alt="AI assistant" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GRIGLIA ============ -->
+<section style="padding-top:20px">
+  <div class="wrap">
+    <div class="head center reveal">
+      <p class="kicker" data-i18n="more.kicker">And much more</p>
+      <h2 data-i18n="more.title">Everything a real project needs.</h2>
+    </div>
+    <div class="grid reveal">
+      <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h12"/></svg><h4 data-i18n="g1.h">Lists and reports</h4><p data-i18n="g1.p">Bill of materials, purchase list, devices, wires, terminals, cables and PLC lists as pages or Excel.</p></div>
+      <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg><h4 data-i18n="g2.h">Project checks</h4><p data-i18n="g2.p">Open contacts, duplicate tags, unconnected pins, missing parts: found before the workshop does.</p></div>
+      <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg><h4 data-i18n="g3.h">Manufacturer parts</h4><p data-i18n="g3.p">Import part data from EDZ packages, XML and CSV into a local SQLite library.</p></div>
+      <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><h4 data-i18n="g4.h">Revisions</h4><p data-i18n="g4.p">Archive a revision, compare two versions of a project and mark the changed pages.</p></div>
+      <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><h4 data-i18n="g5.h">Macros and title blocks</h4><p data-i18n="g5.p">Reusable circuits, a component editor, custom title blocks and page templates.</p></div>
+      <div class="cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><h4 data-i18n="g6.h">Six languages</h4><p data-i18n="g6.p">Interface and manual in English, Italian, French, German, Spanish and Russian.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DOWNLOAD ============ -->
+<section id="download" class="dl">
+  <div class="wrap">
+    <div class="head center reveal">
+      <p class="kicker">Download</p>
+      <h2><span data-i18n="dl.title">Get OpenWiring</span> <span class="mono" id="dl-ver" style="color:var(--muted);font-weight:500">{{version}}</span></h2>
+      <p class="sub" data-i18n="dl.sub">Free for any use, including commercial projects. Projects are plain files on your computer.</p>
+    </div>
+    <div class="dl-grid reveal">
+      <a class="dl-card" data-os="mac-arm" href="https://github.com/elconfa/OpenWiring/releases/latest">
+        <span class="os"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.9-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.8ZM14.1 5.7c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.6 2.8-1.3Z"/></svg>macOS<span class="badge-rec" data-i18n="dl.rec">Recommended</span></span>
+        <span>Apple Silicon (M1–M4)</span>
+        <span class="file" data-file="arm64.dmg">OpenWiring-{{version}}-arm64.dmg</span>
+        <span class="go" data-i18n="dl.go">Download →</span>
+      </a>
+      <a class="dl-card" data-os="mac-intel" href="https://github.com/elconfa/OpenWiring/releases/latest">
+        <span class="os"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.9-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.8ZM14.1 5.7c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.6 2.8-1.3Z"/></svg>macOS<span class="badge-rec" data-i18n="dl.rec">Recommended</span></span>
+        <span>Intel</span>
+        <span class="file" data-file="{{version}}.dmg">OpenWiring-{{version}}.dmg</span>
+        <span class="go" data-i18n="dl.go">Download →</span>
+      </a>
+      <a class="dl-card" data-os="win" href="https://github.com/elconfa/OpenWiring/releases/latest">
+        <span class="os"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10 4.5v7H3v-6Zm8-1.1L21 3v8.5H11V4.4ZM3 12.5h7v7l-7-1v-6Zm8 0h10V21l-10-1.4v-7.1Z"/></svg>Windows<span class="badge-rec" data-i18n="dl.rec">Recommended</span></span>
+        <span>Windows 10 / 11 · x64</span>
+        <span class="file" data-file="win.zip">OpenWiring-{{version}}-win.zip</span>
+        <span class="go" data-i18n="dl.go">Download →</span>
+      </a>
+    </div>
+    <p class="note reveal"><span data-i18n="dl.note">The apps are not digitally signed yet: on first start, macOS asks for confirmation in System Settings ▸ Privacy &amp; Security, Windows in “More info ▸ Run anyway”.</span> <a href="https://github.com/elconfa/OpenWiring#installazione" data-i18n="dl.how">How to install</a> · <a href="https://github.com/elconfa/OpenWiring/releases" data-i18n="dl.all">All releases</a></p>
+  </div>
+</section>
+
+<!-- ============ NOVITÀ ============ -->
+<section id="news">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="kicker" data-i18n="news.kicker">News</p>
+      <h2 data-i18n="news.title">What's new</h2>
+    </div>
+    <div class="news-list reveal" id="news-list">
+      <a class="news-item" href="https://github.com/elconfa/OpenWiring/releases/tag/v2.0.0">
+        <time>2026-11-04</time>
+        <div><h4>OpenWiring 2.0.0</h4><p data-i18n="news.fallback">First public release: new name, GPL-3.0 licence, interruption points that pair by name, network address table, PLC address formats per station.</p></div>
+        <span class="tag">release</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMUNITÀ ============ -->
+<section id="community" style="padding-top:20px">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="kicker" data-i18n="com.kicker">Community</p>
+      <h2 data-i18n="com.title">Made in the open, with people who use it.</h2>
+      <p class="sub" data-i18n="com.sub">OpenWiring is young. Real projects and honest feedback shape what comes next.</p>
+    </div>
+    <div class="community">
+      <a class="card reveal" href="https://github.com/elconfa/OpenWiring/issues/new/choose"><h3 data-i18n="com.c1">Report a bug</h3><p data-i18n="com.p1">Something wrong? A short form asks for what we need to reproduce it.</p><span class="go" data-i18n="com.g1">Open an issue →</span></a>
+      <a class="card reveal" href="https://github.com/elconfa/OpenWiring/discussions"><h3 data-i18n="com.c2">Ask and share</h3><p data-i18n="com.p2">Questions, ideas and examples from your own panels in the Discussions.</p><span class="go" data-i18n="com.g2">Join the discussion →</span></a>
+      <a class="card reveal" href="https://github.com/elconfa/OpenWiring/issues/new?template=3-traduzione.yml"><h3 data-i18n="com.c3">Translate</h3><p data-i18n="com.p3">Improve a translation of the interface or the manual, or add a new language.</p><span class="go" data-i18n="com.g3">Suggest a fix →</span></a>
+      <a class="card reveal" href="https://github.com/elconfa/OpenWiring"><h3 data-i18n="com.c4">Contribute code</h3><p data-i18n="com.p4">Electron, React and TypeScript with 600+ tests. Pull requests are welcome.</p><span class="go" data-i18n="com.g4">View the source →</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CHIUSURA ============ -->
+<div class="final">
+  <div class="grid-bg"></div><div class="glow"></div>
+  <div class="wrap reveal">
+    <h2 data-i18n="final.title">Your next panel, documented properly.</h2>
+    <p class="sub" style="margin:0 auto 34px" data-i18n="final.sub">Open the example project and see the cross-references build themselves.</p>
+    <div class="cta"><a class="btn primary" href="#download" data-i18n="final.cta">Download OpenWiring</a><a class="btn" href="manual/en/03-primo-progetto.html" data-i18n="final.tut">30-minute tutorial</a></div>
+  </div>
+</div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <a class="logo" href="#top"><img src="assets/icon.png" alt="">OpenWiring</a>
+    <span>© 2026 · GPL-3.0</span>
+    <nav>
+      <a href="manual/" data-i18n="nav.manual">Manual</a>
+      <a href="assets/scorciatoie.html" data-i18n="foot.keys">Shortcuts</a>
+      <a href="https://github.com/elconfa/OpenWiring/releases">Releases</a>
+      <a href="https://github.com/elconfa/OpenWiring/discussions">Discussions</a>
+      <a href="https://github.com/elconfa/OpenWiring">GitHub</a>
+    </nav>
+  </div>
+  <div class="wrap" style="margin-top:18px;font-size:12.5px" data-i18n="foot.tm">Product and company names are trademarks of their respective owners and are used only to describe compatible file formats.</div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

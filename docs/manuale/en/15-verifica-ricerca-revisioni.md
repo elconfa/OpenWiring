@@ -5,7 +5,7 @@
 **Check** in the toolbar (or *Project ▸ Check*) checks the whole project and opens the *Checks* tab of the
 Lists view.
 
-![The project checks](../img/it/controlli.png)
+![The project checks](../img/en/controlli.png)
 
 *The example project has no problems. For an example with warnings see [chapter 3](03-primo-progetto.md#step-6--check).*
 
@@ -38,7 +38,7 @@ element and selects it.
 
 **⌘F** (or *Search*) opens the search in the whole project.
 
-![Find and replace](../img/it/cerca.png)
+![Find and replace](../img/en/cerca.png)
 
 *The search for «pompa» finds seven descriptions.*
 

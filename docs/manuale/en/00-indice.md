@@ -6,7 +6,7 @@ to PDF, DXF and Excel. This manual explains every function with examples and pic
 Beginners can read chapters 1–3 and draw their first schematic in half an hour; the other chapters can be
 looked up when needed.
 
-> The pictures show the program with the Italian interface. Choose your language with
+> The pictures show the program with the English interface. Choose your language with
 > *View ▸ Language · Lingua*: menus and windows have the same layout in every language.
 
 ## Chapters
@@ -37,6 +37,8 @@ looked up when needed.
 ## Conventions used in this manual
 
 - *Italics with arrows* show a menu path: *Project ▸ Check*.
+  The path is the one of the *classic menus*; with the ribbon the same command is almost always in the tab with
+  the same name, and *Search for a command…* (⌘K) finds it by its name ([chapter 2](02-interfaccia.md#ribbon)).
 - **⌘** is the Command key on the Mac; on Windows use **Ctrl**.
 - Tags are written as on the schematic: `-2K1` (device), `-X1:3` (terminal), `200.01` (wire number).
 - The examples use the **example project** «Avviamento motore pompa» (*File ▸ Load the example project*),

@@ -4,7 +4,7 @@ The layout page is the **mounting view** of the cabinet plate: DIN rails, cable 
 with dimensions. It is used to check that everything fits, for drilling and to estimate the length of the
 wires.
 
-![The cabinet layout](../img/it/layout.png)
+![The cabinet layout](../img/en/layout.png)
 
 *A layout created with automatic placement: two rows of rails with cable ducts and the devices of the
 example project.*

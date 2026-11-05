@@ -3,7 +3,7 @@
 Los esquemas se dibujan en italiano y se imprimen también en **inglés** o **alemán**, o en dos idiomas a la
 vez. El idioma de la interfaz del programa es otro ajuste ([capítulo 1](01-introduzione.md#idioma-de-la-interfaz)).
 
-![El esquema en dos idiomas](../img/it/schema-inglese.png)
+![El esquema en dos idiomas](../img/en/schema-inglese.png)
 
 *La página 2 en inglés con el italiano debajo: «Emergency stop / Arresto di emergenza».*
 
@@ -13,7 +13,7 @@ La pestaña *Traducciones* de la vista Listas (o *Proyecto ▸ Traducciones…*)
 traducibles del proyecto: títulos de página, textos libres, descripciones de los dispositivos, ubicaciones,
 comentarios PLC, campos del cajetín. Para cada uno están la traducción inglesa, la alemana y dónde aparece.
 
-![El diccionario](../img/it/traduzioni.png)
+![El diccionario](../img/en/traduzioni.png)
 
 *El diccionario del proyecto de ejemplo.*
 

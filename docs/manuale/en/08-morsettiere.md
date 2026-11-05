@@ -2,7 +2,7 @@
 
 ## Terminals in the schematic
 
-![Terminals in the schematic](../img/it/morsetti-schema.png)
+![Terminals in the schematic](../img/en/morsetti-schema.png)
 
 *Terminals `-X1:1…4` on page 1: the terminal strip tag appears only on the first of the row.*
 
@@ -27,7 +27,7 @@ On a vertical wire the terminal strip tag is on the left and the number on the r
 
 The **Terminal strips** tab shows the terminal strips of the project and their terminals in a table.
 
-![The Terminal strips view](../img/it/morsettiere.png)
+![The Terminal strips view](../img/en/morsettiere.png)
 
 *Terminal strip `-X1` of the example project: external and internal destinations, wire numbers, parts and
 accessories.*
@@ -90,7 +90,7 @@ terminals). Everything goes into the bill of materials and the purchase list aut
 **Generate terminal strip diagrams** creates one page per terminal strip (more sheets beyond 40 terminals)
 with destinations, wire numbers, jumpers, separators, spares and clickable positions, also in the PDF.
 
-![The terminal strip diagram](../img/it/schema-morsettiera.png)
+![The terminal strip diagram](../img/en/schema-morsettiera.png)
 
 *The top part of the terminal strip diagram of `-X1`.*
 

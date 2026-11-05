@@ -35,7 +35,7 @@ champ *Textes sur le schéma* de l'appareil les force ou les masque pour cet app
 L'onglet **Appareils** (en haut à droite) montre tous les appareils du projet dans un tableau qui se
 modifie comme un tableur.
 
-![Le navigateur des appareils](../img/it/navigatore-dispositivi.png)
+![Le navigateur des appareils](../img/en/navigatore-dispositivi.png)
 
 *Le navigateur avec les 17 appareils du projet d'exemple. Les valeurs en gris italique viennent de
 l'article ou de l'emplacement de la page.*
@@ -84,7 +84,7 @@ Dans l'arborescence, le nœud **Structure =Installation +Emplacement** regroupe 
 appareils sans fonction ou sans emplacement sont en bas, dans *sans fonction (=)* et *sans emplacement (+)*.
 Un clic sur un appareil l'ouvre dans le schéma.
 
-![La structure dans l'arborescence](../img/it/struttura.png)
+![La structure dans l'arborescence](../img/en/struttura.png)
 
 *Dans le projet d'exemple les appareils n'ont pas de fonction : ils sont tous dans «sans fonction»,
 répartis entre les armoires `+Q1` et `+Q2`.*
@@ -97,7 +97,7 @@ il est dessiné sur le schéma réseau, ou celui de sa page.
 L'onglet **Articles** est la bibliothèque personnelle d'articles, enregistrée sur l'ordinateur et
 disponible dans tous les projets.
 
-![La gestion des articles](../img/it/articoli.png)
+![La gestion des articles](../img/en/articoli.png)
 
 *Un contacteur importé depuis un EDZ : données, image, modèle de fonction et symbole.*
 

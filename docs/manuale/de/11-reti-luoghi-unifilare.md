@@ -25,7 +25,7 @@ Wo man die Orte sieht:
 Der Netzwerkplan zeigt auf einer einzigen Seite alle Knoten der Anlage und die Busverbindungen zwischen den
 Schaltschränken.
 
-![Der Netzwerkplan](../img/it/schema-rete.png)
+![Der Netzwerkplan](../img/en/schema-rete.png)
 
 *Der Netzwerkplan des Beispielprojekts: die CPU `-3A1` und der Switch `-5A1` im Schaltschrank `+Q1`, die
 dezentrale Peripherie `-5A2` und der Umrichter `-5U1` im Schaltschrank `+Q2`, verbunden über Profinet (grün)
@@ -108,7 +108,7 @@ Profinet-Namen.
 
 Der einpolige Übersichtsplan stellt die Energieverteilung mit einer einzigen Linie je Abgang dar.
 
-![Der einpolige Übersichtsplan](../img/it/unifilare.png)
+![Der einpolige Übersichtsplan](../img/en/unifilare.png)
 
 *Der einpolige Plan des Beispielprojekts: dieselben BMK wie im mehrpoligen Plan, mit dem Verweis auf ihre
 Position.*

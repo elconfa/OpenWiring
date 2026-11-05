@@ -34,7 +34,7 @@ turned on, description and technical data appear under the tag of the main eleme
 The **Devices** tab (top right) shows all the devices of the project in a table that is edited like a
 spreadsheet.
 
-![The device navigator](../img/it/navigatore-dispositivi.png)
+![The device navigator](../img/en/navigatore-dispositivi.png)
 
 *The navigator with the 17 devices of the example project. Values in grey italics come from the part or
 from the location of the page.*
@@ -82,7 +82,7 @@ In the tree, the **Structure =Plant +Location** node groups the devices first by
 without a location are at the bottom, in *without function (=)* and *without location (+)*. A click on a
 device opens it in the schematic.
 
-![The structure in the tree](../img/it/struttura.png)
+![The structure in the tree](../img/en/struttura.png)
 
 *In the example project the devices have no function: they are all in «without function», divided between
 cabinets `+Q1` and `+Q2`.*
@@ -94,7 +94,7 @@ drawn in on the network diagram, or the one of its page.
 
 The **Parts** tab is the personal parts library, saved on the computer and available in all projects.
 
-![Parts management](../img/it/articoli.png)
+![Parts management](../img/en/articoli.png)
 
 *A contactor imported from an EDZ: data, picture, function template and symbol.*
 

@@ -4,7 +4,7 @@
 
 **PDF** en la barra de herramientas (o *Archivo ▸ Exportar ▸ PDF…*) crea un PDF vectorial en A3.
 
-![La exportación PDF](../img/it/export-pdf.png)
+![La exportación PDF](../img/en/export-pdf.png)
 
 *Las opciones del PDF.*
 
@@ -24,7 +24,7 @@ y listas.
 
 *Archivo ▸ Imprimir…* (⌘P) envía las páginas a la impresora en **A3 horizontal**, una página por hoja.
 
-![La impresión](../img/it/stampa.png)
+![La impresión](../img/en/stampa.png)
 
 *Las opciones de impresión: páginas, blanco y negro, idioma.*
 

@@ -31,7 +31,7 @@ Le logiciel reproposera le dernier choisi.
 D'autres symboles se dessinent avec l'éditeur ou s'importent de QElectroTech et des fichiers EDZ des
 fabricants ([chapitre 13](13-macro-simboli-cartigli.md) et [chapitre 7](07-dispositivi-e-articoli.md)).
 
-![Un départ moteur](../img/it/partenza-motore.png)
+![Un départ moteur](../img/en/partenza-motore.png)
 
 *Le départ moteur de la page 1 : disjoncteur moteur `-1Q1`, contacts de puissance du contacteur `-2K1`,
 bornier `-X1`, câble `-1W1` et moteur `-1M1`.*
@@ -51,7 +51,7 @@ côté, le segment continue tout droit jusqu'au fil.
 
 ### Jonctions et croisements
 
-![Jonctions en T](../img/it/giunzioni.png)
+![Jonctions en T](../img/en/giunzioni.png)
 
 *Les jonctions de l'auto-maintien de la page 2 : le point indique la connexion.*
 
@@ -61,7 +61,7 @@ côté, le segment continue tout droit jusqu'au fil.
 
 ### Modifier les fils
 
-![Un fil sélectionné](../img/it/filo-selezionato.png)
+![Un fil sélectionné](../img/en/filo-selezionato.png)
 
 *Un fil sélectionné montre ses sommets sous forme de petits carrés.*
 
@@ -82,7 +82,7 @@ ses deux points de connexion : inutile de le couper à la main. Les deux tronço
 
 ## Points de potentiel
 
-![Barres de potentiel](../img/it/potenziali.png)
+![Barres de potentiel](../img/en/potenziali.png)
 
 *Les barres L1, L2, L3, N et PE de la page 1.*
 
@@ -96,7 +96,7 @@ Le **point de potentiel** donne un nom à un conducteur : `L1`, `L2`, `L3`, `N`,
 
 ## Renvois entre pages
 
-![Renvois de départ](../img/it/rimandi.png)
+![Renvois de départ](../img/en/rimandi.png)
 
 *Les renvois `+24V` et `0V` de la page 1 : le nom au-dessus du fil, les pages d'arrivée à côté de la flèche.*
 

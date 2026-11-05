@@ -6,7 +6,7 @@ export en PDF, DXF et Excel. Ce manuel explique chaque fonction avec des exemple
 Pour débuter, lisez les chapitres 1 à 3 et dessinez votre premier schéma en une demi-heure ; les autres
 chapitres se consultent au besoin.
 
-> Les images montrent le logiciel avec l'interface en italien. Choisissez votre langue avec
+> Les images montrent le logiciel avec l'interface en anglais. Choisissez votre langue avec
 > *Affichage ▸ Language · Lingua* : menus et fenêtres ont la même disposition dans toutes les langues.
 
 ## Chapitres
@@ -37,6 +37,8 @@ chapitres se consultent au besoin.
 ## Conventions du manuel
 
 - *L'italique avec des flèches* indique un chemin dans les menus : *Projet ▸ Vérification*.
+  Le chemin est celui des *menus classiques* ; avec le ruban, la même commande se trouve presque toujours dans
+  l'onglet du même nom, et *Rechercher une commande…* (⌘K) la trouve par son nom ([chapitre 2](02-interfaccia.md#ruban)).
 - **⌘** est la touche Commande du Mac ; sous Windows on utilise **Ctrl**.
 - Les repères s'écrivent comme sur le schéma : `-2K1` (appareil), `-X1:3` (borne), `200.01` (numéro de fil).
 - Les exemples utilisent le **projet d'exemple** « Avviamento motore pompa » (*Fichier ▸ Charger le projet

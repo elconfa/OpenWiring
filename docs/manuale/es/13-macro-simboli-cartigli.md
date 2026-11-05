@@ -26,7 +26,7 @@ exportación en la pestaña *Macros*).
 El editor dibuja un componente desde cero o modifica uno existente: símbolos básicos, símbolos personales,
 componentes importados de QElectroTech o de EPLAN, incluidas las cajas negras de los artículos EDZ.
 
-![El editor de componentes](../img/it/editor-simboli.png)
+![El editor de componentes](../img/en/editor-simboli.png)
 
 *El guardamotor 3P abierto en el editor: a la izquierda los objetos que añadir, en el centro el dibujo con
 los puntos de conexión, a la derecha las propiedades.*
@@ -106,7 +106,7 @@ cada cajetín incluido se puede elegir *Personalizar…* y partir de ese dibujo.
 
 También se puede dibujar el cajetín de la propia empresa.
 
-![El editor de cajetines](../img/it/editor-cartiglio.png)
+![El editor de cajetines](../img/en/editor-cartiglio.png)
 
 *El cajetín estándar abierto en el editor, con la lista de marcadores a la derecha.*
 

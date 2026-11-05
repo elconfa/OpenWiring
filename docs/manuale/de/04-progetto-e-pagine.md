@@ -6,9 +6,9 @@ Die Projekteinstellungen öffnen sich mit *Projekt ▸ Projekteigenschaften*, mi
 Projektnamen im Baum oder indem man alles abwählt (Klick auf eine leere Stelle): das Feld *Eigenschaften*
 zeigt die aktuelle Seite und darunter die Projektdaten.
 
-![Eigenschaften: Seite, Schriftfeld, Revisionen](../img/it/proprieta-progetto-1.png)
-![Eigenschaften: Orte, Sprachen, IP-Netze, Schriftfelddaten](../img/it/proprieta-progetto-2.png)
-![Eigenschaften: BMK, Drahtnummern, Zeichnung](../img/it/proprieta-progetto-3.png)
+![Eigenschaften: Seite, Schriftfeld, Revisionen](../img/en/proprieta-progetto-1.png)
+![Eigenschaften: Orte, Sprachen, IP-Netze, Schriftfelddaten](../img/en/proprieta-progetto-2.png)
+![Eigenschaften: BMK, Drahtnummern, Zeichnung](../img/en/proprieta-progetto-3.png)
 
 *Das Feld der Projekteigenschaften von oben nach unten.*
 
@@ -42,7 +42,7 @@ Seite, auf dem Deckblatt und in den PDF-Eigenschaften. Man schreibt sie nur einm
 Das Blatt ist ein **A3 quer** (420 × 297 mm) mit einem in **10 nummerierte Spalten** geteilten Rahmen und dem
 Schriftfeld unten. Die Spalten dienen den Verweisen: `/2.4` bedeutet Seite 2, Spalte 4.
 
-![Seiteneigenschaften](../img/it/proprieta-pagina.png)
+![Seiteneigenschaften](../img/en/proprieta-pagina.png)
 
 *Die Eigenschaften von Seite 2 des Beispielprojekts.*
 
@@ -63,9 +63,9 @@ Schriftfeld unten. Die Spalten dienen den Verweisen: `/2.4` bedeutet Seite 2, Sp
 | Löschen | *✕* unter dem Baum | fragt nach; rückgängig mit ⌘Z |
 | Seite wechseln | Klick im Baum, **Bild↑/Bild↓** | |
 
-![Das Menü Einfügen](../img/it/menu-inserisci.png)
+![Die Registerkarte Seiten](../img/en/menu-inserisci.png)
 
-*Das Menü Einfügen: Zeichenwerkzeuge, Netzwerkverbindungen und Seiten.*
+*Die Registerkarte Seiten: neue Seiten jeder Art, automatische Seiten, Reihenfolge und Blatt.*
 
 ### Seitentypen
 
@@ -84,7 +84,7 @@ Erzeugte Seiten aktualisieren sich selbst: ihr Inhalt kommt immer aus dem Schalt
 
 ## Schriftfeld
 
-![Das Standard-Schriftfeld](../img/it/cartiglio.png)
+![Das Standard-Schriftfeld](../img/en/cartiglio.png)
 
 *Das Standard-Schriftfeld: Firma, Projekt mit Zeichnungsnummer und Revision, Seitentitel, Kunde, Datum und
 Autor, Seitennummer.*
@@ -131,7 +131,7 @@ verworfen, und das Programm meldet, wie viele.
 Revisionstabelle und den Feldern *Erstellt*, *Geprüft*, *Freigegeben*. Es aktualisiert sich selbst mit den
 Projektdaten.
 
-![Das Deckblatt](../img/it/copertina.png)
+![Das Deckblatt](../img/en/copertina.png)
 
 *Das Deckblatt des Beispielprojekts.*
 

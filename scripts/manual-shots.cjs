@@ -31,16 +31,25 @@ app.whenReady().then(async () => {
     return res;
   });
   const win = new BrowserWindow({
-    width: 1280, height: 820, show: false,
+    width: 1440, height: 900, show: false,
     webPreferences: { offscreen: { deviceScaleFactor: 2 }, preload: path.join(ROOT, 'electron', 'preload.cjs'), contextIsolation: true, sandbox: true },
   });
   await win.loadURL('app://elettrocad/index.html?shots=1');
   const js = code => win.webContents.executeJavaScript(`(async () => { ${code} })()`);
   for (let i = 0; i < 50 && !(await js('return !!window.__ecad')); i++) await sleep(100);
+  // Senza tour guidato né finestra di avvio: si segnano come già visti e si ricarica
+  await js(`localStorage.setItem('elettrocad.tourDone', '1');`);
+  await win.loadURL('app://elettrocad/index.html?shots=1');
+  for (let i = 0; i < 50 && !(await js('return !!window.__ecad')); i++) await sleep(100);
   await sleep(800);
   fs.mkdirSync(OUT, { recursive: true });
   const { prelude, init, shots } = require('./manual-shots.list.cjs');
+  // Lingua dell'interfaccia delle foto (la cartella di uscita è quella della lingua)
+  if (lang !== 'it') { await js(`${prelude}\nst().setUiLang('${lang}');`); await sleep(800); }
+  await js(`window.__shotLang = '${lang}';`);
   await js(`${prelude}\n${init}`);
+  // Testi dello schema nella stessa lingua (dizionario del progetto)
+  if (lang !== 'it') await js(`${prelude}\nwindow.__shotLang = '${lang}'; st().setLanguages({ display: '${lang}' });`);
   // Articoli di prova nella libreria (EDZ dei test: contattore e relè di sicurezza)
   const edz = fs.readFileSync(path.join(ROOT, 'test', 'fixtures', 'esempio.edz')).toString('base64');
   await js(`${prelude}
@@ -90,7 +99,7 @@ app.whenReady().then(async () => {
         }
       } else fs.writeFileSync(path.join(OUT, `${s.name}.png`), img.toPNG());
       await js(`${prelude}\n${s.cleanup ?? ''}\nreset();`);
-      if (s.size) { win.setSize(1280, 820); await sleep(400); }
+      if (s.size) { win.setSize(1440, 900); await sleep(400); }
       n++;
       console.log('ok', s.name);
     } catch (e) {

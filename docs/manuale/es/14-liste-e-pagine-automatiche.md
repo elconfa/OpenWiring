@@ -4,7 +4,7 @@ Todas las listas se **calculan a partir del esquema**: no se rellenan a mano y e
 
 ## La vista Listas
 
-![La vista Listas](../img/it/liste.png)
+![La vista Listas](../img/en/liste.png)
 
 *La pestaña Listas con la lista de materiales del proyecto de ejemplo.*
 
@@ -29,7 +29,7 @@ Las listas vacías no aparecen. Un clic en una posición (`/2.4`) lleva al eleme
 
 ## Lista de compra
 
-![La lista de compra](../img/it/lista-acquisto.png)
+![La lista de compra](../img/en/lista-acquisto.png)
 
 *La lista de compra del proyecto de ejemplo.*
 
@@ -47,7 +47,7 @@ La lista de compra sirve para pedir el material:
 
 Las listas se convierten en **páginas del proyecto** con cajetín, para imprimir e incluir en el PDF.
 
-![Las páginas automáticas](../img/it/pagine-automatiche.png)
+![Las páginas automáticas](../img/en/pagine-automatiche.png)
 
 *La ventana de las páginas automáticas: para cada lista las filas, las hojas necesarias y las páginas ya
 presentes.*
@@ -64,7 +64,7 @@ presentes.*
 - *Quitar todas las páginas* quita las páginas de lista.
 - *Insertar ▸ Actualizar las páginas de lista* realinea las páginas con las listas elegidas.
 
-![Una página de lista](../img/it/pagina-lista.png)
+![Una página de lista](../img/en/pagina-lista.png)
 
 *La lista de dispositivos como página del proyecto.*
 
@@ -73,7 +73,7 @@ presentes.*
 *Archivo ▸ Exportar ▸ Etiquetas M-Print PRO / GeniusPRO…* prepara las etiquetas para las impresoras de
 marcado.
 
-![Las etiquetas](../img/it/etichette.png)
+![Las etiquetas](../img/en/etichette.png)
 
 *La ventana de las etiquetas.*
 

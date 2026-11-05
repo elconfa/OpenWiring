@@ -31,7 +31,7 @@ proponer el último elegido.
 Otros símbolos se dibujan con el editor o se importan de QElectroTech y de los archivos EDZ de los
 fabricantes ([capítulo 13](13-macro-simboli-cartigli.md) y [capítulo 7](07-dispositivi-e-articoli.md)).
 
-![Una salida de motor](../img/it/partenza-motore.png)
+![Una salida de motor](../img/en/partenza-motore.png)
 
 *La salida de motor de la página 1: guardamotor `-1Q1`, contactos de potencia del contactor `-2K1`, regleta
 `-X1`, cable `-1W1` y motor `-1M1`.*
@@ -51,7 +51,7 @@ el tramo sigue recto hasta el hilo.
 
 ### Uniones y cruces
 
-![Uniones en T](../img/it/giunzioni.png)
+![Uniones en T](../img/en/giunzioni.png)
 
 *Las uniones de la autorretención de la página 2: el punto indica la conexión.*
 
@@ -61,7 +61,7 @@ el tramo sigue recto hasta el hilo.
 
 ### Modificar los hilos
 
-![Un hilo seleccionado](../img/it/filo-selezionato.png)
+![Un hilo seleccionado](../img/en/filo-selezionato.png)
 
 *Un hilo seleccionado muestra sus vértices como cuadraditos.*
 
@@ -82,7 +82,7 @@ sus dos puntos de conexión: no hace falta cortarlo a mano. Los dos tramos conse
 
 ## Puntos de potencial
 
-![Barras de potencial](../img/it/potenziali.png)
+![Barras de potencial](../img/en/potenziali.png)
 
 *Las barras L1, L2, L3, N y PE de la página 1.*
 
@@ -96,7 +96,7 @@ El **punto de potencial** da nombre a un conductor: `L1`, `L2`, `L3`, `N`, `PE`,
 
 ## Puntos de interrupción entre páginas
 
-![Puntos de interrupción de salida](../img/it/rimandi.png)
+![Puntos de interrupción de salida](../img/en/rimandi.png)
 
 *Los puntos de interrupción `+24V` y `0V` de la página 1: el nombre sobre el hilo, las páginas de llegada
 junto a la flecha.*

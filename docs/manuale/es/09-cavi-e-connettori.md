@@ -4,7 +4,7 @@
 
 Un cable se define con una **línea de definición** que atraviesa los hilos.
 
-![Un cable en el esquema](../img/it/cavo.png)
+![Un cable en el esquema](../img/en/cavo.png)
 
 *El cable `-1W1 FG16OR16 4G1,5` de la página 1: la línea de trazo y punto atraviesa los cuatro hilos hacia
 el motor, cada uno con el color de su conductor.*
@@ -30,7 +30,7 @@ veces cuenta una sola vez.
 
 ### Listas de cables
 
-![La lista de cables](../img/it/lista-cavi.png)
+![La lista de cables](../img/en/lista-cavi.png)
 
 *La lista de cables del proyecto de ejemplo: el cable del motor y los cables de red.*
 

@@ -6,9 +6,9 @@ Les paramètres du projet s'ouvrent avec *Projet ▸ Propriétés du projet*, en
 dans l'arborescence, ou en désélectionnant tout (clic sur une zone vide) : le panneau *Propriétés* affiche
 la page courante et, dessous, les données du projet.
 
-![Propriétés : page, cartouche, révisions](../img/it/proprieta-progetto-1.png)
-![Propriétés : emplacements, langues, réseaux IP, données du cartouche](../img/it/proprieta-progetto-2.png)
-![Propriétés : repères, numéros de fil, dessin](../img/it/proprieta-progetto-3.png)
+![Propriétés : page, cartouche, révisions](../img/en/proprieta-progetto-1.png)
+![Propriétés : emplacements, langues, réseaux IP, données du cartouche](../img/en/proprieta-progetto-2.png)
+![Propriétés : repères, numéros de fil, dessin](../img/en/proprieta-progetto-3.png)
 
 *Le panneau des propriétés du projet, de haut en bas.*
 
@@ -42,7 +42,7 @@ de chaque page, sur la couverture et dans les propriétés du PDF. On les écrit
 La feuille est un **A3 paysage** (420 × 297 mm) avec le cadre divisé en **10 colonnes** numérotées et le
 cartouche en bas. Les colonnes servent aux renvois : `/2.4` signifie page 2, colonne 4.
 
-![Propriétés de la page](../img/it/proprieta-pagina.png)
+![Propriétés de la page](../img/en/proprieta-pagina.png)
 
 *Les propriétés de la page 2 du projet d'exemple.*
 
@@ -63,9 +63,9 @@ cartouche en bas. Les colonnes servent aux renvois : `/2.4` signifie page 2, col
 | Supprimer | *✕* sous l'arborescence | demande confirmation ; s'annule avec ⌘Z |
 | Changer de page | clic dans l'arborescence, **PgPréc/PgSuiv** | |
 
-![Le menu Insertion](../img/it/menu-inserisci.png)
+![L'onglet Pages](../img/en/menu-inserisci.png)
 
-*Le menu Insertion : outils de dessin, connexions réseau et pages.*
+*L'onglet Pages : nouvelles pages de chaque type, pages automatiques, ordre des pages et feuille.*
 
 ### Types de pages
 
@@ -84,7 +84,7 @@ Les pages générées se mettent à jour toutes seules : leur contenu vient touj
 
 ## Cartouche
 
-![Le cartouche standard](../img/it/cartiglio.png)
+![Le cartouche standard](../img/en/cartiglio.png)
 
 *Le cartouche standard : société, projet avec numéro de plan et révision, titre de la page, client, date et
 auteur, numéro de page.*
@@ -131,7 +131,7 @@ allemand ou italien et des textes en plusieurs langues ; les propriétés dont l
 tableau des révisions et cases *Établi*, *Vérifié*, *Approuvé*. Elle se met à jour toute seule avec les
 données du projet.
 
-![La couverture](../img/it/copertina.png)
+![La couverture](../img/en/copertina.png)
 
 *La couverture du projet d'exemple.*
 

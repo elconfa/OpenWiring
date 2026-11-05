@@ -1,13 +1,13 @@
 # 2. L'interface
 
-![La fenêtre d'OpenWiring avec ses parties numérotées](../img/it/interfaccia.png)
+![La fenêtre d'OpenWiring avec ses parties numérotées](../img/en/interfaccia.png)
 
-*La fenêtre d'OpenWiring avec le projet d'exemple (interface en italien).*
+*La fenêtre d'OpenWiring avec le projet d'exemple.*
 
 | N° | Partie | À quoi elle sert |
 |---|---|---|
-| 1 | Barre de menus | toutes les commandes : *Fichier, Édition, Affichage, Insertion, Projet, Listes, Aide* |
-| 2 | Barre d'outils | les commandes de dessin les plus utilisées |
+| 1 | Onglets du ruban | *Fichier* et les onglets *Accueil, Insertion, Pages, Projet, Listes, Révisions, Affichage, Aide* |
+| 2 | Commandes du ruban | les commandes de l'onglet ouvert, en groupes avec leur nom en dessous |
 | 3 | Arborescence du modèle | pages, appareils, structure =/+, borniers, câbles, articles du projet |
 | 4 | Propriétés | les données de l'élément sélectionné, de la page ou du projet |
 | 5 | Zone de dessin | la page de schéma courante |
@@ -16,56 +16,60 @@
 | 8 | Barre d'état | conseils sur la commande active, fichier, page, coordonnées du curseur |
 | 9 | Onglets des vues | Schéma, Appareils, API, Borniers, Articles, Listes |
 
-## Barre de menus
+## Ruban
 
-![Le menu Fichier](../img/it/menu-file.png)
+Les commandes sont réunies dans des **onglets** ; chaque onglet les répartit en groupes dont le nom est écrit en
+dessous. Le raccourci clavier apparaît dans l'info-bulle de chaque bouton. Un **double clic** sur un onglet réduit
+le ruban aux noms des onglets (un clic le rouvre pour une commande) ; *Affichage ▸ Barre de commandes ▸ Style*
+choisit entre ruban, ruban compact et **menus classiques**, pour qui préfère les menus déroulants.
+*Rechercher une commande…* (⌘K) trouve n'importe quelle commande en tapant son nom.
 
-*Le menu Fichier : projets, import et export.*
+![L'onglet Fichier](../img/en/menu-file.png)
 
-Chaque commande du logiciel se trouve dans un menu ; les raccourcis clavier apparaissent à côté des entrées.
-Menu ouvert, les flèches ← → passent au menu voisin et Échap le ferme.
+*L'onglet Fichier : démarrage, projets récents, nouveau, ouvrir, enregistrer, importer, exporter, imprimer et PDF, paramètres.*
 
-| Menu | Contient |
+| Onglet | Contenu |
 |---|---|
-| *Fichier* | nouveau, ouvrir, enregistrer, projet d'exemple, pages en texte pour les assistants IA, **Importer** (articles EDZ/XML/CSV, symboles QElectroTech, schéma depuis PDF, macros, comparaison) et **Exporter** (PDF, impression, DXF, étiquettes, PLCopen, articles, dictionnaire) |
-| *Édition* | annuler et rétablir, couper, copier, coller, dupliquer, supprimer, tout sélectionner, faire pivoter, miroir, rechercher et remplacer |
-| *Affichage* | vues, ajuster la page, page précédente et suivante, thème clair ou sombre, feuille blanche ou sombre, langue des schémas, langue de l'interface, libellés sous les icônes |
-| *Insertion* | fil, câble, cadre d'armoire, texte, image, bus de conducteurs, connexions réseau par protocole, pages de tous types, pages automatiques |
-| *Projet* | propriétés, propriétés définies par l'utilisateur, vérification, assistant IA, renumérotations, cartouche, emplacements, réseaux IP, traductions, révisions, modèles |
-| *Listes* | contrôles, traductions et toutes les listes du projet, PDF complet |
-| *Aide* | manuel, raccourcis, guide pour agents IA, site du projet, à propos (version, auteur, marques et données de tiers) |
+| *Fichier* | nouveau, ouvrir, ouvrir à côté, enregistrer, **Importer** (articles EDZ/XML/CSV, symboles QElectroTech, schéma depuis PDF, macros) et **Exporter** (PDF, DXF, étiquettes, PLCopen, articles, dictionnaire), imprimer, paramètres, à propos |
+| *Accueil* | presse-papiers, dessin (sélection, fil, fils rapides, rangée de bornes, texte), édition (rotation, miroir, aligner, supprimer), rechercher (recherche, ajuster, page précédente et suivante), vérification, PDF et impression |
+| *Insertion* | symboles et macros, liaisons (faisceau de fils, bus réseau, câble, section), emplacements, graphisme (texte, image, dessin DXF) |
+| *Pages* | nouvelle page de chaque type, pages automatiques (listes, dessins de câbles, brochages), organiser, feuille (cartouche, format et cadre) |
+| *Projet* | paramètres et propriétés, profils, numérotation des appareils et des fils, articles, réseaux IP et adresses, traductions, assistant IA |
+| *Listes* | vérifications, listes, liste E/S API, listes personnalisées, vues (appareils, borniers, connecteurs, câbles, répartiteurs, calculs), PDF complet, étiquettes, PLCopen |
+| *Révisions* | révisions, publication, modifications de la révision, comparaison avec un autre projet, enregistrer comme modèle |
+| *Affichage* | panneaux, thème, feuille, langue de l'interface et des schémas, grille, miniatures, plan de la feuille, menu radial, style du ruban |
+| *Aide* | manuel, visite guidée, raccourcis, guide pour agents IA, mises à jour, à propos, site du projet |
 
-![Le menu Projet](../img/it/menu-progetto.png)
+![L'onglet Projet](../img/en/menu-progetto.png)
 
-*Le menu Projet.*
+*L'onglet Projet.*
 
-## Barre d'outils
+## Onglet Accueil et outils sur le dessin
 
-![La barre d'outils](../img/it/barra-strumenti.png)
+![L'onglet Accueil](../img/en/barra-strumenti.png)
+
+L'onglet *Accueil* réunit les commandes utilisées en permanence. Au-dessus du schéma se trouve aussi une petite
+barre flottante avec les outils de dessin (sélection, fil, fils rapides, renvois, bornes, texte) : on l'active et
+la désactive avec *Affichage ▸ Outils sur le dessin*.
 
 | Bouton | Action |
 |---|---|
-| *Nouveau, Ouvrir, Enregistrer* | gestion du fichier de projet |
-| *Annuler, Rétablir* | ⌘Z et ⇧⌘Z |
-| *Sélectionner* | revenir à la sélection (aussi avec Échap) |
+| *Sélectionner* | retour à la sélection (aussi avec Échap) |
 | *Fil* | dessiner des fils (touche **W**) |
-| *Bus* et la liste des protocoles | dessiner une connexion réseau (Profinet, EtherCAT, Modbus…) |
-| *Bus fils* | regrouper les fils en un bus de conducteurs ([chapitre 5](05-disegnare.md#bus-de-conducteurs)) |
-| *Armoire* | cadre d'une armoire dans le schéma réseau |
-| *Câble* | ligne de définition de câble |
+| *Rapide V*, *Rapide H* | fil vertical ou horizontal en une fois |
+| *Bornes en rangée* | une rangée de bornes sur les fils traversés |
 | *Texte* | texte libre sur la page |
-| *Faire pivoter, Supprimer* | sur la sélection (touches **R** et **Suppr**) |
-| *Ajuster* | afficher toute la page (touche **F**) |
+| *Faire pivoter, Miroir, Supprimer* | sur la sélection (touches **R** et **Suppr**) |
 | *Rechercher* | rechercher et remplacer (⌘F) |
-| *Vérification* | contrôles du projet |
-| *EDZ* | importer des articles de fabricants |
-| *PDF* | exporter le projet en PDF |
+| *Ajuster* | afficher toute la page (touche **F**) |
+| *Vérification* | vérifications du projet |
+| *PDF*, *Imprimer…* | exporter en PDF ou imprimer |
 
-En désactivant *Affichage ▸ Libellés sous les icônes*, la barre devient une seule rangée d'icônes, plus basse.
+La barre d'accès rapide en haut à gauche contient *Enregistrer*, *Annuler* et *Rétablir* (⌘S, ⌘Z, ⇧⌘Z).
 
 ## Arborescence du modèle
 
-![L'arborescence du modèle](../img/it/albero.png)
+![L'arborescence du modèle](../img/en/albero.png)
 
 L'arborescence montre le projet et s'ouvre ou se ferme avec les triangles ▸ ▾ :
 
@@ -92,7 +96,7 @@ des suggestions ou des valeurs reprises de l'article.
 
 ## Bibliothèque
 
-![La bibliothèque des symboles](../img/it/libreria-simboli.png)
+![La bibliothèque des symboles](../img/en/libreria-simboli.png)
 
 La colonne de droite a trois onglets :
 
@@ -106,7 +110,7 @@ La colonne de droite a trois onglets :
 
 ## Menu du clic droit
 
-![Le menu du clic droit](../img/it/menu-contestuale.png)
+![Le menu du clic droit](../img/en/menu-contestuale.png)
 
 Le clic droit sur un élément ouvre les commandes les plus utilisées : couper, copier, coller ici, dupliquer,
 faire pivoter, miroir, supprimer, créer une macro à partir de la sélection, **copier les propriétés** et **coller les propriétés de -X** (toutes les données de l'appareil sauf le repère, [chapitre 7](07-dispositivi-e-articoli.md#copier-les-propriétés)), modifier le composant, ajouter aux favoris, mettre en

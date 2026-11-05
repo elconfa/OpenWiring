@@ -5,7 +5,7 @@ toujours à jour.
 
 ## La vue Listes
 
-![La vue Listes](../img/it/liste.png)
+![La vue Listes](../img/en/liste.png)
 
 *L'onglet Listes avec la nomenclature du projet d'exemple.*
 
@@ -30,7 +30,7 @@ Les listes vides n'apparaissent pas. Un clic sur une position (`/2.4`) mène à 
 
 ## Liste d'achat
 
-![La liste d'achat](../img/it/lista-acquisto.png)
+![La liste d'achat](../img/en/lista-acquisto.png)
 
 *La liste d'achat du projet d'exemple.*
 
@@ -48,7 +48,7 @@ La liste d'achat sert à commander le matériel :
 
 Les listes deviennent des **pages du projet** avec cartouche, à imprimer et à inclure dans le PDF.
 
-![Les pages automatiques](../img/it/pagine-automatiche.png)
+![Les pages automatiques](../img/en/pagine-automatiche.png)
 
 *La fenêtre des pages automatiques : pour chaque liste les lignes, les feuilles nécessaires et les pages déjà
 présentes.*
@@ -65,7 +65,7 @@ présentes.*
 - *Retirer toutes les pages* retire les pages de liste.
 - *Insertion ▸ Mettre à jour les pages de liste* réaligne les pages sur les listes choisies.
 
-![Une page de liste](../img/it/pagina-lista.png)
+![Une page de liste](../img/en/pagina-lista.png)
 
 *La liste des appareils comme page du projet.*
 
@@ -74,7 +74,7 @@ présentes.*
 *Fichier ▸ Exporter ▸ Étiquettes M-Print PRO / GeniusPRO…* prépare les étiquettes pour les imprimantes de
 repérage.
 
-![Les étiquettes](../img/it/etichette.png)
+![Les étiquettes](../img/en/etichette.png)
 
 *La fenêtre des étiquettes.*
 

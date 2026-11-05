@@ -6,9 +6,9 @@ Los ajustes del proyecto se abren con *Proyecto ▸ Propiedades del proyecto*, h
 proyecto en el árbol, o deseleccionando todo (clic en una zona vacía): el panel *Propiedades* muestra la
 página actual y, debajo, los datos del proyecto.
 
-![Propiedades: página, cajetín, revisiones](../img/it/proprieta-progetto-1.png)
-![Propiedades: ubicaciones, idiomas, redes IP, datos del cajetín](../img/it/proprieta-progetto-2.png)
-![Propiedades: siglas, números de hilo, dibujo](../img/it/proprieta-progetto-3.png)
+![Propiedades: página, cajetín, revisiones](../img/en/proprieta-progetto-1.png)
+![Propiedades: ubicaciones, idiomas, redes IP, datos del cajetín](../img/en/proprieta-progetto-2.png)
+![Propiedades: siglas, números de hilo, dibujo](../img/en/proprieta-progetto-3.png)
 
 *El panel de propiedades del proyecto, de arriba abajo.*
 
@@ -42,7 +42,7 @@ cada página, en la portada y en las propiedades del PDF. Se escriben una sola v
 La hoja es un **A3 apaisado** (420 × 297 mm) con el marco dividido en **10 columnas** numeradas y el cajetín
 abajo. Las columnas sirven para las referencias: `/2.4` significa página 2, columna 4.
 
-![Propiedades de la página](../img/it/proprieta-pagina.png)
+![Propiedades de la página](../img/en/proprieta-pagina.png)
 
 *Las propiedades de la página 2 del proyecto de ejemplo.*
 
@@ -63,9 +63,9 @@ abajo. Las columnas sirven para las referencias: `/2.4` significa página 2, col
 | Eliminar | *✕* bajo el árbol | pide confirmación; se deshace con ⌘Z |
 | Cambiar de página | clic en el árbol, **RePág/AvPág** | |
 
-![El menú Insertar](../img/it/menu-inserisci.png)
+![La pestaña Páginas](../img/en/menu-inserisci.png)
 
-*El menú Insertar: herramientas de dibujo, conexiones de red y páginas.*
+*La pestaña Páginas: páginas nuevas de cada tipo, páginas automáticas, orden de las páginas y hoja.*
 
 ### Tipos de página
 
@@ -84,7 +84,7 @@ Las páginas generadas se actualizan solas: su contenido viene siempre del esque
 
 ## Cajetín
 
-![El cajetín estándar](../img/it/cartiglio.png)
+![El cajetín estándar](../img/en/cartiglio.png)
 
 *El cajetín estándar: empresa, proyecto con número de plano y revisión, título de la página, cliente, fecha
 y autor, número de página.*
@@ -128,7 +128,7 @@ programa indica cuántas.
 proyecto, tabla de revisiones y casillas *Elaborado*, *Revisado*, *Aprobado*. Se actualiza sola con los
 datos del proyecto.
 
-![La portada](../img/it/copertina.png)
+![La portada](../img/en/copertina.png)
 
 *La portada del proyecto de ejemplo.*
 

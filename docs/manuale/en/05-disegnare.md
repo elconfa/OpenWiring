@@ -30,7 +30,7 @@ The list is filtered as you type; you can also type a new tag. The program offer
 Other symbols can be drawn with the editor or imported from QElectroTech and from the manufacturers' EDZ
 files ([chapter 13](13-macro-simboli-cartigli.md) and [chapter 7](07-dispositivi-e-articoli.md)).
 
-![A motor feeder](../img/it/partenza-motore.png)
+![A motor feeder](../img/en/partenza-motore.png)
 
 *The motor feeder on page 1: motor protection switch `-1Q1`, power contacts of contactor `-2K1`, terminal
 strip `-X1`, cable `-1W1` and motor `-1M1`.*
@@ -50,7 +50,7 @@ side, the segment continues straight up to the wire.
 
 ### Junctions and crossings
 
-![T-junctions](../img/it/giunzioni.png)
+![T-junctions](../img/en/giunzioni.png)
 
 *The self-holding junctions on page 2: the dot shows the connection.*
 
@@ -60,7 +60,7 @@ side, the segment continues straight up to the wire.
 
 ### Editing wires
 
-![A selected wire](../img/it/filo-selezionato.png)
+![A selected wire](../img/en/filo-selezionato.png)
 
 *A selected wire shows its vertices as small squares.*
 
@@ -82,7 +82,7 @@ cross-section.
 
 ## Potential points
 
-![Potential rails](../img/it/potenziali.png)
+![Potential rails](../img/en/potenziali.png)
 
 *The L1, L2, L3, N and PE rails on page 1.*
 
@@ -96,7 +96,7 @@ The **potential point** gives a name to a conductor: `L1`, `L2`, `L3`, `N`, `PE`
 
 ## Interruption points between pages
 
-![Outgoing interruption points](../img/it/rimandi.png)
+![Outgoing interruption points](../img/en/rimandi.png)
 
 *The `+24V` and `0V` interruption points on page 1: the name above the wire, the destination pages next to
 the arrow.*

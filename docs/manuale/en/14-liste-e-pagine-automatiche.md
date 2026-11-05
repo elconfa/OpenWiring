@@ -4,7 +4,7 @@ All lists are **calculated from the schematic**: they are not filled in by hand 
 
 ## The Lists view
 
-![The Lists view](../img/it/liste.png)
+![The Lists view](../img/en/liste.png)
 
 *The Lists tab with the bill of materials of the example project.*
 
@@ -29,7 +29,7 @@ Empty lists do not appear. A click on a position (`/2.4`) takes you to the eleme
 
 ## Purchase list
 
-![The purchase list](../img/it/lista-acquisto.png)
+![The purchase list](../img/en/lista-acquisto.png)
 
 *The purchase list of the example project.*
 
@@ -47,7 +47,7 @@ The purchase list is used to order the material:
 
 Lists become **project pages** with a title block, to be printed and included in the PDF.
 
-![The automatic pages](../img/it/pagine-automatiche.png)
+![The automatic pages](../img/en/pagine-automatiche.png)
 
 *The automatic pages window: for each list the rows, the sheets needed and the pages already present.*
 
@@ -63,7 +63,7 @@ Lists become **project pages** with a title block, to be printed and included in
 - *Remove all pages* removes the list pages.
 - *Insert ▸ Update the list pages* realigns the pages to the chosen lists.
 
-![A list page](../img/it/pagina-lista.png)
+![A list page](../img/en/pagina-lista.png)
 
 *The device list as a project page.*
 
@@ -71,7 +71,7 @@ Lists become **project pages** with a title block, to be printed and included in
 
 *File ▸ Export ▸ M-Print PRO / GeniusPRO labels…* prepares the labels for marking printers.
 
-![The labels](../img/it/etichette.png)
+![The labels](../img/en/etichette.png)
 
 *The labels window.*
 

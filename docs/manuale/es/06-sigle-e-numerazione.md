@@ -72,11 +72,11 @@ escribir los bornes a mano (*Propiedades ▸ Puntos de conexión*). Los contacto
 
 ### Referencias cruzadas
 
-![La referencia del contacto a la bobina](../img/it/rimando-contatto.png)
+![La referencia del contacto a la bobina](../img/en/rimando-contatto.png)
 
 *Debajo de cada contacto `-2K1` está `/2.2`: la bobina está en la página 2, columna 2.*
 
-![La imagen de contactos de la bobina](../img/it/contatti-bobina.png)
+![La imagen de contactos de la bobina](../img/en/contatti-bobina.png)
 
 *La imagen de contactos de `-2K1` al pie de la página 2: a la izquierda de la línea los contactos de
 potencia y NA, a la derecha los NC, cada uno con su posición.*
@@ -108,7 +108,7 @@ interruptor en la página de vista general: clic derecho en el contacto ▸ *Dib
 
 ## Propiedades de un dispositivo
 
-![Las propiedades de una bobina](../img/it/proprieta-dispositivo.png)
+![Las propiedades de una bobina](../img/en/proprieta-dispositivo.png)
 
 *Las propiedades de la bobina `-2K1` del proyecto de ejemplo.*
 
@@ -126,7 +126,7 @@ valen también para los contactos. Si hay un artículo asignado, los campos vac�
 
 ## Números de hilo
 
-![Los números de hilo](../img/it/numeri-filo.png)
+![Los números de hilo](../img/en/numeri-filo.png)
 
 *Números de hilo de la página 1: `1.01`, `1.03`… encima del contactor, los mismos números debajo, porque los
 bornes `-X1` no cambian el número.*
@@ -195,7 +195,7 @@ contador los salta aunque estén escritos en otra página.
 
 ## Sección y color de los hilos
 
-![Las propiedades de un hilo](../img/it/proprieta-filo.png)
+![Las propiedades de un hilo](../img/en/proprieta-filo.png)
 
 *Las propiedades de un hilo: número, red, conexiones, potencial, sección y color.*
 
@@ -214,7 +214,7 @@ contador los salta aunque estén escritos en otra página.
 Para seguir un conductor por todo el proyecto: selecciona un hilo y pulsa **Resaltar en todas las páginas**
 en las propiedades (o clic derecho ▸ *Resaltar potencial*).
 
-![Un potencial resaltado](../img/it/potenziale-evidenziato.png)
+![Un potencial resaltado](../img/en/potenziale-evidenziato.png)
 
 *El conductor `2.02` resaltado en naranja; la barra de estado de abajo enumera las páginas en las que aparece.*
 

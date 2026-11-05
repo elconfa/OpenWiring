@@ -6,9 +6,9 @@ The project settings open with *Project ▸ Project properties*, by clicking the
 or by deselecting everything (click an empty area): the *Properties* panel shows the current page and,
 below it, the project data.
 
-![Properties: page, title block, revisions](../img/it/proprieta-progetto-1.png)
-![Properties: locations, languages, IP networks, title block data](../img/it/proprieta-progetto-2.png)
-![Properties: tags, wire numbers, drawing](../img/it/proprieta-progetto-3.png)
+![Properties: page, title block, revisions](../img/en/proprieta-progetto-1.png)
+![Properties: locations, languages, IP networks, title block data](../img/en/proprieta-progetto-2.png)
+![Properties: tags, wire numbers, drawing](../img/en/proprieta-progetto-3.png)
 
 *The project properties panel, from top to bottom.*
 
@@ -42,7 +42,7 @@ of every page, on the cover and in the PDF properties. They are written only onc
 The sheet is **A3 landscape** (420 × 297 mm) with the frame divided into **10 numbered columns** and the
 title block at the bottom. The columns are used for references: `/2.4` means page 2, column 4.
 
-![Page properties](../img/it/proprieta-pagina.png)
+![Page properties](../img/en/proprieta-pagina.png)
 
 *The properties of page 2 of the example project.*
 
@@ -62,9 +62,9 @@ title block at the bottom. The columns are used for references: `/2.4` means pag
 | Delete | *✕* below the tree | asks for confirmation; undo with ⌘Z |
 | Change page | click in the tree, **PgUp/PgDn** | |
 
-![The Insert menu](../img/it/menu-inserisci.png)
+![The Pages tab](../img/en/menu-inserisci.png)
 
-*The Insert menu: drawing tools, network connections and pages.*
+*The Pages tab: new pages of every type, automatic pages, page order and sheet.*
 
 ### Page types
 
@@ -83,7 +83,7 @@ Generated pages update by themselves: their content always comes from the schema
 
 ## Title block
 
-![The standard title block](../img/it/cartiglio.png)
+![The standard title block](../img/en/cartiglio.png)
 
 *The standard title block: company, project with drawing number and revision, page title, customer, date
 and author, page number.*
@@ -127,7 +127,7 @@ program says how many.
 *+ Cover* adds page **0** at the beginning of the project with logo, title, description, project data,
 revision table and *Drawn*, *Checked*, *Approved* boxes. It updates by itself with the project data.
 
-![The cover](../img/it/copertina.png)
+![The cover](../img/en/copertina.png)
 
 *The cover of the example project.*
 

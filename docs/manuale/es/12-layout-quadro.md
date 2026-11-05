@@ -4,7 +4,7 @@ La página de disposición es la **vista de montaje** de la placa del cuadro: ca
 aparatos a escala, con las cotas. Sirve para comprobar que todo cabe, para el taladrado y para estimar la
 longitud de los hilos.
 
-![La disposición del cuadro](../img/it/layout.png)
+![La disposición del cuadro](../img/en/layout.png)
 
 *Una disposición creada con la colocación automática: dos filas de carriles con canaletas y los aparatos del
 proyecto de ejemplo.*

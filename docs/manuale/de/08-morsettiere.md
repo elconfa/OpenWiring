@@ -2,7 +2,7 @@
 
 ## Klemmen im Schaltplan
 
-![Klemmen im Schaltplan](../img/it/morsetti-schema.png)
+![Klemmen im Schaltplan](../img/en/morsetti-schema.png)
 
 *Die Klemmen `-X1:1…4` auf Seite 1: das BMK der Klemmleiste erscheint nur an der ersten der Reihe.*
 
@@ -27,7 +27,7 @@ Draht (gedrehtes Symbol) steht die Nummer oben und das BMK unten.
 
 Der Reiter **Klemmleisten** zeigt die Klemmleisten des Projekts und ihre Klemmen in einer Tabelle.
 
-![Die Ansicht Klemmleisten](../img/it/morsettiere.png)
+![Die Ansicht Klemmleisten](../img/en/morsettiere.png)
 
 *Die Klemmleiste `-X1` des Beispielprojekts: externe und interne Ziele, Drahtnummern, Artikel und Zubehör.*
 
@@ -89,7 +89,7 @@ Trennklemmen). Alles kommt automatisch in die Stückliste und die Einkaufsliste.
 **Klemmleistenpläne erzeugen** legt eine Seite je Klemmleiste an (mehrere Blätter ab 40 Klemmen) mit Zielen,
 Drahtnummern, Brücken, Trennplatten, Reserven und anklickbaren Positionen, auch im PDF.
 
-![Der Klemmleistenplan](../img/it/schema-morsettiera.png)
+![Der Klemmleistenplan](../img/en/schema-morsettiera.png)
 
 *Der obere Teil des Klemmleistenplans von `-X1`.*
 

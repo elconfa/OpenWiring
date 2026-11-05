@@ -15,7 +15,7 @@ end you know the basic commands: inserting symbols, drawing wires, filling in da
 5. Press **W** (*Wire* tool), click the `+24V` point and then the right-hand end of the page; finish the
    wire with a double click. Do the same for the `0V` rail.
 
-![The +24V and 0V rails](../img/it/tutorial-1.png)
+![The +24V and 0V rails](../img/en/tutorial-1.png)
 
 *Step 1: the supply rails.*
 
@@ -33,7 +33,7 @@ end you know the basic commands: inserting symbols, drawing wires, filling in da
 If a symbol must be turned, press **R** (rotate by 90°) before inserting it; after inserting, rotate it with
 **R** on the selection. Symbols snap to the 4 mm grid.
 
-![The inserted symbols](../img/it/tutorial-2.png)
+![The inserted symbols](../img/en/tutorial-2.png)
 
 *Step 2: pushbuttons and coil, still without wires.*
 
@@ -47,7 +47,7 @@ If a symbol must be turned, press **R** (rotate by 90°) before inserting it; af
 Where a wire reaches another wire, the program creates a **junction** and draws it with a dot.
 Two wires that cross without a dot are not connected.
 
-![The wires of the circuit](../img/it/tutorial-3.png)
+![The wires of the circuit](../img/en/tutorial-3.png)
 
 *Step 3: the connected control circuit. The blue wire numbers were assigned automatically.*
 
@@ -61,7 +61,7 @@ Two wires that cross without a dot are not connected.
 4. Category *Loads*: **Indicator lamp** below the contact: it becomes `-1P1`.
 5. Connect `+24V` rail → contact → lamp → `0V` rail.
 
-![The finished circuit](../img/it/tutorial-4.png)
+![The finished circuit](../img/en/tutorial-4.png)
 
 *Step 4: self-holding `-1K1 13-14` and the running lamp controlled by `-1K1 23-24`.*
 
@@ -77,7 +77,7 @@ Select coil `-1K1`. In the *Properties* panel fill in:
 - **Technical data**: `24 V DC`;
 - if you know it, the **part**, or else manufacturer, type and order number.
 
-![The properties of the coil](../img/it/tutorial-proprieta.png)
+![The properties of the coil](../img/en/tutorial-proprieta.png)
 
 *The properties of coil `-1K1`: tag, device data, ordering, connection points and position.*
 
@@ -90,7 +90,7 @@ the **device**: written on the coil, they also apply to its contacts. Fill in th
 Press **Check** in the toolbar. The *Checks* tab opens with errors (●), warnings (▲) and unused data (○).
 Clicking a row takes you to the element.
 
-![The check reports the unconnected components](../img/it/tutorial-verifica.png)
+![The check reports the unconnected components](../img/en/tutorial-verifica.png)
 
 *This is what the check reports if you run it after step 2, when the symbols are not yet connected.*
 
@@ -103,7 +103,7 @@ connection points appear.
 2. **PDF** in the toolbar: choose *All* pages and press *Export*. The PDF has the index, the lists at the end
    and clickable cross-references.
 
-![The finished page](../img/it/tutorial-pagina.png)
+![The finished page](../img/en/tutorial-pagina.png)
 
 *The finished page, with the title block filled in from the project data.*
 

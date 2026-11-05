@@ -5,7 +5,7 @@
 **Prüfung** in der Werkzeugleiste (oder *Projekt ▸ Prüfung*) prüft das ganze Projekt und öffnet den Reiter
 *Prüfungen* der Ansicht Listen.
 
-![Die Projektprüfungen](../img/it/controlli.png)
+![Die Projektprüfungen](../img/en/controlli.png)
 
 *Das Beispielprojekt hat keine Probleme. Ein Beispiel mit Warnungen zeigt [Kapitel 3](03-primo-progetto.md#schritt-6--prüfung).*
 
@@ -39,7 +39,7 @@ Zeile** führt zum Element und wählt es aus.
 
 **⌘F** (oder *Suchen*) öffnet die Suche im ganzen Projekt.
 
-![Suchen und ersetzen](../img/it/cerca.png)
+![Suchen und ersetzen](../img/en/cerca.png)
 
 *Die Suche nach «pompa» findet sieben Beschreibungen.*
 

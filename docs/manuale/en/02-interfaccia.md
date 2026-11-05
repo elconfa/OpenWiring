@@ -1,13 +1,13 @@
 # 2. The interface
 
-![The OpenWiring window with its numbered parts](../img/it/interfaccia.png)
+![The OpenWiring window with its numbered parts](../img/en/interfaccia.png)
 
-*The OpenWiring window with the example project (Italian interface).*
+*The OpenWiring window with the example project.*
 
 | No. | Part | What it is for |
 |---|---|---|
-| 1 | Menu bar | all commands: *File, Edit, View, Insert, Project, Lists, Help* |
-| 2 | Toolbar | the most used drawing commands |
+| 1 | Ribbon tabs | *File* and the tabs *Home, Insert, Pages, Project, Lists, Revisions, View, Help* |
+| 2 | Ribbon commands | the commands of the open tab, in groups with their name below |
 | 3 | Model tree | pages, devices, =/+ structure, terminal strips, cables, project parts |
 | 4 | Properties | the data of the selected element, of the page or of the project |
 | 5 | Drawing area | the current schematic page |
@@ -16,56 +16,60 @@
 | 8 | Status bar | hints on the active command, file, page, cursor coordinates |
 | 9 | View tabs | Schematic, Devices, PLC, Terminal strips, Parts, Lists |
 
-## Menu bar
+## Ribbon
 
-![The File menu](../img/it/menu-file.png)
+Commands are collected in **tabs**; each tab divides them into groups with the name written below. The keyboard
+shortcut is shown in the tooltip of every button. A **double click** on a tab reduces the ribbon to the tab names
+(a click opens it again for one command); *View ▸ Command bar ▸ Style* chooses between ribbon, compact ribbon and
+**classic menus**, for those who prefer drop-down menus. *Search for a command…* (⌘K) finds any command by typing
+its name.
 
-*The File menu: projects, import and export.*
+![The File tab](../img/en/menu-file.png)
 
-Every command of the program is in a menu; the keyboard shortcuts are shown next to the entries. With a menu
-open, the ← → arrows move to the next menu and Esc closes it.
+*The File tab: start, recent projects, new, open, save, import, export, print and PDF, settings.*
 
-| Menu | Contains |
+| Tab | Contains |
 |---|---|
-| *File* | new, open, save, example project, pages as text for AI assistants, **Import** (EDZ/XML/CSV parts, QElectroTech symbols, schematic from PDF, macros, comparison) and **Export** (PDF, print, DXF, labels, PLCopen, parts, dictionary) |
-| *Edit* | undo and redo, cut, copy, paste, duplicate, delete, select all, rotate, mirror, find and replace |
-| *View* | views, fit page, previous and next page, light or dark theme, white or dark sheet, schematic language, interface language, labels under the icons |
-| *Insert* | wire, cable, cabinet frame, text, image, conductor bus, network connections by protocol, pages of every type, automatic pages |
-| *Project* | properties, check, AI assistant, renumbering, title block, locations, IP networks, translations, revisions, templates |
-| *Lists* | checks, translations and all the project lists, complete PDF |
-| *Help* | manual, shortcuts, guide for AI agents, project website, about (version, author, trademarks and third-party data) |
+| *File* | new, open, open alongside, save, **Import** (EDZ/XML/CSV parts, QElectroTech symbols, schematic from PDF, macros) and **Export** (PDF, DXF, labels, PLCopen, parts, dictionary), print, settings, about |
+| *Home* | clipboard, drawing (select, wire, quick wires, terminal row, text), edit (rotate, mirror, align, delete), find (search, fit, previous and next page), check, PDF and print |
+| *Insert* | symbols and macros, connections (wire bus, network bus, cable, cross-section), locations, graphics (text, image, DXF drawing) |
+| *Pages* | new page of every type, automatic pages (lists, cable drawings, pinouts), organize, sheet (title block, format and frame) |
+| *Project* | settings and properties, profiles, numbering of devices and wires, parts, IP networks and addresses, translations, AI assistant |
+| *Lists* | checks, lists, PLC I/O list, custom lists, views (devices, terminal strips, connectors, cables, distribution, calculations), complete PDF, labels, PLCopen |
+| *Revisions* | revisions, release, changes of the revision, comparison with another project, save as template |
+| *View* | panels, theme, sheet, interface and schematic language, grid, thumbnails, sheet map, radial menu, ribbon style |
+| *Help* | manual, guided tour, shortcuts, guide for AI agents, updates, about, project website |
 
-![The Project menu](../img/it/menu-progetto.png)
+![The Project tab](../img/en/menu-progetto.png)
 
-*The Project menu.*
+*The Project tab.*
 
-## Toolbar
+## Home tab and drawing toolbar
 
-![The toolbar](../img/it/barra-strumenti.png)
+![The Home tab](../img/en/barra-strumenti.png)
+
+The *Home* tab collects the commands used all the time. Above the schematic there is also a small floating bar
+with the drawing tools (selection, wire, quick wires, interruption points, terminals, text): switch it on and off
+with *View ▸ Drawing toolbar*.
 
 | Button | Action |
 |---|---|
-| *New, Open, Save* | project file management |
-| *Undo, Redo* | ⌘Z and ⇧⌘Z |
 | *Select* | back to selection (also with Esc) |
 | *Wire* | draw wires (key **W**) |
-| *Bus* and the protocol list | draw a network connection (Profinet, EtherCAT, Modbus…) |
-| *Wire bus* | groups wires into a conductor bus ([chapter 5](05-disegnare.md#conductor-buses)) |
-| *Cabinet* | frame of a cabinet in the network diagram |
-| *Cable* | cable definition line |
+| *Quick V*, *Quick H* | vertical or horizontal wire in one go |
+| *Terminal row* | a row of terminals on the wires crossed |
 | *Text* | free text on the page |
-| *Rotate, Delete* | on the selection (keys **R** and **Del**) |
-| *Fit* | show the whole page (key **F**) |
+| *Rotate, Mirror, Delete* | on the selection (keys **R** and **Del**) |
 | *Search* | find and replace (⌘F) |
+| *Fit* | show the whole page (key **F**) |
 | *Check* | project checks |
-| *EDZ* | import manufacturers' parts |
-| *PDF* | export the project to PDF |
+| *PDF*, *Print…* | export to PDF or print |
 
-Turning off *View ▸ Labels under the icons* makes the toolbar a single, lower row of icons.
+The quick access bar at the top left holds *Save*, *Undo* and *Redo* (⌘S, ⌘Z, ⇧⌘Z).
 
 ## Model tree
 
-![The model tree](../img/it/albero.png)
+![The model tree](../img/en/albero.png)
 
 The tree shows the project and opens or closes with the triangles ▸ ▾:
 
@@ -92,7 +96,7 @@ taken from the part.
 
 ## Library
 
-![The symbol library](../img/it/libreria-simboli.png)
+![The symbol library](../img/en/libreria-simboli.png)
 
 The right-hand column has three tabs:
 
@@ -106,7 +110,7 @@ The right-hand column has three tabs:
 
 ## Right-click menu
 
-![The right-click menu](../img/it/menu-contestuale.png)
+![The right-click menu](../img/en/menu-contestuale.png)
 
 Right-clicking an element opens the most used commands: cut, copy, paste here, duplicate, rotate, mirror,
 delete, create macro from selection, **copy properties** and **paste properties of -X** (all device data except the tag, [chapter 7](07-dispositivi-e-articoli.md#copying-properties)), edit the component, add to favourites, highlight potential (on wires), go to the main element or

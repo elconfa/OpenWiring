@@ -25,7 +25,7 @@ Dónde se ven las ubicaciones:
 El esquema de red muestra en una sola página todos los nodos de la instalación y las conexiones de bus entre
 los cuadros.
 
-![El esquema de red](../img/it/schema-rete.png)
+![El esquema de red](../img/en/schema-rete.png)
 
 *El esquema de red del proyecto de ejemplo: la CPU `-3A1` y el switch `-5A1` en el cuadro `+Q1`, las E/S
 remotas `-5A2` y el variador `-5U1` en el cuadro `+Q2`, conectados en Profinet (verde) y Modbus RTU
@@ -107,7 +107,7 @@ repetidos.
 
 El esquema unifilar representa la distribución de potencia con una sola línea por cada salida.
 
-![El esquema unifilar](../img/it/unifilare.png)
+![El esquema unifilar](../img/en/unifilare.png)
 
 *El unifilar del proyecto de ejemplo: las mismas siglas que el multifilar, con la referencia a su posición.*
 

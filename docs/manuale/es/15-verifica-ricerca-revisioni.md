@@ -5,7 +5,7 @@
 **Verificación** en la barra de herramientas (o *Proyecto ▸ Verificación*) comprueba todo el proyecto y abre
 la pestaña *Comprobaciones* de la vista Listas.
 
-![Las comprobaciones del proyecto](../img/it/controlli.png)
+![Las comprobaciones del proyecto](../img/en/controlli.png)
 
 *El proyecto de ejemplo no tiene problemas. Para un ejemplo con avisos ver el [capítulo 3](03-primo-progetto.md#paso-6--verificación).*
 
@@ -38,7 +38,7 @@ elemento y lo selecciona.
 
 **⌘F** (o *Buscar*) abre la búsqueda en todo el proyecto.
 
-![Buscar y reemplazar](../img/it/cerca.png)
+![Buscar y reemplazar](../img/en/cerca.png)
 
 *La búsqueda de «pompa» encuentra siete descripciones.*
 

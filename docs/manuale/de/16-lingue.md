@@ -4,7 +4,7 @@ Schaltpläne werden auf Italienisch gezeichnet und lassen sich auch auf **Englis
 oder in zwei Sprachen zugleich. Die Sprache der Programmoberfläche ist eine eigene Einstellung
 ([Kapitel 1](01-introduzione.md#sprache-der-oberfläche)).
 
-![Der Schaltplan in zwei Sprachen](../img/it/schema-inglese.png)
+![Der Schaltplan in zwei Sprachen](../img/en/schema-inglese.png)
 
 *Seite 2 auf Englisch mit dem Italienischen darunter: «Emergency stop / Arresto di emergenza».*
 
@@ -15,7 +15,7 @@ Texte des Projekts auf: Seitentitel, freie Texte, Gerätebeschreibungen, Orte, S
 Schriftfeldfelder. Zu jedem gibt es die englische und die deutsche Übersetzung und die Stelle, an der er
 erscheint.
 
-![Das Wörterbuch](../img/it/traduzioni.png)
+![Das Wörterbuch](../img/en/traduzioni.png)
 
 *Das Wörterbuch des Beispielprojekts.*
 

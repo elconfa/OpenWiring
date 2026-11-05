@@ -4,7 +4,7 @@
 
 **PDF** dans la barre d'outils (ou *Fichier ▸ Exporter ▸ PDF…*) crée un PDF vectoriel en A3.
 
-![L'export PDF](../img/it/export-pdf.png)
+![L'export PDF](../img/en/export-pdf.png)
 
 *Les options du PDF.*
 
@@ -23,7 +23,7 @@ de même que les positions dans les listes et l'index ; le PDF a des **signets**
 
 *Fichier ▸ Imprimer…* (⌘P) envoie les pages à l'imprimante en **A3 paysage**, une page par feuille.
 
-![L'impression](../img/it/stampa.png)
+![L'impression](../img/en/stampa.png)
 
 *Les options d'impression : pages, noir et blanc, langue.*
 

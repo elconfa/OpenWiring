@@ -16,7 +16,7 @@ kennen Sie die Grundbefehle: Symbole einfügen, Drähte zeichnen, Daten ausfüll
 5. Drücken Sie **W** (Werkzeug *Draht*), klicken Sie auf den Punkt `+24V` und dann ans rechte Seitenende;
    beenden Sie den Draht mit einem Doppelklick. Ebenso für die Schiene `0V`.
 
-![Die Schienen +24V und 0V](../img/it/tutorial-1.png)
+![Die Schienen +24V und 0V](../img/en/tutorial-1.png)
 
 *Schritt 1: die Versorgungsschienen.*
 
@@ -35,7 +35,7 @@ kennen Sie die Grundbefehle: Symbole einfügen, Drähte zeichnen, Daten ausfüll
 Muss ein Symbol gedreht werden, vor dem Einfügen **R** drücken (Drehung um 90°); nach dem Einfügen dreht man
 es mit **R** auf der Auswahl. Symbole rasten im 4-mm-Raster ein.
 
-![Die eingefügten Symbole](../img/it/tutorial-2.png)
+![Die eingefügten Symbole](../img/en/tutorial-2.png)
 
 *Schritt 2: Taster und Spule, noch ohne Drähte.*
 
@@ -49,7 +49,7 @@ es mit **R** auf der Auswahl. Symbole rasten im 4-mm-Raster ein.
 Wo ein Draht auf einen anderen trifft, erzeugt das Programm einen **Abzweig** und zeichnet ihn mit einem
 Punkt. Zwei Drähte, die sich ohne Punkt kreuzen, sind nicht verbunden.
 
-![Die Drähte des Stromkreises](../img/it/tutorial-3.png)
+![Die Drähte des Stromkreises](../img/en/tutorial-3.png)
 
 *Schritt 3: der verbundene Steuerstromkreis. Die blauen Drahtnummern wurden automatisch vergeben.*
 
@@ -63,7 +63,7 @@ Punkt. Zwei Drähte, die sich ohne Punkt kreuzen, sind nicht verbunden.
 4. Kategorie *Verbraucher*: **Meldeleuchte** unter dem Kontakt: sie wird zu `-1P1`.
 5. Schiene `+24V` → Kontakt → Leuchte → Schiene `0V` verbinden.
 
-![Der fertige Stromkreis](../img/it/tutorial-4.png)
+![Der fertige Stromkreis](../img/en/tutorial-4.png)
 
 *Schritt 4: Selbsthaltung `-1K1 13-14` und die von `-1K1 23-24` geschaltete Betriebsleuchte.*
 
@@ -79,7 +79,7 @@ Spule `-1K1` auswählen. Im Feld *Eigenschaften* ausfüllen:
 - **Technische Daten**: `24 V DC`;
 - wenn bekannt, den **Artikel**, sonst Hersteller, Typ und Bestellnummer.
 
-![Die Eigenschaften der Spule](../img/it/tutorial-proprieta.png)
+![Die Eigenschaften der Spule](../img/en/tutorial-proprieta.png)
 
 *Die Eigenschaften der Spule `-1K1`: BMK, Gerätedaten, Bestellung, Anschlusspunkte und Position.*
 
@@ -92,7 +92,7 @@ Taster (`Pumpe Aus`, `Pumpe Ein`) und die Leuchte (`Pumpe läuft`) aus.
 In der Symbolleiste auf **Prüfung** drücken. Es öffnet sich die Registerkarte *Prüfungen* mit Fehlern (●),
 Warnungen (▲) und ungenutzten Daten (○). Ein Klick auf eine Zeile führt zum Element.
 
-![Die Prüfung meldet die nicht angeschlossenen Bauteile](../img/it/tutorial-verifica.png)
+![Die Prüfung meldet die nicht angeschlossenen Bauteile](../img/en/tutorial-verifica.png)
 
 *Das meldet die Prüfung, wenn man sie nach Schritt 2 startet, solange die Symbole noch nicht verbunden sind.*
 
@@ -105,7 +105,7 @@ Warnungen zu freien Anschlusspunkten.
 2. **PDF** in der Symbolleiste: *Alle* Seiten wählen und *Exportieren* drücken. Das PDF hat das
    Inhaltsverzeichnis, die Listen am Ende und anklickbare Querverweise.
 
-![Die fertige Seite](../img/it/tutorial-pagina.png)
+![Die fertige Seite](../img/en/tutorial-pagina.png)
 
 *Die fertige Seite mit dem aus den Projektdaten ausgefüllten Schriftfeld.*
 

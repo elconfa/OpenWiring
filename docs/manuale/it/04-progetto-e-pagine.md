@@ -62,9 +62,9 @@ cartiglio in basso. Le colonne servono per i riferimenti: `/2.4` significa pagin
 | Elimina | *✕* sotto l'albero | chiede conferma; si annulla con ⌘Z |
 | Cambia pagina | clic nell'albero, **PagSu/PagGiù** | |
 
-![Il menu Inserisci](../img/it/menu-inserisci.png)
+![La scheda Pagine](../img/it/menu-inserisci.png)
 
-*Il menu Inserisci: strumenti di disegno, collegamenti di rete e pagine.*
+*La scheda Pagine: pagine nuove di ogni tipo, pagine automatiche, ordine delle pagine e foglio.*
 
 ### Tipi di pagina
 

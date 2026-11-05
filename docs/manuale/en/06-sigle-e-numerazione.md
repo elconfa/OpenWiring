@@ -72,11 +72,11 @@ the terminals typed by hand (*Properties ▸ Connection points*). Power contacts
 
 ### Cross-references
 
-![The cross-reference from the contact to the coil](../img/it/rimando-contatto.png)
+![The cross-reference from the contact to the coil](../img/en/rimando-contatto.png)
 
 *Below each `-2K1` contact there is `/2.2`: the coil is on page 2, column 2.*
 
-![The contact image of the coil](../img/it/contatti-bobina.png)
+![The contact image of the coil](../img/en/contatti-bobina.png)
 
 *The contact image of `-2K1` at the bottom of page 2: power and NO contacts to the left of the line, NC to the
 right, each with its position.*
@@ -108,7 +108,7 @@ cross-reference)…*, then click where it should be drawn.
 
 ## Device properties
 
-![The properties of a coil](../img/it/proprieta-dispositivo.png)
+![The properties of a coil](../img/en/proprieta-dispositivo.png)
 
 *The properties of coil `-2K1` in the example project.*
 
@@ -126,7 +126,7 @@ apply to the contacts. If a part is assigned, empty fields show its data in grey
 
 ## Wire numbers
 
-![Wire numbers](../img/it/numeri-filo.png)
+![Wire numbers](../img/en/numeri-filo.png)
 
 *Wire numbers on page 1: `1.01`, `1.03`… above the contactor, the same numbers below, because terminals `-X1`
 do not change the number.*
@@ -192,7 +192,7 @@ them even when they are written on another page.
 
 ## Wire cross-section and colour
 
-![The properties of a wire](../img/it/proprieta-filo.png)
+![The properties of a wire](../img/en/proprieta-filo.png)
 
 *The properties of a wire: number, network, connections, potential, cross-section and colour.*
 
@@ -209,7 +209,7 @@ them even when they are written on another page.
 To follow a conductor through the whole project: select a wire and press **Highlight on all pages** in the
 properties (or right click ▸ *Highlight potential*).
 
-![A highlighted potential](../img/it/potenziale-evidenziato.png)
+![A highlighted potential](../img/en/potenziale-evidenziato.png)
 
 *Conductor `2.02` highlighted in orange; the status bar at the bottom lists the pages where it appears.*
 

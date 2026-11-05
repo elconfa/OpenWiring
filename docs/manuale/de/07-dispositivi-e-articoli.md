@@ -35,7 +35,7 @@ eingeschaltet, erscheinen Beschreibung und technische Daten unter dem BMK des Ha
 Der Reiter **Geräte** (oben rechts) zeigt alle Geräte des Projekts in einer Tabelle, die wie eine
 Tabellenkalkulation bearbeitet wird.
 
-![Der Geräte-Navigator](../img/it/navigatore-dispositivi.png)
+![Der Geräte-Navigator](../img/en/navigatore-dispositivi.png)
 
 *Der Navigator mit den 17 Geräten des Beispielprojekts. Die Werte in grauer Kursivschrift stammen vom
 Artikel oder vom Ort der Seite.*
@@ -82,7 +82,7 @@ Im Baum gruppiert der Knoten **Struktur =Anlage +Ort** die Geräte zuerst nach *
 und dann nach **Ort** (`+Q1`, `+P1`…), wie es IEC 81346 vorsieht. Geräte ohne Funktion oder ohne Ort stehen
 unten, in *ohne Funktion (=)* und *ohne Ort (+)*. Ein Klick auf ein Gerät öffnet es im Schaltplan.
 
-![Die Struktur im Baum](../img/it/struttura.png)
+![Die Struktur im Baum](../img/en/struttura.png)
 
 *Im Beispielprojekt haben die Geräte keine Funktion: Sie stehen alle unter «ohne Funktion», aufgeteilt auf
 die Schaltschränke `+Q1` und `+Q2`.*
@@ -95,7 +95,7 @@ im Netzwerkplan gezeichnet ist, oder der seiner Seite.
 Der Reiter **Artikel** ist die persönliche Artikelbibliothek, auf dem Computer gespeichert und in allen
 Projekten verfügbar.
 
-![Die Artikelverwaltung](../img/it/articoli.png)
+![Die Artikelverwaltung](../img/en/articoli.png)
 
 *Ein aus einer EDZ importiertes Schütz: Daten, Bild, Funktionsschablone und Symbol.*
 

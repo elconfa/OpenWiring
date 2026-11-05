@@ -4,7 +4,7 @@ Les schémas se dessinent en italien et s'impriment aussi en **anglais** ou en *
 langues ensemble. La langue de l'interface du programme est un autre réglage
 ([chapitre 1](01-introduzione.md#langue-de-linterface)).
 
-![Le schéma en deux langues](../img/it/schema-inglese.png)
+![Le schéma en deux langues](../img/en/schema-inglese.png)
 
 *La page 2 en anglais avec l'italien en dessous : «Emergency stop / Arresto di emergenza».*
 
@@ -14,7 +14,7 @@ L'onglet *Traductions* de la vue Listes (ou *Projet ▸ Traductions…*) énumè
 projet : titres de page, textes libres, descriptions des appareils, emplacements, commentaires API, champs du
 cartouche. Pour chacun il y a la traduction anglaise, la traduction allemande et l'endroit où il apparaît.
 
-![Le dictionnaire](../img/it/traduzioni.png)
+![Le dictionnaire](../img/en/traduzioni.png)
 
 *Le dictionnaire du projet d'exemple.*
 

@@ -7,7 +7,7 @@ DXF und Excel. Dieses Handbuch erklärt jede Funktion mit Beispielen und Bildern
 Für den Einstieg genügen die Kapitel 1–3: in einer halben Stunde ist der erste Schaltplan gezeichnet. Die
 übrigen Kapitel schlägt man bei Bedarf nach.
 
-> Die Bilder zeigen das Programm mit italienischer Oberfläche. Die Sprache wählt man unter
+> Die Bilder zeigen das Programm mit englischer Oberfläche. Die Sprache wählt man unter
 > *Ansicht ▸ Language · Lingua*: Menüs und Fenster sind in allen Sprachen gleich aufgebaut.
 
 ## Kapitel
@@ -38,6 +38,8 @@ Für den Einstieg genügen die Kapitel 1–3: in einer halben Stunde ist der ers
 ## Konventionen in diesem Handbuch
 
 - *Kursiv mit Pfeilen* steht für einen Menüpfad: *Projekt ▸ Prüfung*.
+  Der Pfad ist der der *klassischen Menüs*; im Menüband steht derselbe Befehl fast immer auf der gleichnamigen
+  Registerkarte, und *Befehl suchen…* (⌘K) findet ihn über den Namen ([Kapitel 2](02-interfaccia.md#menüband)).
 - **⌘** ist die Befehlstaste des Mac; unter Windows verwendet man **Strg**.
 - Kennzeichen werden wie im Schaltplan geschrieben: `-2K1` (Gerät), `-X1:3` (Klemme), `200.01` (Drahtnummer).
 - Die Beispiele verwenden das **Beispielprojekt** „Avviamento motore pompa“ (*Datei ▸ Beispielprojekt

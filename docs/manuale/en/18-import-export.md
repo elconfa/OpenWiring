@@ -4,7 +4,7 @@
 
 **PDF** in the toolbar (or *File ▸ Export ▸ PDF…*) creates a vector PDF in A3.
 
-![The PDF export](../img/it/export-pdf.png)
+![The PDF export](../img/en/export-pdf.png)
 
 *The PDF options.*
 
@@ -23,7 +23,7 @@ overviews), as are the positions in the lists and the index; the PDF has **bookm
 
 *File ▸ Print…* (⌘P) sends the pages to the printer in **A3 landscape**, one page per sheet.
 
-![Printing](../img/it/stampa.png)
+![Printing](../img/en/stampa.png)
 
 *The print options: pages, black and white, language.*
 

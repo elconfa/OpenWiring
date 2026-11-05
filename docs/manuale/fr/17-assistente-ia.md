@@ -4,7 +4,7 @@ L'assistant IA est un collègue à qui demander, dans votre langue, d'**explique
 **dessiner** des parties du schéma. Il fonctionne avec **Claude** (Anthropic), **ChatGPT** (OpenAI) et
 **Gemini** (Google), en utilisant vos comptes. Il répond dans la langue de l'interface.
 
-![L'assistant IA](../img/it/assistente-ia.png)
+![L'assistant IA](../img/en/assistente-ia.png)
 
 *Le panneau de l'assistant, avec les boutons rapides.*
 
@@ -58,7 +58,7 @@ nouveau numéro ajoute une page.
 
 *Projet ▸ Assistants IA : profils et comptes…* (ou ⚙ dans le panneau).
 
-![Les profils](../img/it/profili-ia.png)
+![Les profils](../img/en/profili-ia.png)
 
 *Un profil par assistant : à la première utilisation il y en a un pour Claude, ChatGPT et Gemini.*
 
@@ -108,7 +108,7 @@ l'anglais et l'allemand avec la terminologie du secteur. Les traductions entrent
 
 On peut aussi travailler avec un assistant dans un chat du navigateur, sans profils :
 
-![Pages au format texte](../img/it/testo-ia.png)
+![Pages au format texte](../img/en/testo-ia.png)
 
 *La fenêtre des pages au format texte.*
 

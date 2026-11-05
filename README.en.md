@@ -13,7 +13,7 @@
   <img alt="macOS and Windows" src="https://img.shields.io/badge/platforms-macOS%20%7C%20Windows-lightgrey">
 </p>
 
-<p align="center"><a href="README.md">Versione italiana</a> · <a href="docs/manuale/en/00-indice.md"><b>User manual (20 chapters)</b></a></p>
+<p align="center"><a href="https://elconfa.github.io/OpenWiring/"><b>Website</b></a> · <a href="https://elconfa.github.io/OpenWiring/manual/en/index.html"><b>Online manual (20 chapters)</b></a> · <a href="README.md">Versione italiana</a></p>
 
 OpenWiring is an electrical CAD program for industrial automation. You don't draw lines, you draw
 **connected devices**: the program knows that contact `-2K1 13-14` belongs to coil `-2K1`, that two wires

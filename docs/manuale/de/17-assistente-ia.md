@@ -4,7 +4,7 @@ Der KI-Assistent ist ein Kollege, den Sie in Ihrer Sprache bitten können, Teile
 **erklären**, zu **prüfen** oder zu **zeichnen**. Er arbeitet mit **Claude** (Anthropic), **ChatGPT**
 (OpenAI) und **Gemini** (Google) und nutzt Ihre Konten. Er antwortet in der Sprache der Oberfläche.
 
-![Der KI-Assistent](../img/it/assistente-ia.png)
+![Der KI-Assistent](../img/en/assistente-ia.png)
 
 *Der Bereich des Assistenten mit den Schnellschaltflächen.*
 
@@ -57,7 +57,7 @@ diese; eine neue Nummer fügt eine Seite hinzu.
 
 *Projekt ▸ KI-Assistenten: Profile und Konten…* (oder ⚙ im Bereich).
 
-![Die Profile](../img/it/profili-ia.png)
+![Die Profile](../img/en/profili-ia.png)
 
 *Ein Profil je Assistent: beim ersten Start gibt es je eines für Claude, ChatGPT und Gemini.*
 
@@ -107,7 +107,7 @@ Englisch und Deutsch mit der Fachterminologie. Die Übersetzungen kommen als **z
 
 Man kann auch mit einem Assistenten in einem Browser-Chat arbeiten, ohne Profile:
 
-![Seiten im Textformat](../img/it/testo-ia.png)
+![Seiten im Textformat](../img/en/testo-ia.png)
 
 *Das Fenster der Seiten im Textformat.*
 

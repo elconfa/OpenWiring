@@ -6,7 +6,7 @@ exportación a PDF, DXF y Excel. Este manual explica cada función con ejemplos 
 Para empezar basta con los capítulos 1–3: en media hora se dibuja el primer esquema. Los demás capítulos se
 consultan cuando hacen falta.
 
-> Las imágenes muestran el programa con la interfaz en italiano. El idioma se elige en
+> Las imágenes muestran el programa con la interfaz en inglés. El idioma se elige en
 > *Ver ▸ Language · Lingua*: menús y ventanas tienen la misma disposición en todos los idiomas.
 
 ## Capítulos
@@ -37,6 +37,8 @@ consultan cuando hacen falta.
 ## Convenciones del manual
 
 - *La cursiva con flechas* indica una ruta de menú: *Proyecto ▸ Verificación*.
+  La ruta es la de los *menús clásicos*; con la cinta, el mismo comando está casi siempre en la pestaña del
+  mismo nombre, y *Buscar un comando…* (⌘K) lo encuentra por su nombre ([capítulo 2](02-interfaccia.md#cinta-de-opciones)).
 - **⌘** es la tecla Comando del Mac; en Windows se usa **Ctrl**.
 - Las siglas se escriben como en el esquema: `-2K1` (dispositivo), `-X1:3` (borne), `200.01` (número de hilo).
 - Los ejemplos usan el **proyecto de ejemplo** «Avviamento motore pompa» (*Archivo ▸ Cargar el proyecto de

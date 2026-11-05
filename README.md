@@ -13,7 +13,7 @@
   <img alt="macOS e Windows" src="https://img.shields.io/badge/piattaforme-macOS%20%7C%20Windows-lightgrey">
 </p>
 
-<p align="center"><a href="README.en.md">English version</a></p>
+<p align="center"><a href="https://elconfa.github.io/OpenWiring/"><b>Sito e manuale online</b></a> · <a href="README.en.md">English version</a></p>
 
 OpenWiring è un CAD elettrico per l'automazione industriale: non si disegnano linee, ma **dispositivi
 collegati**. Dallo schema il programma ricava da solo riferimenti incrociati, numeri filo, morsettiere,

@@ -2,7 +2,7 @@
 
 ## Bornes dans le schéma
 
-![Bornes dans le schéma](../img/it/morsetti-schema.png)
+![Bornes dans le schéma](../img/en/morsetti-schema.png)
 
 *Les bornes `-X1:1…4` de la page 1 : le repère du bornier n'apparaît que sur la première de la rangée.*
 
@@ -27,7 +27,7 @@ Sur un fil vertical le repère du bornier est à gauche et le numéro à droite 
 
 L'onglet **Borniers** montre les borniers du projet et leurs bornes dans un tableau.
 
-![La vue Borniers](../img/it/morsettiere.png)
+![La vue Borniers](../img/en/morsettiere.png)
 
 *Le bornier `-X1` du projet d'exemple : destinations externes et internes, numéros de fil, articles et
 accessoires.*
@@ -91,7 +91,7 @@ sectionnables). Tout entre automatiquement dans la nomenclature et la liste d'ac
 **Générer les schémas des borniers** crée une page par bornier (plusieurs feuilles au-delà de 40 bornes)
 avec destinations, numéros de fil, ponts, séparateurs, réserves et positions cliquables, aussi dans le PDF.
 
-![Le schéma du bornier](../img/it/schema-morsettiera.png)
+![Le schéma du bornier](../img/en/schema-morsettiera.png)
 
 *La partie haute du schéma du bornier `-X1`.*
 

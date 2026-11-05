@@ -1,13 +1,13 @@
 # 2. La interfaz
 
-![La ventana de OpenWiring con sus partes numeradas](../img/it/interfaccia.png)
+![La ventana de OpenWiring con sus partes numeradas](../img/en/interfaccia.png)
 
-*La ventana de OpenWiring con el proyecto de ejemplo (interfaz en italiano).*
+*La ventana de OpenWiring con el proyecto de ejemplo.*
 
 | N.º | Parte | Para qué sirve |
 |---|---|---|
-| 1 | Barra de menús | todos los comandos: *Archivo, Editar, Ver, Insertar, Proyecto, Listas, Ayuda* |
-| 2 | Barra de herramientas | los comandos de dibujo más usados |
+| 1 | Pestañas de la cinta | *Archivo* y las pestañas *Inicio, Insertar, Páginas, Proyecto, Listas, Revisiones, Ver, Ayuda* |
+| 2 | Comandos de la cinta | los comandos de la pestaña abierta, en grupos con su nombre debajo |
 | 3 | Árbol del modelo | páginas, dispositivos, estructura =/+, regletas, cables, artículos del proyecto |
 | 4 | Propiedades | los datos del elemento seleccionado, de la página o del proyecto |
 | 5 | Área de dibujo | la página de esquema actual |
@@ -16,56 +16,60 @@
 | 8 | Barra de estado | indicaciones sobre el comando activo, archivo, página, coordenadas del cursor |
 | 9 | Pestañas de las vistas | Esquema, Dispositivos, PLC, Regletas, Artículos, Listas |
 
-## Barra de menús
+## Cinta de opciones
 
-![El menú Archivo](../img/it/menu-file.png)
+Los comandos se reúnen en **pestañas**; cada pestaña los divide en grupos con el nombre escrito debajo. El atajo de
+teclado aparece en la información de cada botón. Un **doble clic** en una pestaña reduce la cinta a los nombres de
+las pestañas (un clic la vuelve a abrir para un comando); *Ver ▸ Barra de comandos ▸ Estilo* elige entre cinta,
+cinta compacta y **menús clásicos**, para quien prefiere los menús desplegables. *Buscar un comando…* (⌘K)
+encuentra cualquier comando escribiendo su nombre.
 
-*El menú Archivo: proyectos, importación y exportación.*
+![La pestaña Archivo](../img/en/menu-file.png)
 
-Cada comando del programa está en un menú; junto a las entradas aparecen los atajos de teclado. Con un menú
-abierto, las flechas ← → pasan al menú contiguo y Esc lo cierra.
+*La pestaña Archivo: inicio, proyectos recientes, nuevo, abrir, guardar, importar, exportar, imprimir y PDF, ajustes.*
 
-| Menú | Contiene |
+| Pestaña | Contiene |
 |---|---|
-| *Archivo* | nuevo, abrir, guardar, proyecto de ejemplo, páginas en texto para asistentes IA, **Importar** (artículos EDZ/XML/CSV, símbolos QElectroTech, esquema desde PDF, macros, comparación) y **Exportar** (PDF, impresión, DXF, etiquetas, PLCopen, artículos, diccionario) |
-| *Editar* | deshacer y rehacer, cortar, copiar, pegar, duplicar, eliminar, seleccionar todo, girar, reflejar, buscar y reemplazar |
-| *Ver* | vistas, ajustar página, página anterior y siguiente, tema claro u oscuro, hoja blanca u oscura, idioma de los esquemas, idioma de la interfaz, textos bajo los iconos |
-| *Insertar* | hilo, cable, recuadro de cuadro, texto, imagen, bus de conductores, conexiones de red por protocolo, páginas de todo tipo, páginas automáticas |
-| *Proyecto* | propiedades, propiedades definidas por el usuario, verificación, asistente IA, renumeraciones, cajetín, ubicaciones, redes IP, traducciones, revisiones, modelos |
-| *Listas* | comprobaciones, traducciones y todas las listas del proyecto, PDF completo |
-| *Ayuda* | manual, atajos, guía para agentes IA, sitio del proyecto, información (versión, autor, marcas y datos de terceros) |
+| *Archivo* | nuevo, abrir, abrir al lado, guardar, **Importar** (artículos EDZ/XML/CSV, símbolos QElectroTech, esquema desde PDF, macros) y **Exportar** (PDF, DXF, etiquetas, PLCopen, artículos, diccionario), imprimir, ajustes, información |
+| *Inicio* | portapapeles, dibujo (seleccionar, cable, cables rápidos, fila de bornes, texto), edición (girar, simetría, alinear, eliminar), buscar (búsqueda, ajustar, página anterior y siguiente), verificación, PDF e impresión |
+| *Insertar* | símbolos y macros, conexiones (haz de cables, bus de red, manguera, sección), ubicaciones, gráficos (texto, imagen, dibujo DXF) |
+| *Páginas* | nueva página de cada tipo, páginas automáticas (listas, dibujos de mangueras, asignación de pines), organizar, hoja (cajetín, formato y marco) |
+| *Proyecto* | ajustes y propiedades, perfiles, numeración de dispositivos y cables, artículos, redes IP y direcciones, traducciones, asistente IA |
+| *Listas* | verificaciones, listas, lista E/S PLC, listas personalizadas, vistas (dispositivos, regleteros, conectores, mangueras, distribuidores, cálculos), PDF completo, etiquetas, PLCopen |
+| *Revisiones* | revisiones, publicación, cambios de la revisión, comparación con otro proyecto, guardar como plantilla |
+| *Ver* | paneles, tema, hoja, idioma de la interfaz y de los esquemas, cuadrícula, miniaturas, mapa de la hoja, menú radial, estilo de la cinta |
+| *Ayuda* | manual, recorrido guiado, atajos, guía para agentes IA, actualizaciones, información, sitio del proyecto |
 
-![El menú Proyecto](../img/it/menu-progetto.png)
+![La pestaña Proyecto](../img/en/menu-progetto.png)
 
-*El menú Proyecto.*
+*La pestaña Proyecto.*
 
-## Barra de herramientas
+## Pestaña Inicio y herramientas en el dibujo
 
-![La barra de herramientas](../img/it/barra-strumenti.png)
+![La pestaña Inicio](../img/en/barra-strumenti.png)
+
+La pestaña *Inicio* reúne los comandos que se usan continuamente. Encima del esquema hay también una pequeña barra
+flotante con las herramientas de dibujo (selección, cable, cables rápidos, remisiones, bornes, texto): se activa y
+desactiva en *Ver ▸ Herramientas en el dibujo*.
 
 | Botón | Acción |
 |---|---|
-| *Nuevo, Abrir, Guardar* | gestión del archivo del proyecto |
-| *Deshacer, Rehacer* | ⌘Z y ⇧⌘Z |
-| *Seleccionar* | vuelve a la selección (también con Esc) |
-| *Hilo* | dibuja hilos (tecla **W**) |
-| *Bus* y la lista de protocolos | dibuja una conexión de red (Profinet, EtherCAT, Modbus…) |
-| *Bus hilos* | agrupa los hilos en un bus de conductores ([capítulo 5](05-disegnare.md#bus-de-conductores)) |
-| *Cuadro* | recuadro de un cuadro en el esquema de red |
-| *Cable* | línea de definición de cable |
+| *Seleccionar* | volver a la selección (también con Esc) |
+| *Hilo* | dibujar hilos (tecla **W**) |
+| *Rápido V*, *Rápido H* | hilo vertical u horizontal de una vez |
+| *Bornes en fila* | una fila de bornes sobre los hilos atravesados |
 | *Texto* | texto libre en la página |
-| *Girar, Eliminar* | sobre la selección (teclas **R** y **Supr**) |
-| *Ajustar* | muestra toda la página (tecla **F**) |
+| *Girar, Reflejar, Eliminar* | sobre la selección (teclas **R** y **Supr**) |
 | *Buscar* | buscar y reemplazar (⌘F) |
-| *Verificación* | comprobaciones del proyecto |
-| *EDZ* | importa artículos de fabricantes |
-| *PDF* | exporta el proyecto a PDF |
+| *Ajustar* | mostrar toda la página (tecla **F**) |
+| *Verificación* | verificaciones del proyecto |
+| *PDF*, *Imprimir…* | exportar a PDF o imprimir |
 
-Desactivando *Ver ▸ Textos bajo los iconos*, la barra se convierte en una sola fila de iconos, más baja.
+La barra de acceso rápido arriba a la izquierda contiene *Guardar*, *Deshacer* y *Rehacer* (⌘S, ⌘Z, ⇧⌘Z).
 
 ## Árbol del modelo
 
-![El árbol del modelo](../img/it/albero.png)
+![El árbol del modelo](../img/en/albero.png)
 
 El árbol muestra el proyecto y se abre o se cierra con los triángulos ▸ ▾:
 
@@ -92,7 +96,7 @@ sugerencias o valores tomados del artículo.
 
 ## Biblioteca
 
-![La biblioteca de símbolos](../img/it/libreria-simboli.png)
+![La biblioteca de símbolos](../img/en/libreria-simboli.png)
 
 La columna derecha tiene tres pestañas:
 
@@ -106,7 +110,7 @@ La columna derecha tiene tres pestañas:
 
 ## Menú del botón derecho
 
-![El menú del botón derecho](../img/it/menu-contestuale.png)
+![El menú del botón derecho](../img/en/menu-contestuale.png)
 
 El clic derecho sobre un elemento abre los comandos más usados: cortar, copiar, pegar aquí, duplicar,
 girar, reflejar, eliminar, crear macro a partir de la selección, **copiar propiedades** y **pegar propiedades de -X** (todos los datos del dispositivo salvo la sigla, [capítulo 7](07-dispositivi-e-articoli.md#copiar-las-propiedades)), modificar el componente, añadir a favoritos, resaltar potencial (en

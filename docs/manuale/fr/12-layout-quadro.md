@@ -4,7 +4,7 @@ La page d'implantation est la **vue de montage** de la plaque de l'armoire : rai
 appareils à l'échelle, avec les cotes. Elle sert à vérifier que tout tient, au perçage et à estimer la
 longueur des fils.
 
-![L'implantation de l'armoire](../img/it/layout.png)
+![L'implantation de l'armoire](../img/en/layout.png)
 
 *Une implantation créée avec le placement automatique : deux rangées de rails avec goulottes et les
 appareils du projet d'exemple.*

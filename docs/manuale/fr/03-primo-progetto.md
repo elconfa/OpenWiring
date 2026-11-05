@@ -17,7 +17,7 @@ vérifier et exporter.
 5. Appuyez sur **W** (outil *Fil*), cliquez sur le point `+24V` puis à l'extrémité droite de la page ;
    terminez le fil par un double clic. Faites de même pour la barre `0V`.
 
-![Les barres +24V et 0V](../img/it/tutorial-1.png)
+![Les barres +24V et 0V](../img/en/tutorial-1.png)
 
 *Étape 1 : les barres d'alimentation.*
 
@@ -35,7 +35,7 @@ vérifier et exporter.
 Si un symbole doit être tourné, appuyez sur **R** (rotation de 90°) avant de l'insérer ; après
 l'insertion, on le tourne avec **R** sur la sélection. Les symboles s'accrochent à la grille de 4 mm.
 
-![Les symboles insérés](../img/it/tutorial-2.png)
+![Les symboles insérés](../img/en/tutorial-2.png)
 
 *Étape 2 : boutons et bobine, encore sans fils.*
 
@@ -49,7 +49,7 @@ l'insertion, on le tourne avec **R** sur la sélection. Les symboles s'accrochen
 Là où un fil arrive sur un autre fil, le logiciel crée une **jonction** et la dessine avec un point.
 Deux fils qui se croisent sans point ne sont pas reliés.
 
-![Les fils du circuit](../img/it/tutorial-3.png)
+![Les fils du circuit](../img/en/tutorial-3.png)
 
 *Étape 3 : le circuit de commande relié. Les numéros de fil bleus ont été attribués automatiquement.*
 
@@ -63,7 +63,7 @@ Deux fils qui se croisent sans point ne sont pas reliés.
 4. Catégorie *Récepteurs* : **Voyant** sous le contact : il devient `-1P1`.
 5. Reliez barre `+24V` → contact → voyant → barre `0V`.
 
-![Le circuit terminé](../img/it/tutorial-4.png)
+![Le circuit terminé](../img/en/tutorial-4.png)
 
 *Étape 4 : l'auto-maintien `-1K1 13-14` et le voyant de marche commandé par `-1K1 23-24`.*
 
@@ -79,7 +79,7 @@ Sélectionnez la bobine `-1K1`. Dans le panneau *Propriétés*, remplissez :
 - **Caractéristiques techniques** : `24 V CC` ;
 - si vous le connaissez, l'**article**, sinon fabricant, type et référence de commande.
 
-![Les propriétés de la bobine](../img/it/tutorial-proprieta.png)
+![Les propriétés de la bobine](../img/en/tutorial-proprieta.png)
 
 *Les propriétés de la bobine `-1K1` : repère, données de l'appareil, commande, points de connexion et position.*
 
@@ -92,7 +92,7 @@ contacts. Remplissez aussi les boutons (`Arrêt pompe`, `Marche pompe`) et le vo
 Appuyez sur **Vérification** dans la barre d'outils. L'onglet *Contrôles* s'ouvre avec les erreurs (●),
 les avertissements (▲) et les données inutilisées (○). Un clic sur une ligne mène à l'élément.
 
-![La vérification signale les composants non reliés](../img/it/tutorial-verifica.png)
+![La vérification signale les composants non reliés](../img/en/tutorial-verifica.png)
 
 *Voici ce que signale la vérification si on la lance après l'étape 2, quand les symboles ne sont pas encore
 reliés.*
@@ -106,7 +106,7 @@ avertissements sur les points de connexion libres apparaissent.
 2. **PDF** dans la barre d'outils : choisissez *Toutes* les pages et appuyez sur *Exporter*. Le PDF a
    l'index, les listes à la fin et des renvois cliquables.
 
-![La page terminée](../img/it/tutorial-pagina.png)
+![La page terminée](../img/en/tutorial-pagina.png)
 
 *La page terminée, avec le cartouche rempli à partir des données du projet.*
 

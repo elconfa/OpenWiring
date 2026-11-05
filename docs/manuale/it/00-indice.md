@@ -34,6 +34,8 @@ consultano quando servono.
 ## Convenzioni del manuale
 
 - *Corsivo con frecce* indica un percorso nei menu: *Progetto ▸ Verifica*.
+  Il percorso è quello dei *menu classici*; con la barra multifunzione lo stesso comando è quasi sempre nella
+  scheda con lo stesso nome, e *Cerca un comando…* (⌘K) lo trova scrivendone il nome ([capitolo 2](02-interfaccia.md#barra-multifunzione)).
 - **⌘** è il tasto Comando del Mac; su Windows si usa **Ctrl**.
 - Le sigle si scrivono come sullo schema: `-2K1` (dispositivo), `-X1:3` (morsetto), `200.01` (numero filo).
 - Gli esempi usano il **progetto di esempio** «Avviamento motore pompa» (*File ▸ Carica il progetto di

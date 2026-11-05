@@ -25,7 +25,7 @@ exchanged as `.ecmacro` files (*File ▸ Import ▸ Macros…* and the export bu
 The editor draws a component from scratch or modifies an existing one: basic symbols, personal symbols,
 components imported from QElectroTech or EPLAN, including the black boxes of EDZ parts.
 
-![The component editor](../img/it/editor-simboli.png)
+![The component editor](../img/en/editor-simboli.png)
 
 *The 3P motor protection switch open in the editor: on the left the objects to add, in the centre the
 drawing with the connection points, on the right the properties.*
@@ -105,7 +105,7 @@ each included title block you can choose *Customise…* and start from that draw
 
 You can also draw your own company's title block.
 
-![The title block editor](../img/it/editor-cartiglio.png)
+![The title block editor](../img/en/editor-cartiglio.png)
 
 *The standard title block open in the editor, with the list of placeholders on the right.*
 

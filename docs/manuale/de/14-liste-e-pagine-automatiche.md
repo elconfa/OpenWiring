@@ -5,7 +5,7 @@ aktuell.
 
 ## Die Ansicht Listen
 
-![Die Ansicht Listen](../img/it/liste.png)
+![Die Ansicht Listen](../img/en/liste.png)
 
 *Der Reiter Listen mit der Stückliste des Beispielprojekts.*
 
@@ -31,7 +31,7 @@ Leere Listen erscheinen nicht. Ein Klick auf eine Position (`/2.4`) führt zum E
 
 ## Einkaufsliste
 
-![Die Einkaufsliste](../img/it/lista-acquisto.png)
+![Die Einkaufsliste](../img/en/lista-acquisto.png)
 
 *Die Einkaufsliste des Beispielprojekts.*
 
@@ -49,7 +49,7 @@ Die Einkaufsliste dient zum Bestellen des Materials:
 
 Die Listen werden zu **Projektseiten** mit Schriftfeld, zum Drucken und für das PDF.
 
-![Die automatischen Seiten](../img/it/pagine-automatiche.png)
+![Die automatischen Seiten](../img/en/pagine-automatiche.png)
 
 *Das Fenster der automatischen Seiten: für jede Liste die Zeilen, die nötigen Blätter und die vorhandenen
 Seiten.*
@@ -66,7 +66,7 @@ Seiten.*
 - *Alle Seiten entfernen* entfernt die Listenseiten.
 - *Einfügen ▸ Listenseiten aktualisieren* gleicht die Seiten an die gewählten Listen an.
 
-![Eine Listenseite](../img/it/pagina-lista.png)
+![Eine Listenseite](../img/en/pagina-lista.png)
 
 *Die Geräteliste als Projektseite.*
 
@@ -75,7 +75,7 @@ Seiten.*
 *Datei ▸ Exportieren ▸ Etiketten M-Print PRO / GeniusPRO…* bereitet die Etiketten für die
 Beschriftungsdrucker vor.
 
-![Die Etiketten](../img/it/etichette.png)
+![Die Etiketten](../img/en/etichette.png)
 
 *Das Fenster der Etiketten.*
 

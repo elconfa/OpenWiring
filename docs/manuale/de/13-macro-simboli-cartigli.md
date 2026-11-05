@@ -26,7 +26,7 @@ Export-Schaltfläche im Reiter *Makros*).
 Der Editor zeichnet ein Bauteil von Grund auf oder ändert ein vorhandenes: Grundsymbole, persönliche
 Symbole, aus QElectroTech oder EPLAN importierte Bauteile, auch die Blackboxen von EDZ-Artikeln.
 
-![Der Bauteileditor](../img/it/editor-simboli.png)
+![Der Bauteileditor](../img/en/editor-simboli.png)
 
 *Der Motorschutzschalter 3P im Editor: links die hinzufügbaren Objekte, in der Mitte die Zeichnung mit den
 Anschlusspunkten, rechts die Eigenschaften.*
@@ -106,7 +106,7 @@ Ausfüllen. Bei jedem mitgelieferten Schriftfeld kann man *Anpassen…* wählen 
 
 Man kann auch das Schriftfeld der eigenen Firma zeichnen.
 
-![Der Schriftfeldeditor](../img/it/editor-cartiglio.png)
+![Der Schriftfeldeditor](../img/en/editor-cartiglio.png)
 
 *Das Standard-Schriftfeld im Editor, mit der Liste der Platzhalter rechts.*
 

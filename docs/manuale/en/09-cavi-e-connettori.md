@@ -4,7 +4,7 @@
 
 A cable is defined with a **definition line** that crosses the wires.
 
-![A cable in the schematic](../img/it/cavo.png)
+![A cable in the schematic](../img/en/cavo.png)
 
 *Cable `-1W1 FG16OR16 4G1,5` on page 1: the dash-dot line crosses the four wires towards the motor, each
 with the colour of its conductor.*
@@ -30,7 +30,7 @@ once.
 
 ### Cable lists
 
-![The cable list](../img/it/lista-cavi.png)
+![The cable list](../img/en/lista-cavi.png)
 
 *The cable list of the example project: the motor cable and the network cables.*
 

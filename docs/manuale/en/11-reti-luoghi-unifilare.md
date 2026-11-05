@@ -25,7 +25,7 @@ Where the locations are seen:
 The network diagram shows on a single page all the nodes of the plant and the bus connections between the
 cabinets.
 
-![The network diagram](../img/it/schema-rete.png)
+![The network diagram](../img/en/schema-rete.png)
 
 *The network diagram of the example project: CPU `-3A1` and switch `-5A1` in cabinet `+Q1`, remote I/O
 `-5A2` and inverter `-5U1` in cabinet `+Q2`, connected with Profinet (green) and Modbus RTU (orange).*
@@ -104,7 +104,7 @@ names.
 
 The single-line diagram represents the power distribution with a single line for each outgoing feeder.
 
-![The single-line diagram](../img/it/unifilare.png)
+![The single-line diagram](../img/en/unifilare.png)
 
 *The single-line diagram of the example project: the same tags as the multi-line one, with the reference to
 their position.*

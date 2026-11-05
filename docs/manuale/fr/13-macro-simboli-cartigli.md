@@ -28,7 +28,7 @@ L'éditeur dessine un composant à partir de zéro ou modifie un composant exist
 symboles personnels, composants importés de QElectroTech ou d'EPLAN, y compris les boîtes noires des
 articles EDZ.
 
-![L'éditeur de composants](../img/it/editor-simboli.png)
+![L'éditeur de composants](../img/en/editor-simboli.png)
 
 *Le disjoncteur-moteur 3P ouvert dans l'éditeur : à gauche les objets à ajouter, au centre le dessin avec
 les points de connexion, à droite les propriétés.*
@@ -111,7 +111,7 @@ prêts à remplir. Pour chaque cartouche inclus on peut choisir *Personnaliser�
 
 On peut aussi dessiner le cartouche de sa propre société.
 
-![L'éditeur de cartouches](../img/it/editor-cartiglio.png)
+![L'éditeur de cartouches](../img/en/editor-cartiglio.png)
 
 *Le cartouche standard ouvert dans l'éditeur, avec la liste des marqueurs à droite.*
 

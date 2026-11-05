@@ -6,7 +6,7 @@ Portal, CODESYS oder PLCopen exportiert.
 
 ## Die SPS-Ansicht
 
-![Die SPS-Ansicht](../img/it/vista-plc.png)
+![Die SPS-Ansicht](../img/en/vista-plc.png)
 
 *Die SPS-Ansicht des Beispielprojekts: die CPU `-3A1`, die Station `PLC1` und die E/A-Zuordnungsliste.*
 
@@ -69,7 +69,7 @@ berechnet die Adressen (`IB4…IB5`, `%IB4`, `EB4`).
 
 ## E/A-Punkte im Schaltplan
 
-![E/A-Punkte im Schaltplan](../img/it/punti-io.png)
+![E/A-Punkte im Schaltplan](../img/en/punti-io.png)
 
 *Zwei Eingänge und ein Ausgang auf Seite 3: im Kasten die Adresse, rechts der symbolische Name und der
 Verweis auf die Übersicht `/4.2`, links das BMK der Karte.*
@@ -106,7 +106,7 @@ vergeben.
 **Übersichtsseiten** legt eine Seite je Karte am Ende des Projekts an und entfernt die Seiten gelöschter
 Karten.
 
-![Die Kartenübersicht](../img/it/panoramica-plc.png)
+![Die Kartenübersicht](../img/en/panoramica-plc.png)
 
 *Die Übersicht der CPU `-3A1`: für jeden Kanal Klemme, Adresse, symbolischer Name, Kommentar,
 angeschlossenes Gerät und Seite.*

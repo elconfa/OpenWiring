@@ -31,7 +31,7 @@ das zuletzt gewählte erneut vor.
 Weitere Symbole zeichnet man mit dem Editor oder importiert sie aus QElectroTech und aus den EDZ-Dateien der
 Hersteller ([Kapitel 13](13-macro-simboli-cartigli.md) und [Kapitel 7](07-dispositivi-e-articoli.md)).
 
-![Ein Motorabgang](../img/it/partenza-motore.png)
+![Ein Motorabgang](../img/en/partenza-motore.png)
 
 *Der Motorabgang auf Seite 1: Motorschutzschalter `-1Q1`, Hauptkontakte des Schützes `-2K1`, Klemmleiste
 `-X1`, Kabel `-1W1` und Motor `-1M1`.*
@@ -51,7 +51,7 @@ Abschnitt gerade bis zum Draht weiter.
 
 ### Abzweige und Kreuzungen
 
-![T-Abzweige](../img/it/giunzioni.png)
+![T-Abzweige](../img/en/giunzioni.png)
 
 *Die Abzweige der Selbsthaltung auf Seite 2: der Punkt zeigt die Verbindung.*
 
@@ -61,7 +61,7 @@ Abschnitt gerade bis zum Draht weiter.
 
 ### Drähte bearbeiten
 
-![Ein ausgewählter Draht](../img/it/filo-selezionato.png)
+![Ein ausgewählter Draht](../img/en/filo-selezionato.png)
 
 *Ein ausgewählter Draht zeigt seine Eckpunkte als kleine Quadrate.*
 
@@ -84,7 +84,7 @@ Abschnitte behalten Farbe und Querschnitt.
 
 ## Potenzialpunkte
 
-![Potenzialschienen](../img/it/potenziali.png)
+![Potenzialschienen](../img/en/potenziali.png)
 
 *Die Schienen L1, L2, L3, N und PE auf Seite 1.*
 
@@ -98,7 +98,7 @@ Der **Potenzialpunkt** gibt einem Leiter einen Namen: `L1`, `L2`, `L3`, `N`, `PE
 
 ## Unterbrechungspunkte zwischen Seiten
 
-![Unterbrechungspunkte als Quelle](../img/it/rimandi.png)
+![Unterbrechungspunkte als Quelle](../img/en/rimandi.png)
 
 *Die Unterbrechungspunkte `+24V` und `0V` auf Seite 1: der Name über dem Draht, die Zielseiten neben dem Pfeil.*
 

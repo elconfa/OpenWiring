@@ -15,7 +15,7 @@ final se conocen los comandos básicos: insertar símbolos, dibujar hilos, relle
 5. Pulsa **W** (herramienta *Hilo*), haz clic en el punto `+24V` y luego en el extremo derecho de la página;
    termina el hilo con un doble clic. Haz lo mismo para la barra `0V`.
 
-![Las barras +24V y 0V](../img/it/tutorial-1.png)
+![Las barras +24V y 0V](../img/en/tutorial-1.png)
 
 *Paso 1: las barras de alimentación.*
 
@@ -33,7 +33,7 @@ final se conocen los comandos básicos: insertar símbolos, dibujar hilos, relle
 Si hay que girar un símbolo, pulsa **R** (giro de 90°) antes de insertarlo; después de insertarlo se gira
 con **R** sobre la selección. Los símbolos se ajustan a la rejilla de 4 mm.
 
-![Los símbolos insertados](../img/it/tutorial-2.png)
+![Los símbolos insertados](../img/en/tutorial-2.png)
 
 *Paso 2: pulsadores y bobina, todavía sin hilos.*
 
@@ -47,7 +47,7 @@ con **R** sobre la selección. Los símbolos se ajustan a la rejilla de 4 mm.
 Donde un hilo llega a otro hilo, el programa crea una **unión** y la dibuja con un punto.
 Dos hilos que se cruzan sin punto no están conectados.
 
-![Los hilos del circuito](../img/it/tutorial-3.png)
+![Los hilos del circuito](../img/en/tutorial-3.png)
 
 *Paso 3: el circuito de mando conectado. Los números de hilo azules se asignaron automáticamente.*
 
@@ -61,7 +61,7 @@ Dos hilos que se cruzan sin punto no están conectados.
 4. Categoría *Receptores*: **Piloto de señalización** bajo el contacto: pasa a ser `-1P1`.
 5. Conecta barra `+24V` → contacto → piloto → barra `0V`.
 
-![El circuito terminado](../img/it/tutorial-4.png)
+![El circuito terminado](../img/en/tutorial-4.png)
 
 *Paso 4: la autorretención `-1K1 13-14` y el piloto de marcha mandado por `-1K1 23-24`.*
 
@@ -77,7 +77,7 @@ Selecciona la bobina `-1K1`. En el panel *Propiedades* rellena:
 - **Datos técnicos**: `24 V CC`;
 - si lo conoces, el **artículo**, o si no fabricante, tipo y código de pedido.
 
-![Las propiedades de la bobina](../img/it/tutorial-proprieta.png)
+![Las propiedades de la bobina](../img/en/tutorial-proprieta.png)
 
 *Las propiedades de la bobina `-1K1`: sigla, datos del dispositivo, pedido, puntos de conexión y posición.*
 
@@ -90,7 +90,7 @@ pulsadores (`Paro bomba`, `Marcha bomba`) y el piloto (`Bomba en marcha`).
 Pulsa **Verificación** en la barra de herramientas. Se abre la pestaña *Comprobaciones* con los errores (●),
 los avisos (▲) y los datos sin usar (○). Un clic en una fila lleva al elemento.
 
-![La verificación señala los componentes sin conectar](../img/it/tutorial-verifica.png)
+![La verificación señala los componentes sin conectar](../img/en/tutorial-verifica.png)
 
 *Esto es lo que señala la verificación si se lanza después del paso 2, cuando los símbolos aún no están
 conectados.*
@@ -104,7 +104,7 @@ avisos sobre puntos de conexión libres.
 2. **PDF** en la barra de herramientas: elige *Todas* las páginas y pulsa *Exportar*. El PDF tiene el
    índice, las listas al final y referencias con enlace.
 
-![La página terminada](../img/it/tutorial-pagina.png)
+![La página terminada](../img/en/tutorial-pagina.png)
 
 *La página terminada, con el cajetín rellenado con los datos del proyecto.*
 

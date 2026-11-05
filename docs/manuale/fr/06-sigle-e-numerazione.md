@@ -73,11 +73,11 @@ puissance sont `1-2`, `3-4`, `5-6`.
 
 ### Renvois croisés
 
-![Le renvoi du contact vers la bobine](../img/it/rimando-contatto.png)
+![Le renvoi du contact vers la bobine](../img/en/rimando-contatto.png)
 
 *Sous chaque contact `-2K1` il y a `/2.2` : la bobine est en page 2, colonne 2.*
 
-![L'image des contacts de la bobine](../img/it/contatti-bobina.png)
+![L'image des contacts de la bobine](../img/en/contatti-bobina.png)
 
 *L'image des contacts de `-2K1` en bas de la page 2 : à gauche de la ligne les contacts de puissance et NO,
 à droite les NF, chacun avec sa position.*
@@ -110,7 +110,7 @@ du disjoncteur sur la page de vue d'ensemble : clic droit sur le contact ▸ *De
 
 ## Propriétés d'un appareil
 
-![Les propriétés d'une bobine](../img/it/proprieta-dispositivo.png)
+![Les propriétés d'une bobine](../img/en/proprieta-dispositivo.png)
 
 *Les propriétés de la bobine `-2K1` du projet d'exemple.*
 
@@ -128,7 +128,7 @@ elles valent aussi pour les contacts. Si un article est attribué, les champs vi
 
 ## Numéros de fil
 
-![Les numéros de fil](../img/it/numeri-filo.png)
+![Les numéros de fil](../img/en/numeri-filo.png)
 
 *Numéros de fil de la page 1 : `1.01`, `1.03`… au-dessus du contacteur, les mêmes numéros dessous, car les
 bornes `-X1` ne changent pas le numéro.*
@@ -196,7 +196,7 @@ saute même quand ils sont écrits sur une autre page.
 
 ## Section et couleur des fils
 
-![Les propriétés d'un fil](../img/it/proprieta-filo.png)
+![Les propriétés d'un fil](../img/en/proprieta-filo.png)
 
 *Les propriétés d'un fil : numéro, réseau, connexions, potentiel, section et couleur.*
 
@@ -213,7 +213,7 @@ saute même quand ils sont écrits sur une autre page.
 Pour suivre un conducteur dans tout le projet : sélectionnez un fil et appuyez sur **Mettre en évidence sur
 toutes les pages** dans les propriétés (ou clic droit ▸ *Mettre en évidence le potentiel*).
 
-![Un potentiel mis en évidence](../img/it/potenziale-evidenziato.png)
+![Un potentiel mis en évidence](../img/en/potenziale-evidenziato.png)
 
 *Le conducteur `2.02` mis en évidence en orange ; la barre d'état en bas énumère les pages où il apparaît.*
 

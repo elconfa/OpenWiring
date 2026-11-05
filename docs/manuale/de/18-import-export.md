@@ -4,7 +4,7 @@
 
 **PDF** in der Werkzeugleiste (oder *Datei ▸ Exportieren ▸ PDF…*) erzeugt ein Vektor-PDF in A3.
 
-![Der PDF-Export](../img/it/export-pdf.png)
+![Der PDF-Export](../img/en/export-pdf.png)
 
 *Die PDF-Optionen.*
 
@@ -24,7 +24,7 @@ Seiten und Listen.
 
 *Datei ▸ Drucken…* (⌘P) schickt die Seiten im **A3-Querformat** an den Drucker, eine Seite je Blatt.
 
-![Das Drucken](../img/it/stampa.png)
+![Das Drucken](../img/en/stampa.png)
 
 *Die Druckoptionen: Seiten, Schwarzweiß, Sprache.*
 

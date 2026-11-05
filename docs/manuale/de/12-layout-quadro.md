@@ -4,7 +4,7 @@ Die Aufbauseite ist die **Montageansicht** der Montageplatte des Schaltschranks:
 und Geräte maßstäblich, mit Bemaßung. Sie dient dazu, zu prüfen, ob alles passt, für das Bohrbild und zum
 Abschätzen der Drahtlängen.
 
-![Der Schaltschrankaufbau](../img/it/layout.png)
+![Der Schaltschrankaufbau](../img/en/layout.png)
 
 *Ein mit automatischem Platzieren erstellter Aufbau: zwei Reihen Hutschienen mit Kabelkanälen und die Geräte
 des Beispielprojekts.*

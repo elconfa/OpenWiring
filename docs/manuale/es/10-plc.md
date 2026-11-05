@@ -6,7 +6,7 @@ exporta a TIA Portal, CODESYS o PLCopen.
 
 ## La vista PLC
 
-![La vista PLC](../img/it/vista-plc.png)
+![La vista PLC](../img/en/vista-plc.png)
 
 *La vista PLC del proyecto de ejemplo: la CPU `-3A1`, la estación `PLC1` y la lista de asignación de E/S.*
 
@@ -69,7 +69,7 @@ programa calcula las direcciones (`IB4…IB5`, `%IB4`, `EB4`).
 
 ## Puntos de E/S en el esquema
 
-![Puntos de E/S en el esquema](../img/it/punti-io.png)
+![Puntos de E/S en el esquema](../img/en/punti-io.png)
 
 *Dos entradas y una salida de la página 3: en el recuadro la dirección, a la derecha el nombre simbólico y
 la referencia a la vista general `/4.2`, a la izquierda la sigla de la tarjeta.*
@@ -105,7 +105,7 @@ usa palabras de 16 bits, así que al pasar de Omron o a Omron las direcciones se
 **Páginas de vista general** crea una página por tarjeta, al final del proyecto, y quita las de las tarjetas
 eliminadas.
 
-![La vista general de la tarjeta](../img/it/panoramica-plc.png)
+![La vista general de la tarjeta](../img/en/panoramica-plc.png)
 
 *La vista general de la CPU `-3A1`: para cada canal borne, dirección, nombre simbólico, comentario,
 dispositivo conectado y página.*

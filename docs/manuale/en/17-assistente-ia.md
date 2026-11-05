@@ -4,7 +4,7 @@ The AI assistant is a colleague you can ask, in your own language, to **explain*
 parts of the schematic. It works with **Claude** (Anthropic), **ChatGPT** (OpenAI) and **Gemini** (Google),
 using your accounts. It answers in the language of the interface.
 
-![The AI assistant](../img/it/assistente-ia.png)
+![The AI assistant](../img/en/assistente-ia.png)
 
 *The assistant panel, with the quick buttons.*
 
@@ -57,7 +57,7 @@ a page.
 
 *Project ▸ AI assistants: profiles and accounts…* (or ⚙ in the panel).
 
-![The profiles](../img/it/profili-ia.png)
+![The profiles](../img/en/profili-ia.png)
 
 *One profile per assistant: on first use there is one for Claude, ChatGPT and Gemini.*
 
@@ -107,7 +107,7 @@ English and German with the industry terminology. The translations enter the dic
 
 You can also work with an assistant in a browser chat, without profiles:
 
-![Pages in text format](../img/it/testo-ia.png)
+![Pages in text format](../img/en/testo-ia.png)
 
 *The window of pages in text format.*
 

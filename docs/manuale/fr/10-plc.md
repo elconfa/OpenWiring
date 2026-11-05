@@ -6,7 +6,7 @@ s'exporte vers TIA Portal, CODESYS ou PLCopen.
 
 ## La vue API
 
-![La vue API](../img/it/vista-plc.png)
+![La vue API](../img/en/vista-plc.png)
 
 *La vue API du projet d'exemple : la CPU `-3A1`, la station `PLC1` et la liste d'affectation des E/S.*
 
@@ -69,7 +69,7 @@ process ; le programme calcule les adresses (`IB4…IB5`, `%IB4`, `EB4`).
 
 ## Points E/S dans le schéma
 
-![Points E/S dans le schéma](../img/it/punti-io.png)
+![Points E/S dans le schéma](../img/en/punti-io.png)
 
 *Deux entrées et une sortie de la page 3 : dans le cadre l'adresse, à droite le nom symbolique et le renvoi
 à la vue d'ensemble `/4.2`, à gauche le repère de la carte.*
@@ -106,7 +106,7 @@ réattribuées.
 **Pages de vue d'ensemble** crée une page par carte, à la fin du projet, et retire celles des cartes
 supprimées.
 
-![La vue d'ensemble de la carte](../img/it/panoramica-plc.png)
+![La vue d'ensemble de la carte](../img/en/panoramica-plc.png)
 
 *La vue d'ensemble de la CPU `-3A1` : pour chaque canal la borne, l'adresse, le nom symbolique, le
 commentaire, l'appareil relié et la page.*

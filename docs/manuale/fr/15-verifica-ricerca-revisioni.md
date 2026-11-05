@@ -5,7 +5,7 @@
 **Vérification** dans la barre d'outils (ou *Projet ▸ Vérification*) contrôle tout le projet et ouvre
 l'onglet *Contrôles* de la vue Listes.
 
-![Les contrôles du projet](../img/it/controlli.png)
+![Les contrôles du projet](../img/en/controlli.png)
 
 *Le projet d'exemple n'a pas de problèmes. Pour un exemple avec des avertissements voir le [chapitre 3](03-primo-progetto.md#étape-6--vérification).*
 
@@ -39,7 +39,7 @@ mène à l'élément et le sélectionne.
 
 **⌘F** (ou *Rechercher*) ouvre la recherche dans tout le projet.
 
-![Rechercher et remplacer](../img/it/cerca.png)
+![Rechercher et remplacer](../img/en/cerca.png)
 
 *La recherche de «pompa» trouve sept descriptions.*
 

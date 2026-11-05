@@ -9,3 +9,4 @@ dist-cli/
 
 # Documenti interni (lista dei lavori, prove, note di pubblicazione): non vanno nel repository pubblico
 privato/
+_site/

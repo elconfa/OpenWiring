@@ -4,7 +4,7 @@
 
 Un câble se définit avec une **ligne de définition** qui traverse les fils.
 
-![Un câble dans le schéma](../img/it/cavo.png)
+![Un câble dans le schéma](../img/en/cavo.png)
 
 *Le câble `-1W1 FG16OR16 4G1,5` de la page 1 : la ligne en trait mixte traverse les quatre fils vers le
 moteur, chacun avec la couleur de son conducteur.*
@@ -30,7 +30,7 @@ traversé deux fois ne compte qu'une fois.
 
 ### Listes des câbles
 
-![La liste des câbles](../img/it/lista-cavi.png)
+![La liste des câbles](../img/en/lista-cavi.png)
 
 *La liste des câbles du projet d'exemple : le câble du moteur et les câbles réseau.*
 

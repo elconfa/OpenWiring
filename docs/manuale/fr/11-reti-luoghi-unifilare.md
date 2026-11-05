@@ -25,7 +25,7 @@ Où l'on voit les emplacements :
 Le schéma réseau montre sur une seule page tous les nœuds de l'installation et les liaisons de bus entre les
 armoires.
 
-![Le schéma réseau](../img/it/schema-rete.png)
+![Le schéma réseau](../img/en/schema-rete.png)
 
 *Le schéma réseau du projet d'exemple : la CPU `-3A1` et le switch `-5A1` dans l'armoire `+Q1`, les E/S
 déportées `-5A2` et le variateur `-5U1` dans l'armoire `+Q2`, reliés en Profinet (vert) et Modbus RTU
@@ -107,7 +107,7 @@ répétés.
 
 Le schéma unifilaire représente la distribution de puissance avec une seule ligne par départ.
 
-![Le schéma unifilaire](../img/it/unifilare.png)
+![Le schéma unifilaire](../img/en/unifilare.png)
 
 *L'unifilaire du projet d'exemple : les mêmes repères que le multifilaire, avec le renvoi à leur position.*
 

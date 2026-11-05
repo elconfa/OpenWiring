@@ -4,7 +4,7 @@
 
 Ein Kabel wird mit einer **Definitionslinie** definiert, die die Drähte kreuzt.
 
-![Ein Kabel im Schaltplan](../img/it/cavo.png)
+![Ein Kabel im Schaltplan](../img/en/cavo.png)
 
 *Das Kabel `-1W1 FG16OR16 4G1,5` auf Seite 1: die Strich-Punkt-Linie kreuzt die vier Drähte zum Motor,
 jeder in der Farbe seiner Ader.*
@@ -30,7 +30,7 @@ gekreuzte Ader zählt nur einmal.
 
 ### Kabellisten
 
-![Die Kabelliste](../img/it/lista-cavi.png)
+![Die Kabelliste](../img/en/lista-cavi.png)
 
 *Die Kabelliste des Beispielprojekts: das Motorkabel und die Netzwerkkabel.*
 

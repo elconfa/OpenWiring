@@ -6,7 +6,7 @@ Portal, CODESYS or PLCopen.
 
 ## The PLC view
 
-![The PLC view](../img/it/vista-plc.png)
+![The PLC view](../img/en/vista-plc.png)
 
 *The PLC view of the example project: CPU `-3A1`, station `PLC1` and the I/O assignment list.*
 
@@ -67,7 +67,7 @@ calculates the addresses (`IB4…IB5`, `%IB4`, `EB4`).
 
 ## I/O points in the schematic
 
-![I/O points in the schematic](../img/it/punti-io.png)
+![I/O points in the schematic](../img/en/punti-io.png)
 
 *Two inputs and one output on page 3: in the box the address, on the right the symbolic name and the
 reference to overview `/4.2`, on the left the card tag.*
@@ -102,7 +102,7 @@ uses 16-bit words, so switching from or to Omron reassigns the addresses.
 
 **Overview pages** creates one page per card, at the end of the project, and removes those of deleted cards.
 
-![The card overview](../img/it/panoramica-plc.png)
+![The card overview](../img/en/panoramica-plc.png)
 
 *The overview of CPU `-3A1`: for each channel terminal, address, symbolic name, comment, connected device
 and page.*
