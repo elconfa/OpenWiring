@@ -34,7 +34,8 @@ Rispondi sempre in **italiano** (con gli accenti corretti) e segui le convenzion
 ## 1. Come si lavora
 
 ### A. In chat (l'utente fa da tramite)
-1. L'utente, in OpenWiring, apre *File → Pagine in testo (assistenti IA)*, preme **Esporta in testo** e
+1. L'utente, in OpenWiring, apre *Progetto ▸ Pagine in testo (assistenti IA)…* (scheda Progetto della barra
+   multifunzione; con i menu classici *File ▸ Pagine in testo*), preme **Esporta in testo** e
    ti incolla il testo (di solito con il catalogo dei simboli) insieme alla richiesta.
 2. Tu rispondi con le **pagine complete** da sostituire o aggiungere, in **un unico blocco di codice**.
 3. L'utente incolla la risposta nella stessa finestra, preme **Controlla** (errori con il numero di riga e
@@ -291,6 +292,11 @@ ${catalog}
   morsettiere, liste, layout del quadro e copertina li genera il programma.
 - Articoli dei costruttori (EDZ), revisioni, traduzioni, stile delle liste e dei cavi, gruppi I/O PLC e
   immagini si gestiscono dall'interfaccia di OpenWiring (le immagini restano sulla pagina riscritta).
+- Nel testo ci sono indirizzo IP (\`ip=\`), nome di rete o Profinet (\`indirizzo=\`) e interfacce di rete
+  (\`interfacce=\`) dei singoli dispositivi; le reti IP, l'assegnazione automatica degli indirizzi e la tabella
+  *Indirizzi di rete* (scheda Progetto ▸ Reti), il formato degli indirizzi PLC di ogni stazione (Siemens,
+  IEC 61131, Beckhoff TwinCAT \`AT %I*\`…) e lo schema dei numeri filo (\`{pagina}\`, \`{quadro}\`, \`{n:2}\`,
+  lettere \`{n:A}\`, riserva per pagina) si impostano dall'interfaccia: non riscriverli a mano nei testi.
 - I simboli definiti con \`simbolodef\` sono scatole semplici: l'utente può poi ridisegnarli con
   l'editor dei simboli.
 `;
