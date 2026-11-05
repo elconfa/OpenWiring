@@ -915,7 +915,7 @@ kbd { font: 10.5px ui-monospace, Menlo, monospace; color: var(--muted); border: 
 .sym-tree .tree-row { display: flex; align-items: center; gap: 4px; height: 26px; padding-right: 6px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
 .sym-tree .tree-row:hover { background: var(--panel-2); }
 .sym-tree .tree-row.focus { outline: 1px solid var(--accent); outline-offset: -1px; }
-.sym-tree .tree-row.active { background: var(--accent-soft); }
+.sym-tree .tree-row.active { background: var(--accent-soft); color: var(--text); }
 .sym-tree .tree-row.root { font-weight: 600; margin-top: 4px; }
 .sym-tree .tree-guides { flex: none; align-self: stretch; background: repeating-linear-gradient(to right, transparent 0 7px, var(--border) 7px 8px, transparent 8px 14px); }
 .sym-tree .tree-twist { flex: none; width: 12px; text-align: center; color: var(--muted); font-size: 10px; }

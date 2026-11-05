@@ -47,6 +47,11 @@ If a symbol must be turned, press **R** (rotate by 90°) before inserting it; af
 Where a wire reaches another wire, the program creates a **junction** and draws it with a dot.
 Two wires that cross without a dot are not connected.
 
+> **Automatic connection.** When you insert or move a symbol, its free connection points connect by
+> themselves to the points facing them on the same line: two symbols placed one below the other on the same
+> vertical are already joined by a wire. It is handy for circuits drawn in columns; if you prefer to draw every
+> wire by hand, switch it off in *Project properties ▸ Drawing ▸ Automatic connection*.
+
 ![The wires of the circuit](../img/en/tutorial-3.png)
 
 *Step 3: the connected control circuit. The blue wire numbers were assigned automatically.*

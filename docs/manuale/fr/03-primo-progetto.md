@@ -49,6 +49,11 @@ l'insertion, on le tourne avec **R** sur la sélection. Les symboles s'accrochen
 Là où un fil arrive sur un autre fil, le logiciel crée une **jonction** et la dessine avec un point.
 Deux fils qui se croisent sans point ne sont pas reliés.
 
+> **Connexion automatique.** Quand vous insérez ou déplacez un symbole, ses points de connexion libres se
+> relient d'eux-mêmes aux points en face sur la même ligne : deux symboles placés l'un sous l'autre sur la même
+> verticale sont déjà reliés par un fil. C'est pratique pour les circuits en colonne ; si vous préférez tracer
+> chaque fil à la main, désactivez-la dans *Propriétés du projet ▸ Dessin ▸ Connexion automatique*.
+
 ![Les fils du circuit](../img/en/tutorial-3.png)
 
 *Étape 3 : le circuit de commande relié. Les numéros de fil bleus ont été attribués automatiquement.*

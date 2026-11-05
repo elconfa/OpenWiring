@@ -49,6 +49,12 @@ es mit **R** auf der Auswahl. Symbole rasten im 4-mm-Raster ein.
 Wo ein Draht auf einen anderen trifft, erzeugt das Programm einen **Abzweig** und zeichnet ihn mit einem
 Punkt. Zwei Drähte, die sich ohne Punkt kreuzen, sind nicht verbunden.
 
+> **Automatische Verbindung.** Beim Einfügen oder Verschieben eines Symbols verbinden sich seine freien
+> Anschlusspunkte von selbst mit den gegenüberliegenden Punkten auf derselben Linie: zwei Symbole
+> untereinander auf derselben Senkrechten sind bereits durch einen Draht verbunden. Das ist praktisch für
+> Stromkreise in Spalten; wer jeden Draht von Hand zeichnen will, schaltet sie unter
+> *Projekteigenschaften ▸ Zeichnung ▸ Automatische Verbindung* aus.
+
 ![Die Drähte des Stromkreises](../img/en/tutorial-3.png)
 
 *Schritt 3: der verbundene Steuerstromkreis. Die blauen Drahtnummern wurden automatisch vergeben.*

@@ -47,6 +47,11 @@ con **R** sobre la selección. Los símbolos se ajustan a la rejilla de 4 mm.
 Donde un hilo llega a otro hilo, el programa crea una **unión** y la dibuja con un punto.
 Dos hilos que se cruzan sin punto no están conectados.
 
+> **Conexión automática.** Al insertar o mover un símbolo, sus puntos de conexión libres se conectan solos
+> con los puntos enfrentados en la misma línea: dos símbolos colocados uno debajo del otro en la misma vertical
+> quedan ya unidos por un hilo. Es cómodo para los circuitos en columna; si prefieres dibujar cada hilo a mano,
+> desactívala en *Propiedades del proyecto ▸ Dibujo ▸ Conexión automática*.
+
 ![Los hilos del circuito](../img/en/tutorial-3.png)
 
 *Paso 3: el circuito de mando conectado. Los números de hilo azules se asignaron automáticamente.*

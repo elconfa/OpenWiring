@@ -48,6 +48,11 @@ Se un simbolo va girato, prima di inserirlo premi **R** (ruota di 90°); dopo l'
 Dove il filo arriva su un altro filo, il programma crea una **giunzione** e la disegna con il pallino.
 Due fili che si incrociano senza pallino non sono collegati.
 
+> **Collegamento automatico.** Quando inserisci o sposti un simbolo, i suoi punti di connessione liberi si
+> collegano da soli ai punti affacciati sulla stessa linea: due simboli messi uno sotto l'altro sulla stessa
+> verticale risultano già uniti da un filo. È comodo per i circuiti in colonna; se preferisci tirare ogni
+> filo a mano, spegnilo in *Proprietà del progetto ▸ Disegno ▸ Collegamento automatico*.
+
 ![I fili del circuito](../img/it/tutorial-3.png)
 
 *Passo 3: il circuito di comando collegato. I numeri filo azzurri sono stati assegnati in automatico.*
