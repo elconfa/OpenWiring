@@ -423,7 +423,24 @@ export function Canvas({ derived }: { derived: Derived }) {
     return best ?? snapPt(p);
   };
 
-  const fit = useCallback(() => setVb({ x: -10, y: -10, w: PAGE_W + 20, h: PAGE_H + 20 }), []);
+  // Pagina intera; con la barra «Strumenti sul disegno» visibile si lascia sopra la pagina lo spazio
+  // della barra, così il bordo alto (per esempio la barra +24V) resta raggiungibile con il mouse
+  const fit = useCallback(() => {
+    const W = PAGE_W + 20, H = PAGE_H + 20;
+    const r = svgRef.current?.getBoundingClientRect();
+    const bar = document.querySelector('.active-bar')?.getBoundingClientRect();
+    const need = r && bar && bar.height > 0 ? bar.bottom - r.top + 6 : 0;
+    let m = 0;
+    if (r && r.width > 0 && r.height > 0 && need > 0) {
+      for (let i = 0; i < 4; i++) {
+        const s = Math.min(r.width / W, r.height / (H + m));
+        const top = (r.height - (H + m) * s) / 2 + (10 + m) * s; // px tra il bordo dello schema e la pagina
+        if (top >= need - 0.5) break;
+        m += (need - top) / s;
+      }
+    }
+    setVb({ x: -10, y: -10 - m, w: W, h: H + m });
+  }, []);
   // Zoom per la barra di stato (100% = pagina intera) e zoom scelto da lì, attorno al centro
   useEffect(() => { useStore.setState({ zoom: Math.round(((PAGE_W + 20) / vb.w) * 100) }); }, [vb]);
   useEffect(() => () => useStore.setState({ zoom: null }), []);

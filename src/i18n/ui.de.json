@@ -3357,5 +3357,6 @@
  "prima gli analogici (WAGO)": "zuerst analog (WAGO)",
  "schede in fila": "Karten der Reihe nach",
  "Testo da incollare in una lista di variabili globali (GVL) di CODESYS o TwinCAT": "Text zum Einfügen in eine globale Variablenliste (GVL) von CODESYS oder TwinCAT",
- "Una stazione può avere un formato diverso dal progetto, es. un nodo CODESYS accanto a una CPU Siemens; cambiandolo gli indirizzi della stazione si rifanno": "Eine Station kann ein anderes Format als das Projekt haben, z. B. ein CODESYS-Knoten neben einer Siemens-CPU; beim Ändern werden die Adressen der Station neu vergeben"
+ "Una stazione può avere un formato diverso dal progetto, es. un nodo CODESYS accanto a una CPU Siemens; cambiandolo gli indirizzi della stazione si rifanno": "Eine Station kann ein anderes Format als das Projekt haben, z. B. ein CODESYS-Knoten neben einer Siemens-CPU; beim Ändern werden die Adressen der Station neu vergeben",
+ "Trascina per allargare o stringere la colonna dei nomi; doppio clic per tornare alla larghezza normale": "Ziehen, um die Namensspalte breiter oder schmaler zu machen; Doppelklick für die normale Breite"
 }

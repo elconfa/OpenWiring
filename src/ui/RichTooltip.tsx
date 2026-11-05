@@ -16,7 +16,15 @@ export function RichTooltip() {
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     let cur: Element | null = null;
-    const hide = () => { clearTimeout(timer); cur = null; setTip(null); };
+    let watch: ReturnType<typeof setInterval> | undefined;
+    const hide = () => { clearTimeout(timer); clearInterval(watch); cur = null; setTip(null); };
+    /** Il comando è ancora visibile sotto il puntatore? Una finestra aperta sopra lo copre */
+    const visible = (el: Element) => {
+      if (!document.contains(el)) return false;
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return !!hit && el.contains(hit);
+    };
     const over = (e: MouseEvent) => {
       const el = (e.target as Element | null)?.closest?.('[data-tip]') ?? null;
       if (el === cur) return;
@@ -24,7 +32,7 @@ export function RichTooltip() {
       if (!el) return;
       cur = el;
       timer = setTimeout(() => {
-        if (!cur || !document.contains(cur)) return;
+        if (!cur || !visible(cur)) return;
         const r = cur.getBoundingClientRect();
         const W = 300;
         setTip({
@@ -33,6 +41,8 @@ export function RichTooltip() {
           title: cur.getAttribute('data-tip') ?? '', text: cur.getAttribute('data-tip-text') ?? undefined,
           keys: cur.getAttribute('data-tip-key') ?? undefined, icon: cur.getAttribute('data-tip-icon') ?? undefined,
         });
+        // Se nel frattempo si apre una finestra sopra il comando, il suggerimento sparisce
+        watch = setInterval(() => { if (!cur || !visible(cur)) hide(); }, 250);
       }, 550);
     };
     window.addEventListener('mouseover', over);
@@ -41,6 +51,7 @@ export function RichTooltip() {
     window.addEventListener('blur', hide);
     return () => {
       clearTimeout(timer);
+      clearInterval(watch);
       window.removeEventListener('mouseover', over);
       window.removeEventListener('mousedown', hide, true);
       window.removeEventListener('keydown', hide, true);

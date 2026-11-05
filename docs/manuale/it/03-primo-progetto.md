@@ -60,10 +60,13 @@ Due fili che si incrociano senza pallino non sono collegati.
 ## Passo 4 – Autoritenuta e lampada
 
 1. Categoria *Bobine e contatti*: **Contatto NA**. Inseriscilo a destra del pulsante di marcia.
-   Il contatto prende la sigla dell'ultima bobina, `-1K1`, e i morsetti `13-14`.
+   Si apre la finestra *Contatto NA: di quale dispositivo?* con le bobine del progetto: scegli `-1K1` e premi
+   Invio. Il contatto prende i morsetti `13-14`. Se confermi senza scegliere, resta un dispositivo nuovo
+   (`-1K2`).
 2. Collegalo **in parallelo** al pulsante di marcia: un filo dal tratto sopra `-1S2` al contatto, un filo
    dal contatto al tratto sotto `-1S2`. Le giunzioni a T si formano da sole.
-3. Inserisci un secondo **Contatto NA** più a destra: diventa `-1K1` con i morsetti `23-24`.
+3. Inserisci un secondo **Contatto NA** più a destra: la finestra propone già `-1K1`, l'ultima bobina scelta;
+   premi Invio e il contatto prende i morsetti `23-24`.
 4. Categoria *Utilizzatori*: **Lampada di segnalazione** sotto il contatto: diventa `-1P1`.
 5. Collega barra `+24V` → contatto → lampada → barra `0V`.
 
@@ -106,7 +109,8 @@ punti di connessione liberi.
 ## Passo 7 – Salvare ed esportare
 
 1. **Salva** (⌘S) e scegli il nome del file, per esempio `Comando pompa.ecad`.
-2. **PDF** nella barra strumenti: scegli *Tutte* le pagine e premi *Esporta*. Il PDF ha l'indice, le liste
+2. **PDF** nella barra strumenti: lascia *Quelle spuntate nell'elenco qui sotto* (di partenza sono spuntate
+   tutte) e premi *Esporta*. Il PDF ha l'indice, le liste
    in coda e i rimandi cliccabili.
 
 ![La pagina finita](../img/it/tutorial-pagina.png)

@@ -62,10 +62,13 @@ Punkt. Zwei Drähte, die sich ohne Punkt kreuzen, sind nicht verbunden.
 ## Schritt 4 – Selbsthaltung und Leuchte
 
 1. Kategorie *Spulen und Kontakte*: **Schließer**. Rechts neben dem Ein-Taster einfügen.
-   Der Kontakt übernimmt das BMK der letzten Spule, `-1K1`, und die Anschlüsse `13-14`.
+   Das Fenster *Schließer: welches Betriebsmittel?* öffnet sich mit den Spulen des Projekts: `-1K1` wählen
+   und Enter drücken. Der Kontakt erhält die Anschlüsse `13-14`. Ohne Auswahl bestätigt, bleibt er ein
+   neues Betriebsmittel (`-1K2`).
 2. Ihn **parallel** zum Ein-Taster anschließen: ein Draht vom Abschnitt über `-1S2` zum Kontakt, ein Draht
    vom Kontakt zum Abschnitt unter `-1S2`. Die T-Abzweige entstehen von selbst.
-3. Einen zweiten **Schließer** weiter rechts einfügen: er wird `-1K1` mit den Anschlüssen `23-24`.
+3. Einen zweiten **Schließer** weiter rechts einfügen: das Fenster schlägt bereits `-1K1` vor, die zuletzt
+   gewählte Spule; Enter drücken, und der Kontakt erhält die Anschlüsse `23-24`.
 4. Kategorie *Verbraucher*: **Meldeleuchte** unter dem Kontakt: sie wird zu `-1P1`.
 5. Schiene `+24V` → Kontakt → Leuchte → Schiene `0V` verbinden.
 
@@ -108,7 +111,8 @@ Warnungen zu freien Anschlusspunkten.
 ## Schritt 7 – Speichern und exportieren
 
 1. **Speichern** (⌘S) und den Dateinamen wählen, zum Beispiel `Pumpensteuerung.ecad`.
-2. **PDF** in der Symbolleiste: *Alle* Seiten wählen und *Exportieren* drücken. Das PDF hat das
+2. **PDF** in der Symbolleiste: *Die unten angehakten* lassen (anfangs sind alle angehakt) und
+   *Exportieren* drücken. Das PDF hat das
    Inhaltsverzeichnis, die Listen am Ende und anklickbare Querverweise.
 
 ![Die fertige Seite](../img/en/tutorial-pagina.png)

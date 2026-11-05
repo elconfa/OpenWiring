@@ -10,7 +10,7 @@
 
 | Option | Effet |
 |---|---|
-| *Toutes*, *Page courante seulement*, *Pages* | quelles pages ; l'intervalle s'écrit avec les numéros du projet (`1-3, 5` ou `200-205`) |
+| *Celles cochées dans la liste ci-dessous*, *Page courante seulement*, *Une page*, *Pages* | quelles pages ; l'intervalle s'écrit avec les numéros du projet (`1-3, 5` ou `200-205`) |
 | *Page d'index initiale* | index cliquable des pages et des listes |
 | *Listes à la fin* | nomenclature, appareils, bornes, connexions, E/S API après les schémas |
 | *Noir et blanc pour l'impression* | fils et numéros de fil en noir |

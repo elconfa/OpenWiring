@@ -60,7 +60,9 @@ The **main device** (the coil of a relay or contactor) and its **contacts** have
 links them by itself:
 
 1. Insert the coil: it gets, for example, `-2K1`.
-2. Insert the contacts: they take the tag of the last coil inserted.
+2. Insert the contacts: a window asks *which device?* and lists the project's coils and devices, those with
+   the same letter first. Choose from the list or type a new tag; from the next contact on, the window
+   suggests the last coil chosen.
 3. To assign a contact to another coil, type the tag in the contact properties: the list suggests the
    existing tags with the same letter.
 

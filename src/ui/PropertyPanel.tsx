@@ -5,7 +5,7 @@ import { netSequence, sequenceContext, SEQ_MODE_NAMES } from '../model/wiringOrd
 import { editWireOrder } from './wireOrderDialog';
 import { ROTS, allowedRots } from '../model/rotations';
 import { useFullPart } from './partsDbSync';
-import { Fragment, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { isListPage } from '../model/lists';
 import { useStore, type UserPropTarget } from '../model/store';
 import type { SymbolInstance, Wire, TextItem, ProjectInfo, DeviceField, IoKind, CableLine, CableLineShow, Zone, ImageItem, WireDef, ItemLook } from '../model/types';
@@ -59,13 +59,28 @@ export async function openTextEditor(t: TextItem) {
 const TERM_TEXT_DIRS: [TerminalTextDir, string][] = [['auto', tn('orizzontali')], ['parallel', tn('paralleli al morsetto')], ['perpendicular', tn('perpendicolari al morsetto')]];
 
 /** Campo di testo che conferma il valore all'uscita o con Invio (una sola voce di annullamento) */
-export function Field({ value, onCommit, list, placeholder, type = 'text', suggestion }: {
+export function Field({ value, onCommit, list, placeholder, type = 'text', suggestion, wrap }: {
   /** false (anche asincrono) annulla la modifica e rimette il valore precedente */
   value: string; onCommit: (v: string) => unknown; list?: string; placeholder?: string; type?: string;
   /** Testo proposto (es. dall'articolo): con il doppio clic sul campo vuoto diventa il valore, da modificare */
   suggestion?: string;
+  /** Testo lungo (descrizione, dati tecnici, note): va a capo e il campo cresce fino a 3 righe */
+  wrap?: boolean;
 }) {
   const [v, setV] = useState(value);
+  const area = useRef<HTMLTextAreaElement>(null);
+  // Altezza del campo a capo: quanto serve al testo, al massimo 3 righe (poi scorre)
+  useLayoutEffect(() => {
+    const el = area.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    const cs = getComputedStyle(el);
+    const border = el.offsetHeight - el.clientHeight;
+    const max = (parseFloat(cs.lineHeight) || 16) * 3 + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + border;
+    const need = el.scrollHeight + border;
+    el.style.height = `${Math.min(need, max)}px`;
+    el.style.overflowY = need > max + 1 ? 'auto' : 'hidden';
+  });
   // Modifica in corso, con la funzione dell'elemento che si stava modificando: cliccando altrove
   // (sullo schema, nell'albero) il pannello può cambiare elemento o sparire prima dell'uscita dal
   // campo, e la modifica va confermata lo stesso
@@ -78,6 +93,16 @@ export function Field({ value, onCommit, list, placeholder, type = 'text', sugge
   useEffect(() => { flush(); setV(value); }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => flush(), []); // eslint-disable-line react-hooks/exhaustive-deps
   const edit = (nv: string) => { setV(nv); pending.current = { v: nv, value: pending.current?.value ?? value, onCommit }; };
+  if (wrap) return (
+    <textarea ref={area} className="wrap-field" rows={1} value={v} placeholder={placeholder}
+      title={suggestion && !v ? tx('Doppio clic per usare il testo dell\'articolo e modificarlo') : undefined}
+      onDoubleClick={e => { if (suggestion && !v) { edit(suggestion); const el = e.currentTarget; setTimeout(() => el.select(), 0); } }}
+      onChange={e => edit(e.target.value.replace(/\r?\n/g, ' '))} onBlur={flush}
+      onKeyDown={e => {
+        if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLTextAreaElement).blur(); }
+        if (e.key === 'Escape') { pending.current = null; setV(value); }
+      }} />
+  );
   return (
     <input type={type} value={v} list={list} placeholder={placeholder}
       title={suggestion && !v ? tx('Doppio clic per usare il testo dell\'articolo e modificarlo') : undefined}
@@ -147,7 +172,31 @@ function VisToggle({ on, set }: Vis) {
   );
 }
 
+/** Colonna dei nomi del pannello Proprietà: frazione della larghezza, regolabile e ricordata */
+const NAME_W_PREF = 'elettrocad.propNameW';
+const NAME_W_DEFAULT = 0.36;
+const clampNameW = (f: number) => Math.min(0.6, Math.max(0.24, f));
+const loadNameW = () => { try { const f = Number(localStorage.getItem(NAME_W_PREF)); return f > 0 ? clampNameW(f) : NAME_W_DEFAULT; } catch { return NAME_W_DEFAULT; } };
+
+function useNameWidth() {
+  const [nameW, setW] = useState(loadNameW);
+  const setNameW = (f: number) => { const v = clampNameW(f); setW(v); try { localStorage.setItem(NAME_W_PREF, String(v)); } catch { /* solo comodità */ } };
+  const startNameResize = (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    const table = (e.currentTarget as HTMLElement).closest('table');
+    if (!table) return;
+    const r = table.getBoundingClientRect();
+    const move = (ev: MouseEvent) => setNameW((ev.clientX - r.left) / r.width);
+    const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); document.body.classList.remove('col-resizing'); };
+    document.body.classList.add('col-resizing');
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+  return { nameW, setNameW, startNameResize };
+}
+
 export function PropertyPanel({ derived }: { derived: Derived }) {
+  const { nameW, setNameW, startNameResize } = useNameWidth();
   const project = useStore(s => s.project);
   const pageId = useStore(s => s.pageId);
   const selection = useStore(s => s.selection);
@@ -284,9 +333,15 @@ export function PropertyPanel({ derived }: { derived: Derived }) {
   }
 
   return (
-    <div className="props">
+    <div className="props props-main" style={{ '--prop-name-w': `${nameW * 100}%` } as React.CSSProperties}>
       <table className="prop-table">
-        <thead><tr><th>{tx('Proprietà')}</th><th>{tx('Valore')}</th></tr></thead>
+        <thead><tr>
+          <th className="prop-name-th">{tx('Proprietà')}
+            <span className="col-resize" onMouseDown={startNameResize} onDoubleClick={() => setNameW(NAME_W_DEFAULT)}
+              title={tx('Trascina per allargare o stringere la colonna dei nomi; doppio clic per tornare alla larghezza normale')} />
+          </th>
+          <th>{tx('Valore')}</th>
+        </tr></thead>
         <tbody>
           {body}
           {/* Revisione aperta: nota della modifica di questo elemento (scritta accanto alla nuvoletta) */}
@@ -373,6 +428,7 @@ function SymbolProps({ inst }: { inst: SymbolInstance }) {
   };
   const devField = (k: 'description' | 'techData' | 'manufacturer' | 'typeNr' | 'orderNr' | 'note' | 'func' | 'loc', fromPart?: string, placeholder?: string) => (
     <Field value={ownOf(k)} placeholder={fromPart ? tx('{0} (articolo)', fromPart) : placeholder} suggestion={fromPart} list={k === 'manufacturer' ? 'manufacturers-list' : undefined}
+      wrap={k === 'description' || k === 'techData' || k === 'note'}
       onCommit={v => dev({ [k]: v.trim() || undefined })} />
   );
   // Spostamento con i fili collegati che seguono, come col trascinamento
@@ -772,7 +828,7 @@ function ConnectorProps({ inst }: { inst: SymbolInstance }) {
       <Row label="">
         <button onClick={() => { st().setConnSel(conn); st().setView('connectors'); }}>{tx('Apri connettore')}</button>
       </Row>
-      <Row label={tx('Descrizione')}><Field value={d.description ?? ''} placeholder={tx('es. Connettore motore')} onCommit={v => st().updateConnector(conn, { description: v.trim() || undefined })} /></Row>
+      <Row label={tx('Descrizione')}><Field wrap value={d.description ?? ''} placeholder={tx('es. Connettore motore')} onCommit={v => st().updateConnector(conn, { description: v.trim() || undefined })} /></Row>
       <Row label={tx('Controparte')}>
         <select value={d.matingPartNr ?? ''} onChange={e => st().updateConnector(conn, { matingPartNr: e.target.value || undefined })}>
           <option value="">{tx('— nessuna —')}</option>
@@ -961,7 +1017,7 @@ function CableProps({ line, derived }: { line: CableLine; derived: Derived }) {
         <Row label={tx('Ordine')}><PiecesSelect value={c.pieces === undefined ? '' : c.pieces ? 'pz' : 'm'} fromPart={cableByPiece({}, c.partNr ? partsIndex(project, library).get(c.partNr) : undefined)} onChange={v => upd({ pieces: v === '' ? undefined : v === 'pz' })} /></Row>
         <Row label={tx('Da')}><Field value={c.from ?? ''} placeholder={tx('es. -X1')} onCommit={v => upd({ from: v.trim() || undefined })} /></Row>
         <Row label="A"><Field value={c.to ?? ''} placeholder={tx('es. -M1')} onCommit={v => upd({ to: v.trim() || undefined })} /></Row>
-        <Row label={tx('Descrizione')}><Field value={c.description ?? ''} onCommit={v => upd({ description: v.trim() || undefined })} /></Row>
+        <Row label={tx('Descrizione')}><Field wrap value={c.description ?? ''} onCommit={v => upd({ description: v.trim() || undefined })} /></Row>
         <Row label={tx('Articolo')}>
           <select value={c.partNr ?? ''} onChange={e => upd({ partNr: e.target.value || undefined })}>
             <option value="">{tx('— nessuno —')}</option>
@@ -1610,7 +1666,7 @@ function PageProps() {
   return (
     <Group title={tx('Pagina {0}', page.name)}>
       <Row label={tx('Numero')}><Field value={page.name} onCommit={v => st().updatePage(page.id, { name: v })} /></Row>
-      <Row label={tx('Descrizione')}><Field value={page.title} onCommit={v => st().updatePage(page.id, { title: v })} /></Row>
+      <Row label={tx('Descrizione')}><Field wrap value={page.title} onCommit={v => st().updatePage(page.id, { title: v })} /></Row>
       <Row label={tx('Luogo (sezione)')}>
         <select value={page.panelId ?? ''} onChange={e => {
           const v = e.target.value === '+' ? st().addPanel().id : e.target.value;

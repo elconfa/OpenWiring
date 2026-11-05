@@ -60,7 +60,9 @@ El **dispositivo principal** (la bobina de un relé o de un contactor) y sus **c
 sigla. El programa los vincula solo:
 
 1. Inserta la bobina: recibe por ejemplo `-2K1`.
-2. Inserta los contactos: toman la sigla de la última bobina insertada.
+2. Inserta los contactos: una ventana pregunta *¿de qué dispositivo?* y lista las bobinas y aparatos del
+   proyecto, primero los de la misma letra. Elige en la lista o escribe una sigla nueva; a partir del
+   contacto siguiente, la ventana propone la última bobina elegida.
 3. Para asignar un contacto a otra bobina, escribe la sigla en las propiedades del contacto: la lista
    propone las siglas existentes con la misma letra.
 

@@ -60,7 +60,9 @@ L'**appareil principal** (la bobine d'un relais ou d'un contacteur) et ses **con
 Le logiciel les relie tout seul :
 
 1. Insérez la bobine : elle reçoit par exemple `-2K1`.
-2. Insérez les contacts : ils prennent le repère de la dernière bobine insérée.
+2. Insérez les contacts : une fenêtre demande *quel appareil ?* et liste les bobines et appareils du projet,
+   d'abord ceux de même lettre. Choisissez dans la liste ou écrivez un nouveau repère ; à partir du contact
+   suivant, la fenêtre propose la dernière bobine choisie.
 3. Pour attribuer un contact à une autre bobine, écrivez le repère dans les propriétés du contact : la liste
    propose les repères existants de même lettre.
 

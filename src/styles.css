@@ -954,3 +954,12 @@ kbd { font: 10.5px ui-monospace, Menlo, monospace; color: var(--muted); border: 
 .modal.branch-picker .branch-new { min-height: 1.2em; color: var(--accent); }
 .modal.branch-picker .branch-list { flex: none; height: min(50vh, 440px); overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-2); padding: 4px; }
 .modal.branch-picker .branch-list .tree-row.active { background: var(--accent-soft); }
+
+/* Pannello Proprietà: colonna dei nomi regolabile (trascinando il bordo dell'intestazione) e testi lunghi a capo */
+.props-main .prop-table th { z-index: 2; }
+.props-main .prop-table th.prop-name-th { width: var(--prop-name-w, 36%); z-index: 3; }
+.props-main .prop-table .prop-name { width: auto; overflow-wrap: anywhere; }
+.prop-name-th .col-resize { position: absolute; top: 0; right: -3px; width: 7px; height: 100%; cursor: col-resize; z-index: 2; }
+.prop-name-th .col-resize:hover, body.col-resizing .prop-name-th .col-resize { background: var(--accent-soft); }
+body.col-resizing, body.col-resizing * { cursor: col-resize !important; user-select: none; }
+.prop-value textarea.wrap-field { display: block; resize: none; overflow: hidden; line-height: 1.35; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; }

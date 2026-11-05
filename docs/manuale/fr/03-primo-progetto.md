@@ -61,10 +61,13 @@ Deux fils qui se croisent sans point ne sont pas reliés.
 ## Étape 4 – Auto-maintien et voyant
 
 1. Catégorie *Bobines et contacts* : **Contact NO**. Insérez-le à droite du bouton de marche.
-   Le contact prend le repère de la dernière bobine, `-1K1`, et les bornes `13-14`.
+   La fenêtre *Contact NO : quel appareil ?* s'ouvre avec les bobines du projet : choisissez `-1K1` et
+   appuyez sur Entrée. Le contact reçoit les bornes `13-14`. Si vous confirmez sans choisir, il reste un
+   appareil nouveau (`-1K2`).
 2. Reliez-le **en parallèle** au bouton de marche : un fil du segment au-dessus de `-1S2` vers le contact,
    un fil du contact vers le segment en dessous de `-1S2`. Les jonctions en T se forment toutes seules.
-3. Insérez un deuxième **Contact NO** plus à droite : il devient `-1K1` avec les bornes `23-24`.
+3. Insérez un deuxième **Contact NO** plus à droite : la fenêtre propose déjà `-1K1`, la dernière bobine
+   choisie ; appuyez sur Entrée et le contact reçoit les bornes `23-24`.
 4. Catégorie *Récepteurs* : **Voyant** sous le contact : il devient `-1P1`.
 5. Reliez barre `+24V` → contact → voyant → barre `0V`.
 
@@ -108,7 +111,8 @@ avertissements sur les points de connexion libres apparaissent.
 ## Étape 7 – Enregistrer et exporter
 
 1. **Enregistrer** (⌘S) et choisissez le nom du fichier, par exemple `Commande pompe.ecad`.
-2. **PDF** dans la barre d'outils : choisissez *Toutes* les pages et appuyez sur *Exporter*. Le PDF a
+2. **PDF** dans la barre d'outils : laissez *Celles cochées dans la liste ci-dessous* (au départ toutes sont
+   cochées) et appuyez sur *Exporter*. Le PDF a
    l'index, les listes à la fin et des renvois cliquables.
 
 ![La page terminée](../img/en/tutorial-pagina.png)

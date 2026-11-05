@@ -10,7 +10,7 @@
 
 | Option | Effect |
 |---|---|
-| *All*, *Current page only*, *Pages* | which pages; the range is written with the project numbers (`1-3, 5` or `200-205`) |
+| *Those ticked in the list below*, *Current page only*, *One page*, *Pages* | which pages; the range is written with the project numbers (`1-3, 5` or `200-205`) |
 | *Initial index page* | clickable index of pages and lists |
 | *Lists at the end* | bill of materials, devices, terminals, connections, PLC I/O after the schematics |
 | *Black and white for printing* | wires and wire numbers in black |

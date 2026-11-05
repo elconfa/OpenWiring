@@ -59,10 +59,13 @@ Dos hilos que se cruzan sin punto no están conectados.
 ## Paso 4 – Autorretención y piloto
 
 1. Categoría *Bobinas y contactos*: **Contacto NA**. Insértalo a la derecha del pulsador de marcha.
-   El contacto toma la sigla de la última bobina, `-1K1`, y los bornes `13-14`.
+   Se abre la ventana *Contacto NA: ¿de qué dispositivo?* con las bobinas del proyecto: elige `-1K1` y pulsa
+   Intro. El contacto recibe los bornes `13-14`. Si confirmas sin elegir, queda como dispositivo nuevo
+   (`-1K2`).
 2. Conéctalo **en paralelo** con el pulsador de marcha: un hilo del tramo encima de `-1S2` al contacto,
    un hilo del contacto al tramo debajo de `-1S2`. Las uniones en T se forman solas.
-3. Inserta un segundo **Contacto NA** más a la derecha: pasa a ser `-1K1` con los bornes `23-24`.
+3. Inserta un segundo **Contacto NA** más a la derecha: la ventana ya propone `-1K1`, la última bobina
+   elegida; pulsa Intro y el contacto recibe los bornes `23-24`.
 4. Categoría *Receptores*: **Piloto de señalización** bajo el contacto: pasa a ser `-1P1`.
 5. Conecta barra `+24V` → contacto → piloto → barra `0V`.
 
@@ -106,7 +109,8 @@ avisos sobre puntos de conexión libres.
 ## Paso 7 – Guardar y exportar
 
 1. **Guardar** (⌘S) y elige el nombre del archivo, por ejemplo `Mando bomba.ecad`.
-2. **PDF** en la barra de herramientas: elige *Todas* las páginas y pulsa *Exportar*. El PDF tiene el
+2. **PDF** en la barra de herramientas: deja *Las marcadas en la lista de abajo* (al principio están todas
+   marcadas) y pulsa *Exportar*. El PDF tiene el
    índice, las listas al final y referencias con enlace.
 
 ![La página terminada](../img/en/tutorial-pagina.png)

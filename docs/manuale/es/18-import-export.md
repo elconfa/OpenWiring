@@ -10,7 +10,7 @@
 
 | Opción | Efecto |
 |---|---|
-| *Todas*, *Solo la página actual*, *Páginas* | qué páginas; el intervalo se escribe con los números del proyecto (`1-3, 5` o `200-205`) |
+| *Las marcadas en la lista de abajo*, *Solo la página actual*, *Una página*, *Páginas* | qué páginas; el intervalo se escribe con los números del proyecto (`1-3, 5` o `200-205`) |
 | *Página de índice inicial* | índice con enlaces de las páginas y las listas |
 | *Listas al final* | lista de materiales, dispositivos, bornes, conexiones, E/S PLC después de los esquemas |
 | *Blanco y negro para imprimir* | hilos y números de hilo en negro |

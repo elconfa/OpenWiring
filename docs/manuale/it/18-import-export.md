@@ -10,7 +10,7 @@
 
 | Opzione | Effetto |
 |---|---|
-| *Tutte*, *Solo la pagina corrente*, *Pagine* | quali pagine; l'intervallo si scrive con i numeri del progetto (`1-3, 5` o `200-205`) |
+| *Quelle spuntate nell'elenco qui sotto*, *Solo la pagina corrente*, *Una pagina*, *Pagine* | quali pagine; l'intervallo si scrive con i numeri del progetto (`1-3, 5` o `200-205`) |
 | *Pagina indice iniziale* | indice cliccabile delle pagine e delle liste |
 | *Liste in coda* | distinta, dispositivi, morsetti, connessioni, I/O PLC dopo gli schemi |
 | *Bianco e nero per la stampa* | fili e numeri filo in nero |

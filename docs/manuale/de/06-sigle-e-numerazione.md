@@ -60,7 +60,9 @@ Das **Hauptelement** (die Spule eines Relais oder Schützes) und seine **Kontakt
 Programm verbindet sie selbst:
 
 1. Spule einfügen: sie erhält zum Beispiel `-2K1`.
-2. Kontakte einfügen: sie übernehmen das BMK der zuletzt eingefügten Spule.
+2. Kontakte einfügen: ein Fenster fragt *welches Betriebsmittel?* und listet die Spulen und Geräte des
+   Projekts, die mit demselben Buchstaben zuerst. Aus der Liste wählen oder ein neues BMK eingeben; ab dem
+   nächsten Kontakt schlägt das Fenster die zuletzt gewählte Spule vor.
 3. Um einen Kontakt einer anderen Spule zuzuordnen, das BMK in den Kontakteigenschaften eintragen: die
    Liste schlägt vorhandene BMK mit demselben Buchstaben vor.
 

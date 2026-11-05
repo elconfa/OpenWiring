@@ -59,10 +59,12 @@ Two wires that cross without a dot are not connected.
 ## Step 4 – Self-holding and lamp
 
 1. Category *Coils and contacts*: **NO contact**. Insert it to the right of the start pushbutton.
-   The contact takes the tag of the last coil, `-1K1`, and the terminals `13-14`.
+   The *NO contact: which device?* window opens with the project's coils: choose `-1K1` and press Enter.
+   The contact gets terminals `13-14`. If you confirm without choosing, it stays a new device (`-1K2`).
 2. Connect it **in parallel** with the start pushbutton: one wire from the segment above `-1S2` to the
    contact, one wire from the contact to the segment below `-1S2`. The T-junctions form by themselves.
-3. Insert a second **NO contact** further right: it becomes `-1K1` with terminals `23-24`.
+3. Insert a second **NO contact** further right: the window already suggests `-1K1`, the last coil chosen;
+   press Enter and the contact gets terminals `23-24`.
 4. Category *Loads*: **Indicator lamp** below the contact: it becomes `-1P1`.
 5. Connect `+24V` rail → contact → lamp → `0V` rail.
 
@@ -105,7 +107,8 @@ connection points appear.
 ## Step 7 – Saving and exporting
 
 1. **Save** (⌘S) and choose the file name, for example `Pump control.ecad`.
-2. **PDF** in the toolbar: choose *All* pages and press *Export*. The PDF has the index, the lists at the end
+2. **PDF** in the toolbar: keep *Those ticked in the list below* (all are ticked at first) and press
+   *Export*. The PDF has the index, the lists at the end
    and clickable cross-references.
 
 ![The finished page](../img/en/tutorial-pagina.png)

@@ -10,7 +10,7 @@
 
 | Option | Wirkung |
 |---|---|
-| *Alle*, *Nur die aktuelle Seite*, *Seiten* | welche Seiten; der Bereich wird mit den Projektnummern angegeben (`1-3, 5` oder `200-205`) |
+| *Die unten angehakten*, *Nur die aktuelle Seite*, *Eine Seite*, *Seiten* | welche Seiten; der Bereich wird mit den Projektnummern angegeben (`1-3, 5` oder `200-205`) |
 | *Inhaltsverzeichnis am Anfang* | anklickbares Verzeichnis der Seiten und Listen |
 | *Listen am Ende* | Stückliste, Geräte, Klemmen, Verbindungen, SPS-E/A nach den Schaltplänen |
 | *Schwarzweiß für den Druck* | Drähte und Drahtnummern in Schwarz |
