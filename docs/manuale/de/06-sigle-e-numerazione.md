@@ -100,6 +100,11 @@ Ein Kontakt lässt sich auch **auf einer anderen Seite zeigen**, ohne ihn zu dup
 Hilfskontakt des Leistungsschalters auf der Übersichtsseite: Rechtsklick auf den Kontakt ▸ *Darstellung
 zeichnen (Paarquerverweis)…*, dann ein Klick an die Stelle, an der sie gezeichnet werden soll.
 
+Man kann auch beim **Hauptelement** beginnen: Rechtsklick auf die Spule oder den Motorschutzschalter ▸
+*Darstellung eines Kontakts zeichnen…* (oder *Darstellung…* auf der Registerkarte *Symbol*) listet seine
+bereits im Schaltplan platzierten Kontakte auf, Hilfskontakte zuerst: den gewünschten wählen und an die
+Zielstelle klicken.
+
 - Die Darstellung ist **nur Zeichnung**: Sie zählt nicht als Kontakt, verbindet sich nicht mit Drähten und
   erscheint weder in den Listen noch in der Stückliste. Kennzeichen und Anschlüsse folgen immer dem echten
   Kontakt.

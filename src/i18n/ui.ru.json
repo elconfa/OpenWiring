@@ -3358,5 +3358,15 @@
  "schede in fila": "модули по порядку",
  "Testo da incollare in una lista di variabili globali (GVL) di CODESYS o TwinCAT": "Текст для вставки в список глобальных переменных (GVL) CODESYS или TwinCAT",
  "Una stazione può avere un formato diverso dal progetto, es. un nodo CODESYS accanto a una CPU Siemens; cambiandolo gli indirizzi della stazione si rifanno": "У станции может быть формат, отличный от проекта, напр. узел CODESYS рядом с CPU Siemens; при смене адреса станции пересчитываются",
- "Trascina per allargare o stringere la colonna dei nomi; doppio clic per tornare alla larghezza normale": "Перетащите, чтобы расширить или сузить столбец названий; двойной щелчок возвращает обычную ширину"
+ "Trascina per allargare o stringere la colonna dei nomi; doppio clic per tornare alla larghezza normale": "Перетащите, чтобы расширить или сузить столбец названий; двойной щелчок возвращает обычную ширину",
+ "-{0} non ha ancora contatti nello schema: inserisci prima il contatto, poi la sua rappresentazione": "У -{0} ещё нет контактов на схеме: сначала вставьте контакт, затем его изображение",
+ "-{0}: rappresentazione di quale contatto?": "-{0}: изображение какого контакта?",
+ "di potenza": "силовой",
+ "Disegna una rappresentazione di un contatto…": "Нарисовать изображение контакта…",
+ "in scambio": "переключающий",
+ "NA": "НО",
+ "NC": "НЗ",
+ "Rappresentazione…": "Изображение…",
+ "Riferimento a coppie: disegna il contatto anche in un altro punto (per esempio l'ausiliario accanto ai poli). Su un contatto lo disegna subito; su una bobina o un salvamotore chiede quale dei suoi contatti": "Парная ссылка: нарисовать контакт ещё в одном месте (например, вспомогательный рядом с полюсами). На контакте начинает сразу; на катушке или автомате защиты двигателя спрашивает, какой из его контактов",
+ "Scegli il contatto da disegnare anche qui (per esempio l'ausiliario accanto ai poli), poi un clic dove va disegnato. È solo disegno: sigla e morsetti seguono il contatto vero.": "Выберите контакт, который нужно нарисовать и здесь (например, вспомогательный рядом с полюсами), затем щёлкните, куда его поставить. Это только рисунок: обозначение и клеммы следуют за настоящим контактом."
 }

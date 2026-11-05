@@ -20,6 +20,7 @@ import { keyLabel, onKeysChange } from './shortcuts';
 import { openSettingsAt } from './SettingsDialog';
 import { openPropsDialog } from './PropsDialog';
 import { chooseReplacement } from './ReplaceSymbolDialog';
+import { chooseRepresentation } from './representationChooser';
 import { checkUpdates } from './updates';
 import { insertImageFromFile, insertDxfDrawing } from './images';
 import { usePanelStore } from './panels';
@@ -297,6 +298,9 @@ export function ribbonTabs(s: State): RTab[] {
           { icon: 'replace', label: tx('Sostituisci simbolo…'), run: () => { if (one && sym) void chooseReplacement(sym).then(id => { if (id) st().replaceSymbol(one.id, id); }); }, disabled: !one || !sym || !canReplace(one) },
           { icon: 'drawing', label: tx('Modifica il componente…'), run: () => { if (sym) st().openSymbolEditor(sym); }, disabled: !sym },
           { icon: 'star', label: sym && s.favorites.includes(sym.id) ? tx('Togli dai preferiti') : tx('Aggiungi ai preferiti'), run: () => { if (sym) st().toggleFavorite(sym.id); }, disabled: !sym, active: !!sym && s.favorites.includes(sym.id) },
+          { icon: 'link', label: tx('Rappresentazione…'), title: tx('Riferimento a coppie: disegna il contatto anche in un altro punto (per esempio l\'ausiliario accanto ai poli). Su un contatto lo disegna subito; su una bobina o un salvamotore chiede quale dei suoi contatti'),
+            run: () => { if (!one) return; if (sym?.role === 'aux') st().startRepresentation(one.id); else void chooseRepresentation(one.id); },
+            disabled: !one || !!one.pairOf || (sym?.role !== 'aux' && sym?.role !== 'main') },
         ] },
         { name: tn('Dati'), items: [
           { icon: 'terminal', label: tx('Morsetti dall\'articolo'), run: () => st().pinsFromArticles([...new Set(symbols.map(e => e.tag).filter(Boolean))]), title: tx('Bobina, poli e contatti del dispositivo prendono i morsetti del modello funzione dell\'articolo (si annulla con Annulla)') },

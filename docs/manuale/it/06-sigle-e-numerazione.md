@@ -100,6 +100,10 @@ Un contatto si può **mostrare anche in un'altra pagina** senza duplicarlo, per 
 dell'interruttore nella pagina della panoramica: tasto destro sul contatto ▸ *Disegna una rappresentazione
 (riferimento a coppie)…* e poi un clic dove va disegnato.
 
+Si può partire anche dall'**elemento principale**: tasto destro sulla bobina o sul salvamotore ▸ *Disegna
+una rappresentazione di un contatto…* (o *Rappresentazione…* nella scheda *Simbolo*) mostra l'elenco dei
+suoi contatti già piazzati nello schema, prima gli ausiliari: scegli quello da disegnare e fai clic dove va.
+
 - La rappresentazione è **solo disegno**: non conta come contatto, non si collega ai fili e non entra nelle
   liste né nella distinta. Sigla e morsetti seguono sempre il contatto vero.
 - Il contatto vero e la rappresentazione si rimandano a vicenda con i riferimenti incrociati, in tutte e

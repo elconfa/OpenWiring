@@ -20,6 +20,7 @@ import { saveMacroFromSelection, duplicatePageAsk } from './actions';
 import { potentialOf } from '../model/netlist';
 import { chooseLinkPartner } from './linkChooser';
 import { chooseAuxDevice } from './auxChooser';
+import { chooseRepresentation } from './representationChooser';
 import { addCableLineAsk } from './cableChooser';
 import { confirmTerminalRow, startTerminalRow } from './terminalRowChooser';
 import { crossedWires } from '../model/cables';
@@ -153,6 +154,7 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
       {st.highlight && item(tx('Togli evidenziazione potenziale'), () => st.setHighlight(null))}
       {xr?.mainId && <><hr />{item(tx('Vai all\'elemento principale'), () => goTo(xr.mainId!))}</>}
       {xr?.contacts?.length ? <><hr />{xr.contacts.map(c => <span key={c.id}>{item(tx('Vai al contatto {0} (/{1})', c.labels, c.location), () => goTo(c.id))}</span>)}</> : null}
+      {xr?.contacts?.length && one ? item(tx('Disegna una rappresentazione di un contatto…'), () => void chooseRepresentation(one.id)) : null}
       <hr />
       {item(tx('Seleziona tutto'), () => st.setSelection(page?.elements.map(e => e.id) ?? []), { k: key('A') })}
       {item(tx('Cerca e sostituisci…'), () => st.setDialog('search'), { k: key('F') })}

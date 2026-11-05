@@ -3358,5 +3358,15 @@
  "schede in fila": "Karten der Reihe nach",
  "Testo da incollare in una lista di variabili globali (GVL) di CODESYS o TwinCAT": "Text zum Einfügen in eine globale Variablenliste (GVL) von CODESYS oder TwinCAT",
  "Una stazione può avere un formato diverso dal progetto, es. un nodo CODESYS accanto a una CPU Siemens; cambiandolo gli indirizzi della stazione si rifanno": "Eine Station kann ein anderes Format als das Projekt haben, z. B. ein CODESYS-Knoten neben einer Siemens-CPU; beim Ändern werden die Adressen der Station neu vergeben",
- "Trascina per allargare o stringere la colonna dei nomi; doppio clic per tornare alla larghezza normale": "Ziehen, um die Namensspalte breiter oder schmaler zu machen; Doppelklick für die normale Breite"
+ "Trascina per allargare o stringere la colonna dei nomi; doppio clic per tornare alla larghezza normale": "Ziehen, um die Namensspalte breiter oder schmaler zu machen; Doppelklick für die normale Breite",
+ "-{0} non ha ancora contatti nello schema: inserisci prima il contatto, poi la sua rappresentazione": "-{0} hat noch keine Kontakte im Schaltplan: zuerst den Kontakt einfügen, dann seine Darstellung",
+ "-{0}: rappresentazione di quale contatto?": "-{0}: Darstellung welches Kontakts?",
+ "di potenza": "Leistungs-",
+ "Disegna una rappresentazione di un contatto…": "Darstellung eines Kontakts zeichnen…",
+ "in scambio": "Wechsler",
+ "NA": "Schließer",
+ "NC": "Öffner",
+ "Rappresentazione…": "Darstellung…",
+ "Riferimento a coppie: disegna il contatto anche in un altro punto (per esempio l'ausiliario accanto ai poli). Su un contatto lo disegna subito; su una bobina o un salvamotore chiede quale dei suoi contatti": "Paarweiser Querverweis: den Kontakt auch an anderer Stelle zeichnen (zum Beispiel den Hilfskontakt neben den Polen). Auf einem Kontakt startet es sofort; auf einer Spule oder einem Motorschutzschalter fragt es, welcher seiner Kontakte",
+ "Scegli il contatto da disegnare anche qui (per esempio l'ausiliario accanto ai poli), poi un clic dove va disegnato. È solo disegno: sigla e morsetti seguono il contatto vero.": "Den Kontakt wählen, der auch hier gezeichnet werden soll (zum Beispiel den Hilfskontakt neben den Polen), dann an die Zielstelle klicken. Nur Zeichnung: BMK und Anschlüsse folgen dem echten Kontakt."
 }

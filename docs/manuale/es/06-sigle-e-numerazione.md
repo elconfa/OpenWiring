@@ -99,6 +99,10 @@ Un contacto también se puede **mostrar en otra página** sin duplicarlo, por ej
 interruptor en la página de vista general: clic derecho en el contacto ▸ *Dibujar una representación
 (referencia por pares)…* y luego un clic donde se debe dibujar.
 
+También se puede partir del **elemento principal**: clic derecho en la bobina o en el guardamotor ▸
+*Dibujar una representación de un contacto…* (o *Representación…* en la pestaña *Símbolo*) muestra sus
+contactos ya colocados en el esquema, primero los auxiliares: elige el que quieres dibujar y haz clic donde va.
+
 - La representación es **solo dibujo**: no cuenta como contacto, no se conecta a los hilos y no entra en las
   listas ni en la lista de materiales. Identificador y bornes siguen siempre al contacto real.
 - El contacto real y la representación se remiten el uno al otro con referencias cruzadas, en las dos

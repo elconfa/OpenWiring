@@ -100,6 +100,10 @@ A contact can also be **shown on another page** without duplicating it, for exam
 a circuit breaker on the overview page: right-click the contact ▸ *Draw a representation (paired
 cross-reference)…*, then click where it should be drawn.
 
+You can also start from the **main element**: right-click the coil or the motor protector ▸ *Draw a
+representation of a contact…* (or *Representation…* on the *Symbol* tab) lists its contacts already placed
+in the schematic, auxiliaries first: choose the one to draw and click where it goes.
+
 - The representation is **drawing only**: it does not count as a contact, does not connect to wires and
   does not appear in the reports or in the bill of materials. Tag and terminals always follow the real
   contact.

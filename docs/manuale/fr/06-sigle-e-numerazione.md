@@ -100,6 +100,10 @@ Un contact peut aussi être **montré sur une autre page** sans le dupliquer, pa
 du disjoncteur sur la page de vue d'ensemble : clic droit sur le contact ▸ *Dessiner une représentation
 (renvoi par paire)…*, puis un clic là où elle doit être dessinée.
 
+On peut aussi partir de l'**élément principal** : clic droit sur la bobine ou le disjoncteur moteur ▸
+*Dessiner une représentation d'un contact…* (ou *Représentation…* dans l'onglet *Symbole*) liste ses contacts
+déjà placés dans le schéma, les auxiliaires d'abord : choisissez celui à dessiner et cliquez où il va.
+
 - La représentation est **seulement un dessin** : elle ne compte pas comme contact, ne se relie pas aux
   fils et n'entre ni dans les listes ni dans la nomenclature. Repère et bornes suivent toujours le vrai
   contact.
