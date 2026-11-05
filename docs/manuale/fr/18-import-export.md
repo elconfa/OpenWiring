@@ -14,6 +14,7 @@
 | *Page d'index initiale* | index cliquable des pages et des listes |
 | *Listes à la fin* | nomenclature, appareils, bornes, connexions, E/S API après les schémas |
 | *Noir et blanc pour l'impression* | fils et numéros de fil en noir |
+| *Fichier compact (plus petit)* | activé par défaut : fichier environ dix fois plus petit, même dessin, renvois et signets toujours cliquables |
 | *Langue du PDF*, *Deuxième langue* | le PDF dans une autre langue, sans changer le projet |
 
 Dans le PDF les **renvois sont cliquables** (contacts ↔ bobine, renvois entre pages, API, vues d'ensemble),

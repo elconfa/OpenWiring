@@ -3368,5 +3368,7 @@
  "NC": "NC",
  "Rappresentazione…": "Representación…",
  "Riferimento a coppie: disegna il contatto anche in un altro punto (per esempio l'ausiliario accanto ai poli). Su un contatto lo disegna subito; su una bobina o un salvamotore chiede quale dei suoi contatti": "Referencia por pares: dibuja el contacto también en otro punto (por ejemplo el auxiliar junto a los polos). En un contacto empieza enseguida; en una bobina o un guardamotor pregunta cuál de sus contactos",
- "Scegli il contatto da disegnare anche qui (per esempio l'ausiliario accanto ai poli), poi un clic dove va disegnato. È solo disegno: sigla e morsetti seguono il contatto vero.": "Elige el contacto que se dibujará también aquí (por ejemplo el auxiliar junto a los polos) y haz clic donde va. Es solo dibujo: sigla y bornes siguen al contacto real."
+ "Scegli il contatto da disegnare anche qui (per esempio l'ausiliario accanto ai poli), poi un clic dove va disegnato. È solo disegno: sigla e morsetti seguono il contatto vero.": "Elige el contacto que se dibujará también aquí (por ejemplo el auxiliar junto a los polos) y haz clic donde va. Es solo dibujo: sigla y bornes siguen al contacto real.",
+ "File compatto (più piccolo)": "Archivo compacto (más pequeño)",
+ "Comprime il contenuto delle pagine e arrotonda le coordinate: il file è molto più piccolo, il disegno è lo stesso e rimandi, indice e segnalibri restano cliccabili": "Comprime el contenido de las páginas y redondea las coordenadas: el archivo es mucho más pequeño, el dibujo es el mismo y las referencias cruzadas, el índice y los marcadores siguen siendo clicables"
 }

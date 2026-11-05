@@ -3368,5 +3368,7 @@
  "NC": "НЗ",
  "Rappresentazione…": "Изображение…",
  "Riferimento a coppie: disegna il contatto anche in un altro punto (per esempio l'ausiliario accanto ai poli). Su un contatto lo disegna subito; su una bobina o un salvamotore chiede quale dei suoi contatti": "Парная ссылка: нарисовать контакт ещё в одном месте (например, вспомогательный рядом с полюсами). На контакте начинает сразу; на катушке или автомате защиты двигателя спрашивает, какой из его контактов",
- "Scegli il contatto da disegnare anche qui (per esempio l'ausiliario accanto ai poli), poi un clic dove va disegnato. È solo disegno: sigla e morsetti seguono il contatto vero.": "Выберите контакт, который нужно нарисовать и здесь (например, вспомогательный рядом с полюсами), затем щёлкните, куда его поставить. Это только рисунок: обозначение и клеммы следуют за настоящим контактом."
+ "Scegli il contatto da disegnare anche qui (per esempio l'ausiliario accanto ai poli), poi un clic dove va disegnato. È solo disegno: sigla e morsetti seguono il contatto vero.": "Выберите контакт, который нужно нарисовать и здесь (например, вспомогательный рядом с полюсами), затем щёлкните, куда его поставить. Это только рисунок: обозначение и клеммы следуют за настоящим контактом.",
+ "File compatto (più piccolo)": "Компактный файл (меньше)",
+ "Comprime il contenuto delle pagine e arrotonda le coordinate: il file è molto più piccolo, il disegno è lo stesso e rimandi, indice e segnalibri restano cliccabili": "Сжимает содержимое страниц и округляет координаты: файл намного меньше, чертёж тот же, перекрёстные ссылки, оглавление и закладки остаются кликабельными"
 }

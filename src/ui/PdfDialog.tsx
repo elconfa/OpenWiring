@@ -191,6 +191,7 @@ export function PdfDialog() {
           <label title={tx('I file PDF collegati agli articoli usati (Articoli ▸ Schede tecniche e documenti), con una pagina di elenco; solo nell\'app desktop')}><input type="checkbox" checked={!!o.attachDocs} onChange={e => setO({ ...o, attachDocs: e.target.checked })} /> {tx('Schede tecniche degli articoli allegate in fondo')}</label>
           </>}
           <label><input type="checkbox" checked={o.mono} onChange={e => setO({ ...o, mono: e.target.checked })} /> {tx('Bianco e nero')}{print ? '' : tx(' per la stampa')}</label>
+          {!print && <label title={tx('Comprime il contenuto delle pagine e arrotonda le coordinate: il file è molto più piccolo, il disegno è lo stesso e rimandi, indice e segnalibri restano cliccabili')}><input type="checkbox" checked={o.compact !== false} onChange={e => setO({ ...o, compact: e.target.checked })} /> {tx('File compatto (più piccolo)')}</label>}
         </fieldset>
         <fieldset>
           <legend>{tx('Lingua')}</legend>

@@ -3368,5 +3368,7 @@
  "NC": "Öffner",
  "Rappresentazione…": "Darstellung…",
  "Riferimento a coppie: disegna il contatto anche in un altro punto (per esempio l'ausiliario accanto ai poli). Su un contatto lo disegna subito; su una bobina o un salvamotore chiede quale dei suoi contatti": "Paarweiser Querverweis: den Kontakt auch an anderer Stelle zeichnen (zum Beispiel den Hilfskontakt neben den Polen). Auf einem Kontakt startet es sofort; auf einer Spule oder einem Motorschutzschalter fragt es, welcher seiner Kontakte",
- "Scegli il contatto da disegnare anche qui (per esempio l'ausiliario accanto ai poli), poi un clic dove va disegnato. È solo disegno: sigla e morsetti seguono il contatto vero.": "Den Kontakt wählen, der auch hier gezeichnet werden soll (zum Beispiel den Hilfskontakt neben den Polen), dann an die Zielstelle klicken. Nur Zeichnung: BMK und Anschlüsse folgen dem echten Kontakt."
+ "Scegli il contatto da disegnare anche qui (per esempio l'ausiliario accanto ai poli), poi un clic dove va disegnato. È solo disegno: sigla e morsetti seguono il contatto vero.": "Den Kontakt wählen, der auch hier gezeichnet werden soll (zum Beispiel den Hilfskontakt neben den Polen), dann an die Zielstelle klicken. Nur Zeichnung: BMK und Anschlüsse folgen dem echten Kontakt.",
+ "File compatto (più piccolo)": "Kompakte Datei (kleiner)",
+ "Comprime il contenuto delle pagine e arrotonda le coordinate: il file è molto più piccolo, il disegno è lo stesso e rimandi, indice e segnalibri restano cliccabili": "Komprimiert den Seiteninhalt und rundet die Koordinaten: Die Datei wird viel kleiner, die Zeichnung bleibt gleich und Querverweise, Inhaltsverzeichnis und Lesezeichen bleiben anklickbar"
 }

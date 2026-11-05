@@ -36,7 +36,9 @@ export async function exportPdf(project: Project, tables: Table[], library: Part
   const plan = printPlan(project, library, opts, tables);
   tables = (plan.tables.length ? plan.tables : tables).map(t => translateTable(project, t));
   const { t: tr } = translator(project);
-  const doc = new jsPDF({ orientation: sheetOrientation(), unit: 'mm', format: [PAGE_W, PAGE_H] });
+  const compact = opts.compact !== false;
+  // Compatto: flussi compressi (Flate) e 3 decimali sui numeri (in punti: un millesimo di pt, invisibile)
+  const doc = new jsPDF({ orientation: sheetOrientation(), unit: 'mm', format: [PAGE_W, PAGE_H], ...(compact ? { compress: true, floatPrecision: 3 } : {}) });
   if (opts.mono) monoPdf(doc as unknown as Parameters<typeof monoPdf>[0]);
   const info = project.info;
   doc.setProperties({
@@ -123,6 +125,11 @@ export async function exportPdf(project: Project, tables: Table[], library: Part
   }
 
   const base = new Uint8Array(doc.output('arraybuffer'));
+  if (!docs.length && compact) {
+    // Le migliaia di collegamenti dei rimandi sono oggetti a sé: pdf-lib li raccoglie in flussi compressi
+    const small = await PDFDocument.load(base).then(m => m.save({ useObjectStreams: true }), () => base);
+    return { data: small.length < base.length ? small : base, pages: doc.getNumberOfPages(), links, ...(missing.length ? { attached: 0, missing } : {}) };
+  }
   if (!docs.length) return { data: base, pages: doc.getNumberOfPages(), links, ...(missing.length ? { attached: 0, missing } : {}) };
   // Le pagine delle schede in coda, così come sono
   const merged = await PDFDocument.load(base);
@@ -130,7 +137,7 @@ export async function exportPdf(project: Project, tables: Table[], library: Part
     const src = await PDFDocument.load(d.bytes, { ignoreEncryption: true });
     for (const pg of await merged.copyPages(src, src.getPageIndices())) merged.addPage(pg);
   }
-  return { data: await merged.save(), pages: merged.getPageCount(), links, attached: docs.length, missing };
+  return { data: await merged.save({ useObjectStreams: compact }), pages: merged.getPageCount(), links, attached: docs.length, missing };
 }
 
 /** Pagina «Documenti allegati»: per ogni scheda l'articolo, il documento e la pagina del PDF dove comincia */

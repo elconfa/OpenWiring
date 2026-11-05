@@ -14,6 +14,7 @@
 | *Initial index page* | clickable index of pages and lists |
 | *Lists at the end* | bill of materials, devices, terminals, connections, PLC I/O after the schematics |
 | *Black and white for printing* | wires and wire numbers in black |
+| *Compact file (smaller)* | on by default: a file about ten times smaller, same drawing, references and bookmarks still clickable |
 | *PDF language*, *Second language* | the PDF in another language, without changing the project |
 
 In the PDF the **references are clickable** (contacts ↔ coil, interruption points between pages, PLC,

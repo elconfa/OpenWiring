@@ -14,6 +14,7 @@
 | *Página de índice inicial* | índice con enlaces de las páginas y las listas |
 | *Listas al final* | lista de materiales, dispositivos, bornes, conexiones, E/S PLC después de los esquemas |
 | *Blanco y negro para imprimir* | hilos y números de hilo en negro |
+| *Archivo compacto (más pequeño)* | activado de serie: archivo unas diez veces más pequeño, mismo dibujo, referencias y marcadores siguen con enlace |
 | *Idioma del PDF*, *Segundo idioma* | el PDF en otro idioma, sin cambiar el proyecto |
 
 En el PDF las **referencias tienen enlace** (contactos ↔ bobina, puntos de interrupción entre páginas, PLC,

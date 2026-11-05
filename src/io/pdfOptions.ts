@@ -26,6 +26,11 @@ export interface PdfOptions {
    * una pagina o un intervallo scelti si stampano sempre
    */
   skipGroups?: string[];
+  /**
+   * File più piccolo: flussi compressi, coordinate con meno decimali e oggetti raccolti in flussi compressi.
+   * Senza perdite visibili; rimandi, indice e segnalibri restano cliccabili. Di serie sì (false = come prima della 2.0.4)
+   */
+  compact?: boolean;
   /** Aggiorna tutte le liste prima di stampare o esportare (di serie sì) */
   updateLists?: boolean;
 }
