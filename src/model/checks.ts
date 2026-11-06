@@ -50,6 +50,7 @@ export type IssueFix = { label: string } & (
   | { kind: 'deleteElement'; pageId: string; id: string }
   | { kind: 'cableFromPart'; cableId: string }
   | { kind: 'clearCardOrder'; cardId: string }
+  | { kind: 'busCableTag'; wireIds: string[]; tag: string }
 );
 
 /**
@@ -341,7 +342,8 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
   for (const [t, n] of cableTags) if (n > 1) out.push({ level: 'error', kind: tx('Cavi'), msg: tx('Sigla -{0} usata da {1} cavi', t, n) });
   // Cavo di rete disegnato in più tratti uniti dai rimandi: la sigla dev'essere la stessa
   for (const r of busCableRows(project)) if (r.otherTags) {
-    out.push({ level: 'warn', kind: tx('Cavi'), msg: tx('Il cavo -{0} prosegue con i rimandi in tratti con un\'altra sigla ({1}): è lo stesso cavo, usa la stessa sigla', r.tag, r.otherTags.map(t => `-${t}`).join(', ')), pageId: r.page.id, elementId: r.wire.id, loc: r.loc });
+    out.push({ level: 'warn', kind: tx('Cavi'), msg: tx('Il cavo -{0} prosegue con i rimandi in tratti con un\'altra sigla ({1}): è lo stesso cavo, usa la stessa sigla', r.tag, r.otherTags.map(t => `-${t}`).join(', ')), pageId: r.page.id, elementId: r.wire.id, loc: r.loc,
+      fix: { kind: 'busCableTag', wireIds: r.wires.map(w => w.id), tag: r.tag, label: tx('Usa -{0} su tutti i tratti', r.tag) } });
   }
 
   // Luoghi

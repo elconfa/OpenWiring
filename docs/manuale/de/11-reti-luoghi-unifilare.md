@@ -77,6 +77,16 @@ In den Eigenschaften der Verbindung gibt man Typ (je Protokoll vorgeschlagen, zu
 *Profinet tipo A 2×2×AWG22*), Länge und Artikel an. Netzwerkkabel erscheinen in der Kabelliste mit den Ports
 an den Enden (`-3A1:X1 P1` → `-5A1:P1`), in den Etiketten und, mit Artikel, in der Stückliste in Metern.
 
+Ein Kabel, das über ein Paar Querverweise auf einer anderen Seite weitergeht (zum Beispiel von der
+Robotersteuerung zur Roboterseite), ist **ein einziges Kabel**: es hat auf allen Abschnitten ein einziges
+BMK. Ein Abschnitt mit dem vom Programm vergebenen BMK übernimmt selbst das BMK des Kabels, auch wenn
+Sie die Querverweise erst nach dem Zeichnen paaren. Ändert man BMK, Typ, Länge oder Artikel auf einem Abschnitt, ändern sich auch die
+anderen. Haben die Abschnitte verschiedene BMK, meldet es die Prüfung, und die Schaltfläche
+**-… für alle Abschnitte verwenden** setzt überall das BMK des Abschnitts auf der ersten Seite.
+Geben Sie den Querverweisen denselben Namen wie dem Kabel (`1102W1`): neben dem Querverweis wird das
+BMK nicht wiederholt. Zum Ein- oder Ausblenden auf einem Abschnitt dient das Auge von
+**Kabel-BMK**; das Auge von **Drahtnummer** schaltet alle Texte der Verbindung aus.
+
 ### Listen und Prüfungen
 
 - **Netzwerkverbindungen**: Protokoll, Ports, Schaltschränke, Verbindungen zwischen verschiedenen

@@ -28,8 +28,9 @@ describe('reti e quadri', () => {
   it('i bus non hanno numero filo e non entrano in connessioni ed etichette dei fili', () => {
     expect(connectionReport(p).rows.some(r => r[3].startsWith('-5A'))).toBe(false);
     expect(makeLabels(p, 'wires', DEFAULT_LABEL_OPTIONS).some(l => l.lines[0] === '')).toBe(false);
+    // Sigla del cavo, poi il protocollo
     const wn = derive(p).pages.get(p.pages[4].id)!.wireNumbers;
-    expect(p.pages[4].elements.flatMap(e => (e.kind === 'wire' ? [wn.get(e.id)] : [])).sort()).toEqual(['Modbus RTU', 'Modbus RTU', 'Profinet', 'Profinet']);
+    expect(p.pages[4].elements.flatMap(e => (e.kind === 'wire' ? [wn.get(e.id)] : [])).sort()).toEqual(['-5W1  Profinet', '-5W2  Profinet', '-5W3  Modbus RTU', '-5W4  Modbus RTU']);
   });
   it('liste e controlli', () => {
     expect(networkLinkReport(p).rows).toHaveLength(4);

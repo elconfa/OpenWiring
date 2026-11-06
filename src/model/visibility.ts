@@ -10,7 +10,8 @@ export type SymVisKey =
   /** Morsetti: sigla della morsettiera (senza scelta solo sul primo morsetto della morsettiera nella pagina) */
   | 'strip';
 /** Proprietà di un filo che si possono scrivere sullo schema */
-export type WireVisKey = 'number' | 'cross' | 'color';
+/** cable: sigla del cavo sui collegamenti di rete */
+export type WireVisKey = 'number' | 'cross' | 'color' | 'cable';
 
 export type ShowMap<K extends string> = Partial<Record<K, boolean>>;
 

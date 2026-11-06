@@ -75,6 +75,15 @@ protocollo). Nelle proprietà del collegamento si indicano tipo (proposto per pr
 *Profinet tipo A 2×2×AWG22*), lunghezza e articolo. I cavi di rete compaiono nella lista cavi con le porte
 alle estremità (`-3A1:X1 P1` → `-5A1:P1`), nelle etichette e, con l'articolo, in distinta in metri.
 
+Un cavo che prosegue su un'altra pagina con una coppia di rimandi (per esempio dal controller del robot
+alla pagina del robot) è **un cavo solo**: ha una sigla sola su tutti i tratti. Il tratto con la sigla data dal programma prende da solo quella del
+cavo, anche se i rimandi li abbini dopo averlo disegnato. Cambiando sigla, tipo,
+lunghezza o articolo in un tratto, cambiano anche gli altri. Se i tratti hanno sigle diverse la verifica
+lo segnala, e il pulsante **Usa -… su tutti i tratti** mette su tutti la sigla del tratto sulla prima
+pagina. Dai ai rimandi lo stesso nome del cavo (`1102W1`): accanto al rimando la sigla non si ripete. Per
+mostrarla o nasconderla su un tratto usa l'occhio di **Sigla cavo**; l'occhio di **Numero filo** spegne
+tutte le scritte sul collegamento.
+
 ### Liste e controlli
 
 - **Collegamenti di rete**: protocollo, porte, quadri, collegamenti tra quadri diversi.

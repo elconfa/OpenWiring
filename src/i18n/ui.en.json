@@ -3377,5 +3377,6 @@
  "+{0}-{1} è disegnato nella pagina {2} del quadro +{3}: stampando solo +{0} non compare (dividi il circuito ai morsetti, oppure nel PDF aggiungi le pagine di altri quadri)": "+{0}-{1} is drawn on page {2} of cabinet +{3}: printing only +{0} it does not appear (split the circuit at the terminals, or in the PDF add the pages of other cabinets)",
  "+{0}-{1} è disegnato nelle pagine {2} del quadro +{3}: stampando solo +{0} non compare (dividi il circuito ai morsetti, oppure nel PDF aggiungi le pagine di altri quadri)": "+{0}-{1} is drawn on pages {2} of cabinet +{3}: printing only +{0} it does not appear (split the circuit at the terminals, or in the PDF add the pages of other cabinets)",
  "Aggiungi le pagine di altri quadri con dispositivi dei quadri scelti ({0})": "Add the pages of other cabinets with devices of the chosen cabinets ({0})",
- "Per esempio un sensore del +Q2 disegnato nella pagina degli ingressi PLC del +Q1: senza queste pagine chi cabla il +Q2 non lo vede": "For example a +Q2 sensor drawn on the PLC input page of +Q1: without these pages whoever wires +Q2 does not see it"
+ "Per esempio un sensore del +Q2 disegnato nella pagina degli ingressi PLC del +Q1: senza queste pagine chi cabla il +Q2 non lo vede": "For example a +Q2 sensor drawn on the PLC input page of +Q1: without these pages whoever wires +Q2 does not see it",
+ "Usa -{0} su tutti i tratti": "Use -{0} on all segments"
 }

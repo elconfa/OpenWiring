@@ -1174,7 +1174,7 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
         const tr = off ? `translate(${off.x} ${off.y})` : undefined;
         if (e.kind === 'wire') {
           // Collegamenti di rete: sigla del cavo e protocollo
-          const no = e.bus ? [e.busCable?.tag && `-${e.busCable.tag}`, derived.wireNumbers.get(e.id)].filter(Boolean).join('  ') || undefined : derived.wireNumbers.get(e.id);
+          const no = derived.wireNumbers.get(e.id);
           const pts = e.points.map(p => `${p.x},${p.y}`).join(' ');
           const bus = protocolOf(e.bus);
           // Colore del filo, o quello del suo conduttore (anche oltre rimandi e morsetti)

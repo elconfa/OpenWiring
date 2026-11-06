@@ -20,7 +20,7 @@ export const TEXT_COVERAGE = {
     bus: 'bus=', busCable: 'cavo= tipocavo= lunghezza= articolocavo=', poles: 'poli=', text: 'testo=', lineType: 'linea=', width: 'spessore=',
     labelSize: 'hnumero=', labelColor: 'colorenumero=', bundle: 'busfili=', tapStart: 'cond1=', tapEnd: 'cond2=', tNode: 'nodo1= nodo2=', userProps: 'proprieta=',
   } satisfies Coverage<Wire>,
-  busCable: { tag: 'cavo=', type: 'tipocavo=', length: 'lunghezza=', partNr: 'articolocavo=' } satisfies Record<keyof BusCable, string>,
+  busCable: { tag: 'cavo=', type: 'tipocavo=', length: 'lunghezza=', partNr: 'articolocavo=', auto: 'no: dato interno della sigla automatica' } satisfies Record<keyof BusCable, string>,
   text: { x: '@x,y', y: '@x,y', text: '"<testo>"', size: 'h=', rot: 'rot=', w: 'l=', align: 'allinea=' } satisfies Coverage<TextItem>,
   cable: {
     cableId: 'lineacavo -<sigla>', points: 'x,y x,y', main: 'principale', show: 'testi=', labelPos: 'posizione=', labelOffset: 'spostamento=',

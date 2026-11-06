@@ -80,6 +80,15 @@ du protocole). Dans les propriétés de la liaison on indique le type (proposé 
 câbles avec les ports aux extrémités (`-3A1:X1 P1` → `-5A1:P1`), dans les étiquettes et, avec l'article,
 dans la nomenclature en mètres.
 
+Un câble qui continue sur une autre page par une paire de renvois (par exemple du contrôleur du robot à la
+page du robot) est **un seul câble** : il a un seul repère sur tous les tronçons. Le tronçon avec le repère donné par le programme prend tout
+seul celui du câble, même si vous appariez les renvois après l'avoir dessiné. Changer le repère, le
+type, la longueur ou l'article sur un tronçon change aussi les autres. Si les tronçons ont des repères
+différents, la vérification le signale, et le bouton **Utiliser -… sur tous les tronçons** met partout le
+repère du tronçon de la première page. Donnez aux renvois le même nom que le câble (`1102W1`) : à côté du
+renvoi le repère n'est pas répété. Pour l'afficher ou le masquer sur un tronçon, utilisez l'œil de
+**Repère du câble** ; l'œil de **Numéro de fil** éteint tous les textes de la liaison.
+
 ### Listes et contrôles
 
 - **Connexions réseau** : protocole, ports, armoires, liaisons entre armoires différentes.

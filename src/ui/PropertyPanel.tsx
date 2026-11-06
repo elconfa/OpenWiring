@@ -14,7 +14,7 @@ import { PANEL_KINDS, PIN_OWN_FIELDS, AUX_OWN_FIELDS } from '../model/types';
 import { cableByPiece, cableInfos, cableSection, conductorsFor, conductorEnds, markingOf, pinDeviceOptions } from '../model/cables';
 import { PiecesSelect } from './CablesView';
 import { ConductorSwatch } from './CablesView';
-import { PROTOCOLS, protocolLabel, GENERIC_BUS, networkLinks, panelLabel, panelAncestors, devicePanels, BUS_CABLE_TYPES, IP_PROTOCOLS, nodeIp, isIp, netmask, parseIp, networkOfIp } from '../model/network';
+import { PROTOCOLS, protocolLabel, GENERIC_BUS, networkLinks, panelLabel, panelAncestors, devicePanels, BUS_CABLE_TYPES, IP_PROTOCOLS, busCableGroups, nodeIp, isIp, netmask, parseIp, networkOfIp } from '../model/network';
 import { LANGS } from '../model/i18n';
 import type { Lang, TerminalTextDir, ExtraPart, Part, UserPropAssign, RailSetting } from '../model/types';
 import { railOf, PLC_ROW_DEFAULT } from '../model/fixedPos';
@@ -270,7 +270,7 @@ export function PropertyPanel({ derived }: { derived: Derived }) {
             {w.bus && !PROTOCOLS.some(p => p.name === w.bus) && <option value={w.bus}>{w.bus}</option>}
           </select>
         </Row>
-        {w.bus && <BusCableRows wire={w} />}
+        {w.bus && <BusCableRows wire={w} tagShown={derived.cableTagShown.has(w.id)} />}
         <WireDataRows wires={[w]} />
         <Row label={tx('Vertici')}>{w.points.length}</Row>
       </Group>
@@ -868,16 +868,21 @@ function NetNodeProps({ inst, vis }: { inst: SymbolInstance; vis: Vis }) {
 }
 
 /** Collegamento di rete: dati del cavo (sigla, tipo, lunghezza, articolo) per lista cavi e distinta */
-function BusCableRows({ wire }: { wire: Wire }) {
+function BusCableRows({ wire, tagShown }: { wire: Wire; tagShown: boolean }) {
   const project = useStore(s => s.project);
   const library = useStore(s => s.library);
   const st = useStore.getState;
   const c = wire.busCable ?? {};
-  const set = (patch: Partial<NonNullable<Wire['busCable']>>) => st().setWireProps([wire.id], { busCable: { ...c, ...patch } });
+  // Un cavo che prosegue con i rimandi è uno solo: sigla e dati valgono per tutti i suoi tratti
+  const set = (patch: Partial<NonNullable<Wire['busCable']>>) => {
+    const g = busCableGroups(project).find(x => x.wires.some(y => y.wire.id === wire.id));
+    const ids = g ? g.wires.map(y => y.wire.id) : [wire.id];
+    st().setWireProps(ids, { busCable: { ...c, ...patch, ...('tag' in patch ? { auto: patch.tag ? undefined : c.auto } : {}) } });
+  };
   const parts = [...partsIndex(project, library).values()];
   return (
     <>
-      <Row label={tx('Sigla cavo')}><Field value={c.tag ?? ''} placeholder="automatica" onCommit={v => set({ tag: v.replace(/^-/, '').trim() || undefined })} /></Row>
+      <Row label={tx('Sigla cavo')} vis={{ on: tagShown, set: on => st().setWireShow([wire.id], 'cable', on) }}><Field value={c.tag ?? ''} placeholder="automatica" onCommit={v => set({ tag: v.replace(/^-/, '').trim() || undefined })} /></Row>
       <Row label={tx('Tipo cavo')}><Field value={c.type ?? ''} list="bus-cable-types" placeholder={BUS_CABLE_TYPES[wire.bus!] ?? (wire.bus === GENERIC_BUS ? tx('es. cavo del pad del robot, 10 m') : tx('es. Cat5e SF/UTP'))} onCommit={v => set({ type: v.trim() || undefined })} /></Row>
       <Row label={tx('Lunghezza (m)')}><Field value={c.length !== undefined ? String(c.length).replace('.', ',') : ''} placeholder={tx('es. 2')}
         onCommit={v => { const n = parseFloat(v.replace(',', '.')); set({ length: isNaN(n) ? undefined : n }); }} /></Row>

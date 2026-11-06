@@ -599,8 +599,11 @@ export function busCableRows(project: Project, nets?: Net[]): BusCableRow[] {
     else if (!a || !b) { a ??= sorted[k]; b ??= sorted[k + 1]; }
     // Dati del cavo: dal primo tratto che li ha (di solito quello con la sigla)
     const first = <K extends keyof NonNullable<Wire['busCable']>>(key: K) => wires.map(w => w.wire.busCable?.[key]).find(v => v !== undefined && v !== '');
-    const main = wires.find(w => w.wire.busCable?.tag) ?? wires[0];
-    const tags = [...new Set(wires.map(w => w.wire.busCable?.tag).filter((t): t is string => !!t))];
+    // Sigla principale: quella del tratto sulla prima pagina (di solito dove parte il cavo)
+    const order = (w: { wire: Wire; pageId: string }) => project.pages.findIndex(pg => pg.id === w.pageId) * 1e4 + Math.min(...w.wire.points.map(q => q.x));
+    const byPage = [...wires].sort((x, y) => order(x) - order(y));
+    const main = byPage.find(w => w.wire.busCable?.tag) ?? byPage[0];
+    const tags = [...new Set(byPage.map(w => w.wire.busCable?.tag).filter((t): t is string => !!t))];
     const page = pages.get(main.pageId)!;
     out.push({
       wire: main.wire, page, protocol: proto, tag: tags[0] ?? '', type: first('type') ?? BUS_CABLE_TYPES[proto] ?? '',
@@ -641,8 +644,33 @@ export function assignBusCableTags(project: Project, only?: Set<string>): number
     const from = groupOf.get(e)?.find(w => w !== e && w.busCable?.tag);
     if (from) { e.busCable = { ...from.busCable, ...Object.fromEntries(Object.entries(e.busCable ?? {}).filter(([, v]) => v !== undefined)) }; n++; continue; }
     const x = Math.min(...e.points.map(p => p.x));
-    e.busCable = { ...e.busCable, tag: nextTagFor(project, 'W', pg, x, allCableTags(project)) };
+    e.busCable = { ...e.busCable, tag: nextTagFor(project, 'W', pg, x, allCableTags(project)), auto: true };
     n++;
+  }
+  return n;
+}
+
+/**
+ * Tratti con la sigla automatica che i rimandi (abbinati dopo) uniscono a un cavo con un'altra
+ * sigla: prendono quella del cavo, cioè quella scritta dall'utente o, se sono tutte automatiche,
+ * quella del tratto sulla prima pagina. Restituisce quanti tratti cambiano.
+ */
+export function unifyBusCableTags(project: Project): number {
+  if (!project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus && e.busCable?.auto))) return 0;
+  const index = new Map(project.pages.map((pg, i) => [pg.id, i]));
+  let n = 0;
+  for (const g of busCableGroups(project)) {
+    const tagged = g.wires.filter(w => w.wire.busCable?.tag);
+    if (new Set(tagged.map(w => w.wire.busCable!.tag)).size < 2) continue;
+    const order = (w: { wire: Wire; pageId: string }) => (index.get(w.pageId) ?? 0) * 1e4 + Math.min(...w.wire.points.map(q => q.x));
+    const sorted = [...tagged].sort((a, b) => order(a) - order(b));
+    const main = sorted.find(w => !w.wire.busCable!.auto) ?? sorted[0];
+    const c = main.wire.busCable!;
+    for (const { wire } of tagged) {
+      if (wire === main.wire || !wire.busCable!.auto || wire.busCable!.tag === c.tag) continue;
+      wire.busCable = { ...c, ...Object.fromEntries(Object.entries(wire.busCable!).filter(([k, v]) => k !== 'tag' && v !== undefined)), tag: c.tag };
+      n++;
+    }
   }
   return n;
 }

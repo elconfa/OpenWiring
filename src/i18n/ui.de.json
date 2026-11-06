@@ -3377,5 +3377,6 @@
  "+{0}-{1} è disegnato nella pagina {2} del quadro +{3}: stampando solo +{0} non compare (dividi il circuito ai morsetti, oppure nel PDF aggiungi le pagine di altri quadri)": "+{0}-{1} ist auf Seite {2} des Schranks +{3} gezeichnet: druckt man nur +{0}, fehlt es (Stromkreis an den Klemmen trennen oder im PDF Seiten anderer Schränke hinzufügen)",
  "+{0}-{1} è disegnato nelle pagine {2} del quadro +{3}: stampando solo +{0} non compare (dividi il circuito ai morsetti, oppure nel PDF aggiungi le pagine di altri quadri)": "+{0}-{1} ist auf den Seiten {2} des Schranks +{3} gezeichnet: druckt man nur +{0}, fehlt es (Stromkreis an den Klemmen trennen oder im PDF Seiten anderer Schränke hinzufügen)",
  "Aggiungi le pagine di altri quadri con dispositivi dei quadri scelti ({0})": "Seiten anderer Schränke mit Geräten der gewählten Schränke hinzufügen ({0})",
- "Per esempio un sensore del +Q2 disegnato nella pagina degli ingressi PLC del +Q1: senza queste pagine chi cabla il +Q2 non lo vede": "Zum Beispiel ein Sensor von +Q2 auf der SPS-Eingangsseite von +Q1: ohne diese Seiten sieht ihn der Verdrahter von +Q2 nicht"
+ "Per esempio un sensore del +Q2 disegnato nella pagina degli ingressi PLC del +Q1: senza queste pagine chi cabla il +Q2 non lo vede": "Zum Beispiel ein Sensor von +Q2 auf der SPS-Eingangsseite von +Q1: ohne diese Seiten sieht ihn der Verdrahter von +Q2 nicht",
+ "Usa -{0} su tutti i tratti": "-{0} für alle Abschnitte verwenden"
 }

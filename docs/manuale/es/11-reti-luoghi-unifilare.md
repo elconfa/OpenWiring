@@ -79,6 +79,15 @@ En las propiedades de la conexión se indican tipo (propuesto según el protocol
 puertos en los extremos (`-3A1:X1 P1` → `-5A1:P1`), en las etiquetas y, con el artículo, en la lista de
 materiales en metros.
 
+Un cable que continúa en otra página mediante un par de referencias (por ejemplo del controlador del robot
+a la página del robot) es **un solo cable**: tiene una sola sigla en todos los tramos. El tramo con la sigla dada por el programa toma por sí solo la
+del cable, aunque emparejes las referencias después de dibujarlo. Al cambiar la
+sigla, el tipo, la longitud o el artículo en un tramo, cambian también los demás. Si los tramos tienen
+siglas distintas, la verificación lo indica, y el botón **Usar -… en todos los tramos** pone en todos la
+sigla del tramo de la primera página. Da a las referencias el mismo nombre que el cable (`1102W1`): junto
+a la referencia la sigla no se repite. Para mostrarla u ocultarla en un tramo usa el ojo de **Sigla del
+cable**; el ojo de **Número de hilo** apaga todos los textos de la conexión.
+
 ### Listas y comprobaciones
 
 - **Conexiones de red**: protocolo, puertos, cuadros, conexiones entre cuadros distintos.

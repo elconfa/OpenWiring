@@ -39,6 +39,8 @@ export interface Derived {
   netlist: NetlistResult;
   /** Rimandi in attesa del corrispondente, in ordine di pagina */
   linkWaiting: { id: string; pageId: string }[];
+  /** Collegamenti di rete con la sigla del cavo scritta sullo schema */
+  cableTagShown: Set<string>;
 }
 
 /** Dati calcolati da tutto il progetto (etichette, riferimenti incrociati, reti) */
@@ -96,10 +98,15 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
   }
   // Numeri filo; le linee che partono da un punto di potenziale hanno già il nome scritto accanto
   const potentialPins = new Set<string>();
+  /** Nome dei rimandi nel loro punto: un cavo di rete che finisce su un rimando con la sua sigla non la ripete */
+  const linkTagAt = new Map<string, string>();
   for (const e of allPlaced(project)) {
     if (e.sym.role === 'potential') for (const p of pinsWorld(e.inst, e.sym)) potentialPins.add(`${e.page.id}|${keyOf(p)}`);
+    if (e.sym.role === 'link' && e.inst.tag) for (const p of pinsWorld(e.inst, e.sym)) linkTagAt.set(`${e.page.id}|${keyOf(p)}`, e.inst.tag.replace(/^-/, ''));
   }
   const wireNumbers = new Map<string, string>();
+  /** Collegamenti di rete con la sigla del cavo scritta */
+  const cableTagShown = new Set<string>();
   /** Rimandi dei bus di conduttori alle altre pagine (pagina e primo tratto), in fondo al nome */
   const wireRefs = new Map<string, { page: string; id: string }[]>();
   const settings = settingsOf(project);
@@ -109,9 +116,15 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     const net = netlist.wireNet.get(w.id);
     const ends = [w.points[0], w.points[w.points.length - 1]];
     if (w.bus) {
-      // Bus generico: al posto del protocollo il tipo del cavo (o l'articolo)
-      const label = w.bus === GENERIC_BUS ? w.busCable?.type || w.busCable?.partNr || '' : w.bus;
-      if (label && (settings.showWireNumbers || settings.showWireData)) wireNumbers.set(w.id, label);
+      // Sigla del cavo, poi il protocollo (bus generico: il tipo del cavo o l'articolo). L'occhio del
+      // numero filo spegne tutto; la sigla ha un occhio suo ed è nascosta se il filo arriva a un
+      // rimando con lo stesso nome (sarebbe scritta due volte)
+      const tag = w.busCable?.tag;
+      const sameLink = !!tag && ends.some(p => linkTagAt.get(`${pg.id}|${keyOf(p)}`) === tag);
+      if (tag && (w.show?.cable ?? (w.show?.number !== false && !sameLink))) cableTagShown.add(w.id);
+      const kind = w.bus === GENERIC_BUS ? w.busCable?.type || w.busCable?.partNr || '' : w.bus;
+      const label = [cableTagShown.has(w.id) ? `-${tag}` : '', w.show?.number !== false && (settings.showWireNumbers || settings.showWireData) ? kind : ''].filter(Boolean).join('  ');
+      if (label) wireNumbers.set(w.id, label);
       continue;
     }
     // Bus di conduttori: il nome, con le altre pagine in cui prosegue
@@ -304,7 +317,7 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     const wireLabelPos = texts.size ? placeWireLabels(project, pg, texts, designations, deviceLines, netlist.junctions.get(pg.id) ?? [], sizes) : undefined;
     pages.set(pg.id, { conductorColor, wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name! })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), reportSheet: reportSheets.get(pg.id), drawing: ['cable', 'connector', 'system'].includes(pg.type) ? drawingData(project, pg, library, netlist) : undefined, connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) });
   }
-  return { pages, netlist, linkWaiting: waiting.map(l => ({ id: l.inst.id, pageId: l.page.id })) };
+  return { pages, netlist, cableTagShown, linkWaiting: waiting.map(l => ({ id: l.inst.id, pageId: l.page.id })) };
 }
 
 /**

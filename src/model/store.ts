@@ -6,7 +6,7 @@ import { applySheet } from './types';
 import type { TextMoveKey, ExtraPart, UserPropDef, PinDir } from './types';
 import type { DrawingStyleKind, Project, Page, Element, Part, SymbolInstance, Pt, Wire, ProjectInfo, ProjectSettings, DeviceField, PlcCard, IoKind, SymbolDef, TerminalStripData, Jumper, Cable, CableLine, CableMarking, Layout, WireDef, Distributor } from './types';
 import { newLayoutPage, autoLayout as autoLayoutModel, layoutOf, type AutoLayoutOptions } from './layout';
-import { newPanel, newNetworkPage, assignBusCableTags, assignIps, newIpNetwork, netInterfaces, setNetInterface, stationInterface, splitNetInterface as splitNetInterfaceModel, mergeNetInterface as mergeNetInterfaceModel, assignProfinetNames } from './network';
+import { newPanel, newNetworkPage, assignBusCableTags, unifyBusCableTags, assignIps, newIpNetwork, netInterfaces, setNetInterface, stationInterface, splitNetInterface as splitNetInterfaceModel, mergeNetInterface as mergeNetInterfaceModel, assignProfinetNames } from './network';
 import { nextPin, freePins, allConnectors, type ConnectorData } from './connectors';
 import { genderSymbol, type ConnectorGender } from './connectorTypes';
 import { releaseRevision as releaseRevisionModel, openRevision as openRevisionModel, cancelRevision as cancelRevisionModel, unpackProject, isReleased, lastRevision, archiveKb, type Difference, type ReleaseData } from './revisions';
@@ -921,6 +921,8 @@ export const useStore = create<State>((set, get) => {
       keepAnalogFirst(next);
       // I collegamenti di rete nuovi (disegnati, incollati o cambiati in bus) ricevono la sigla del cavo
       assignBusCableTags(next);
+      // Tratti uniti dai rimandi dopo essere stati disegnati: la sigla automatica diventa quella del cavo
+      unifyBusCableTags(next);
       // Pagine generate in blocchi nell'ordine scelto, con la loro numerazione (IND.1, MOR.2…)
       arrangePages(next);
       registerPageNumbers(next);
@@ -1993,6 +1995,9 @@ export const useStore = create<State>((set, get) => {
           } else if (f.kind === 'clearCardOrder') {
             const c = p.plc.cards.find(x => x.id === f.cardId);
             if (c) { delete c.partNr; delete c.orderNr; delete c.manufacturer; }
+          } else if (f.kind === 'busCableTag') {
+            const ids = new Set(f.wireIds);
+            for (const pg of p.pages) for (const e of pg.elements) if (e.kind === 'wire' && ids.has(e.id)) e.busCable = { ...e.busCable, tag: f.tag };
           } else if (f.kind === 'renumberWires') {
             const ids = new Set(f.wireIds);
             for (const pg of p.pages) for (const e of pg.elements) if (e.kind === 'wire' && ids.has(e.id)) delete e.number;

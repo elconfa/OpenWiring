@@ -401,6 +401,11 @@ export interface BusCable {
   /** Lunghezza in metri */
   length?: number;
   partNr?: string;
+  /**
+   * Sigla data dal programma (non scritta dall'utente): se poi il tratto si collega con i rimandi a
+   * un cavo che ha già una sigla, prende quella
+   */
+  auto?: boolean;
 }
 
 export interface TextItem {
