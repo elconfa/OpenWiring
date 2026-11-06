@@ -15,6 +15,7 @@
 | *Listen am Ende* | Stückliste, Geräte, Klemmen, Verbindungen, SPS-E/A nach den Schaltplänen |
 | *Schwarzweiß für den Druck* | Drähte und Drahtnummern in Schwarz |
 | *Kompakte Datei (kleiner)* | standardmäßig an: etwa zehnmal kleinere Datei, gleiche Zeichnung, Verweise und Lesezeichen bleiben anklickbar |
+| *Seiten anderer Schränke mit Geräten der gewählten Schränke hinzufügen* | erscheint, wenn Schränke abgewählt sind: fügt Seiten anderer Schränke hinzu, auf denen Geräte der gedruckten Schränke gezeichnet sind (Kapitel 11) |
 | *Sprache des PDF*, *Zweite Sprache* | das PDF in einer anderen Sprache, ohne das Projekt zu ändern |
 
 Im PDF sind die **Verweise anklickbar** (Kontakte ↔ Spule, Unterbrechungspunkte zwischen Seiten, SPS,

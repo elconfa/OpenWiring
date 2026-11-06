@@ -20,6 +20,32 @@ Où l'on voit les emplacements :
 - les **étiquettes** des appareils sont regroupées par emplacement ;
 - une **page d'implantation** attribuée à un emplacement ne propose que ses appareils.
 
+### Un composant d'une armoire raccordé à une autre armoire
+
+Cas typique : un capteur monté dans **+Q2** va sur une entrée API de **+Q1**. Si vous le dessinez sur
+la page des entrées de +Q1 avec le cadre d'emplacement +Q2, le repère est juste (`+Q2-B1`) et le
+capteur entre dans les listes de +Q2. Mais le schéma est sur les pages de +Q1 : celui qui câble +Q2
+et ne reçoit que ses pages ne le voit pas.
+
+La technique conseillée est de **couper le circuit à la limite de l'armoire**, sur les bornes :
+
+1. sur la page de +Q1 : entrée API → borne `-X1:5` → câble `-W12` → renvoi vers la page de +Q2 ;
+2. sur une page de +Q2 : renvoi depuis +Q1 → câble `-W12` → borne `-X2:5` → capteur `-B1`.
+
+Chaque composant est dessiné sur les pages de l'armoire où il est monté ; la liaison entre les
+armoires est le câble, présent dans les plans de câbles des deux ; les renvois sont cliquables dans
+le PDF. Chaque armoire a son entrée sur bornes et chaque câbleur travaille jusqu'à la borne.
+
+Les **vérifications** avertissent quand un appareil d'une armoire, d'un boîtier de commande ou d'une
+boîte de dérivation est dessiné sur les pages d'une autre armoire : *+Q2-B1 est dessiné page 310 de
+l'armoire +Q1 : en imprimant seulement +Q2 il n'apparaît pas*. Le bord machine et le terrain ne
+comptent pas, car on les dessine en général sur les pages de l'armoire ; un sous-emplacement de la
+même armoire (ex. la porte) non plus.
+
+Si vous préférez garder le composant près de l'entrée API, en imprimant seulement certaines armoires
+cochez dans le PDF *Ajouter les pages d'autres armoires avec des appareils des armoires choisies*
+(chapitre 18).
+
 ## Schéma réseau
 
 Le schéma réseau montre sur une seule page tous les nœuds de l'installation et les liaisons de bus entre les

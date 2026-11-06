@@ -8,7 +8,7 @@ import { openReport } from './actions';
 import { PAGE_W, PAGE_H, sheetOf } from '../model/types';
 import { useStore } from '../model/store';
 import { runPdfExport, runPrint } from './actions';
-import { COVER_GROUP, DEFAULT_PDF_OPTIONS, pagesFor, pagePanel, printGroup, type PdfOptions } from '../io/pdfOptions';
+import { COVER_GROUP, DEFAULT_PDF_OPTIONS, foreignPagesFor, pagesFor, pagePanel, printGroup, type PdfOptions } from '../io/pdfOptions';
 import { pageGroup, SCHEMA_GROUP } from '../model/pageOrder';
 import { listEntries, outdated, type ListEntry } from '../model/lists';
 import { projectReports } from '../model/reports';
@@ -59,7 +59,7 @@ export function PdfDialog() {
   const library = useStore(s => s.library);
   const spec = mode === 'range' ? range : mode === 'one' ? 'current' : mode;
   const onePage = mode === 'one' ? (project.pages.find(p => p.id === one) ?? project.pages.find(p => p.id === pageId))?.id : undefined;
-  const filter = { skipPanels: o.skipPanels, skipGroups: o.skipGroups };
+  const filter = { skipPanels: o.skipPanels, skipGroups: o.skipGroups, foreignPages: o.foreignPages };
   const chosen = open ? pagesFor(project, { pages: spec, currentPageId: onePage ?? pageId, ...filter }) : [];
   // Luoghi presenti (anche quelli scritti solo sui dispositivi, es. +BM), con quante pagine e quanti dispositivi
   const devs = useMemo(() => (open ? devicesPerLocation(project) : new Map<string, number>()), [open, project]);
@@ -181,6 +181,10 @@ export function PdfDialog() {
             {panelsIn.map(x => (
               <label key={x.id || '-'}><input type="checkbox" disabled={!all} checked={!o.skipPanels?.includes(x.id)} onChange={e => flipIn('skipPanels', x.id, e.target.checked)} /> {x.label} <span className="muted" title={x.undef ? tx('Luogo scritto sui dispositivi ma non definito tra i luoghi del progetto') : undefined}>({x.d ? tx('pagine: {0}, dispositivi: {1}', x.n, x.d) : x.n}{x.undef ? ' · ' + tx('non definito') : ''})</span></label>
             ))}
+            {all && !!o.skipPanels?.length && (() => {
+              const n = foreignPagesFor(project, o.skipPanels).size;
+              return n ? <label title={tx('Per esempio un sensore del +Q2 disegnato nella pagina degli ingressi PLC del +Q1: senza queste pagine chi cabla il +Q2 non lo vede')}><input type="checkbox" checked={!!o.foreignPages} onChange={e => setO({ ...o, foreignPages: e.target.checked })} /> {tx('Aggiungi le pagine di altri quadri con dispositivi dei quadri scelti ({0})', n)}</label> : null;
+            })()}
             {all && !!o.skipPanels?.length && <p className="muted small">{tx('Anche le liste (morsetti, dispositivi, distinta, acquisti, I/O PLC, connessioni, cavi…) hanno solo le righe dei quadri scelti; i loro fogli si impaginano di nuovo.')}</p>}
           </fieldset>
         )}

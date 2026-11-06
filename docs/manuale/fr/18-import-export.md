@@ -15,6 +15,7 @@
 | *Listes à la fin* | nomenclature, appareils, bornes, connexions, E/S API après les schémas |
 | *Noir et blanc pour l'impression* | fils et numéros de fil en noir |
 | *Fichier compact (plus petit)* | activé par défaut : fichier environ dix fois plus petit, même dessin, renvois et signets toujours cliquables |
+| *Ajouter les pages d'autres armoires avec des appareils des armoires choisies* | apparaît quand des armoires sont exclues : ajoute les pages d'autres armoires où sont dessinés des appareils des armoires imprimées (chapitre 11) |
 | *Langue du PDF*, *Deuxième langue* | le PDF dans une autre langue, sans changer le projet |
 
 Dans le PDF les **renvois sont cliquables** (contacts ↔ bobine, renvois entre pages, API, vues d'ensemble),

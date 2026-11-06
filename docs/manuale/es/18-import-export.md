@@ -15,6 +15,7 @@
 | *Listas al final* | lista de materiales, dispositivos, bornes, conexiones, E/S PLC después de los esquemas |
 | *Blanco y negro para imprimir* | hilos y números de hilo en negro |
 | *Archivo compacto (más pequeño)* | activado de serie: archivo unas diez veces más pequeño, mismo dibujo, referencias y marcadores siguen con enlace |
+| *Añadir las páginas de otros cuadros con dispositivos de los cuadros elegidos* | aparece al quitar cuadros: añade las páginas de otros cuadros donde están dibujados dispositivos de los cuadros impresos (capítulo 11) |
 | *Idioma del PDF*, *Segundo idioma* | el PDF en otro idioma, sin cambiar el proyecto |
 
 En el PDF las **referencias tienen enlace** (contactos ↔ bobina, puntos de interrupción entre páginas, PLC,

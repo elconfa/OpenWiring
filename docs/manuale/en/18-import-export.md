@@ -15,6 +15,7 @@
 | *Lists at the end* | bill of materials, devices, terminals, connections, PLC I/O after the schematics |
 | *Black and white for printing* | wires and wire numbers in black |
 | *Compact file (smaller)* | on by default: a file about ten times smaller, same drawing, references and bookmarks still clickable |
+| *Add the pages of other cabinets with devices of the chosen cabinets* | appears when some cabinets are left out: adds the pages of other cabinets where devices of the printed cabinets are drawn (chapter 11) |
 | *PDF language*, *Second language* | the PDF in another language, without changing the project |
 
 In the PDF the **references are clickable** (contacts ↔ coil, interruption points between pages, PLC,

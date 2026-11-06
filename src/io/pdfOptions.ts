@@ -2,6 +2,7 @@
 import type { Project, Page, Lang } from '../model/types';
 import { pageGroup, SCHEMA_GROUP } from '../model/pageOrder';
 import { panelOfStripName } from '../model/panelScope';
+import { foreignDevices } from '../model/network';
 
 export interface PdfOptions {
   /** "all", "current" oppure un elenco/intervallo di pagine, es. "1-3, 5" o "200-205" */
@@ -31,6 +32,11 @@ export interface PdfOptions {
    * Senza perdite visibili; rimandi, indice e segnalibri restano cliccabili. Di serie sì (false = come prima della 2.0.4)
    */
   compact?: boolean;
+  /**
+   * Stampando alcuni quadri, anche le pagine di altri quadri dove sono disegnati dispositivi dei
+   * quadri scelti (es. un sensore del +Q2 sulla pagina degli ingressi PLC del +Q1)
+   */
+  foreignPages?: boolean;
   /** Aggiorna tutte le liste prima di stampare o esportare (di serie sì) */
   updateLists?: boolean;
 }
@@ -81,11 +87,22 @@ export function pagePanel(project: Project, pg: Page): string {
 }
 
 /** Pagine da stampare o esportare: quelle scelte (tutte, corrente, intervallo); stampando tutte, senza i quadri e i gruppi tolti */
-export function pagesFor(project: Project, o: Pick<PdfOptions, 'pages' | 'currentPageId' | 'skipPanels' | 'skipGroups'>): Page[] {
+/** Pagine di quadri tolti con dispositivi dei quadri rimasti (id pagina) */
+export function foreignPagesFor(project: Project, skipPanels?: string[]): Set<string> {
+  const skip = new Set(skipPanels ?? []);
+  const out = new Set<string>();
+  if (!skip.size) return out;
+  for (const f of foreignDevices(project)) if (!skip.has(f.panel.id) && skip.has(f.pagePanel.id)) for (const pg of f.pages) out.add(pg.id);
+  return out;
+}
+
+export function pagesFor(project: Project, o: Pick<PdfOptions, 'pages' | 'currentPageId' | 'skipPanels' | 'skipGroups' | 'foreignPages'>): Page[] {
   const chosen = selectPages(project, o.pages, o.currentPageId);
   if (o.pages !== 'all') return chosen;
   const panels = new Set(o.skipPanels ?? []), groups = new Set(o.skipGroups ?? []);
+  const foreign = o.foreignPages ? foreignPagesFor(project, o.skipPanels) : undefined;
   return chosen.filter(pg => {
+    if (foreign?.has(pg.id) && !groups.has(printGroup(pg))) return true;
     const g = pageGroup(pg);
     if (groups.has(printGroup(pg))) return false;
     // Lista divisa per quadro: la pagina segue il suo luogo, anche «+BM» non definito o senza quadro

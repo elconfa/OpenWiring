@@ -1990,6 +1990,9 @@ export const useStore = create<State>((set, get) => {
             const c = p.cables?.find(x => x.id === f.cableId);
             const part = c?.partNr ? partsIndex(p, get().library).get(c.partNr) : undefined;
             if (c && part) Object.assign(c, cableFromPart(c, part));
+          } else if (f.kind === 'clearCardOrder') {
+            const c = p.plc.cards.find(x => x.id === f.cardId);
+            if (c) { delete c.partNr; delete c.orderNr; delete c.manufacturer; }
           } else if (f.kind === 'renumberWires') {
             const ids = new Set(f.wireIds);
             for (const pg of p.pages) for (const e of pg.elements) if (e.kind === 'wire' && ids.has(e.id)) delete e.number;

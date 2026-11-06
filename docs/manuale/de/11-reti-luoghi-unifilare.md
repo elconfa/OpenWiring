@@ -20,6 +20,30 @@ Wo man die Orte sieht:
 - die **Etiketten** der Geräte sind nach Ort gruppiert;
 - eine einem Ort zugewiesene **Aufbauseite** schlägt nur dessen Geräte vor.
 
+### Ein Bauteil eines Schaltschranks, verbunden mit einem anderen Schaltschrank
+
+Typischer Fall: Ein im **+Q2** montierter Sensor geht auf einen SPS-Eingang des **+Q1**. Zeichnen Sie
+ihn auf der Eingangsseite von +Q1 mit dem Ortskasten +Q2, ist das Kennzeichen richtig (`+Q2-B1`) und
+der Sensor erscheint in den Listen von +Q2. Der Schaltplan liegt aber auf den Seiten von +Q1: Wer +Q2
+verdrahtet und nur dessen Seiten erhält, sieht ihn nicht.
+
+Empfohlen wird, **den Stromkreis an der Schrankgrenze zu trennen**, an den Klemmen:
+
+1. auf der Seite von +Q1: SPS-Eingang → Klemme `-X1:5` → Kabel `-W12` → Unterbrechungspunkt zur Seite von +Q2;
+2. auf einer Seite von +Q2: Unterbrechungspunkt von +Q1 → Kabel `-W12` → Klemme `-X2:5` → Sensor `-B1`.
+
+Jedes Bauteil wird auf den Seiten des Schranks gezeichnet, in dem es montiert ist; die Verbindung
+zwischen den Schränken ist das Kabel, das in den Kabelplänen beider erscheint; die Verweise sind im
+PDF anklickbar. Jeder Schrank hat seinen Klemmeneingang, und jeder Verdrahter arbeitet bis zur Klemme.
+
+Die **Prüfungen** warnen, wenn ein Gerät eines Schaltschranks, Bedienpults oder Abzweigkastens auf
+den Seiten eines anderen Schranks gezeichnet ist: *+Q2-B1 ist auf Seite 310 des Schranks +Q1
+gezeichnet: druckt man nur +Q2, fehlt es*. Maschine und Feld zählen nicht, da sie meist auf den
+Schrankseiten gezeichnet werden; ebenso wenig ein Unterort desselben Schranks (z. B. die Tür).
+
+Wenn Sie das Bauteil lieber neben dem SPS-Eingang lassen, haken Sie beim Druck nur einiger Schränke
+im PDF *Seiten anderer Schränke mit Geräten der gewählten Schränke hinzufügen* an (Kapitel 18).
+
 ## Netzwerkplan
 
 Der Netzwerkplan zeigt auf einer einzigen Seite alle Knoten der Anlage und die Busverbindungen zwischen den

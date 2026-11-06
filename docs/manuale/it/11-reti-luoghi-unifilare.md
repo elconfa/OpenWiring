@@ -20,6 +20,30 @@ Dove si vedono i luoghi:
 - le **etichette** dei dispositivi sono raggruppate per luogo;
 - una **pagina di layout** assegnata a un luogo propone solo i suoi apparecchi.
 
+### Un componente di un quadro collegato a un altro quadro
+
+Caso tipico: un sensore montato nel **+Q2** va a un ingresso PLC del **+Q1**. Se lo disegni nella
+pagina degli ingressi del +Q1 con il riquadro di luogo +Q2, la sigla è giusta (`+Q2-B1`) e il
+sensore va nelle liste del +Q2. Lo schema però sta nelle pagine del +Q1: chi cabla il +Q2 e riceve
+solo le sue pagine non lo vede.
+
+La tecnica consigliata è **dividere il circuito al confine del quadro**, sui morsetti:
+
+1. nella pagina del +Q1: ingresso PLC → morsetto `-X1:5` → cavo `-W12` → rimando verso la pagina del +Q2;
+2. in una pagina del +Q2: rimando dal +Q1 → cavo `-W12` → morsetto `-X2:5` → sensore `-B1`.
+
+Ogni componente è disegnato nelle pagine del quadro in cui è montato; il collegamento tra i quadri è
+il cavo, che compare nei disegni dei cavi di tutti e due; i rimandi si cliccano nel PDF. Ogni quadro
+ha la sua entrata a morsetti e ogni cablatore lavora fino al morsetto.
+
+I **controlli** avvisano quando un dispositivo di un quadro, di una pulsantiera o di una cassetta è
+disegnato nelle pagine di un altro quadro: *+Q2-B1 è disegnato nella pagina 310 del quadro +Q1:
+stampando solo +Q2 non compare*. Bordo macchina e campo non contano, perché di solito si disegnano
+nelle pagine del quadro; nemmeno un sottoluogo dello stesso quadro (es. la porta).
+
+Se preferisci lasciare il componente vicino all'ingresso PLC, stampando solo alcuni quadri spunta
+nel PDF *Aggiungi le pagine di altri quadri con dispositivi dei quadri scelti* (capitolo 18).
+
 ## Schema di rete
 
 Lo schema di rete mostra in una pagina sola tutti i nodi dell'impianto e i collegamenti bus tra i quadri.

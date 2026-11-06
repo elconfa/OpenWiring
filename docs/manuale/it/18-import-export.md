@@ -15,6 +15,7 @@
 | *Liste in coda* | distinta, dispositivi, morsetti, connessioni, I/O PLC dopo gli schemi |
 | *Bianco e nero per la stampa* | fili e numeri filo in nero |
 | *File compatto (più piccolo)* | di serie acceso: file circa dieci volte più piccolo, stesso disegno, rimandi e segnalibri sempre cliccabili |
+| *Aggiungi le pagine di altri quadri con dispositivi dei quadri scelti* | compare togliendo dei quadri: aggiunge le pagine di altri quadri dove sono disegnati dispositivi dei quadri stampati (capitolo 11) |
 | *Lingua del PDF*, *Seconda lingua* | il PDF in un'altra lingua, senza cambiare il progetto |
 
 Nel PDF i **rimandi sono cliccabili** (contatti ↔ bobina, rimandi tra pagine, PLC, panoramiche), così

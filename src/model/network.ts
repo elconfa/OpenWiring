@@ -134,6 +134,39 @@ export function devicePanels(project: Project): Map<string, Panel> {
   return out;
 }
 
+/** Dispositivo di un quadro con elementi disegnati nelle pagine di un altro quadro (riquadro di luogo o luogo scritto) */
+export interface ForeignDevice { tag: string; panel: Panel; pagePanel: Panel; pages: { id: string; name: string }[]; el: PlacedElement }
+
+/**
+ * Dispositivi disegnati fuori dalle pagine del loro quadro: stampando solo il loro quadro quelle
+ * pagine non ci sono. Una voce per dispositivo e quadro delle pagine; le rappresentazioni non contano
+ */
+export function foreignDevices(project: Project): ForeignDevice[] {
+  const panels = project.panels ?? [];
+  if (panels.length < 2) return [];
+  const own = devicePanels(project);
+  // Solo i luoghi che si cablano a parte (quadro, pulsantiera, cassetta): bordo macchina e campo si
+  // disegnano di solito nelle pagine del quadro; un sottoluogo (es. la porta) va con il suo quadro
+  const wired = (p: Panel) => !p.kind || ['Quadro elettrico', 'Pulsantiera', 'Cassetta di derivazione'].includes(p.kind);
+  const chain = (p: Panel) => { const ids: string[] = []; for (let q: Panel | undefined = p; q && !ids.includes(q.id); q = panels.find(x => x.id === q!.parentId)) ids.push(q.id); return ids; };
+  const related = (a: Panel, b: Panel) => chain(a).includes(b.id) || chain(b).includes(a.id);
+  const out = new Map<string, ForeignDevice>();
+  for (const d of buildDevices(project).values()) {
+    const p = own.get(d.tag);
+    if (!p || !wired(p)) continue;
+    for (const e of d.elements) {
+      if (e.inst.pairOf) continue;
+      const pp = panels.find(x => x.id === e.page.panelId);
+      if (!pp || related(p, pp)) continue;
+      const key = `${d.tag}\u0000${pp.id}`;
+      const f = out.get(key) ?? { tag: d.tag, panel: p, pagePanel: pp, pages: [], el: e };
+      if (!f.pages.some(x => x.id === e.page.id)) f.pages.push({ id: e.page.id, name: e.page.name });
+      out.set(key, f);
+    }
+  }
+  return [...out.values()];
+}
+
 export interface NetPort { el: PlacedElement; port: string; panel?: Panel }
 export interface NetLink {
   protocol: string;

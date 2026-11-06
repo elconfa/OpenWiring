@@ -20,6 +20,31 @@ Dónde se ven las ubicaciones:
 - las **etiquetas** de los dispositivos se agrupan por ubicación;
 - una **página de disposición** asignada a una ubicación propone solo sus aparatos.
 
+### Un componente de un cuadro conectado a otro cuadro
+
+Caso típico: un sensor montado en el **+Q2** va a una entrada PLC del **+Q1**. Si lo dibujas en la
+página de entradas del +Q1 con el recuadro de ubicación +Q2, la identificación es correcta (`+Q2-B1`)
+y el sensor entra en las listas del +Q2. Pero el esquema está en las páginas del +Q1: quien cablea el
++Q2 y recibe solo sus páginas no lo ve.
+
+La técnica recomendada es **dividir el circuito en el límite del cuadro**, en los bornes:
+
+1. en la página del +Q1: entrada PLC → borne `-X1:5` → cable `-W12` → referencia hacia la página del +Q2;
+2. en una página del +Q2: referencia desde el +Q1 → cable `-W12` → borne `-X2:5` → sensor `-B1`.
+
+Cada componente se dibuja en las páginas del cuadro donde está montado; la unión entre los cuadros es
+el cable, que aparece en los dibujos de cables de los dos; las referencias tienen enlace en el PDF.
+Cada cuadro tiene su entrada a bornes y cada cableador trabaja hasta el borne.
+
+Las **verificaciones** avisan cuando un dispositivo de un cuadro, una botonera o una caja de
+derivación está dibujado en las páginas de otro cuadro: *+Q2-B1 está dibujado en la página 310 del
+cuadro +Q1: imprimiendo solo +Q2 no aparece*. A pie de máquina y en campo no cuentan, porque se
+dibujan normalmente en las páginas del cuadro; tampoco una sububicación del mismo cuadro (p. ej. la
+puerta).
+
+Si prefieres dejar el componente junto a la entrada PLC, al imprimir solo algunos cuadros marca en el
+PDF *Añadir las páginas de otros cuadros con dispositivos de los cuadros elegidos* (capítulo 18).
+
 ## Esquema de red
 
 El esquema de red muestra en una sola página todos los nodos de la instalación y las conexiones de bus entre

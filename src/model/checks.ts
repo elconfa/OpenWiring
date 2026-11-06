@@ -12,13 +12,13 @@ import { nextTagFor } from './numbering';
 import { linkPartners, isIncomingLink, NO_PARTNER } from './links';
 import { isBundle } from './bundles';
 import { pinsWorld, samePt, onSegmentInterior } from './geometry';
-import { plcProblems, hardwareProblems } from './plc';
+import { plcProblems, hardwareProblems, cardDevice } from './plc';
 import { allStrips, stripRows } from './terminals';
 import { cableInfos, differsFromPart } from './cables';
 import { cableStyleOf, shieldDims, shieldGeometry } from './cableStyle';
 import { connectorProblems } from './connectors';
 import { layoutProblems } from './layout';
-import { networkProblems, locationProblems, ipProblems, allCableTags, busCableRows } from './network';
+import { networkProblems, locationProblems, ipProblems, allCableTags, busCableRows, foreignDevices } from './network';
 import { tx } from '../i18n/ui';
 
 /** Chiave stabile di una segnalazione, per ricordare quelle verificate e accettate */
@@ -49,6 +49,7 @@ export type IssueFix = { label: string } & (
   | { kind: 'renumberWires'; wireIds: string[] }
   | { kind: 'deleteElement'; pageId: string; id: string }
   | { kind: 'cableFromPart'; cableId: string }
+  | { kind: 'clearCardOrder'; cardId: string }
 );
 
 /**
@@ -129,11 +130,36 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
 
   // Articoli usati che non sono né nel progetto né nella libreria: su un altro computer mancano i dati
   // per distinta e liste (codice di ordinazione, costruttore, descrizione)
-  for (const [nr, where] of partRefs(project)) {
+  const devices = buildDevices(project);
+  for (const [nr, where] of partRefs(project, devices)) {
     if (parts.has(nr)) continue;
     const pe = where.pageId ? project.pages.find(p => p.id === where.pageId) : undefined;
     out.push({ level: 'warn', kind: tx('Articoli'), msg: tx('Articolo {0} ({1}) non presente nel progetto né nella libreria: in distinta mancano i suoi dati', nr, where.what),
       ...(pe && where.elementId ? { pageId: pe.id, elementId: where.elementId } : {}) });
+  }
+
+  // Schede PLC con il dispositivo nello schema: valgono i dati d'ordinazione del dispositivo; quelli
+  // rimasti nella scheda non si vedono nella vista PLC e non vanno in distinta
+  for (const c of project.plc.cards) {
+    const d = cardDevice(project, c, devices);
+    if (!d) continue;
+    const info = deviceInfo(d.elements, d.main, parts);
+    const stale = ([['partNr', tx('articolo')], ['orderNr', tx('codice di ordinazione')], ['manufacturer', tx('costruttore')]] as const)
+      .filter(([k]) => c[k]?.trim() && c[k]!.trim() !== (info[k] ?? '').trim())
+      .map(([k, name]) => `${name} ${c[k]}`);
+    if (!stale.length) continue;
+    const el = d.main ?? d.elements[0];
+    out.push({ level: 'info', kind: tx('PLC'), msg: tx('Scheda PLC -{0}: dati nascosti diversi da quelli del dispositivo nello schema ({1}); vale il dispositivo{2}', c.tag, stale.join(', '), info.partNr ? ` (${info.partNr})` : ''),
+      ...at(el), fix: { label: tx('Togli i dati della scheda'), kind: 'clearCardOrder', cardId: c.id } });
+  }
+
+  // Dispositivi di un quadro disegnati nelle pagine di un altro: nel PDF del solo loro quadro non ci sono
+  for (const f of foreignDevices(project)) {
+    const pages = f.pages.map(x => x.name).join(', ');
+    out.push({ level: 'warn', kind: tx('Luoghi'), msg: f.pages.length === 1
+      ? tx('+{0}-{1} è disegnato nella pagina {2} del quadro +{3}: stampando solo +{0} non compare (dividi il circuito ai morsetti, oppure nel PDF aggiungi le pagine di altri quadri)', f.panel.code, f.tag, pages, f.pagePanel.code)
+      : tx('+{0}-{1} è disegnato nelle pagine {2} del quadro +{3}: stampando solo +{0} non compare (dividi il circuito ai morsetti, oppure nel PDF aggiungi le pagine di altri quadri)', f.panel.code, f.tag, pages, f.pagePanel.code),
+      ...at(f.el) });
   }
 
   // Ripartitori: somma delle sezioni su ogni uscita entro quella ammessa, gruppi non disegnati
@@ -555,7 +581,7 @@ export function releaseCheck(project: Project, library: Part[] = []): { errors: 
  * Codici articolo usati nel progetto (campi partNr e …PartNr, articoli delle riserve), con il primo
  * punto in cui compaiono: elemento della pagina, oppure morsettiera, cavo, ripartitore…
  */
-export function partRefs(project: Project): Map<string, { what: string; pageId?: string; elementId?: string }> {
+export function partRefs(project: Project, devices = buildDevices(project)): Map<string, { what: string; pageId?: string; elementId?: string }> {
   const out = new Map<string, { what: string; pageId?: string; elementId?: string }>();
   const add = (nr: unknown, what: string, pageId?: string, elementId?: string) => {
     if (typeof nr === 'string' && nr.trim() && !out.has(nr)) out.set(nr, { what, pageId, elementId });
@@ -575,6 +601,7 @@ export function partRefs(project: Project): Map<string, { what: string; pageId?:
   for (const c of project.cables ?? []) walk(c, `-${c.tag}`);
   for (const d of project.distributors ?? []) walk(d, `-${d.tag}`);
   for (const [conn, d] of Object.entries(project.connectors ?? {})) walk(d, `-${conn}`);
-  for (const c of project.plc.cards) walk(c, `-${c.tag}`);
+  // Schede con il dispositivo nello schema: come in distinta vale l'articolo del dispositivo
+  for (const c of project.plc.cards) if (!cardDevice(project, c, devices)) walk(c, `-${c.tag}`);
   return out;
 }

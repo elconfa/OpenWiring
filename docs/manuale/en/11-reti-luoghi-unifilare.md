@@ -20,6 +20,30 @@ Where the locations are seen:
 - the device **labels** are grouped by location;
 - a **layout page** assigned to a location proposes only its own devices.
 
+### A component of one cabinet wired to another cabinet
+
+Typical case: a sensor mounted in **+Q2** goes to a PLC input of **+Q1**. If you draw it on the
+input page of +Q1 with the +Q2 location box, the tag is right (`+Q2-B1`) and the sensor goes into the
++Q2 lists. The schematic, though, is on the +Q1 pages: whoever wires +Q2 and receives only its pages
+does not see it.
+
+The recommended technique is to **split the circuit at the cabinet boundary**, on the terminals:
+
+1. on the +Q1 page: PLC input → terminal `-X1:5` → cable `-W12` → interruption point to the +Q2 page;
+2. on a +Q2 page: interruption point from +Q1 → cable `-W12` → terminal `-X2:5` → sensor `-B1`.
+
+Each component is drawn on the pages of the cabinet where it is mounted; the link between the
+cabinets is the cable, which appears in the cable drawings of both; the references are clickable in
+the PDF. Each cabinet has its own terminal entry and each wirer works up to the terminal.
+
+The **checks** warn when a device of a cabinet, push-button station or junction box is drawn on the
+pages of another cabinet: *+Q2-B1 is drawn on page 310 of cabinet +Q1: printing only +Q2 it does not
+appear*. Machine and field locations do not count, since they are usually drawn on the cabinet pages;
+nor does a sub-location of the same cabinet (e.g. the door).
+
+If you prefer to keep the component next to the PLC input, when printing only some cabinets tick
+*Add the pages of other cabinets with devices of the chosen cabinets* in the PDF (chapter 18).
+
 ## Network diagram
 
 The network diagram shows on a single page all the nodes of the plant and the bus connections between the
