@@ -5,6 +5,7 @@ import { columnOf } from './types';
 import { computeNetlist, type Net } from './netlist';
 import { uid, getSymbol, pinsWorld } from './geometry';
 import { nextTagFor } from './numbering';
+import { bundleTaps, isBundle } from './bundles';
 
 /** Colori standard dei cavi per numero di conduttori (HD 308, con il giallo-verde) */
 const COLOR_SETS: Record<number, string[]> = {
@@ -158,7 +159,8 @@ export function crossedWires(page: Page, line: Pick<CableLine, 'points'>): { wir
   const [a, b] = line.points;
   const out: { wire: Wire; at: Pt; t: number }[] = [];
   for (const e of page.elements) {
-    if (e.kind !== 'wire') continue;
+    // La linea spessa di un bus fili non è un conduttore: contano i fili che vi entrano
+    if (e.kind !== 'wire' || isBundle(e)) continue;
     for (let i = 0; i < e.points.length - 1; i++) {
       const p = intersect(a, b, e.points[i], e.points[i + 1]);
       if (p) { out.push({ wire: e, at: p, t: Math.hypot(p.x - a.x, p.y - a.y) }); break; }
@@ -210,6 +212,19 @@ export function cableInfos(project: Project, nets?: { wireNet: Map<string, Net> 
   // Conduttori già fissati ad altri fili: l'assegnazione automatica non li prende
   const fixedNames = new Map<string, Set<string>>();
   for (const c of project.cables ?? []) fixedNames.set(c.id, new Set(Object.values(c.fixed ?? {})));
+  // Bus fili con il nome del cavo: il conduttore scritto nel bus (WH, BN…) vale per il cavo
+  const busCond = new Map<string, Map<string, string>>();
+  if (project.cables?.length && project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && isBundle(e)))) {
+    const { taps, names } = bundleTaps(project);
+    for (const t of taps) {
+      const n = names.get(t.group)?.trim().replace(/^-/, '');
+      const net = t.name && n ? nl.wireNet.get(t.wire.id) : undefined;
+      if (!net) continue;
+      const m = busCond.get(n!) ?? new Map<string, string>();
+      busCond.set(n!, m);
+      if (!m.has(net.id)) m.set(net.id, t.name!);
+    }
+  }
   for (const pg of project.pages) {
     for (const e of pg.elements) {
       if (e.kind !== 'cable') continue;
@@ -227,7 +242,8 @@ export function cableInfos(project: Project, nets?: { wireNet: Map<string, Net> 
       const pending: typeof crossed = [];
       for (const x of crossed) {
         const net = nl.wireNet.get(x.wire.id);
-        const manual = info.cable.assign[x.wire.id];
+        const fromBus = net ? busCond.get(info.cable.tag)?.get(net.id) : undefined;
+        const manual = info.cable.assign[x.wire.id] ?? (fromBus && info.cable.conductors.includes(fromBus) ? fromBus : undefined);
         const i = net ? nth.get(net.id) ?? 0 : 0;
         if (net) nth.set(net.id, i + 1);
         const again = net && seen.get(net.id)?.[i];

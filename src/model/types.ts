@@ -351,6 +351,8 @@ export interface Wire {
    * bus ("" = senza nome); i bus con lo stesso nome sono lo stesso bus su tutte le pagine
    */
   bundle?: string;
+  /** Bus fili: articolo del cavo che rappresenta (i suoi conduttori sono quelli proposti per il bus) */
+  bundlePart?: string;
   /** Filo che entra in un bus: conduttore del bus a cui si collega l'estremo iniziale o finale (es. "L1") */
   tapStart?: string;
   tapEnd?: string;

@@ -162,6 +162,27 @@ Les règles sont simples :
 Dans le format texte ([chapitre 17](17-assistente-ia.md)) la ligne du bus est un fil avec `busfili=nom`
 (`busfili=_` s'il n'a pas de nom) et le conducteur aux deux extrémités d'un fil s'écrit avec `cond1=` et `cond2=`.
 
+### Bus fils utilisé comme câble
+
+Un câble qui passe d'une armoire à l'autre peut être dessiné comme bus fils : les fils entrent dans le bus
+sur la page de départ et sortent d'un bus du même nom sur la page d'arrivée.
+
+1. Donnez au bus **le repère du câble** (`W1112S1`). Si le câble n'est pas encore dans le projet, après le
+   nom on choisit l'**article du câble** (aussi plus tard, dans *Propriétés ▸ Article du câble*).
+2. Pour chaque fil le programme propose les **conducteurs du câble dans l'ordre** (couleurs ou numéros) :
+   ceux déjà utilisés sont atténués, ceux entrés ailleurs qui attendent leur sortie sont mis en évidence et
+   proposés en premier, les autres sont libres.
+3. Avec **Nommer les conducteurs dans l'ordre** (*Propriétés* du bus) les fils de la page reçoivent leur
+   conducteur de gauche à droite : au départ les premiers libres, à l'arrivée ceux qui attendent la sortie.
+4. Dessinez la ligne du câble sur les fils, sur les deux pages : dans la vue *Câbles* chaque fil prend le
+   conducteur écrit dans le bus. La ligne épaisse du bus ne compte pas comme conducteur.
+
+La vue **Bus fils** (*Affichage ▸ Bus fils*, ou *Listes ▸ Bus fils*) montre tous les bus et, pour celui
+choisi, chaque fil qui entre ou sort avec page, numéro de fil et liaisons ; le conducteur se corrige
+directement dans le tableau. Les fils sans conducteur, ceux qui entrent sans sortir et les conducteurs que
+le câble n'a pas sont signalés. La liste imprimable **Liaisons des bus fils** a un conducteur par ligne
+(comme les connexions des câbles), avec les conducteurs libres du câble.
+
 ## Textes
 
 *Texte* (ou *Insertion ▸ Texte*) et un clic sur la page insèrent un texte libre. Dans *Propriétés* on modifie

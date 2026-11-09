@@ -86,6 +86,7 @@ const REF_COLUMNS: Record<string, string[]> = {
   'Lista fili (cablaggio)': ['Da', 'A'],
   'Lista cavi': ['Cavo', 'Da', 'A'],
   'Collegamenti cavi': ['Da', 'A'],
+  'Collegamenti bus fili': ['Da', 'A'],
   'Lista I/O PLC': ['Scheda'],
   'Lista connettori': ['Connettore'],
   'Collegamenti di rete': ['Quadro', 'Quadro'],

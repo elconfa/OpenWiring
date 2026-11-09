@@ -161,6 +161,27 @@ The rules are simple:
 In the text format ([chapter 17](17-assistente-ia.md)) the line of the bus is a wire with `busfili=name`
 (`busfili=_` if unnamed) and the conductor at the two ends of a wire is written with `cond1=` and `cond2=`.
 
+### Wire bus used as a cable
+
+A cable that goes from one cabinet to another can be drawn as a wire bus: the wires enter the bus on the
+starting page and leave a bus with the same name on the arrival page.
+
+1. Give the bus **the cable tag** (`W1112S1`). If the cable is not yet in the project, after the name you
+   choose the **cable part** (also later, in *Properties ▸ Cable part*).
+2. For each wire the program proposes the **cable conductors in order** (colours or numbers): those
+   already used are dimmed, those that entered elsewhere and wait for their exit are highlighted and
+   proposed first, the others are free.
+3. With **Name the conductors in order** (bus *Properties*) the wires of the page get their conductor from
+   left to right: on the starting page the first free ones, on the arrival page those waiting for their exit.
+4. Draw the cable line across the single wires, on both pages: in the *Cables* view each wire takes the
+   conductor written in the bus. The thick bus line does not count as a conductor.
+
+The **Wire bus** view (*View ▸ Wire bus*, or *Lists ▸ Wire bus*) shows all buses and, for the chosen one,
+every wire entering or leaving with page, wire number and connections; the conductor is corrected directly
+in the table. Wires without a conductor, wires that enter without leaving and conductors the cable does
+not have are marked. The printable list **Wire bus connections** has one conductor per row (like *Cable
+connections*), with the free conductors of the cable.
+
 ## Texts
 
 *Text* (or *Insert ▸ Text*) and a click on the page insert a free text. In *Properties* you change the text

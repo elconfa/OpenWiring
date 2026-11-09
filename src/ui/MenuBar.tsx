@@ -106,7 +106,7 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
     },
     {
       name: 'Visualizza', items: [
-        ...([['schema', tn('Schema')], ['devices', tn('Dispositivi')], ['plc', tn('PLC')], ['terminals', tn('Morsettiere')], ['connectors', tn('Connettori')], ['distributors', tn('Ripartitori')], ['cables', tn('Cavi')], ['calcs', tn('Calcoli')], ['parts', tn('Articoli')], ['reports', tn('Liste')]] as const)
+        ...([['schema', tn('Schema')], ['devices', tn('Dispositivi')], ['plc', tn('PLC')], ['terminals', tn('Morsettiere')], ['connectors', tn('Connettori')], ['distributors', tn('Ripartitori')], ['cables', tn('Cavi')], ['bundles', tn('Bus fili')], ['calcs', tn('Calcoli')], ['parts', tn('Articoli')], ['reports', tn('Liste')]] as const)
           .map(([v, l]) => ({ label: tx(l), run: () => st().setView(v), checked: s.view === v })),
         sep,
         { header: tx('Riquadri') },
@@ -296,7 +296,7 @@ export function ViewTabs() {
   const st = useStore.getState;
   return (
     <div className="tb-tabs" role="tablist">
-      {([['schema', tn('Schema')], ['devices', tn('Dispositivi')], ['plc', tn('PLC')], ['terminals', tn('Morsettiere')], ['connectors', tn('Connettori')], ['distributors', tn('Ripartitori')], ['cables', tn('Cavi')], ['calcs', tn('Calcoli')], ['parts', tn('Articoli')], ['reports', tn('Liste')]] as const).map(([v, l]) => (
+      {([['schema', tn('Schema')], ['devices', tn('Dispositivi')], ['plc', tn('PLC')], ['terminals', tn('Morsettiere')], ['connectors', tn('Connettori')], ['distributors', tn('Ripartitori')], ['cables', tn('Cavi')], ['bundles', tn('Bus fili')], ['calcs', tn('Calcoli')], ['parts', tn('Articoli')], ['reports', tn('Liste')]] as const).map(([v, l]) => (
         <button key={v} role="tab" aria-selected={view === v} className={view === v ? 'tab active' : 'tab'} onClick={() => st().setView(v)}>{tx(l)}</button>
       ))}
     </div>

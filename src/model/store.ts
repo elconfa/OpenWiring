@@ -43,6 +43,7 @@ import { isDeletedSymbol, deletedCategory, applySymbolChoices, mergeSymbols, rem
 import { stripOf, sameDeviceIds, terminalLevelIds, mergeTargets, migrateAuxDescriptions, partsIndex } from './devices';
 import { titleBlockTemplates, templateFields } from './titleBlocks';
 import { linkPartners, pairLinks } from './links';
+import { nameTapsInOrder } from './bundles';
 import { withShow, type WireVisKey, type SymVisKey } from './visibility';
 import { buildPlcGroup, firstFreeChannel, groupConfig, groupMembers, newGroupId, type PlcGroupCfg } from './plcGroup';
 import { nextTerminal, nextToPlace, nextLevel, parseTerminalNo, terminalNo, ensureStrip, renumberStrip as renumberStripModel, renameStrip as renameStripModel, renameTerminals as renameTerminalsModel, addLevel, addJumper as addJumperModel, removeFromJumpers, addSpares as addSparesModel, removeSpares as removeSparesModel, setSparePart, syncStripPages, allStrips } from './terminals';
@@ -85,7 +86,7 @@ export type TreeSel =
 
 export interface LogEntry { time: string; level: 'info' | 'warn' | 'error'; msg: string }
 
-export type View = 'calcs' | 'schema' | 'parts' | 'reports' | 'plc' | 'terminals' | 'connectors' | 'distributors' | 'cables' | 'symbol' | 'devices';
+export type View = 'calcs' | 'schema' | 'parts' | 'reports' | 'plc' | 'terminals' | 'connectors' | 'distributors' | 'cables' | 'bundles' | 'symbol' | 'devices';
 
 /** Progetto aperto ma non attivo: quello che serve per riprenderlo com'era */
 export interface OpenProject {
@@ -285,6 +286,11 @@ export interface State {
   addWire(points: Pt[], bus?: string, bundle?: string): Wire;
   /** Conduttore del bus a cui si collega un estremo del filo (0 iniziale, 1 finale; "" = nessuno) */
   setWireTap(wireId: string, end: 0 | 1, name: string): void;
+  /** Bus fili: conduttore ai fili che lo toccano sulla sua pagina, da sinistra a destra (vedi nameTapsInOrder) */
+  nameBundleTaps(bundleWireId: string): number;
+  /** Bus scelto nella vista Bus fili (un suo tratto) */
+  bundleSel?: string;
+  setBundleSel(wireId: string | undefined): void;
   /** Collegamento rapido (tasti V e H) nel punto indicato; false se non c'è niente da collegare */
   quickWire(at: Pt, axis: 'h' | 'v'): boolean;
   /** Filo in alto o in basso nella posizione fissa delle impostazioni (un passo dopo quelli già messi) */
@@ -1227,6 +1233,12 @@ export const useStore = create<State>((set, get) => {
       get().commit(p => { const pg = currentPage(p, pageId); pg.elements.push(w); splitWiresAtPins(p, pg, [w.id]); });
       return w;
     },
+    nameBundleTaps(bundleWireId) {
+      let n = 0;
+      get().commit(p => { n = nameTapsInOrder(p, bundleWireId, partsIndex(p, get().library)); });
+      return n;
+    },
+    setBundleSel(wireId) { set({ bundleSel: wireId }); },
     setWireTap(wireId, end, name) {
       get().commit(p => {
         for (const pg of p.pages) for (const e of pg.elements) {

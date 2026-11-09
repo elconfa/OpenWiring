@@ -555,6 +555,10 @@ button.link:hover { text-decoration: underline; }
 .ask-list { display: flex; flex-direction: column; gap: 2px; max-height: min(50vh, 360px); overflow-y: auto; margin-bottom: 10px; padding: 2px; }
 .ask-list button { flex: none; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ask-list button.current { outline: 2px solid var(--accent, #2f81f7); outline-offset: -2px; }
+/* Conduttori dei bus fili: già usati attenuati, liberi normali, entrati che aspettano l'uscita in evidenza */
+.ask-list button.tone-used { opacity: .55; }
+.ask-list button.tone-wait { font-weight: 600; border-left: 3px solid var(--warn, #d29922); }
+.ask-list button.tone-free { border-left: 3px solid var(--ok, #2ea043); }
 .ask-order { display: flex; flex-direction: column; gap: 2px; max-height: min(55vh, 420px); overflow-y: auto; margin-bottom: 10px; padding: 2px; min-width: 340px; }
 .ask-order-row { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border: 1px solid var(--border, #d0d7de); border-radius: 4px; cursor: grab; }
 .ask-order-row.current { outline: 2px solid var(--accent, #2f81f7); outline-offset: -2px; }

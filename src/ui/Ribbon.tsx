@@ -215,6 +215,7 @@ export function ribbonTabs(s: State): RTab[] {
           { icon: 'terminalStrip', label: tx('Morsettiere'), big: true, run: () => st().setView('terminals'), active: s.view === 'terminals' },
           { icon: 'connector', label: tx('Connettori'), run: () => st().setView('connectors'), active: s.view === 'connectors' },
           { icon: 'cable', label: tx('Cavi'), run: () => st().setView('cables'), active: s.view === 'cables' },
+          { icon: 'bundle', label: tx('Bus fili'), run: () => st().setView('bundles'), active: s.view === 'bundles', title: tx('Tutti i conduttori che entrano ed escono dai bus fili, da controllare e correggere') },
           { icon: 'distributor', label: tx('Ripartitori'), run: () => st().setView('distributors'), active: s.view === 'distributors' },
           { icon: 'calc', label: tx('Calcoli'), run: () => st().setView('calcs'), active: s.view === 'calcs' },
         ] },

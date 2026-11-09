@@ -17,6 +17,8 @@ import { cardType, cardOrderInfo, ioAssignments } from './plc';
 import { pageOfLocation } from './devices';
 
 import { customListTable } from './customLists';
+import { bundleTaps, bundleConductors, bundleConductorList } from './bundles';
+import { columnOf } from './types';
 
 export interface Table {
   title: string;
@@ -332,6 +334,46 @@ export function cableReport(project: Project): Table {
   return { goto, title: 'Lista cavi', columns: ['Cavo', 'Tipo', 'Formazione', 'Usati', 'Liberi', 'Lunghezza (m)', 'Da', 'A', 'Descrizione', 'Posizione', 'Articolo'], rows };
 }
 
+export const BUNDLE_TITLE = 'Collegamenti bus fili';
+
+/**
+ * Collegamenti dei bus fili: un conduttore per riga, nell'ordine del cavo del bus (colori o numeri),
+ * con i dispositivi alle due estremità (pagina di partenza e di arrivo), numero filo e pagine; i
+ * conduttori liberi del cavo e quelli che entrano senza uscire sono segnati nelle note
+ */
+export function bundleReport(project: Project, library: Part[] = []): Table {
+  const { taps, groupOf, names } = bundleTaps(project);
+  const nl = computeNetlist(project);
+  const parts = partsIndex(project, library);
+  const pageIdx = new Map(project.pages.map((p, i) => [p.id, i]));
+  const pageName = new Map(project.pages.map(p => [p.id, p.name]));
+  const groups = [...new Set(groupOf.values())].map(g => ({ g, name: names.get(g) ?? '' }))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  const rows: string[][] = [];
+  const goto: Record<number, string | undefined>[] = [];
+  for (const { g, name } of groups) {
+    const list = bundleConductorList(project, g, name, parts);
+    const inBus = bundleConductors(taps, g);
+    const order = (n: string) => { const i = list?.indexOf(n) ?? -1; return i < 0 ? 1e6 : i; };
+    const conds = [...new Set([...(list ?? []), ...inBus.map(c => c.name)])]
+      .sort((a, b) => order(a) - order(b) || a.localeCompare(b, undefined, { numeric: true }));
+    const bus = name || '—';
+    for (const c of conds) {
+      const mine = taps.filter(t => t.group === g && t.name === c)
+        .sort((a, b) => (pageIdx.get(a.pageId) ?? 0) - (pageIdx.get(b.pageId) ?? 0) || a.at.x - b.at.x);
+      if (!mine.length) { rows.push([bus, c, '', '', '', '', 'libero']); goto.push({}); continue; }
+      const net = nl.wireNet.get(mine[0].wire.id);
+      const ends = (pageId: string) => (net?.pins ?? []).filter(p => p.el.page.id === pageId).map(p => `-${p.ref}`).join(', ');
+      const first = mine[0], last = mine[mine.length - 1];
+      const note = mine.length < 2 ? 'entra ma non esce' : list && !list.includes(c) ? 'conduttore non del cavo' : '';
+      rows.push([bus, c, ends(first.pageId), mine.length > 1 ? ends(last.pageId) : '', net?.wireNo ?? '',
+        mine.map(t => `${pageName.get(t.pageId)}.${columnOf(t.at.x)}`).join(', '), note]);
+      goto.push({ 5: pageName.get(first.pageId) });
+    }
+  }
+  return { goto, title: BUNDLE_TITLE, columns: ['Bus', 'Conduttore', 'Da', 'A', 'N. filo', 'Posizione', 'Note'], rows };
+}
+
 /** Collegamenti dei cavi: un conduttore per riga con le sue estremità */
 export function cableConnectionReport(project: Project): Table {
   const rows: string[][] = [];
@@ -577,6 +619,7 @@ function projectReportsNow(project: Project, library: Part[]): Table[] {
   const hasBus = project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus));
   if (project.cables?.length || hasBus) out.push(cableReport(project));
   if (project.cables?.length) out.push(cableConnectionReport(project));
+  if (project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bundle !== undefined))) out.push(bundleReport(project, library));
   if (hasBus) out.push(networkLinkReport(project), networkNodeReport(project));
   if (hasBus || project.plc.stations?.length) { const t = networkAddressReport(project, library); if (t.rows.length) out.push(t); }
   if (ipPlan(project).length || project.ipNetworks?.length) out.push(ipPlanReport(project, library));

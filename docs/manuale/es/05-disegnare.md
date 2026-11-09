@@ -162,6 +162,27 @@ Las reglas son sencillas:
 En el formato de texto ([capítulo 17](17-assistente-ia.md)) la línea del bus es un hilo con `busfili=nombre` (`busfili=_`
 si no tiene nombre) y el conductor en los dos extremos de un hilo se escribe con `cond1=` y `cond2=`.
 
+### Bus hilos usado como cable
+
+Un cable que pasa de un cuadro a otro se puede dibujar como bus hilos: los hilos entran en el bus en la
+página de salida y salen de un bus con el mismo nombre en la página de llegada.
+
+1. Da al bus **la sigla del cable** (`W1112S1`). Si el cable aún no está en el proyecto, después del nombre
+   se elige el **artículo del cable** (también después, en *Propiedades ▸ Artículo del cable*).
+2. Para cada hilo el programa propone los **conductores del cable en orden** (colores o números): los ya
+   usados aparecen atenuados, los que entraron en otro lugar y esperan su salida se destacan y se proponen
+   primero, los demás están libres.
+3. Con **Nombrar los conductores en orden** (*Propiedades* del bus) los hilos de la página reciben su
+   conductor de izquierda a derecha: en la salida los primeros libres, en la llegada los que esperan salir.
+4. Dibuja la línea del cable sobre los hilos, en las dos páginas: en la vista *Cables* cada hilo toma el
+   conductor escrito en el bus. La línea gruesa del bus no cuenta como conductor.
+
+La vista **Bus hilos** (*Ver ▸ Bus hilos*, o *Listas ▸ Bus hilos*) muestra todos los buses y, para el
+elegido, cada hilo que entra o sale con página, número de hilo y conexiones; el conductor se corrige
+directamente en la tabla. Se marcan los hilos sin conductor, los que entran sin salir y los conductores
+que el cable no tiene. La lista imprimible **Conexiones de bus hilos** tiene un conductor por fila (como
+las conexiones de cables), con los conductores libres del cable.
+
 ## Textos
 
 *Texto* (o *Insertar ▸ Texto*) y un clic en la página insertan un texto libre. En *Propiedades* se cambian el

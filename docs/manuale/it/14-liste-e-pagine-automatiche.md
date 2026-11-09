@@ -21,6 +21,7 @@ si apre in Excel), *PDF completo* esporta il progetto con tutte le liste in coda
 | Lista connessioni | ogni collegamento: numero filo, da, a, pagine, sezione, colore, cavo |
 | Lista fili (cablaggio) | ogni filo con sezione, colore, puntali e lunghezza stimata |
 | Lista cavi, Collegamenti cavi | vedi [capitolo 9](09-cavi-e-connettori.md) |
+| Collegamenti bus fili | vedi [capitolo 5](05-disegnare.md) |
 | Lista connettori | pin, lati, fili |
 | Collegamenti di rete, Nodi di rete, Piano indirizzi IP | vedi [capitolo 11](11-reti-luoghi-unifilare.md) |
 | Lista I/O PLC | vedi [capitolo 10](10-plc.md) |

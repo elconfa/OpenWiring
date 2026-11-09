@@ -21,6 +21,7 @@ La pestaña **Listas** tiene una subpestaña por cada lista; *Exportar CSV* guar
 | Lista de conexiones | cada conexión: número de hilo, desde, hasta, páginas, sección, color, cable |
 | Lista de hilos (cableado) | cada hilo con sección, color, punteras y longitud estimada |
 | Lista de cables, Conexiones de cables | ver [capítulo 9](09-cavi-e-connettori.md) |
+| Conexiones de bus hilos | ver [capítulo 5](05-disegnare.md) |
 | Lista de conectores | pines, lados, hilos |
 | Conexiones de red, Nodos de red, Plan de direcciones IP | ver [capítulo 11](11-reti-luoghi-unifilare.md) |
 | Lista de E/S PLC | ver [capítulo 10](10-plc.md) |

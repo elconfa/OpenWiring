@@ -35,7 +35,7 @@ import { buildDevices, effectivePinLabels, deviceInfo, designation, partsIndex, 
 import { letterOfTag, nextTagFor } from '../model/numbering';
 import { askChoice } from './Ask';
 import { replaceImage, naturalRatio } from './images';
-import { bundleTaps, bundleConductors, isBundle, COMMON_CONDUCTORS } from '../model/bundles';
+import { bundleTaps, bundleConductors, isBundle, conductorChoices, bundleCable } from '../model/bundles';
 import { linkChoices, currentLinkPartner, pairByName } from './linkChooser';
 import { isIncomingLink, NO_PARTNER, WAITING } from '../model/links';
 import { wireAtPotential, wireLabelShown, wireTooShort, type Derived } from '../model/derive';
@@ -723,7 +723,11 @@ function UserPropRows({ assign, values, target }: { assign: UserPropAssign; valu
 /** Bus di conduttori (modalità BUS): nome e conduttori che vi entrano ed escono */
 function BundleProps({ wire }: { wire: Wire }) {
   const project = useStore(s => s.project);
+  const library = useStore(s => s.library);
   const st = useStore.getState;
+  const parts = partsIndex(project, library);
+  // Articoli cavo (con i conduttori nei dati del cavo): quelli proposti per il bus
+  const cableParts = new Map([...parts].filter(([, p]) => p.cable?.conductors.length));
   const { taps, groupOf } = bundleTaps(project);
   const group = groupOf.get(wire.id) ?? wire.id;
   const conductors = bundleConductors(taps, group);
@@ -741,7 +745,22 @@ function BundleProps({ wire }: { wire: Wire }) {
           <span key={c.name} className={c.count < 2 ? 'warn-text' : undefined} title={c.count < 2 ? tx('Entra nel bus ma non esce da nessuna parte') : tx('{0} fili collegati', c.count)}>{c.name}{c.count < 2 ? ' ⚠' : ''} </span>
         )) : '—'}
       </Row>
+      <Row label={tx('Articolo del cavo')}>
+        <PartInput listId="bundle-cable-parts" value={wire.bundlePart ?? ''} parts={cableParts.size ? cableParts : parts}
+          onCommit={v => st().updateElement(wire.id, { bundlePart: v || undefined })} />
+      </Row>
+      {bundleCable(project, wire.bundle)
+        ? <Row label={tx('Cavo')}>{tx('-{0}: i conduttori sono quelli del cavo', bundleCable(project, wire.bundle)!.tag)}</Row>
+        : wire.bundlePart && !parts.get(wire.bundlePart)?.cable?.conductors.length
+          ? <Row label=""><span className="small warn-text">{tx('L\'articolo {0} non ha i dati del cavo (conduttori): si propongono i nomi comuni', wire.bundlePart)}</span></Row>
+          : null}
       {unnamed > 0 && <Row label=""><span className="small muted">{tx('{0} fili toccano il bus senza conduttore: selezionali per indicarlo', unnamed)}</span></Row>}
+      <Row label="">
+        <button disabled={!taps.some(t => t.group === group && !t.name && t.pageId === project.pages.find(pg => pg.elements.includes(wire))?.id)}
+          title={tx('I fili senza conduttore della pagina, da sinistra a destra: prima i conduttori entrati altrove che aspettano l\'uscita, poi quelli liberi')}
+          onClick={() => st().nameBundleTaps(wire.id)}>{tx('Nomina i conduttori in ordine')}</button>{' '}
+        <button onClick={() => { st().setBundleSel(wire.id); st().setView('bundles'); }}>{tx('Apri in Bus fili')}</button>
+      </Row>
       <WireDataRows wires={[wire]} />
       <Row label={tx('Vertici')}>{wire.points.length}</Row>
     </Group>
@@ -765,7 +784,7 @@ function TapRows({ wire }: { wire: Wire }) {
             <span title={bus ? tx('Bus «{0}»', bus) : undefined}>
               <Field value={t.name ?? ''} list={listId} placeholder={tx('es. L1, PE')} onCommit={v => st().setWireTap(wire.id, t.end, v)} />
             </span>
-            <datalist id={listId}>{[...new Set([...bundleConductors(taps, t.group).map(c => c.name), ...COMMON_CONDUCTORS])].map(n => <option key={n} value={n} />)}</datalist>
+            <datalist id={listId}>{conductorChoices(project, taps, t.group, bus, partsIndex(project, useStore.getState().library)).map(c => <option key={c.name} value={c.name}>{c.count ? tx('già usato ({0})', c.count) : tx('libero')}</option>)}</datalist>
           </Row>
         );
       })}

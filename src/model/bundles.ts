@@ -2,7 +2,7 @@
 // alleggerire lo schema. I fili che la toccano hanno il nome del conduttore (L1, L2, PE…): i fili con
 // lo stesso nome sullo stesso bus sono lo stesso conduttore. I bus che si toccano sono un bus solo;
 // quelli con lo stesso nome lo sono anche su pagine diverse.
-import type { Project, Pt, Wire } from './types';
+import type { Project, Pt, Wire, Cable, Part } from './types';
 import { onSegmentInterior, samePt } from './geometry';
 
 export const isBundle = (w: Wire) => w.bundle !== undefined;
@@ -70,3 +70,73 @@ export function bundleConductors(taps: BundleTap[], group: string): { name: stri
 
 /** Nomi proposti per i conduttori di un bus nuovo */
 export const COMMON_CONDUCTORS = ['L1', 'L2', 'L3', 'N', 'PE', 'L+', 'M', '+24V', '0V'];
+
+/** Cavo rappresentato dal bus: quello con la sigla uguale al nome del bus (es. bus «W1112S1» = cavo -W1112S1) */
+export function bundleCable(project: Project, busName: string | undefined): Cable | undefined {
+  const n = busName?.trim().replace(/^-/, '');
+  return n ? (project.cables ?? []).find(c => c.tag === n) : undefined;
+}
+
+/**
+ * Conduttori del cavo che il bus rappresenta, in ordine: quelli del cavo del progetto con lo stesso
+ * nome, altrimenti quelli dell'articolo scelto sul bus (dati del cavo dell'articolo)
+ */
+export function bundleConductorList(project: Project, group: string, busName?: string, parts?: Map<string, Part>): string[] | undefined {
+  const cable = bundleCable(project, busName);
+  if (cable) return cable.conductors;
+  if (!parts) return undefined;
+  const { groupOf } = bundleTaps(project);
+  for (const pg of project.pages) for (const e of pg.elements) {
+    if (e.kind === 'wire' && e.bundlePart && groupOf.get(e.id) === group) {
+      const c = parts.get(e.bundlePart)?.cable?.conductors;
+      if (c?.length) return c;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Conduttori da proporre per un bus, in ordine: quelli del cavo (progetto o articolo: WH, BN, GN…
+ * oppure 1, 2, 3…), altrimenti quelli già nel bus e poi i nomi comuni. count = fili che già lo usano
+ */
+export function conductorChoices(project: Project, taps: BundleTap[], group: string, busName?: string, parts?: Map<string, Part>): { name: string; count: number }[] {
+  const inBus = bundleConductors(taps, group);
+  const count = (n: string) => inBus.find(c => c.name === n)?.count ?? 0;
+  const list = bundleConductorList(project, group, busName, parts);
+  const base = list ?? COMMON_CONDUCTORS;
+  return [...(list ? [] : inBus.map(c => c.name)), ...base, ...(list ? inBus.map(c => c.name) : [])]
+    .filter((n, i, a) => a.indexOf(n) === i).map(name => ({ name, count: count(name) }));
+}
+
+/**
+ * Nomi per i fili senza conduttore che toccano il bus su una pagina, da sinistra a destra (poi
+ * dall'alto): prima i conduttori che sono entrati altrove e aspettano l'uscita, poi quelli liberi
+ * del cavo (o 1, 2, 3… senza cavo). Restituisce quanti fili ha nominato.
+ */
+export function nameTapsInOrder(project: Project, bundleWireId: string, parts?: Map<string, Part>): number {
+  const { taps, groupOf, names } = bundleTaps(project);
+  const group = groupOf.get(bundleWireId);
+  const page = project.pages.find(pg => pg.elements.some(e => e.id === bundleWireId));
+  if (!group || !page) return 0;
+  const open = taps.filter(t => t.group === group && t.pageId === page.id && !t.name).sort((a, b) => a.at.x - b.at.x || a.at.y - b.at.y);
+  if (!open.length) return 0;
+  const list = bundleConductorList(project, group, names.get(group), parts);
+  const inBus = bundleConductors(taps, group);
+  const order = (n: string) => { const i = list?.indexOf(n) ?? -1; return i < 0 ? 1e6 : i; };
+  // Conduttori già sulla pagina: non si ripetono qui
+  const here = new Set(taps.filter(t => t.group === group && t.pageId === page.id && t.name).map(t => t.name!));
+  const waiting = inBus.filter(c => c.count === 1 && !here.has(c.name)).map(c => c.name)
+    .sort((a, b) => order(a) - order(b) || a.localeCompare(b, undefined, { numeric: true }));
+  const used = new Set(inBus.map(c => c.name));
+  const free: string[] = list ? list.filter(n => !used.has(n)) : [];
+  if (!list) for (let i = 1; free.length < open.length; i++) if (!used.has(String(i))) free.push(String(i));
+  const pool = [...waiting, ...free];
+  let n = 0;
+  for (const t of open) {
+    const name = pool.shift();
+    if (!name) break;
+    if (t.end) t.wire.tapEnd = name; else t.wire.tapStart = name;
+    n++;
+  }
+  return n;
+}

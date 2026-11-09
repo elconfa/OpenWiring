@@ -12,7 +12,8 @@ export interface AskField {
   /** Testo libero con l'elenco dei valori già usati da scegliere (si può scriverne uno nuovo) */
   suggestions?: string[];
 }
-export interface ComboItem { value: string; label: string }
+/** tone: voce già usata (attenuata) o da preferire (evidenziata), es. i conduttori di un bus fili */
+export interface ComboItem { value: string; label: string; tone?: 'used' | 'free' | 'wait' }
 /** Voce di una scelta multipla (askChecks); group: intestazione sotto cui sta, con la casella per tutto il gruppo */
 export interface CheckItem { label: string; checked?: boolean; group?: string; disabled?: boolean; note?: string }
 interface Request {
@@ -247,7 +248,7 @@ function ComboAsk({ req, close }: { req: Request; close: () => void }) {
         </label>
         <div className="ask-list" ref={listRef}>
           {shown.map(i => (
-            <button key={i} type="button" className={i === hi ? 'current' : undefined} onClick={() => pick(i)} title={c.items[i].label}>{c.items[i].label}</button>
+            <button key={i} type="button" className={[i === hi ? 'current' : '', c.items[i].tone ? `tone-${c.items[i].tone}` : ''].filter(Boolean).join(' ') || undefined} onClick={() => pick(i)} title={c.items[i].label}>{c.items[i].label}</button>
           ))}
           {!shown.length && c.items.length > 0 && <span className="muted small">{tx('Nessuna voce corrisponde: con OK si usa il testo scritto.')}</span>}
         </div>

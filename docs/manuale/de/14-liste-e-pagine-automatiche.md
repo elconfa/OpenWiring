@@ -23,6 +23,7 @@ am Ende.
 | Verbindungsliste | jede Verbindung: Drahtnummer, von, nach, Seiten, Querschnitt, Farbe, Kabel |
 | Drahtliste (Verdrahtung) | jeder Draht mit Querschnitt, Farbe, Aderendhülsen und geschätzter Länge |
 | Kabelliste, Kabelverbindungen | siehe [Kapitel 9](09-cavi-e-connettori.md) |
+| Leiterbus-Verbindungen | siehe [Kapitel 5](05-disegnare.md) |
 | Steckverbinderliste | Pins, Seiten, Drähte |
 | Netzwerkverbindungen, Netzwerkknoten, IP-Adressplan | siehe [Kapitel 11](11-reti-luoghi-unifilare.md) |
 | SPS-E/A-Liste | siehe [Kapitel 10](10-plc.md) |

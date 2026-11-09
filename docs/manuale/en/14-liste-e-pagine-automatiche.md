@@ -21,6 +21,7 @@ Excel), *Complete PDF* exports the project with all the lists at the end.
 | Connection list | every connection: wire number, from, to, pages, cross-section, colour, cable |
 | Wire list (wiring) | every wire with cross-section, colour, ferrules and estimated length |
 | Cable list, Cable connections | see [chapter 9](09-cavi-e-connettori.md) |
+| Wire bus connections | see [chapter 5](05-disegnare.md) |
 | Connector list | pins, sides, wires |
 | Network connections, Network nodes, IP address plan | see [chapter 11](11-reti-luoghi-unifilare.md) |
 | PLC I/O list | see [chapter 10](10-plc.md) |

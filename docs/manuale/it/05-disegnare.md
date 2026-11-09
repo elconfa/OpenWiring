@@ -161,6 +161,27 @@ Le regole sono semplici:
 Nel formato testo ([capitolo 17](17-assistente-ia.md)) la linea del bus è un filo con `busfili=nome` (`busfili=_`
 se senza nome) e il conduttore ai due estremi di un filo si scrive con `cond1=` e `cond2=`.
 
+### Bus fili usato come cavo
+
+Un cavo che passa da un quadro all'altro si può disegnare come bus fili: i fili entrano nel bus sulla
+pagina di partenza ed escono da un bus con lo stesso nome sulla pagina di arrivo.
+
+1. Dai al bus **la sigla del cavo** (`W1112S1`). Se il cavo non è ancora nel progetto, dopo il nome si
+   sceglie l'**articolo del cavo** (anche dopo, in *Proprietà ▸ Articolo del cavo*).
+2. Per ogni filo il programma propone i **conduttori del cavo in ordine** (colori o numeri): quelli già
+   usati sono attenuati, quelli entrati altrove che aspettano l'uscita sono evidenziati e proposti per
+   primi, gli altri sono liberi.
+3. Con **Nomina i conduttori in ordine** (*Proprietà* del bus) i fili della pagina ricevono il conduttore
+   da sinistra a destra: in partenza i primi liberi, in arrivo quelli che aspettano l'uscita.
+4. Disegna la linea del cavo sui singoli fili, su tutte e due le pagine: nella scheda *Cavi* ogni filo
+   prende il conduttore scritto nel bus. La linea spessa del bus non conta come conduttore.
+
+La vista **Bus fili** (*Visualizza ▸ Bus fili*, o *Liste ▸ Bus fili*) mostra tutti i bus e, per quello
+scelto, ogni filo che entra o esce con pagina, numero filo e collegamenti; il conduttore si corregge
+direttamente nella tabella. Sono segnati i fili senza conduttore, quelli che entrano senza uscire e i
+conduttori che il cavo non ha. La lista stampabile **Collegamenti bus fili** ha un conduttore per riga
+(come *Collegamenti cavi*), con i conduttori liberi del cavo.
+
 ## Testi
 
 *Testo* (o *Inserisci ▸ Testo*) e un clic sulla pagina inseriscono un testo libero. In *Proprietà* si

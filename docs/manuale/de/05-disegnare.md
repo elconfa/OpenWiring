@@ -166,6 +166,27 @@ Die Regeln sind einfach:
 Im Textformat ([Kapitel 17](17-assistente-ia.md)) ist die Buslinie ein Draht mit `busfili=name` (`busfili=_` ohne
 Namen), und der Leiter an den beiden Enden eines Drahtes wird mit `cond1=` und `cond2=` geschrieben.
 
+### Leiterbus als Kabel
+
+Ein Kabel, das von einem Schaltschrank zum anderen geht, kann als Leiterbus gezeichnet werden: die Drähte
+treten auf der Startseite in den Bus ein und verlassen auf der Zielseite einen Bus mit demselben Namen.
+
+1. Geben Sie dem Bus **das BMK des Kabels** (`W1112S1`). Ist das Kabel noch nicht im Projekt, wählt man
+   nach dem Namen den **Kabelartikel** (auch später, in *Eigenschaften ▸ Kabelartikel*).
+2. Für jeden Draht schlägt das Programm die **Adern des Kabels der Reihe nach** vor (Farben oder Nummern):
+   bereits verwendete sind abgeschwächt, anderswo eingetretene, die auf ihren Ausgang warten, sind
+   hervorgehoben und zuerst vorgeschlagen, die übrigen sind frei.
+3. Mit **Adern der Reihe nach benennen** (*Eigenschaften* des Busses) erhalten die Drähte der Seite ihre
+   Ader von links nach rechts: auf der Startseite die ersten freien, auf der Zielseite die wartenden.
+4. Zeichnen Sie die Kabellinie über die einzelnen Drähte, auf beiden Seiten: in der Ansicht *Kabel* nimmt
+   jeder Draht die im Bus geschriebene Ader. Die dicke Buslinie zählt nicht als Ader.
+
+Die Ansicht **Leiterbus** (*Ansicht ▸ Leiterbus* oder *Listen ▸ Leiterbus*) zeigt alle Busse und für den
+gewählten jeden ein- oder austretenden Draht mit Seite, Drahtnummer und Verbindungen; die Ader wird direkt
+in der Tabelle korrigiert. Drähte ohne Ader, Drähte, die eintreten ohne auszutreten, und Adern, die das
+Kabel nicht hat, werden markiert. Die druckbare Liste **Leiterbus-Verbindungen** hat eine Ader je Zeile
+(wie die Kabelverbindungen), mit den freien Adern des Kabels.
+
 ## Texte
 
 *Text* (oder *Einfügen ▸ Text*) und ein Klick auf die Seite fügen einen freien Text ein. Unter

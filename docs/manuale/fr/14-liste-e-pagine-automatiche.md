@@ -22,6 +22,7 @@ s'ouvre dans Excel), *PDF complet* exporte le projet avec toutes les listes à l
 | Liste des connexions | chaque liaison : numéro de fil, de, à, pages, section, couleur, câble |
 | Liste des fils (câblage) | chaque fil avec section, couleur, embouts et longueur estimée |
 | Liste des câbles, Connexions des câbles | voir [chapitre 9](09-cavi-e-connettori.md) |
+| Liaisons des bus fils | voir [chapitre 5](05-disegnare.md) |
 | Liste des connecteurs | broches, côtés, fils |
 | Connexions réseau, Nœuds réseau, Plan d'adressage IP | voir [chapitre 11](11-reti-luoghi-unifilare.md) |
 | Liste des E/S API | voir [chapitre 10](10-plc.md) |

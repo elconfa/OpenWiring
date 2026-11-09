@@ -33,6 +33,7 @@ import { PlcView } from './ui/PlcView';
 import { TerminalsView } from './ui/TerminalsView';
 import { ConnectorsView } from './ui/ConnectorsView';
 import { DistributorsView } from './ui/DistributorsView';
+import { BundlesView } from './ui/BundlesView';
 import { CalcsView } from './ui/CalcsView';
 import { PdfDialog } from './ui/PdfDialog';
 import { SearchDialog } from './ui/SearchDialog';
@@ -373,6 +374,7 @@ export function App() {
           {view === 'distributors' && <DistributorsView />}
           {view === 'calcs' && <CalcsView />}
           {view === 'cables' && <CablesView />}
+          {view === 'bundles' && <BundlesView />}
           {view === 'symbol' && <SymbolEditor />}
           {!C.log && L.hidden.log && <div className="peek peek-bottom" onMouseEnter={() => P.setPeek('log')} title={tx('Vista report')} />}
           {!C.log && (

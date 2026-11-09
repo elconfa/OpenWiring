@@ -87,7 +87,7 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 #     quel punto (riferimento a coppie, es. ausiliario del salvamotore accanto ai poli): non si collega.
 # filo x,y x,y [x,y…] [sezione=1,5] [colore=BU] [n=2.01] [bus=Profinet] [cavo=5W1]
 #     [tipocavo="…"] [lunghezza=10] [articolocavo=…] [poli=3] [testo="3/N/PE ~400 V"]
-#     [busfili=<nome>|_] [cond1=L1] [cond2=L1]   (bus di conduttori, modalità BUS: nome del bus, «_» senza
+#     [busfili=<nome>|_] [articolobus=<articolo cavo>] [cond1=L1] [cond2=L1]   (bus di conduttori, modalità BUS: nome del bus, «_» senza
 #     nome; cond1/cond2 = conduttore del bus a cui si collega il primo/l'ultimo estremo del filo)
 #     [linea=dash|dashdot|dot] [spessore=0,5]   (tipo di linea e spessore in mm sullo schema)
 #     [tipo=H07V-K] [hnumero=2,5] [colorenumero=#c00000] [posnumeri=JSON] [mostra=JSON] [proprieta=JSON]
@@ -368,6 +368,7 @@ export function pagesToText(project: Project, opts: TextExportOptions = {}): str
       if (w.bus) parts.push(`bus=${bare(w.bus)}`);
       // Bus di conduttori (modalità BUS): "_" = senza nome; cond1/cond2 = conduttore degli estremi
       if (w.bundle !== undefined) parts.push(`busfili=${w.bundle ? bare(w.bundle) : '_'}`);
+      if (w.bundlePart) parts.push(`articolobus=${bare(w.bundlePart)}`);
       if (w.tapStart) parts.push(`cond1=${bare(w.tapStart)}`);
       if (w.tapEnd) parts.push(`cond2=${bare(w.tapEnd)}`);
       if (w.tNode?.start) parts.push(`nodo1=${NODE_TEXT[w.tNode.start]}`);
@@ -523,6 +524,7 @@ function wireAttrs(k: string, v: string, w: Partial<Wire>): boolean {
     case 'n': w.number = v; return true;
     case 'bus': w.bus = v; return true;
     case 'busfili': w.bundle = v === '_' ? '' : v; return true;
+    case 'articolobus': w.bundlePart = v; return true;
     case 'cond1': w.tapStart = v; return true;
     case 'cond2': w.tapEnd = v; return true;
     case 'nodo1': case 'nodo2': {
