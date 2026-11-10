@@ -77,6 +77,25 @@ export function stripRows(p: Project, strip: string): TerminalRow[] {
   return [...map.values()].sort((a, b) => compareTerminalNo(a.no, b.no));
 }
 
+/**
+ * Numeri liberi di una morsettiera per i morsetti copiati (ids) con i loro piani (levels, es. ["A"]),
+ * dal più basso: occupato = c'è un altro morsetto disegnato sugli stessi piani (un numero con solo il
+ * piano B disegnato resta libero per una copia del piano A). Le riserve (vista Morsetti) non sono
+ * disegnate: sono libere, e spare dice quali numeri lo sono.
+ */
+export function freeTerminalNumbers(p: Project, strip: string, levels: string[], ids: string[], count: number) {
+  const rows = stripRows(p, strip);
+  const sameLevel = (lv: string) => !levels.length || !lv || levels.includes(lv);
+  const num = (r: TerminalRow) => (r.base === String(parseInt(r.base, 10)) ? parseInt(r.base, 10) : NaN);
+  const used = new Set(rows.filter(r => r.els.length && sameLevel(r.level) && !r.els.every(x => ids.includes(x.inst.id))).map(num).filter(n => !isNaN(n)));
+  // Riserve segnate nella morsettiera (anche quella appena presa dalla copia stessa)
+  const spare = new Set(stripData(p, strip).spares.map(no => parseTerminalNo(no))
+    .filter(t => sameLevel(t.level) && t.base === String(t.n)).map(t => t.n));
+  const free: number[] = [];
+  for (let n = 1; free.length < count; n++) if (!used.has(n)) free.push(n);
+  return { free, used, spare };
+}
+
 /** Morsetti fisici di una morsettiera: i piani di uno stesso morsetto (1A, 1B…) contano uno */
 export function physicalCount(rows: TerminalRow[]): number {
   return new Set(rows.map(r => (isNaN(parseInt(r.base, 10)) ? r.no : r.base))).size;

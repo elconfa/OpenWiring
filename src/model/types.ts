@@ -353,6 +353,9 @@ export interface Wire {
   bundle?: string;
   /** Bus fili: articolo del cavo che rappresenta (i suoi conduttori sono quelli proposti per il bus) */
   bundlePart?: string;
+  /** Bus fili: altezza (mm) e colore dei nomi dei conduttori scritti dove i fili entrano (assenti = 1,8 mm e il colore dei numeri filo) */
+  tapSize?: number;
+  tapColor?: string;
   /** Filo che entra in un bus: conduttore del bus a cui si collega l'estremo iniziale o finale (es. "L1") */
   tapStart?: string;
   tapEnd?: string;

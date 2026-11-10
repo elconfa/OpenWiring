@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { isListPage } from '../model/lists';
 import { useStore } from '../model/store';
 import type { Pt, Wire, Element, Page, Project, SymbolDef, TextItem, TextMoveKey, ImageItem, Zone, CableLine } from '../model/types';
-import { PAGE_W, PAGE_H } from '../model/types';
+import { PAGE_W, PAGE_H, lookOf } from '../model/types';
 import { getSymbol, instanceBounds, pinsWorld, snapPt, distToSegment, samePt, onSegmentInterior, uid, getGridSize, polylineTouchesBox } from '../model/geometry';
 import { PageContent, SymbolGraphic, SEL } from './PageSvg';
 import { Minimap } from './Minimap';
@@ -12,7 +12,7 @@ import { RadialMenu, radialItems } from './RadialMenu';
 import type { Derived } from '../model/derive';
 import { useDarkTheme } from './theme';
 import { moveWithWires, dragWirePoint, dragWireSegment, landOnWire } from '../model/wireEdit';
-import { labelNear } from '../model/wireLabels';
+import { labelNear, wireLabelGap } from '../model/wireLabels';
 import { editRichText } from './RichTextEditor';
 import { openTextEditor } from './PropertyPanel';
 import { openPropsDialog } from './PropsDialog';
@@ -143,7 +143,7 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
         // Numeri filo: le posizioni attuali (automatica o scelte a mano), più uno qui, uno in meno, o di nuovo automatico
         const cur = pd.wireLabelPos?.get(one.id) ?? [];
         const lbl = menu.label?.wireId === one.id ? menu.label : undefined;
-        const add = labelNear(one.points, menu.at, one.labelSize ?? pd.textStyles?.wireNo.size);
+        const add = labelNear(one.points, menu.at, one.labelSize ?? pd.textStyles?.wireNo.size, wireLabelGap(one, lookOf(settingsOf(st.project)).w.bundle));
         return (
           <>
             {add && item(tx('Aggiungi il numero filo qui'), () => st.setWireLabels(one.id, [...cur, add]))}
@@ -902,7 +902,7 @@ export function Canvas({ derived }: { derived: Derived }) {
     const cur = derived.pages.get(page.id)?.wireLabelPos?.get(d.wireId) ?? [];
     const i = Math.max(0, d.index);
     if (w?.kind !== 'wire' || !cur[i] || (d.to.x === d.start.x && d.to.y === d.start.y)) return undefined;
-    const p = labelNear(w.points, { x: cur[i].x + d.to.x - d.start.x, y: cur[i].y + d.to.y - d.start.y }, w.labelSize ?? derived.pages.get(page.id)?.textStyles?.wireNo.size);
+    const p = labelNear(w.points, { x: cur[i].x + d.to.x - d.start.x, y: cur[i].y + d.to.y - d.start.y }, w.labelSize ?? derived.pages.get(page.id)?.textStyles?.wireNo.size, wireLabelGap(w, lookOf(settingsOf(project)).w.bundle));
     return p ? { list: cur.map((q, k) => (k === i ? p : q)), i } : undefined;
   }
 

@@ -4,7 +4,7 @@
 import { useStore } from '../model/store';
 import { getSymbol } from '../model/geometry';
 import { stripOf } from '../model/devices';
-import { parseTerminalNo, stripRows, terminalNo } from '../model/terminals';
+import { freeTerminalNumbers, parseTerminalNo, terminalNo } from '../model/terminals';
 import type { Pt } from '../model/types';
 import { askCombo } from './Ask';
 import { tx } from '../i18n/ui';
@@ -37,14 +37,10 @@ export async function askPastedTerminals(ids: string[]) {
   }
   for (const g of groups.values()) {
     const project = st().project;
-    // Numeri usati dagli altri morsetti della morsettiera (non da questa copia)
-    const used = new Set(stripRows(project, g.strip)
-      .filter(r => r.els.length && !(r.base === g.base && r.els.every(x => g.ids.includes(x.inst.id))))
-      .map(r => parseInt(r.base, 10)).filter(n => !isNaN(n)));
-    const free: number[] = [];
-    for (let n = 1; free.length < FREE_SHOWN; n++) if (!used.has(n)) free.push(n);
+    const { free, used, spare } = freeTerminalNumbers(project, g.strip, g.levels, g.ids, FREE_SHOWN);
     const lv = g.levels.join('/');
-    const items = free.map(n => ({ value: String(n), label: lv ? `-${g.strip}:${n}${g.levels.length > 1 ? ` (${g.levels.map(l => n + l).join(', ')})` : g.levels[0]}` : `-${g.strip}:${n}`, tone: 'free' as const }));
+    const name = (n: number) => (lv ? `-${g.strip}:${n}${g.levels.length > 1 ? ` (${g.levels.map(l => n + l).join(', ')})` : g.levels[0]}` : `-${g.strip}:${n}`);
+    const items = free.map(n => ({ value: String(n), label: spare.has(n) ? `${name(n)} · ${tx('riserva')}` : name(n), tone: 'free' as const }));
     const r = await askCombo(
       tx('Numero del morsetto copiato (-{0})', g.strip),
       tx('Il primo numero libero della morsettiera, partendo dal più basso; il piano resta quello copiato. Scrivi un altro numero o sceglilo dall\'elenco.'),
@@ -53,7 +49,8 @@ export async function askPastedTerminals(ids: string[]) {
     if (!r) continue;
     const n = r.text.trim().replace(/[A-Za-z]$/, '');
     if (!/^\d+$/.test(n) || n === g.base) continue;
-    if (used.has(parseInt(n, 10))) st().logMsg(tx('Il morsetto -{0}:{1} c\'è già: i due morsetti avranno lo stesso numero', g.strip, n), 'warn');
+    // Occupato solo se c'è già lo stesso piano (5A copiato accanto a un 5B disegnato va bene)
+    if (used.has(parseInt(n, 10))) st().logMsg(tx('Il morsetto -{0}:{1} c\'è già: i due morsetti avranno lo stesso numero', g.strip, g.levels.length ? g.levels.map(l => n + l).join(', ') : n), 'warn');
     st().commit(p => {
       for (const pg of p.pages) for (const e of pg.elements) {
         if (e.kind !== 'symbol' || !g.ids.includes(e.id)) continue;

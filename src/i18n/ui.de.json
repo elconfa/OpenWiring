@@ -3415,5 +3415,9 @@
  "Il morsetto -{0}:{1} c'è già: i due morsetti avranno lo stesso numero": "Klemme -{0}:{1} gibt es bereits: beide Klemmen haben dieselbe Nummer",
  "Il primo numero libero della morsettiera, partendo dal più basso; il piano resta quello copiato. Scrivi un altro numero o sceglilo dall'elenco.": "Die erste freie Nummer der Klemmleiste, von der niedrigsten an; die Etage bleibt die kopierte. Eine andere Nummer eingeben oder aus der Liste wählen.",
  "Numero del morsetto copiato (-{0})": "Nummer der kopierten Klemme (-{0})",
- "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "{0} Elemente ausgeschnitten: beim Einfügen behalten sie Kennzeichen, Klemmen, Verweise und Drahtnummern"
+ "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "{0} Elemente ausgeschnitten: beim Einfügen behalten sie Kennzeichen, Klemmen, Verweise und Drahtnummern",
+ "Altezza dei conduttori (mm)": "Höhe der Adernamen (mm)",
+ "Colore dei conduttori": "Farbe der Adernamen",
+ "Colore della sigla": "Farbe des Kennzeichens",
+ "riserva": "Reserve"
 }

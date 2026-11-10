@@ -5,6 +5,8 @@ import { emptyProject } from '../src/model/project';
 import type { Project, SymbolInstance, Wire } from '../src/model/types';
 import { linkPartners } from '../src/model/links';
 import { copyElements, pasteElements } from '../src/model/clipboard';
+import { freeTerminalNumbers } from '../src/model/terminals';
+import { wireLabelGap, labelSide, labelNear } from '../src/model/wireLabels';
 
 const sym = (id: string, symbolId: string, tag: string, x: number, y: number, extra: Partial<SymbolInstance> = {}): SymbolInstance =>
   ({ kind: 'symbol', id, symbolId, x, y, rot: 0, tag, pinLabels: {}, autoPins: true, ...extra });
@@ -52,5 +54,33 @@ describe('taglia e incolla', () => {
     const clip = { ...copyElements(p, p.pages[1], ['t5']), cut: true };
     const r = pasteElements(p, 'pg3', clip, 100, 0);
     expect(r.ids[0]).not.toBe('t5');
+  });
+});
+
+describe('copia di un morsetto: numeri liberi', () => {
+  const T = (id: string, tag: string, x: number): SymbolInstance => ({ kind: 'symbol', id, symbolId: 'terminal', tag, x, y: 100, rot: 0, pinLabels: {} } as SymbolInstance);
+  it('un numero con solo l\'altro piano disegnato e le riserve restano liberi; le riserve sono segnate', () => {
+    const p = emptyProject();
+    p.pages = [{ id: 'a', name: '1', title: '', type: 'multiline', elements: [
+      T('t1', 'X1:1A', 20), T('t2', 'X1:2A', 40), T('t3', 'X1:2B', 60), T('t4', 'X1:4B', 80), T('t5', 'X1:5A', 100), T('copy', 'X1:1A', 120),
+    ] }];
+    p.terminalStrips = { X1: { jumpers: [], spares: ['3A', '4A'], separators: [] } };
+    const r = freeTerminalNumbers(p, 'X1', ['A'], ['copy'], 4);
+    // 1, 2, 5 hanno il piano A disegnato; 4 ha solo il B (e la riserva 4A); 3 è una riserva
+    expect(r.free).toEqual([3, 4, 6, 7]);
+    expect([...r.spare].sort()).toEqual([3, 4]);
+    // Copia con due piani: serve un numero libero su entrambi
+    expect(freeTerminalNumbers(p, 'X1', ['A', 'B'], ['copy'], 2).free).toEqual([3, 6]);
+  });
+});
+
+describe('sigla del bus fili', () => {
+  it('più lontana dal bus di metà del suo spessore, sopra e sotto, anche spostata a mano', () => {
+    expect(wireLabelGap({}, 1.2)).toBe(0);
+    expect(wireLabelGap({ bundle: 'W1' }, 1.2)).toBe(1);
+    expect(wireLabelGap({ bundle: 'W1', width: 2 }, 1.2)).toBe(1.4);
+    expect(labelSide(false, 50, 100, -1, 1.8, 1).y).toBe(98.2);
+    expect(labelSide(false, 50, 100, 1, 1.8, 1).y).toBe(103.3);
+    expect(labelNear([{ x: 0, y: 100 }, { x: 100, y: 100 }], { x: 50, y: 97 }, 1.8, 1)?.y).toBe(98.2);
   });
 });

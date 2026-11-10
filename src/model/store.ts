@@ -377,7 +377,7 @@ export interface State {
    * avevano gli stessi punti. null = di nuovo automatico per i punti indicati
    */
   setWireOrder(keys: string[], order: string[] | null): void;
-  setWireProps(wireIds: string[], patch: Partial<Pick<Wire, 'cross' | 'color' | 'wireType' | 'bus' | 'poles' | 'text' | 'busCable' | 'lineType' | 'width' | 'labelSize' | 'labelColor'>>, wholeConductor?: boolean): void;
+  setWireProps(wireIds: string[], patch: Partial<Pick<Wire, 'cross' | 'color' | 'wireType' | 'bus' | 'poles' | 'text' | 'busCable' | 'lineType' | 'width' | 'labelSize' | 'labelColor' | 'tapSize' | 'tapColor'>>, wholeConductor?: boolean): void;
   moveSelection(dx: number, dy: number): void;
   rotateSelection(): void;
   /** Rotazione scelta nelle proprietà (solo tra quelle ammesse dal simbolo), con i collegamenti automatici */

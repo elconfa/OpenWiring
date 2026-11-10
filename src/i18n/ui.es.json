@@ -3415,5 +3415,9 @@
  "Il morsetto -{0}:{1} c'è già: i due morsetti avranno lo stesso numero": "El borne -{0}:{1} ya existe: los dos bornes tendrán el mismo número",
  "Il primo numero libero della morsettiera, partendo dal più basso; il piano resta quello copiato. Scrivi un altro numero o sceglilo dall'elenco.": "El primer número libre de la regleta, empezando por el más bajo; el piso sigue siendo el copiado. Escribe otro número o elígelo de la lista.",
  "Numero del morsetto copiato (-{0})": "Número del borne copiado (-{0})",
- "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "{0} elementos cortados: al pegarlos conservan referencias, bornes, remisiones y números de hilo"
+ "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "{0} elementos cortados: al pegarlos conservan referencias, bornes, remisiones y números de hilo",
+ "Altezza dei conduttori (mm)": "Altura de los conductores (mm)",
+ "Colore dei conduttori": "Color de los conductores",
+ "Colore della sigla": "Color de la sigla",
+ "riserva": "reserva"
 }

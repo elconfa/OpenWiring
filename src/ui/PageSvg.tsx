@@ -232,7 +232,7 @@ export interface PageDerived {
   /** Rimandi dei bus di conduttori alle altre pagine: «/pagina» cliccabili in fondo al nome */
   wireRefs?: Map<string, { page: string; id: string }[]>;
   /** Fili che entrano in un bus di conduttori: nome del conduttore scritto accanto */
-  bundleTaps?: { at: Pt; next: Pt; name: string }[];
+  bundleTaps?: { at: Pt; next: Pt; name: string; size?: number; color?: string }[];
   /** Colore ereditato dal conduttore per i fili senza colore proprio */
   conductorColor?: Map<string, string>;
   /** Posizione libera del numero filo (vedi wireLabels.ts) */
@@ -1001,9 +1001,10 @@ function StripDiagram({ data, t, style: S, cols }: { data?: StripSheetData; t: (
 }
 
 /** Nome del conduttore accanto al filo che entra in un bus, dalla parte del filo */
-function BundleTapLabel({ tap, color }: { tap: { at: Pt; next: Pt; name: string }; color: string }) {
+function BundleTapLabel({ tap, color: def }: { tap: { at: Pt; next: Pt; name: string; size?: number; color?: string }; color: string }) {
   const { at, next, name } = tap;
-  const size = 1.8;
+  // Altezza e colore scelti sul bus (proprietà del bus), altrimenti 1,8 mm e il colore dei numeri filo
+  const size = tap.size ?? 1.8, color = tap.color ?? def;
   if (Math.abs(next.x - at.x) < 0.01) {
     // Filo verticale: nome scritto in verticale accanto al filo, appena fuori dal bus
     const down = next.y > at.y;
@@ -1227,7 +1228,7 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
         const L = Math.max(2, look.junctionR * 2.8), a = DIR_VEC[t.stem], b = DIR_VEC[t.join!];
         return <polygon key={`t${i}`} points={`${t.p.x},${t.p.y} ${t.p.x + a.x * L},${t.p.y + a.y * L} ${t.p.x + b.x * L},${t.p.y + b.y * L}`} fill={look.ink} />;
       })}
-      {derived.bundleTaps?.map((t, i) => <BundleTapLabel key={i} tap={t} color={derived.textStyles?.wireNo.color ?? DEFAULT_TEXT.wireNo.color} />)}
+      {derived.bundleTaps?.map((t, i) => <BundleTapLabel key={i} tap={derived.mono ? { ...t, color: look.ink } : t} color={derived.textStyles?.wireNo.color ?? DEFAULT_TEXT.wireNo.color} />)}
       {derived.revisionClouds?.map((c, i) => <Cloud key={i} cloud={c} />)}
     </g>
   );

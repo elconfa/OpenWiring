@@ -735,6 +735,8 @@ function BundleProps({ wire }: { wire: Wire }) {
   const d = useBundleData(wire.id);
   const unnamed = taps.filter(t => t.group === group && !t.name).length;
   const pages = [...new Set(project.pages.filter(pg => pg.elements.some(e => e.kind === 'wire' && groupOf.get(e.id) === group)).map(pg => pg.name))];
+  // Tratti dello stesso bus su tutte le pagine: sigla e nomi dei conduttori uguali ovunque
+  const segs = project.pages.flatMap(pg => pg.elements).filter((e): e is Wire => e.kind === 'wire' && isBundle(e) && (groupOf.get(e.id) ?? e.id) === group);
   return (
     <Group title={tx('Bus di conduttori')}>
       <Row label={tx('Nome')}>
@@ -742,6 +744,9 @@ function BundleProps({ wire }: { wire: Wire }) {
           onCommit={v => st().updateElement(wire.id, { bundle: v.trim() })} />
       </Row>
       <Row label={tx('Pagine')}>{pages.map(n => `/${n}`).join(' ')}</Row>
+      {/* Sigla con i rimandi alle altre pagine: altezza e colore uguali su tutti i tratti del bus */}
+      <WireLabelStyleRows bundle wires={segs} />
+      <BundleTapStyleRows wires={segs} />
       <Row label={tx('Articolo del cavo')}>
         <PartInput listId="bundle-cable-parts" value={wire.bundlePart ?? ''} parts={cableParts.size ? cableParts : parts}
           onCommit={v => st().updateElement(wire.id, { bundlePart: v || undefined })} />
@@ -760,7 +765,7 @@ function BundleProps({ wire }: { wire: Wire }) {
           onClick={() => st().nameBundleTaps(wire.id)}>{tx('Nomina i conduttori in ordine')}</button>{' '}
         <button onClick={() => { st().setBundleSel(wire.id); st().setView('bundles'); }}>{tx('Apri in Bus fili')}</button>
       </Row>
-      <WireDataRows wires={[wire]} />
+      <WireDataRows wires={[wire]} noLabel />
       <Row label={tx('Vertici')}>{wire.points.length}</Row>
     </Group>
   );
@@ -1385,7 +1390,31 @@ function PlcGroupProps({ gid }: { gid: string }) {
 }
 
 /** Altezza e colore del numero filo sui fili selezionati (vuoti = quelli del progetto) */
-function WireLabelStyleRows({ wires }: { wires: Wire[] }) {
+/** Bus fili: altezza e colore dei nomi dei conduttori scritti dove i fili entrano (su tutti i tratti del bus) */
+function BundleTapStyleRows({ wires }: { wires: Wire[] }) {
+  const project = useStore(s => s.project);
+  const st = useStore.getState;
+  const ids = wires.map(w => w.id);
+  const def = textStylesOf(settingsOf(project)).wireNo;
+  const size = wires.every(w => w.tapSize === wires[0].tapSize) ? wires[0].tapSize : undefined;
+  const color = wires.every(w => w.tapColor === wires[0].tapColor) ? wires[0].tapColor : undefined;
+  return (
+    <>
+      <Row label={tx('Altezza dei conduttori (mm)')}>
+        <Field type="number" value={size === undefined ? '' : String(size)} placeholder={tx('predefinito ({0})', '1,8')}
+          onCommit={v => { const n = parseFloat(v.replace(',', '.')); st().setWireProps(ids, { tapSize: n > 0 ? n : undefined }); }} />
+      </Row>
+      <Row label={tx('Colore dei conduttori')}>
+        <span className="color-row">
+          <input type="color" value={color ?? def.color} onChange={e => st().setWireProps(ids, { tapColor: e.target.value })} />
+          {wires.some(w => w.tapColor) && <button title={tx('Torna al colore del progetto')} onClick={() => st().setWireProps(ids, { tapColor: undefined })}>{tx('progetto')}</button>}
+        </span>
+      </Row>
+    </>
+  );
+}
+
+function WireLabelStyleRows({ wires, bundle }: { wires: Wire[]; bundle?: boolean }) {
   const project = useStore(s => s.project);
   const st = useStore.getState;
   const ids = wires.map(w => w.id);
@@ -1394,11 +1423,11 @@ function WireLabelStyleRows({ wires }: { wires: Wire[] }) {
   const color = wires.every(w => w.labelColor === wires[0].labelColor) ? wires[0].labelColor : undefined;
   return (
     <>
-      <Row label={tx('Altezza del numero (mm)')}>
+      <Row label={bundle ? tx('Altezza della sigla (mm)') : tx('Altezza del numero (mm)')}>
         <Field type="number" value={size === undefined ? '' : String(size)} placeholder={tx('progetto ({0})', String(def.size).replace('.', ','))}
           onCommit={v => { const n = parseFloat(v.replace(',', '.')); st().setWireProps(ids, { labelSize: n > 0 ? n : undefined }); }} />
       </Row>
-      <Row label={tx('Colore del numero')}>
+      <Row label={bundle ? tx('Colore della sigla') : tx('Colore del numero')}>
         <span className="color-row">
           <input type="color" value={color ?? def.color} onChange={e => st().setWireProps(ids, { labelColor: e.target.value })} />
           {wires.some(w => w.labelColor) && <button title={tx('Torna al colore del progetto')} onClick={() => st().setWireProps(ids, { labelColor: undefined })}>{tx('progetto')}</button>}
@@ -1597,7 +1626,7 @@ function WireDefProps({ d }: { d: WireDef }) {
   );
 }
 
-function WireDataRows({ wires, withNumber }: { wires: Wire[]; withNumber?: boolean }) {
+function WireDataRows({ wires, withNumber, noLabel }: { wires: Wire[]; withNumber?: boolean; noLabel?: boolean }) {
   const st = useStore.getState;
   const ids = wires.map(w => w.id);
   const same = <K extends 'cross' | 'color' | 'wireType'>(k: K) => (wires.every(w => w[k] === wires[0][k]) ? wires[0][k] ?? '' : undefined);
@@ -1636,7 +1665,7 @@ function WireDataRows({ wires, withNumber }: { wires: Wire[]; withNumber?: boole
           {width && !WIRE_WIDTHS.includes(parseFloat(width)) && <option value={width}>{width.replace('.', ',')}</option>}
         </select>
       </Row>
-      <WireLabelStyleRows wires={wires} />
+      {!noLabel && <WireLabelStyleRows wires={wires} />}
       <Row label={tx('Tutto il conduttore')}>
         <button title={tx('Copia sezione, colore, tipo di linea e spessore su tutti i fili collegati (anche le derivazioni)')}
           onClick={() => st().setWireProps(ids, { cross: wires[0].cross, color: wires[0].color, lineType: wires[0].lineType, width: wires[0].width }, true)}>{tx('Applica a tutto il conduttore')}</button>

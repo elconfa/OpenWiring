@@ -3415,5 +3415,9 @@
  "Il morsetto -{0}:{1} c'è già: i due morsetti avranno lo stesso numero": "Terminal -{0}:{1} already exists: the two terminals will have the same number",
  "Il primo numero libero della morsettiera, partendo dal più basso; il piano resta quello copiato. Scrivi un altro numero o sceglilo dall'elenco.": "The first free number of the terminal strip, starting from the lowest; the level stays the copied one. Type another number or pick it from the list.",
  "Numero del morsetto copiato (-{0})": "Number of the copied terminal (-{0})",
- "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "{0} elements cut: when pasted they keep tags, terminals, cross-references and wire numbers"
+ "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "{0} elements cut: when pasted they keep tags, terminals, cross-references and wire numbers",
+ "Altezza dei conduttori (mm)": "Conductor name height (mm)",
+ "Colore dei conduttori": "Conductor name colour",
+ "Colore della sigla": "Tag colour",
+ "riserva": "spare"
 }

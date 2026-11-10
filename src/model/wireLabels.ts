@@ -2,7 +2,7 @@
 // componenti, sigle, testi, altri fili o altri numeri. Si provano i tratti dal più lungo, punti
 // diversi lungo il tratto e i due lati (a sinistra/sopra per primo, come in EPLAN).
 import { textBounds } from './textFlow';
-import type { Page, Project, Pt, SymbolInstance } from './types';
+import type { Page, Project, Pt, SymbolInstance, Wire } from './types';
 import { getSymbol, instanceBounds, toWorld, pinLabelPlace } from './geometry';
 import { settingsOf } from './numbering';
 
@@ -123,8 +123,9 @@ function obstacleBoxes(project: Project, page: Page, tags: Map<string, string>, 
  */
 export function placeWireLabels(project: Project, page: Page, texts: Map<string, string>,
   tags: Map<string, string> = new Map(), lines: Map<string, string[]> = new Map(), junctions: Pt[] = [],
-  sizes: Map<string, number> = new Map()): Map<string, WireLabelPos[]> {
+  sizes: Map<string, number> = new Map(), gaps: Map<string, number> = new Map()): Map<string, WireLabelPos[]> {
   const sizeOf = (id: string) => sizes.get(id) ?? WIRE_LABEL_SIZE;
+  const gapOf = (id: string) => gaps.get(id) ?? 0;
   const out = new Map<string, WireLabelPos[]>();
   // Numeri messi a mano: restano dove sono e gli automatici li evitano
   const manual = new Set<string>();
@@ -132,7 +133,7 @@ export function placeWireLabels(project: Project, page: Page, texts: Map<string,
   for (const e of page.elements) {
     if (e.kind !== 'wire' || !texts.has(e.id) || !e.labels?.length) continue;
     // Alla distanza dal filo giusta per l'altezza attuale del testo (che può essere cambiata dopo)
-    const ls = e.labels.map(l => relabel(e.points, l, sizeOf(e.id)));
+    const ls = e.labels.map(l => relabel(e.points, l, sizeOf(e.id), gapOf(e.id)));
     out.set(e.id, ls);
     manual.add(e.id);
     for (const l of ls) placedManual.push(labelBox(l, texts.get(e.id)!, sizeOf(e.id)));
@@ -168,7 +169,7 @@ export function placeWireLabels(project: Project, page: Page, texts: Map<string,
         // Il testo deve stare dentro il tratto, con un po' di margine dagli estremi
         const along = vertical ? Math.min(Math.abs(my - s.a.y), Math.abs(my - s.b.y)) : Math.min(Math.abs(mx - s.a.x), Math.abs(mx - s.b.x));
         if (along < tw / 2 + 1) continue;
-        const sides: WireLabelPos[] = [labelSide(vertical, mx, my, -1, size), labelSide(vertical, mx, my, 1, size)];
+        const sides: WireLabelPos[] = [labelSide(vertical, mx, my, -1, size, gapOf(w.id)), labelSide(vertical, mx, my, 1, size, gapOf(w.id))];
         for (const c of sides) {
           first ??= c;
           if (free(labelBox(c, text, size), s)) { best = c; break search; }
@@ -176,7 +177,7 @@ export function placeWireLabels(project: Project, page: Page, texts: Map<string,
       }
     }
     // Nessun posto libero: a metà del tratto più lungo, come prima
-    const pos = best ?? first ?? fallback(w.points);
+    const pos = best ?? first ?? fallback(w.points, gapOf(w.id));
     if (!pos) continue;
     out.set(w.id, [pos]);
     placed.push(labelBox(pos, text, size));
@@ -189,11 +190,20 @@ export function placeWireLabels(project: Project, page: Page, texts: Map<string,
  * tratto verticale, testo ruotato), +1 sotto (o a destra), alla stessa distanza dal filo per
  * qualunque altezza del testo
  */
-export function labelSide(vertical: boolean, mx: number, my: number, side: -1 | 1, size = WIRE_LABEL_SIZE): WireLabelPos {
+export function labelSide(vertical: boolean, mx: number, my: number, side: -1 | 1, size = WIRE_LABEL_SIZE, gap = 0): WireLabelPos {
   const r = (v: number) => Math.round(v * 100) / 100;
   return vertical
-    ? { x: r(side < 0 ? mx - 0.7 : mx + 0.3 + size), y: r(my), vertical: true }
-    : { x: r(mx), y: r(side < 0 ? my - 0.8 : my + 0.5 + size), vertical: false };
+    ? { x: r(side < 0 ? mx - 0.7 - gap : mx + 0.3 + size + gap), y: r(my), vertical: true }
+    : { x: r(mx), y: r(side < 0 ? my - 0.8 - gap : my + 0.5 + size + gap), vertical: false };
+}
+
+/**
+ * Distanza in più della scritta da un filo disegnato spesso (bus di conduttori): metà dello spessore
+ * della linea più un po' d'aria, così la sigla e i rimandi non toccano il bus
+ */
+export function wireLabelGap(w: Pick<Wire, 'bundle' | 'width'>, bundleWidth: number): number {
+  if (w.bundle === undefined) return 0;
+  return Math.round(((w.width ?? bundleWidth) / 2 + 0.4) * 100) / 100;
 }
 
 /** Passo dei numeri filo spostati a mano lungo il filo (mm) */
@@ -204,7 +214,7 @@ export const LABEL_STEP = 2;
  * sotto, a sinistra o a destra), alla distanza della posizione automatica; lungo il tratto si
  * aggancia alla griglia di 2 mm e resta dentro il tratto.
  */
-export function labelNear(pts: Pt[], p: Pt, size = WIRE_LABEL_SIZE): WireLabelPos | undefined {
+export function labelNear(pts: Pt[], p: Pt, size = WIRE_LABEL_SIZE, gap = 0): WireLabelPos | undefined {
   let best: { a: Pt; b: Pt; d: number } | undefined;
   for (let i = 0; i < pts.length - 1; i++) {
     const a = pts[i], b = pts[i + 1];
@@ -221,10 +231,10 @@ export function labelNear(pts: Pt[], p: Pt, size = WIRE_LABEL_SIZE): WireLabelPo
     // Il centro del testo sulla griglia, entro gli estremi del tratto
     const y = snap(p.y, Math.min(a.y, b.y), Math.max(a.y, b.y));
     // Lato: a sinistra o a destra del filo, dove si trova il punto (il testo a sinistra sta tra x-0,7-altezza e x)
-    return labelSide(true, a.x, y, p.x < a.x - 0.3 ? -1 : 1, size);
+    return labelSide(true, a.x, y, p.x < a.x - 0.3 ? -1 : 1, size, gap);
   }
   const x = snap(p.x, Math.min(a.x, b.x), Math.max(a.x, b.x));
-  return labelSide(false, x, a.y, p.y < a.y + size / 2 ? -1 : 1, size);
+  return labelSide(false, x, a.y, p.y < a.y + size / 2 ? -1 : 1, size, gap);
 }
 
 /**
@@ -232,7 +242,7 @@ export function labelNear(pts: Pt[], p: Pt, size = WIRE_LABEL_SIZE): WireLabelPo
  * l'altezza del testo size: resta sullo stesso tratto, dallo stesso lato e nello stesso punto lungo
  * il filo
  */
-export function relabel(pts: Pt[], l: WireLabelPos, size = WIRE_LABEL_SIZE): WireLabelPos {
+export function relabel(pts: Pt[], l: WireLabelPos, size = WIRE_LABEL_SIZE, gap = 0): WireLabelPos {
   let best: { a: Pt; b: Pt; d: number } | undefined;
   for (let i = 0; i < pts.length - 1; i++) {
     const a = pts[i], b = pts[i + 1];
@@ -245,10 +255,10 @@ export function relabel(pts: Pt[], l: WireLabelPos, size = WIRE_LABEL_SIZE): Wir
   }
   if (!best) return { ...l };
   const { a } = best;
-  return l.vertical ? labelSide(true, a.x, l.y, l.x < a.x ? -1 : 1, size) : labelSide(false, l.x, a.y, l.y < a.y ? -1 : 1, size);
+  return l.vertical ? labelSide(true, a.x, l.y, l.x < a.x ? -1 : 1, size, gap) : labelSide(false, l.x, a.y, l.y < a.y ? -1 : 1, size, gap);
 }
 
-function fallback(pts: Pt[]): WireLabelPos | undefined {
+function fallback(pts: Pt[], gap = 0): WireLabelPos | undefined {
   let best = -1, len = 0;
   for (let i = 0; i < pts.length - 1; i++) {
     const l = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
@@ -257,7 +267,7 @@ function fallback(pts: Pt[]): WireLabelPos | undefined {
   if (best < 0 || len < 6) return undefined;
   const a = pts[best], b = pts[best + 1];
   const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-  return Math.abs(a.x - b.x) < 0.01 ? { x: mx - 0.7, y: my, vertical: true } : { x: mx, y: my - 0.8, vertical: false };
+  return Math.abs(a.x - b.x) < 0.01 ? { x: mx - 0.7 - gap, y: my, vertical: true } : { x: mx, y: my - 0.8 - gap, vertical: false };
 }
 
 /** Tratto del filo su cui sta il numero e lato (-1 sinistra/sopra, 1 destra/sotto) */

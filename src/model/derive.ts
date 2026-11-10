@@ -4,7 +4,7 @@ import type { Project, Part, FieldKey, Page, Wire, ProjectSettings, Pt } from '.
 import { bundleTaps, isBundle } from './bundles';
 import { GENERIC_BUS } from './network';
 import { textsUnderTag } from './types';
-import { textStylesOf } from './types';
+import { textStylesOf, lookOf } from './types';
 import type { PageDerived } from '../ui/PageSvg';
 import { allPlaced, crossReferences, effectivePinLabels, locationOf, stripOf, buildDevices, deviceInfo, designation, partsIndex } from './devices';
 import { computeNetlist, withNetlistCache, type NetlistResult } from './netlist';
@@ -31,7 +31,7 @@ import type { CableMark } from '../ui/PageSvg';
 import { pinsWorld, keyOf, getSymbol } from './geometry';
 import { linkPartners, waitingLinks } from './links';
 import { translator, translateTable } from './i18n';
-import { placeWireLabels } from './wireLabels';
+import { placeWireLabels, wireLabelGap } from './wireLabels';
 import { DEVICE_LINE_KEYS, symShown, wireShown, type ShowMap, type SymVisKey, type WireVisKey } from './visibility';
 
 export interface Derived {
@@ -306,16 +306,19 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     if (c) for (const w of n.wires) if (!w.wire.color && !w.wire.bus) conductorColor.set(w.wire.id, c);
   }
   const textStyles = textStylesOf(settings);
+  const bundleWidth = lookOf(settings).w.bundle;
   const pages = new Map<string, PageDerived>();
   for (const pg of project.pages) {
     // Numeri filo in un punto libero del filo (non sotto componenti, sigle o altri fili)
-    const texts = new Map<string, string>(), sizes = new Map<string, number>();
+    const texts = new Map<string, string>(), sizes = new Map<string, number>(), gaps = new Map<string, number>();
     for (const e of pg.elements) if (e.kind === 'wire' && wireNumbers.has(e.id)) {
       texts.set(e.id, wireNumbers.get(e.id)!);
       sizes.set(e.id, e.labelSize ?? textStyles.wireNo.size);
+      const gap = wireLabelGap(e, bundleWidth);
+      if (gap) gaps.set(e.id, gap);
     }
-    const wireLabelPos = texts.size ? placeWireLabels(project, pg, texts, designations, deviceLines, netlist.junctions.get(pg.id) ?? [], sizes) : undefined;
-    pages.set(pg.id, { conductorColor, wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name! })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), reportSheet: reportSheets.get(pg.id), drawing: ['cable', 'connector', 'system'].includes(pg.type) ? drawingData(project, pg, library, netlist) : undefined, connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) });
+    const wireLabelPos = texts.size ? placeWireLabels(project, pg, texts, designations, deviceLines, netlist.junctions.get(pg.id) ?? [], sizes, gaps) : undefined;
+    pages.set(pg.id, { conductorColor, wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), reportSheet: reportSheets.get(pg.id), drawing: ['cable', 'connector', 'system'].includes(pg.type) ? drawingData(project, pg, library, netlist) : undefined, connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) });
   }
   return { pages, netlist, cableTagShown, linkWaiting: waiting.map(l => ({ id: l.inst.id, pageId: l.page.id })) };
 }
