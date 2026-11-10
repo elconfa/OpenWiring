@@ -177,6 +177,10 @@ sur la page de départ et sortent d'un bus du même nom sur la page d'arrivée.
 4. Dessinez la ligne du câble sur les fils, sur les deux pages : dans la vue *Câbles* chaque fil prend le
    conducteur écrit dans le bus. La ligne épaisse du bus ne compte pas comme conducteur.
 
+Un **double clic sur le bus** ouvre ses propriétés : les conducteurs du câble avec leur état (utilisés
+atténués, en attente de la sortie avec ⚠, libres avec la barre verte) et le tableau des fils du bus, où le
+conducteur de chaque fil se corrige en le saisissant ou en le choisissant dans la liste.
+
 La vue **Bus fils** (*Affichage ▸ Bus fils*, ou *Listes ▸ Bus fils*) montre tous les bus et, pour celui
 choisi, chaque fil qui entre ou sort avec page, numéro de fil et liaisons ; le conducteur se corrige
 directement dans le tableau. Les fils sans conducteur, ceux qui entrent sans sortir et les conducteurs que

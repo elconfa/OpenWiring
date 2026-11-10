@@ -1,6 +1,6 @@
 // Cavi multipolari: linee di definizione sullo schema, conduttori assegnati ai fili
 // attraversati, lista cavi e collegamenti dei cavi.
-import type { Project, Cable, CableLine, CableMarking, Part, Wire, Pt, Page } from './types';
+import type { Project, Cable, CableLine, CableMarking, Part, PartCable, Wire, Pt, Page } from './types';
 import { columnOf } from './types';
 import { computeNetlist, type Net } from './netlist';
 import { uid, getSymbol, pinsWorld } from './geometry';
@@ -65,18 +65,46 @@ export function remarkCable(c: Cable, marking: CableMarking): Pick<Cable, 'condu
   return { conductors, marking, assign: followAssign(c, conductors) };
 }
 
+/**
+ * Conduttori di un articolo cavo in ordine. Un articolo marcato «colori» con i conduttori ancora
+ * scritti come numeri (marcatura cambiata dopo aver impostato la formazione) dà i colori standard.
+ */
+export function partConductors(pc: PartCable | undefined): string[] {
+  if (!pc?.conductors.length) return [];
+  const others = pc.conductors.filter(n => !isPeName(n));
+  if (pc.marking === 'colors' && others.length && others.every(n => /^\d+$/.test(n))) return conductorsFor(pc.conductors.length, others.length < pc.conductors.length, 'colors');
+  return pc.conductors;
+}
+
+/**
+ * Articoli cavo salvati con la marcatura «colori» ma i conduttori ancora numerati (versioni fino
+ * alla 2.0.7: la marcatura cambiata dopo la formazione non riscriveva i nomi): conduttori corretti
+ * una volta per tutte. Restituisce un elenco nuovo solo se qualcosa è cambiato.
+ */
+export function repairPartCables<T extends Part>(parts: T[]): T[] | undefined {
+  let changed = false;
+  const out = parts.map(p => {
+    const names = partConductors(p.cable);
+    if (!p.cable || names === p.cable.conductors) return p;
+    changed = true;
+    return { ...p, cable: { ...p.cable, conductors: names } };
+  });
+  return changed ? out : undefined;
+}
+
 /** Dati del cavo presi da un articolo cavo (tipologia): tutti i conduttori, sezione, schermo */
 export function cableFromPart(c: Cable, part: Part): Partial<Cable> {
   const patch: Partial<Cable> = { partNr: part.partNr, type: part.typeNr || part.descr1 || part.partNr };
   const pc = part.cable;
-  if (!pc?.conductors.length) return patch;
+  const names = partConductors(pc);
+  if (!pc || !names.length) return patch;
   // Anche i conduttori fissati dalla numerazione automatica seguono i nomi nuovi per posizione
-  return { ...patch, conductors: [...pc.conductors], marking: pc.marking, cross: pc.cross ?? c.cross, shield: pc.shield, assign: followAssign(c, pc.conductors), fixed: followFixed(c, pc.conductors) };
+  return { ...patch, conductors: [...names], marking: pc.marking, cross: pc.cross ?? c.cross, shield: pc.shield, assign: followAssign(c, names), fixed: followFixed(c, names) };
 }
 
 /** Il cavo ha conduttori diversi da quelli del suo articolo (articolo cambiato dopo averlo scelto) */
 export const differsFromPart = (c: Pick<Cable, 'conductors'>, part?: Part) =>
-  !!part?.cable?.conductors.length && part.cable.conductors.join('\u0000') !== c.conductors.join('\u0000');
+  !!part?.cable?.conductors.length && partConductors(part.cable).join('\u0000') !== c.conductors.join('\u0000');
 
 /**
  * Cavi che usano l'articolo: prendono i conduttori, la marcatura, la sezione e lo schermo dell'articolo

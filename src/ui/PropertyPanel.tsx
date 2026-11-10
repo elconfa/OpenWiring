@@ -11,7 +11,8 @@ import { useStore, type UserPropTarget } from '../model/store';
 import type { SymbolInstance, Wire, TextItem, ProjectInfo, DeviceField, IoKind, CableLine, CableLineShow, Zone, ImageItem, WireDef, ItemLook } from '../model/types';
 import { cableStyleOf, lineShow, CABLE_SHOW_KEYS, CABLE_LABEL_POS, CABLE_COND_DIR, shieldDims } from '../model/cableStyle';
 import { PANEL_KINDS, PIN_OWN_FIELDS, AUX_OWN_FIELDS } from '../model/types';
-import { cableByPiece, cableInfos, cableSection, conductorsFor, conductorEnds, markingOf, pinDeviceOptions } from '../model/cables';
+import { cableByPiece, cableInfos, cableSection, conductorsFor, conductorEnds, markingOf, partConductors, pinDeviceOptions } from '../model/cables';
+import { useBundleData, BundleTapsTable, BundleConductorChips } from './BundleTapsTable';
 import { PiecesSelect } from './CablesView';
 import { ConductorSwatch } from './CablesView';
 import { PROTOCOLS, protocolLabel, GENERIC_BUS, networkLinks, panelLabel, panelAncestors, devicePanels, BUS_CABLE_TYPES, IP_PROTOCOLS, busCableGroups, nodeIp, isIp, netmask, parseIp, networkOfIp } from '../model/network';
@@ -35,7 +36,7 @@ import { buildDevices, effectivePinLabels, deviceInfo, designation, partsIndex, 
 import { letterOfTag, nextTagFor } from '../model/numbering';
 import { askChoice } from './Ask';
 import { replaceImage, naturalRatio } from './images';
-import { bundleTaps, bundleConductors, isBundle, conductorChoices, bundleCable } from '../model/bundles';
+import { bundleTaps, isBundle, conductorChoices, bundleCable } from '../model/bundles';
 import { linkChoices, currentLinkPartner, pairByName } from './linkChooser';
 import { isIncomingLink, NO_PARTNER, WAITING } from '../model/links';
 import { wireAtPotential, wireLabelShown, wireTooShort, type Derived } from '../model/derive';
@@ -730,7 +731,7 @@ function BundleProps({ wire }: { wire: Wire }) {
   const cableParts = new Map([...parts].filter(([, p]) => p.cable?.conductors.length));
   const { taps, groupOf } = bundleTaps(project);
   const group = groupOf.get(wire.id) ?? wire.id;
-  const conductors = bundleConductors(taps, group);
+  const d = useBundleData(wire.id);
   const unnamed = taps.filter(t => t.group === group && !t.name).length;
   const pages = [...new Set(project.pages.filter(pg => pg.elements.some(e => e.kind === 'wire' && groupOf.get(e.id) === group)).map(pg => pg.name))];
   return (
@@ -740,21 +741,18 @@ function BundleProps({ wire }: { wire: Wire }) {
           onCommit={v => st().updateElement(wire.id, { bundle: v.trim() })} />
       </Row>
       <Row label={tx('Pagine')}>{pages.map(n => `/${n}`).join(' ')}</Row>
-      <Row label={tx('Conduttori')}>
-        {conductors.length ? conductors.map(c => (
-          <span key={c.name} className={c.count < 2 ? 'warn-text' : undefined} title={c.count < 2 ? tx('Entra nel bus ma non esce da nessuna parte') : tx('{0} fili collegati', c.count)}>{c.name}{c.count < 2 ? ' ⚠' : ''} </span>
-        )) : '—'}
-      </Row>
       <Row label={tx('Articolo del cavo')}>
         <PartInput listId="bundle-cable-parts" value={wire.bundlePart ?? ''} parts={cableParts.size ? cableParts : parts}
           onCommit={v => st().updateElement(wire.id, { bundlePart: v || undefined })} />
       </Row>
       {bundleCable(project, wire.bundle)
         ? <Row label={tx('Cavo')}>{tx('-{0}: i conduttori sono quelli del cavo', bundleCable(project, wire.bundle)!.tag)}</Row>
-        : wire.bundlePart && !parts.get(wire.bundlePart)?.cable?.conductors.length
+        : wire.bundlePart && !partConductors(parts.get(wire.bundlePart)?.cable).length
           ? <Row label=""><span className="small warn-text">{tx('L\'articolo {0} non ha i dati del cavo (conduttori): si propongono i nomi comuni', wire.bundlePart)}</span></Row>
           : null}
-      {unnamed > 0 && <Row label=""><span className="small muted">{tx('{0} fili toccano il bus senza conduttore: selezionali per indicarlo', unnamed)}</span></Row>}
+      <Row label={tx('Conduttori')}>{d ? <BundleConductorChips d={d} /> : '—'}</Row>
+      {d && d.taps.length > 0 && <tr><td colSpan={2}><div className="bundle-props-taps"><BundleTapsTable d={d} listId={`bundle-props-${wire.id}`} /></div></td></tr>}
+      {unnamed > 0 && <Row label=""><span className="small muted">{tx('{0} fili toccano il bus senza conduttore: scrivi il conduttore qui sopra o usa «Nomina i conduttori in ordine»', unnamed)}</span></Row>}
       <Row label="">
         <button disabled={!taps.some(t => t.group === group && !t.name && t.pageId === project.pages.find(pg => pg.elements.includes(wire))?.id)}
           title={tx('I fili senza conduttore della pagina, da sinistra a destra: prima i conduttori entrati altrove che aspettano l\'uscita, poi quelli liberi')}

@@ -176,6 +176,10 @@ pagina di partenza ed escono da un bus con lo stesso nome sulla pagina di arrivo
 4. Disegna la linea del cavo sui singoli fili, su tutte e due le pagine: nella scheda *Cavi* ogni filo
    prende il conduttore scritto nel bus. La linea spessa del bus non conta come conduttore.
 
+Con un **doppio clic sul bus** si apre la finestra delle sue proprietà: i conduttori del cavo con il loro
+stato (usati attenuati, in attesa dell'uscita con ⚠, liberi con la barra verde) e la tabella dei fili del
+bus, dove il conduttore di ogni filo si corregge scrivendolo o scegliendolo dall'elenco.
+
 La vista **Bus fili** (*Visualizza ▸ Bus fili*, o *Liste ▸ Bus fili*) mostra tutti i bus e, per quello
 scelto, ogni filo che entra o esce con pagina, numero filo e collegamenti; il conduttore si corregge
 direttamente nella tabella. Sono segnati i fili senza conduttore, quelli che entrano senza uscire e i

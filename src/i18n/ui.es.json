@@ -3403,5 +3403,10 @@
  "L'articolo {0} non ha i dati del cavo (conduttori): si propongono i nomi comuni": "El artículo {0} no tiene datos de cable (conductores): se proponen los nombres comunes",
  "Se il bus rappresenta un cavo, scegli il suo articolo: i conduttori (colori o numeri) saranno proposti in ordine. Vuoto per un bus di alimentazione (L1, L2, PE…).": "Si el bus representa un cable, elige su artículo: los conductores (colores o números) se propondrán en orden. Vacío para un bus de alimentación (L1, L2, PE…).",
  "Collegamenti bus fili": "Conexiones de bus hilos",
- "conduttore non del cavo": "conductor que no es del cable"
+ "conduttore non del cavo": "conductor que no es del cable",
+ "{0} fili toccano il bus senza conduttore: scrivi il conduttore qui sopra o usa «Nomina i conduttori in ordine»": "{0} hilos tocan el bus sin conductor: escribe el conductor arriba o usa «Nombrar los conductores en orden»",
+ "Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano": "Al cambiar el marcado los conductores pasan a números o colores estándar, para modificarlos luego a mano",
+ "entrato, aspetta l'uscita": "entrado, espera la salida",
+ "Entrato, aspetta l'uscita": "Entrado, espera la salida",
+ "Nessun filo entra nel bus": "Ningún hilo entra en el bus"
 }

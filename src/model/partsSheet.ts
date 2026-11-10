@@ -5,6 +5,7 @@
 // e restano come sono.
 import type { FunctionTemplate, Part, PartCable } from './types';
 import { tn, tx } from '../i18n/ui';
+import { partConductors } from './cables';
 
 type Key = 'partNr' | 'typeNr' | 'orderNr' | 'manufacturer' | 'supplier' | 'descr1' | 'descr2' | 'productGroup'
   | 'width' | 'height' | 'depth' | 'weight' | 'price' | 'note' | 'symbolId' | 'functions'
@@ -125,6 +126,7 @@ export function partsFromRows(rows: string[][], existing: Map<string, Part>): Pa
       else (part as unknown as Record<string, string | number>)[c.key] = value;
     }
     if (part.cable && !part.cable.conductors.length) delete part.cable;
+    if (part.cable) part.cable.conductors = partConductors(part.cable);
     const before = existing.get(partNr);
     if (!before) { if (!out.has(partNr)) added++; out.set(partNr, part); }
     else if (JSON.stringify(sheetView(before)) !== JSON.stringify(sheetView(part))) { if (!out.has(partNr)) updated++; out.set(partNr, part); }

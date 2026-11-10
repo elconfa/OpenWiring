@@ -177,6 +177,10 @@ página de salida y salen de un bus con el mismo nombre en la página de llegada
 4. Dibuja la línea del cable sobre los hilos, en las dos páginas: en la vista *Cables* cada hilo toma el
    conductor escrito en el bus. La línea gruesa del bus no cuenta como conductor.
 
+Un **doble clic en el bus** abre sus propiedades: los conductores del cable con su estado (usados
+atenuados, a la espera de la salida con ⚠, libres con la barra verde) y la tabla de los hilos del bus,
+donde el conductor de cada hilo se corrige escribiéndolo o eligiéndolo de la lista.
+
 La vista **Bus hilos** (*Ver ▸ Bus hilos*, o *Listas ▸ Bus hilos*) muestra todos los buses y, para el
 elegido, cada hilo que entra o sale con página, número de hilo y conexiones; el conductor se corrige
 directamente en la tabla. Se marcan los hilos sin conductor, los que entran sin salir y los conductores

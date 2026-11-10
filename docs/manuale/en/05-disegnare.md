@@ -176,6 +176,10 @@ starting page and leave a bus with the same name on the arrival page.
 4. Draw the cable line across the single wires, on both pages: in the *Cables* view each wire takes the
    conductor written in the bus. The thick bus line does not count as a conductor.
 
+A **double click on the bus** opens its properties: the cable conductors with their state (used ones
+dimmed, those waiting for the exit with ⚠, free ones with the green bar) and the table of the bus wires,
+where each wire's conductor is corrected by typing it or picking it from the list.
+
 The **Wire bus** view (*View ▸ Wire bus*, or *Lists ▸ Wire bus*) shows all buses and, for the chosen one,
 every wire entering or leaving with page, wire number and connections; the conductor is corrected directly
 in the table. Wires without a conductor, wires that enter without leaving and conductors the cable does

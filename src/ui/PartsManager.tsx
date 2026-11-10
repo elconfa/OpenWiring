@@ -354,7 +354,8 @@ function PartCableEditor({ part }: { part: Part }) {
           <table className="prop-table">
             <tbody>
               <tr><td className="prop-name">{tx('Marcatura')}</td><td className="prop-value">
-                <select value={pc.marking} onChange={e => save({ marking: e.target.value as PartCable['marking'] })}>
+                <select value={pc.marking} onChange={e => { const marking = e.target.value as PartCable['marking']; save({ marking, conductors: pc.conductors.length ? conductorsFor(pc.conductors.length, pc.conductors.some(isPeName), marking) : pc.conductors }); }}
+                  title={tx('Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano')}>
                   <option value="numbers">{tx('Numeri')}</option>
                   <option value="colors">{tx('Colori')}</option>
                 </select>

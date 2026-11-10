@@ -1,34 +1,19 @@
 // Vista Bus fili: tutti i bus di conduttori del progetto e, per quello scelto, ogni filo che vi entra
 // o ne esce con pagina, numero filo e collegamenti; il conduttore si corregge qui. Un conduttore
 // scritto una volta sola (entra ma non esce) o in più di due punti si vede subito.
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useStore } from '../model/store';
-import { bundleTaps, bundleCable, bundleConductorList, conductorChoices, type BundleTap } from '../model/bundles';
-import { partsIndex } from '../model/devices';
-import { computeNetlist } from '../model/netlist';
-import { columnOf } from '../model/types';
+import { bundleTaps, bundleCable, type BundleTap } from '../model/bundles';
 import { ColSplitter } from './split';
-import { ConductorSwatch } from './CablesView';
+import { useBundleData, BundleTapsTable, BundleConductorChips } from './BundleTapsTable';
 import { EmptyState } from './EmptyState';
 import { tx } from '../i18n/ui';
-
-function Field({ value, onCommit, list, width }: { value: string; onCommit: (v: string) => void; list?: string; width?: number }) {
-  const [v, setV] = useState(value);
-  useEffect(() => setV(value), [value]);
-  return (
-    <input value={v} list={list} style={width ? { width } : undefined} placeholder="—" onChange={e => setV(e.target.value)}
-      onBlur={() => { if (v !== value) onCommit(v); }}
-      onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setV(value); }} />
-  );
-}
 
 interface Bus { group: string; name: string; wireId: string; pages: string[]; taps: BundleTap[] }
 
 export function BundlesView() {
   const project = useStore(s => s.project);
-  const library = useStore(s => s.library);
   const sel = useStore(s => s.bundleSel);
-  const parts = useMemo(() => partsIndex(project, library), [project, library]);
   const st = useStore.getState;
   const data = useMemo(() => {
     const { taps, groupOf, names } = bundleTaps(project);
@@ -41,33 +26,13 @@ export function BundlesView() {
       buses.set(g, b);
     }
     for (const t of taps) buses.get(t.group)?.taps.push(t);
-    const nl = computeNetlist(project);
-    return { buses: [...buses.values()], nl, groupOf };
+    return { buses: [...buses.values()], groupOf };
   }, [project]);
   const pageOf = useMemo(() => new Map(project.pages.map(p => [p.id, p])), [project]);
   const bus = data.buses.find(b => b.wireId === sel || b.taps.some(t => t.bundle.id === sel)) ?? data.buses[0];
-  const counts = new Map<string, number>();
-  for (const t of bus?.taps ?? []) if (t.name) counts.set(t.name, (counts.get(t.name) ?? 0) + 1);
+  const d = useBundleData(bus?.wireId);
   const cable = bus ? bundleCable(project, bus.name) : undefined;
-  const list = bus ? bundleConductorList(project, bus.group, bus.name, parts) : undefined;
-  const choices = bus ? conductorChoices(project, bus.taps, bus.group, bus.name, parts) : [];
   const busPart = bus ? project.pages.flatMap(pg => pg.elements).find(e => e.kind === 'wire' && e.bundlePart && data.groupOf.get(e.id) === bus.group) : undefined;
-  const rows = [...(bus?.taps ?? [])].sort((a, b) => {
-    const pa = project.pages.findIndex(p => p.id === a.pageId), pb = project.pages.findIndex(p => p.id === b.pageId);
-    return pa - pb || a.at.x - b.at.x || a.at.y - b.at.y;
-  });
-  const status = (t: BundleTap) => {
-    if (!t.name) return { bad: true, text: tx('senza conduttore') };
-    const n = counts.get(t.name) ?? 0;
-    if (n < 2) return { bad: true, text: tx('entra ma non esce') };
-    if (list && !list.includes(t.name)) return { bad: true, text: tx('il cavo non ha il conduttore {0}', t.name) };
-    return { bad: false, text: n > 2 ? tx('{0} fili', n) : tx('collegato') };
-  };
-  const ends = (t: BundleTap) => {
-    const net = data.nl.wireNet.get(t.wire.id);
-    return net ? net.pins.filter(p => p.el.page.id === t.pageId).map(p => `-${p.ref}`).join(', ') : '';
-  };
-  const goTo = (t: BundleTap) => { st().setPage(t.pageId); st().setSelection([t.wire.id]); st().setView('schema'); };
   const problems = (b: Bus) => b.taps.filter(t => !t.name).length + [...new Set(b.taps.map(t => t.name).filter(Boolean))].filter(n => b.taps.filter(t => t.name === n).length < 2).length;
 
   if (!data.buses.length) {
@@ -79,34 +44,12 @@ export function BundlesView() {
         <div className="parts-toolbar">
           <b>{bus?.name ? tx('Bus «{0}»', bus.name) : tx('Bus senza nome')}</b>
           {cable && <span className="muted small">{tx('Cavo -{0}: i conduttori del bus sono quelli del cavo', cable.tag)}</span>}
-          {!cable && busPart?.kind === 'wire' && list && <span className="muted small">{tx('Articolo {0}: i conduttori del bus sono quelli del cavo', busPart.bundlePart!)}</span>}
+          {!cable && busPart?.kind === 'wire' && d?.list && <span className="muted small">{tx('Articolo {0}: i conduttori del bus sono quelli del cavo', busPart.bundlePart!)}</span>}
           <div className="tb-spacer" />
-          <span className="muted small">{tx('{0} fili', rows.length)}</span>
+          <span className="muted small">{tx('{0} fili', d?.taps.length ?? 0)}</span>
         </div>
-        <datalist id="bundle-conductors">{choices.map(c => <option key={c.name} value={c.name} />)}</datalist>
         <div className="table-wrap">
-          <table className="grid">
-            <thead><tr><th>{tx('Pagina')}</th><th>{tx('Numero filo')}</th><th>{tx('Collega')}</th><th>{tx('Conduttore nel bus')}</th><th>{tx('Stato')}</th><th /></tr></thead>
-            <tbody>
-              {rows.map(t => {
-                const s = status(t);
-                const pg = pageOf.get(t.pageId);
-                return (
-                  <tr key={`${t.wire.id}|${t.end}`} className={s.bad ? 'row-bad' : ''}>
-                    <td>{pg ? `${pg.name}.${columnOf(t.at.x)}` : ''}</td>
-                    <td>{data.nl.wireNet.get(t.wire.id)?.wireNo ?? ''}</td>
-                    <td className="small">{ends(t)}</td>
-                    <td className="nowrap">
-                      <ConductorSwatch name={t.name ?? ''} />{' '}
-                      <Field value={t.name ?? ''} list="bundle-conductors" width={80} onCommit={v => st().setWireTap(t.wire.id, t.end, v)} />
-                    </td>
-                    <td className={s.bad ? 'warn-text small' : 'muted small'}>{s.text}</td>
-                    <td><button className="mini" onClick={() => goTo(t)} title={tx('Mostra sullo schema')}>→</button></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          {d && <BundleTapsTable d={d} full listId="bundle-conductors" />}
         </div>
       </div>
       <ColSplitter id="bundles" />
@@ -130,16 +73,7 @@ export function BundlesView() {
           {bus && (
             <>
               <h4>{tx('Conduttori')}</h4>
-              <table className="grid">
-                <tbody>
-                  {choices.filter(c => c.count || list).map(c => (
-                    <tr key={c.name} className={c.count === 1 ? 'row-bad' : c.count ? '' : 'muted'}>
-                      <td className="nowrap"><ConductorSwatch name={c.name} /> {c.name}</td>
-                      <td className="small">{c.count ? tx('{0} fili', c.count) : tx('libero')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {d && <BundleConductorChips d={d} />}
               <div className="row-buttons">
                 {[...new Set(bus.taps.filter(t => !t.name).map(t => t.pageId))].map(pid => {
                   const seg = pageOf.get(pid)?.elements.find(e => e.kind === 'wire' && e.bundle !== undefined && bus.taps.some(t => t.bundle.id === e.id && t.pageId === pid));

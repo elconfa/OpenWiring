@@ -4,6 +4,7 @@
 // quelli con lo stesso nome lo sono anche su pagine diverse.
 import type { Project, Pt, Wire, Cable, Part } from './types';
 import { onSegmentInterior, samePt } from './geometry';
+import { partConductors } from './cables';
 
 export const isBundle = (w: Wire) => w.bundle !== undefined;
 
@@ -88,8 +89,8 @@ export function bundleConductorList(project: Project, group: string, busName?: s
   const { groupOf } = bundleTaps(project);
   for (const pg of project.pages) for (const e of pg.elements) {
     if (e.kind === 'wire' && e.bundlePart && groupOf.get(e.id) === group) {
-      const c = parts.get(e.bundlePart)?.cable?.conductors;
-      if (c?.length) return c;
+      const c = partConductors(parts.get(e.bundlePart)?.cable);
+      if (c.length) return c;
     }
   }
   return undefined;

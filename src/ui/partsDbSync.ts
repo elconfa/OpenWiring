@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useStore, setLibraryInDb } from '../model/store';
 import { kvGet, kvSet } from '../io/storage';
 import type { Part } from '../model/types';
+import { repairPartCables } from '../model/cables';
 import { tx } from '../i18n/ui';
 
 const bridge = () => {
@@ -186,6 +187,9 @@ export async function startPartsDb(): Promise<boolean> {
     if (!applying && s.library !== prev.library) void run(() => push(useStore.getState().library));
     if (s.project.parts !== prev.project.parts && s.project.parts.some(p => p.lite)) void run(hydrate);
   });
+  // Articoli cavo con i colori scritti come numeri: corretti e riscritti nel database
+  const fixed = repairPartCables(useStore.getState().library);
+  if (fixed) useStore.setState({ library: fixed });
   if (missing.length) await run(() => push(useStore.getState().library));
   if (old?.length) {
     const n = (await b.partsList!()).parts.length;

@@ -181,6 +181,10 @@ treten auf der Startseite in den Bus ein und verlassen auf der Zielseite einen B
 4. Zeichnen Sie die Kabellinie über die einzelnen Drähte, auf beiden Seiten: in der Ansicht *Kabel* nimmt
    jeder Draht die im Bus geschriebene Ader. Die dicke Buslinie zählt nicht als Ader.
 
+Ein **Doppelklick auf den Bus** öffnet seine Eigenschaften: die Adern des Kabels mit ihrem Zustand
+(belegte abgeblendet, auf den Ausgang wartende mit ⚠, freie mit grünem Balken) und die Tabelle der Drähte
+des Busses, in der die Ader jedes Drahtes eingetippt oder aus der Liste gewählt wird.
+
 Die Ansicht **Leiterbus** (*Ansicht ▸ Leiterbus* oder *Listen ▸ Leiterbus*) zeigt alle Busse und für den
 gewählten jeden ein- oder austretenden Draht mit Seite, Drahtnummer und Verbindungen; die Ader wird direkt
 in der Tabelle korrigiert. Drähte ohne Ader, Drähte, die eintreten ohne auszutreten, und Adern, die das

@@ -3403,5 +3403,10 @@
  "L'articolo {0} non ha i dati del cavo (conduttori): si propongono i nomi comuni": "Artikel {0} hat keine Kabeldaten (Adern): es werden die üblichen Namen vorgeschlagen",
  "Se il bus rappresenta un cavo, scegli il suo articolo: i conduttori (colori o numeri) saranno proposti in ordine. Vuoto per un bus di alimentazione (L1, L2, PE…).": "Wenn der Bus ein Kabel darstellt, wählen Sie seinen Artikel: die Adern (Farben oder Nummern) werden der Reihe nach vorgeschlagen. Leer für einen Versorgungsbus (L1, L2, PE…).",
  "Collegamenti bus fili": "Leiterbus-Verbindungen",
- "conduttore non del cavo": "Ader nicht im Kabel"
+ "conduttore non del cavo": "Ader nicht im Kabel",
+ "{0} fili toccano il bus senza conduttore: scrivi il conduttore qui sopra o usa «Nomina i conduttori in ordine»": "{0} Drähte berühren den Bus ohne Ader: Ader oben eingeben oder „Adern der Reihe nach benennen“ verwenden",
+ "Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano": "Beim Ändern der Kennzeichnung werden die Leiter zu Standardnummern oder -farben, danach von Hand anpassbar",
+ "entrato, aspetta l'uscita": "eingetreten, wartet auf den Ausgang",
+ "Entrato, aspetta l'uscita": "Eingetreten, wartet auf den Ausgang",
+ "Nessun filo entra nel bus": "Kein Draht tritt in den Bus ein"
 }

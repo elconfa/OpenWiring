@@ -3403,5 +3403,10 @@
  "L'articolo {0} non ha i dati del cavo (conduttori): si propongono i nomi comuni": "Part {0} has no cable data (conductors): the common names are proposed",
  "Se il bus rappresenta un cavo, scegli il suo articolo: i conduttori (colori o numeri) saranno proposti in ordine. Vuoto per un bus di alimentazione (L1, L2, PE…).": "If the bus represents a cable, choose its part: the conductors (colours or numbers) will be proposed in order. Empty for a supply bus (L1, L2, PE…).",
  "Collegamenti bus fili": "Wire bus connections",
- "conduttore non del cavo": "conductor not in the cable"
+ "conduttore non del cavo": "conductor not in the cable",
+ "{0} fili toccano il bus senza conduttore: scrivi il conduttore qui sopra o usa «Nomina i conduttori in ordine»": "{0} wires touch the bus without a conductor: type the conductor above or use “Name the conductors in order”",
+ "Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano": "Changing the marking turns the conductors into standard numbers or colours, to be edited by hand afterwards",
+ "entrato, aspetta l'uscita": "entered, waiting for the exit",
+ "Entrato, aspetta l'uscita": "Entered, waiting for the exit",
+ "Nessun filo entra nel bus": "No wire enters the bus"
 }

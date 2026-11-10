@@ -34,7 +34,7 @@ import { placeByNumber, sortByNumber, proposePageName } from './pages';
 import { importPagesText, type TextImportResult } from './textFormat';
 import { listEntries, updateList as updateListModel, deleteList as deleteListModel, updateAllLists as updateAllListsModel } from './lists';
 import { planTerminalRow, applyTerminalRow, type TerminalPick, type TerminalRowMode } from './terminalRow';
-import { newCable, remarkCable, cableFromPart, crossedWires, copyCableProps, pasteCableProps, lockCableConductors, syncCablesWithPart, differsFromPart, type CableClip } from './cables';
+import { newCable, remarkCable, repairPartCables, cableFromPart, crossedWires, copyCableProps, pasteCableProps, lockCableConductors, syncCablesWithPart, differsFromPart, type CableClip } from './cables';
 import { allocateChannel, cardByTag, PLC_CARD_TYPES, newCard, cardType, reassignAddresses, adaptAddressFormat, keepAnalogFirst, stationFormat, needsReassign, cardFromPart, applyTagImport, syncOverviewPages, stationNames, type TagImportRow, type TagImportResult } from './plc';
 import { DEFAULT_SETTINGS, DEVICE_FIELDS, PIN_OWN_FIELDS, AUX_OWN_FIELDS } from './types';
 import { getSymbol, pinsWorld, samePt, snap, uid, setLibrarySymbols, instanceBounds } from './geometry';
@@ -951,6 +951,7 @@ export const useStore = create<State>((set, get) => {
     loadProject(p, filePath) {
       p.customSymbols = p.customSymbols.map(repairQetSymbol);
       migrateAuxDescriptions(p);
+      p.parts = repairPartCables(p.parts) ?? p.parts;
       if (settingsOf(p).wireNumbering === 'fixed') lockWireNumbers(p);
       arrangePages(p);
       set({ viewing: null, project: p, pageId: p.pages[0]?.id ?? '', past: [], future: [], selection: [], dirty: false, filePath, savedAt: filePath ? Date.now() : null, treeSel: { type: 'project' }, view: 'schema' });
@@ -1603,7 +1604,8 @@ export const useStore = create<State>((set, get) => {
     propClipboard: null,
     applyUserData(d) {
       const byName = <T extends { name: string; category?: string }>(l: T[]) => [...l].sort((a, b) => (a.category ?? '').localeCompare(b.category ?? '') || a.name.localeCompare(b.name));
-      const library = [...d.library].sort((a, b) => a.partNr.localeCompare(b.partNr));
+      const sorted = [...d.library].sort((a, b) => a.partNr.localeCompare(b.partNr));
+      const library = repairPartCables(sorted) ?? sorted;
       const symbolLibrary = byName(d.symbols), macros = byName(d.macros);
       setLibrarySymbols(symbolLibrary);
       set({ library, symbolLibrary, macros, templates: d.templates, tbLibrary: d.titleBlocks, favorites: d.favorites });
@@ -2999,8 +3001,10 @@ function persistLibrary(library: Part[]) { if (!libraryInDb) void kvSet('library
 
 /** Carica la libreria articoli salvata */
 export async function restoreLibrary() {
-  const lib = libraryInDb ? undefined : await kvGet<Part[]>('library');
-  if (lib?.length) useStore.setState({ library: lib });
+  const stored = libraryInDb ? undefined : await kvGet<Part[]>('library');
+  const lib = stored && repairPartCables(stored);
+  if (lib) persistLibrary(lib);
+  if ((lib ?? stored)?.length) useStore.setState({ library: lib ?? stored! });
   const templates = await kvGet<ProjectTemplate[]>('templates');
   if (templates?.length) useStore.setState({ templates });
   const profiles = await kvGet<SettingsProfile[]>('profiles');

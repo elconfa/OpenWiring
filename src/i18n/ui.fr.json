@@ -3403,5 +3403,10 @@
  "L'articolo {0} non ha i dati del cavo (conduttori): si propongono i nomi comuni": "L'article {0} n'a pas de données de câble (conducteurs) : les noms courants sont proposés",
  "Se il bus rappresenta un cavo, scegli il suo articolo: i conduttori (colori o numeri) saranno proposti in ordine. Vuoto per un bus di alimentazione (L1, L2, PE…).": "Si le bus représente un câble, choisissez son article : les conducteurs (couleurs ou numéros) seront proposés dans l'ordre. Vide pour un bus d'alimentation (L1, L2, PE…).",
  "Collegamenti bus fili": "Liaisons des bus fils",
- "conduttore non del cavo": "conducteur hors du câble"
+ "conduttore non del cavo": "conducteur hors du câble",
+ "{0} fili toccano il bus senza conduttore: scrivi il conduttore qui sopra o usa «Nomina i conduttori in ordine»": "{0} fils touchent le bus sans conducteur : saisissez le conducteur ci-dessus ou utilisez « Nommer les conducteurs dans l'ordre »",
+ "Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano": "En changeant le marquage, les conducteurs deviennent des numéros ou couleurs standard, à modifier ensuite à la main",
+ "entrato, aspetta l'uscita": "entré, attend la sortie",
+ "Entrato, aspetta l'uscita": "Entré, attend la sortie",
+ "Nessun filo entra nel bus": "Aucun fil n'entre dans le bus"
 }

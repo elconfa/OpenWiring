@@ -3403,5 +3403,10 @@
  "L'articolo {0} non ha i dati del cavo (conduttori): si propongono i nomi comuni": "У артикула {0} нет данных кабеля (жил): предлагаются обычные имена",
  "Se il bus rappresenta un cavo, scegli il suo articolo: i conduttori (colori o numeri) saranno proposti in ordine. Vuoto per un bus di alimentazione (L1, L2, PE…).": "Если шина изображает кабель, выберите его артикул: жилы (цвета или номера) будут предложены по порядку. Пусто для шины питания (L1, L2, PE…).",
  "Collegamenti bus fili": "Соединения шин проводов",
- "conduttore non del cavo": "жила не из кабеля"
+ "conduttore non del cavo": "жила не из кабеля",
+ "{0} fili toccano il bus senza conduttore: scrivi il conduttore qui sopra o usa «Nomina i conduttori in ordine»": "{0} проводов касаются шины без жилы: укажите жилу выше или используйте «Назвать жилы по порядку»",
+ "Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano": "При смене маркировки жилы получают стандартные номера или цвета, которые затем можно изменить вручную",
+ "entrato, aspetta l'uscita": "вошёл, ждёт выхода",
+ "Entrato, aspetta l'uscita": "Вошёл, ждёт выхода",
+ "Nessun filo entra nel bus": "Ни один провод не входит в шину"
 }

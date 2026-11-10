@@ -2,11 +2,11 @@
 // cavo, dalla pagina di partenza a quella di arrivo
 import { describe, it, expect } from 'vitest';
 import { emptyProject } from '../src/model/project';
-import { cableInfos } from '../src/model/cables';
+import { cableInfos, partConductors, repairPartCables } from '../src/model/cables';
 import { computeNetlist } from '../src/model/netlist';
 import { nameTapsInOrder, conductorChoices, bundleTaps } from '../src/model/bundles';
 import { bundleReport } from '../src/model/reports';
-import type { Wire, Page, SymbolInstance, Project, CableLine } from '../src/model/types';
+import type { Wire, Page, SymbolInstance, Project, CableLine, Part } from '../src/model/types';
 
 const W = (id: string, pts: [number, number][], extra: Partial<Wire> = {}): Wire => ({ kind: 'wire', id, points: pts.map(([x, y]) => ({ x, y })), ...extra });
 const S = (id: string, tag: string, x: number, y: number): SymbolInstance => ({ kind: 'symbol', id, symbolId: 'coil', tag, x, y, rot: 0, pinLabels: {} } as SymbolInstance);
@@ -76,6 +76,36 @@ describe('bus fili come cavo', () => {
     // Sulla pagina di arrivo (bus con lo stesso nome, senza articolo) valgono gli stessi conduttori
     const t2 = bundleTaps(p);
     expect(conductorChoices(p, t2.taps, t2.groupOf.get('bb')!, 'W1112S1', parts).find(c => c.name === '1')?.count).toBe(1);
+  });
+
+  it('articolo marcato «colori» con i conduttori scritti come numeri: si propongono i colori', () => {
+    const p = project([undefined, undefined], [undefined, undefined]);
+    p.cables = [];
+    (p.pages[0].elements[4] as Wire).bundlePart = 'B08C24100';
+    const nums = Array.from({ length: 24 }, (_, i) => String(i + 1));
+    const parts = new Map([['B08C24100', { partNr: 'B08C24100', attrs: {}, cable: { marking: 'colors', conductors: nums } } as never]]);
+    const { taps, groupOf } = bundleTaps(p);
+    const names = conductorChoices(p, taps, groupOf.get('ba')!, 'W1112S1', parts).map(c => c.name);
+    expect(names.slice(0, 4)).toEqual(['WH', 'BN', 'GN', 'YE']);
+    expect(names).toHaveLength(24);
+    expect(partConductors({ marking: 'numbers', conductors: nums })).toEqual(nums);
+    const pe = partConductors({ marking: 'colors', conductors: ['1', '2', 'GNYE'] });
+    expect(pe).toHaveLength(3);
+    expect(pe.some(n => /^\d+$/.test(n))).toBe(false);
+    expect(pe[2]).toBe('GNYE');
+  });
+
+  it('articoli cavo salvati coi numeri ma marcati «colori»: corretti nei dati, gli altri restano uguali', () => {
+    const nums = Array.from({ length: 24 }, (_, i) => String(i + 1));
+    const a = { partNr: 'B08C24100', attrs: {}, functionTemplates: [], cable: { marking: 'colors' as const, conductors: nums } };
+    const b = { partNr: 'N', attrs: {}, functionTemplates: [], cable: { marking: 'numbers' as const, conductors: ['1', '2'] } };
+    const c = { partNr: 'K', attrs: {}, functionTemplates: [] };
+    const out = repairPartCables<Part>([a, b, c])!;
+    expect(out[0].cable!.conductors.slice(0, 3)).toEqual(['WH', 'BN', 'GN']);
+    expect(out[1]).toBe(b);
+    expect(out[2]).toBe(c);
+    expect(a.cable.conductors[0]).toBe('1');
+    expect(repairPartCables(out)).toBeUndefined();
   });
 
   it('lista «Collegamenti bus fili»: un conduttore per riga nell\'ordine del cavo, liberi e senza uscita nelle note', () => {
