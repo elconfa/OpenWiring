@@ -187,6 +187,11 @@ directement dans le tableau. Les fils sans conducteur, ceux qui entrent sans sor
 le câble n'a pas sont signalés. La liste imprimable **Liaisons des bus fils** a un conducteur par ligne
 (comme les connexions des câbles), avec les conducteurs libres du câble.
 
+Un bus avec l'article d'un câble (conducteurs numérotés ou colorés) a aussi sa page de **câblage**,
+comme les câbles : *Listes ▸ Dessins des câbles (faisceau)* crée la page « Cablaggio bus fili … » avec les
+deux extrémités, les conducteurs et le tableau avec les libres. Un bus sans article reste seulement dans
+la liste *Liaisons des bus fils*.
+
 ## Textes
 
 *Texte* (ou *Insertion ▸ Texte*) et un clic sur la page insèrent un texte libre. Dans *Propriétés* on modifie
@@ -221,6 +226,11 @@ Photos, logos ou dessins s'insèrent dans le schéma comme des images.
 
 Les copies reçoivent **de nouveaux repères et numéros de fil** ; bobine et contacts copiés ensemble restent
 reliés. On peut aussi coller dans un autre projet : symboles et articles utilisés sont copiés avec les éléments.
+
+Avec **couper et coller** les éléments sont **déplacés** : sur une autre page ils gardent repères, numéros
+de borne, numéros de fil et la liaison des renvois. Avec **copier et coller** chaque borne copiée propose le
+premier numéro libre du bornier, en partant du plus bas et avec le même étage (A, B…), et l'on choisit le
+numéro ; les fils copiés prennent un nouveau numéro.
 
 Un circuit souvent utilisé s'enregistre comme **macro** ([chapitre 13](13-macro-simboli-cartigli.md#macros)).
 

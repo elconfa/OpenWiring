@@ -43,7 +43,7 @@ export function listEntries(p: Project, library: Part[] = [], tables: Table[] = 
   if (legend) out.push(rep(legend));
   out.push(
     { key: 'strip', title: groupName('strip'), pages: pagesOf('strip'), need: allStrips(p).reduce((n, s) => n + Math.max(1, Math.ceil(stripRows(p, s).length / per)), 0), style: 'strip' },
-    { key: 'cable', title: groupName('cable'), pages: pagesOf('cable'), need: drawingItems(p, 'cable').length, style: 'cable' },
+    { key: 'cable', title: groupName('cable'), pages: pagesOf('cable'), need: drawingItems(p, 'cable', library).length, style: 'cable' },
     { key: 'connector', title: groupName('connector'), pages: pagesOf('connector'), need: drawingItems(p, 'connector').length, style: 'connector' },
     { key: 'system', title: groupName('system'), pages: pagesOf('system'), need: drawingItems(p, 'system').length, style: 'system' },
     { key: 'plc', title: groupName('plc'), pages: pagesOf('plc'), need: p.plc.cards.length, style: 'plc' },
@@ -73,7 +73,7 @@ export function updateList(p: Project, key: PageGroup, library: Part[] = []): { 
     return syncReportPages(p, projectReports(p, library), [title], library);
   }
   if (key === 'strip') return syncStripPages(p);
-  if (key === 'cable' || key === 'connector' || key === 'system') return syncDrawingPages(p, key);
+  if (key === 'cable' || key === 'connector' || key === 'system') return syncDrawingPages(p, key, library);
   if (key === 'plc') return syncOverviewPages(p);
   return { added: 0, removed: 0 };
 }

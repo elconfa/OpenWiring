@@ -90,7 +90,7 @@ function CableDrawing({ c, t, S }: { c: CableSheet; t: T; S: ResolvedDrawingStyl
   const cell = (r: Record<string, string>) => cols.map(k => r[k.key] ?? '');
   return (
     <g>
-      <Title title={`${t('Cablaggio cavo')} -${c.tag}`} sub={sub} size={S.titleSize} />
+      <Title title={c.bus ? `${t('Cablaggio bus fili')} ${c.tag}` : `${t('Cablaggio cavo')} -${c.tag}`} sub={sub} size={S.titleSize} />
       {drawing && <>
       {/* Estremità */}
       {[{ b: boxA, s: c.sideA, right: true }, { b: boxB, s: c.sideB, right: false }].map(({ b, s, right }, k) => (
@@ -119,7 +119,7 @@ function CableDrawing({ c, t, S }: { c: CableSheet; t: T; S: ResolvedDrawingStyl
       </g>
       <rect x={sheath.x0} y={midY - (n * tight) / 2 - 1.5} width={sheath.x1 - sheath.x0} height={n * tight + 3} rx={1.5} fill="none" stroke={look.ink} strokeWidth={0.6} />
       {c.shield && <rect x={sheath.x0 + 3} y={midY - (n * tight) / 2 - 0.6} width={sheath.x1 - sheath.x0 - 6} height={n * tight + 1.2} rx={1} fill="none" stroke={look.ink} strokeWidth={0.2} strokeDasharray="0.8 0.5" />}
-      <text x={(sheath.x0 + sheath.x1) / 2} y={midY - (n * tight) / 2 - 3.5} fontSize={2.6} fontWeight={600} textAnchor="middle" fill={look.ink}>{`-${c.tag}`}</text>
+      <text x={(sheath.x0 + sheath.x1) / 2} y={midY - (n * tight) / 2 - 3.5} fontSize={2.6} fontWeight={600} textAnchor="middle" fill={look.ink}>{c.bus ? c.tag : `-${c.tag}`}</text>
       <text x={(sheath.x0 + sheath.x1) / 2} y={midY + (n * tight) / 2 + 5} fontSize={2} textAnchor="middle" fill={MUTED}>{[c.type, c.section].filter(Boolean).join(' ')}</text>
       <g fontSize={2} fill={MUTED}>
         <text x={boxA.x + boxA.w + 1.5} y={y0 - 1.5}>{t('Conduttore')}</text>

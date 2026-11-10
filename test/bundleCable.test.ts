@@ -6,6 +6,7 @@ import { cableInfos, partConductors, repairPartCables } from '../src/model/cable
 import { computeNetlist } from '../src/model/netlist';
 import { nameTapsInOrder, conductorChoices, bundleTaps } from '../src/model/bundles';
 import { bundleReport } from '../src/model/reports';
+import { bundleSheet, drawingItems, syncDrawingPages, BUS_ITEM } from '../src/model/drawings';
 import type { Wire, Page, SymbolInstance, Project, CableLine, Part } from '../src/model/types';
 
 const W = (id: string, pts: [number, number][], extra: Partial<Wire> = {}): Wire => ({ kind: 'wire', id, points: pts.map(([x, y]) => ({ x, y })), ...extra });
@@ -124,5 +125,25 @@ describe('bus fili come cavo', () => {
     (p.pages[1].elements[2] as Wire).bundle = 'X';
     expect(nameTapsInOrder(p, 'ba')).toBe(2);
     expect((p.pages[0].elements[3] as Wire).tapEnd).toBe('2');
+  });
+
+  it('pagina «Cablaggio bus fili» per i bus con l\'articolo di un cavo: conduttori in ordine, da e a, liberi', () => {
+    const p = project(['GN', 'WH'], ['GN']);
+    p.cables = [];
+    (p.pages[0].elements[4] as Wire).bundlePart = 'CAVO-4';
+    const lib = [{ partNr: 'CAVO-4', typeNr: 'LIYY 4x0,25', attrs: {}, functionTemplates: [], cable: { marking: 'colors', conductors: ['WH', 'BN', 'GN', 'YE'], cross: '0,25' } } as Part];
+    expect(drawingItems(p, 'cable', lib)).toEqual([BUS_ITEM + 'W1112S1']);
+    const sh = bundleSheet(p, 'W1112S1', lib)!;
+    expect(sh.bus).toBe(true);
+    expect(sh.type).toBe('LIYY 4x0,25');
+    expect(sh.rows.map(r => [r.name, r.problem ?? ''])).toEqual([['WH', 'entra ma non esce'], ['GN', '']]);
+    expect([sh.rows[1].a, sh.rows[1].b].sort()).toEqual(['-K1:A2', '-K3:A1']);
+    expect(sh.spare).toEqual(['BN', 'YE']);
+    syncDrawingPages(p, 'cable', lib);
+    expect(p.pages.find(pg => pg.type === 'cable')?.title).toBe('Cablaggio bus fili W1112S1');
+    // Senza articolo, o con un cavo del progetto con lo stesso nome: nessuna pagina del bus
+    expect(drawingItems(p, 'cable')).toEqual([]);
+    p.cables = [{ id: 'c1', tag: 'W1112S1', conductors: ['WH', 'BN'], assign: {} } as never];
+    expect(drawingItems(p, 'cable', lib)).toEqual(['W1112S1']);
   });
 });

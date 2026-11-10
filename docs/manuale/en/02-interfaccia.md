@@ -14,7 +14,7 @@
 | 6 | Library | symbols, macros and parts to insert |
 | 7 | Report view | messages from import, export and operations |
 | 8 | Status bar | hints on the active command, file, page, cursor coordinates |
-| 9 | View tabs | Schematic, Devices, PLC, Terminal strips, Parts, Lists |
+| 9 | Views | *Schematic* always visible; Devices, PLC, Terminal strips, Cables, Wire bus, Parts, Lists and the others in the *Other views* drop-down button |
 
 ## Ribbon
 

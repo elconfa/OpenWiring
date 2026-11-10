@@ -166,7 +166,7 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
         { label: tx('Schema di rete'), run: () => { st().addNetworkPage(); st().setView('schema'); } },
         { label: tx('Layout del quadro'), run: () => { st().addLayoutPage(); st().setView('schema'); } },
         { label: tx('Copertina'), run: () => { st().addCoverPage(); st().setView('schema'); } },
-        { label: tx('Disegni dei cavi (cablaggio)'), run: () => { st().syncDrawingPages('cable'); st().setView('schema'); }, disabled: !s.project.cables?.length, title: tx('Una pagina per cavo: estremità, conduttori e tabella; si aggiornano da sole') },
+        { label: tx('Disegni dei cavi (cablaggio)'), run: () => { st().syncDrawingPages('cable'); st().setView('schema'); }, disabled: !s.project.cables?.length && !s.project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && !!e.bundlePart)), title: tx('Una pagina per cavo e per bus fili con l\'articolo di un cavo: estremità, conduttori e tabella; si aggiornano da sole') },
         { label: tx('Piedinature dei connettori'), run: () => { st().syncDrawingPages('connector'); st().setView('schema'); }, title: tx('Una pagina per connettore: faccia con i pin numerati e tabella dei collegamenti') },
         { label: tx('Schema d\'insieme'), run: () => { st().syncDrawingPages('system'); st().setView('schema'); }, disabled: !s.project.cables?.length, title: tx('Luoghi (quadri, pulsantiere, bordo macchina) con i dispositivi, le foto e i cavi di collegamento') },
         { label: tx('Pagine automatiche (liste)…'), run: () => st().setDialog('reportPages'), title: tx('Indice, distinta, lista d\'acquisto, dispositivi, morsetti, fili, cavi… come pagine del progetto') },
@@ -290,15 +290,46 @@ export function MenuBar() {
   );
 }
 
-/** Schede delle viste principali, a destra nella barra dei menu */
+/** Viste diverse dallo schema, nell'ordine del pulsante a discesa */
+const OTHER_VIEWS = [['devices', 'Dispositivi'], ['plc', 'PLC'], ['terminals', 'Morsettiere'], ['connectors', 'Connettori'], ['distributors', 'Ripartitori'], ['cables', 'Cavi'], ['bundles', 'Bus fili'], ['calcs', 'Calcoli'], ['parts', 'Articoli'], ['reports', 'Liste']] as const;
+
+/**
+ * Viste principali, a destra nella barra: «Schema» sempre visibile e un pulsante a discesa con le altre
+ * viste (mostra il nome della vista aperta, se non è lo schema)
+ */
 export function ViewTabs() {
   const view = useStore(s => s.view);
   const st = useStore.getState;
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('mousedown', close);
+    window.addEventListener('keydown', esc);
+    return () => { window.removeEventListener('mousedown', close); window.removeEventListener('keydown', esc); };
+  }, [open]);
+  const cur = OTHER_VIEWS.find(([v]) => v === view);
   return (
     <div className="tb-tabs" role="tablist">
-      {([['schema', tn('Schema')], ['devices', tn('Dispositivi')], ['plc', tn('PLC')], ['terminals', tn('Morsettiere')], ['connectors', tn('Connettori')], ['distributors', tn('Ripartitori')], ['cables', tn('Cavi')], ['bundles', tn('Bus fili')], ['calcs', tn('Calcoli')], ['parts', tn('Articoli')], ['reports', tn('Liste')]] as const).map(([v, l]) => (
-        <button key={v} role="tab" aria-selected={view === v} className={view === v ? 'tab active' : 'tab'} onClick={() => st().setView(v)}>{tx(l)}</button>
-      ))}
+      <button role="tab" aria-selected={view === 'schema'} className={view === 'schema' ? 'tab active' : 'tab'} onClick={() => st().setView('schema')}>{tx('Schema')}</button>
+      <div className="menu view-menu" ref={ref}>
+        <button role="tab" aria-selected={!!cur} aria-haspopup="true" aria-expanded={open} className={cur ? 'tab active' : 'tab'}
+          onClick={() => setOpen(o => !o)} title={tx('Dispositivi, PLC, morsettiere, cavi, liste e le altre viste')}>
+          {cur ? tx(cur[1]) : tx('Altre viste')} <span className="view-menu-caret">▾</span>
+        </button>
+        {open && (
+          <div className="menu-drop view-menu-drop" role="menu">
+            {OTHER_VIEWS.map(([v, l]) => (
+              <button key={v} role="menuitemradio" aria-checked={view === v} className="menu-item" onClick={() => { setOpen(false); st().setView(v); }}>
+                <span className="menu-check">{view === v ? '✓' : ''}</span>
+                <span className="menu-label">{tx(l)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

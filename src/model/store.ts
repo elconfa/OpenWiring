@@ -893,7 +893,7 @@ export const useStore = create<State>((set, get) => {
     },
     syncDrawingPages(kind) {
       let r = { added: 0, removed: 0 };
-      get().commit(p => { r = syncDrawingPagesModel(p, kind); });
+      get().commit(p => { r = syncDrawingPagesModel(p, kind, get().library); });
       const what = kind === 'cable' ? tx('Disegni dei cavi') : kind === 'connector' ? tx('Piedinature dei connettori') : tx('Schema d\'insieme');
       get().logMsg(r.added || r.removed ? tx('{0}: {1} pagine aggiunte{2}', what, r.added, r.removed ? `, ${r.removed} rimosse` : '') : tx('{0}: pagine già aggiornate', what));
       // Si va alla prima pagina del tipo
@@ -1785,8 +1785,15 @@ export const useStore = create<State>((set, get) => {
       get().logMsg(tx('Copiati {0} elementi', clip.elements.length));
     },
     cutSelection() {
-      if (!get().selection.length) return;
-      get().copySelection();
+      const { selection, pageId, project } = get();
+      if (!selection.length) return;
+      // Tagliare = spostare: si ricordano i numeri filo per tenerli dove si incolla
+      const clip = copyElements(project, currentPage(project, pageId), selection);
+      const nl = computeNetlist(project);
+      const wireNos: Record<string, string> = {};
+      for (const e of clip.elements) if (e.kind === 'wire') { const no = nl.wireNet.get(e.id)?.wireNo; if (no) wireNos[e.id] = no; }
+      set({ clipboard: { ...clip, cut: true, wireNos } });
+      get().logMsg(tx('Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo', clip.elements.length));
       get().deleteSelection();
     },
     paste(at) {
@@ -1794,8 +1801,22 @@ export const useStore = create<State>((set, get) => {
       if (!clipboard) return;
       const off = pasteOffset(clipboard, at ?? cursor);
       let r = { ids: [] as string[], newCards: [] as string[] };
-      get().commit(p => { r = pasteElements(p, pageId, clipboard, off.x, off.y); placedOnWires(p, currentPage(p, pageId), r.ids); });
-      set({ selection: r.ids, tool: { kind: 'select' } });
+      get().commit(p => {
+        r = pasteElements(p, pageId, clipboard, off.x, off.y);
+        placedOnWires(p, currentPage(p, pageId), r.ids);
+        // Fili tagliati: se nella pagina nuova il numero cambierebbe, si fissa quello di prima
+        if (clipboard.cut && clipboard.wireNos) {
+          const nl = computeNetlist(p);
+          const byOld = new Map(clipboard.elements.map((e, i) => [e.id, r.ids[i]]));
+          const pg = currentPage(p, pageId);
+          for (const [old, no] of Object.entries(clipboard.wireNos)) {
+            const w = pg.elements.find(e => e.id === byOld.get(old));
+            if (w?.kind === 'wire' && !w.number && nl.wireNet.get(w.id)?.wireNo !== no) w.number = no;
+          }
+        }
+      });
+      // Dopo il primo incolla gli elementi tagliati sono di nuovo nel progetto: incollare ancora fa una copia
+      set({ selection: r.ids, tool: { kind: 'select' }, ...(clipboard.cut ? { clipboard: { ...clipboard, cut: false, wireNos: undefined } } : {}) });
       if (r.newCards.length) get().logMsg(tx('Create le schede PLC {0}', r.newCards.join(', ')));
     },
     addStation(station) {

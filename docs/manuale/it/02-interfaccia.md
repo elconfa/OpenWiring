@@ -14,7 +14,7 @@
 | 6 | Libreria | simboli, macro e articoli da inserire |
 | 7 | Vista report | messaggi di import, export e operazioni |
 | 8 | Barra di stato | suggerimenti sul comando attivo, file, pagina, coordinate del cursore |
-| 9 | Schede delle viste | Schema, Dispositivi, PLC, Morsettiere, Articoli, Liste |
+| 9 | Viste | *Schema* sempre visibile; Dispositivi, PLC, Morsettiere, Cavi, Bus fili, Articoli, Liste e le altre nel pulsante a discesa *Altre viste* |
 
 ## Barra multifunzione
 

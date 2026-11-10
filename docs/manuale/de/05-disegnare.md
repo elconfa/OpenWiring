@@ -191,6 +191,11 @@ in der Tabelle korrigiert. Drähte ohne Ader, Drähte, die eintreten ohne auszut
 Kabel nicht hat, werden markiert. Die druckbare Liste **Leiterbus-Verbindungen** hat eine Ader je Zeile
 (wie die Kabelverbindungen), mit den freien Adern des Kabels.
 
+Ein Bus mit Kabelartikel (nummerierte oder farbige Adern) erhält wie die Kabel auch eine
+**Verdrahtungsseite**: *Listen ▸ Kabelzeichnungen (Kabelbaum)* erstellt die Seite „Cablaggio bus fili …“
+mit beiden Enden, den Adern und der Tabelle mit den freien Adern. Ein Bus ohne Artikel bleibt nur in der
+Liste *Leiterbus-Verbindungen*.
+
 ## Texte
 
 *Text* (oder *Einfügen ▸ Text*) und ein Klick auf die Seite fügen einen freien Text ein. Unter
@@ -227,6 +232,11 @@ Fotos, Logos oder Zeichnungen werden als Bilder in den Schaltplan eingefügt.
 
 Kopien erhalten **neue BMK und Drahtnummern**; zusammen kopierte Spule und Kontakte bleiben verbunden. Man
 kann auch in ein anderes Projekt einfügen: verwendete Symbole und Artikel werden mitkopiert.
+
+Mit **Ausschneiden und Einfügen** werden die Elemente **verschoben**: auf einer anderen Seite behalten sie
+Kennzeichen, Klemmennummern, Drahtnummern und die Verbindung der Verweise. Mit **Kopieren und Einfügen**
+schlägt jede kopierte Klemme die erste freie Nummer der Klemmleiste vor, von der niedrigsten an und mit
+derselben Etage (A, B…), und man wählt die Nummer; kopierte Drähte erhalten eine neue Nummer.
 
 Ein häufig verwendeter Stromkreis lässt sich als **Makro** speichern ([Kapitel 13](13-macro-simboli-cartigli.md#makros)).
 

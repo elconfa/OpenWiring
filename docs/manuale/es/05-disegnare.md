@@ -187,6 +187,11 @@ directamente en la tabla. Se marcan los hilos sin conductor, los que entran sin 
 que el cable no tiene. La lista imprimible **Conexiones de bus hilos** tiene un conductor por fila (como
 las conexiones de cables), con los conductores libres del cable.
 
+Un bus con el artículo de un cable (conductores numerados o de colores) tiene también su página de
+**cableado**, como los cables: *Listas ▸ Dibujos de los cables (cableado)* crea la página «Cablaggio bus
+fili …» con los dos extremos, los conductores y la tabla con los libres. Un bus sin artículo queda solo
+en la lista *Conexiones de bus hilos*.
+
 ## Textos
 
 *Texto* (o *Insertar ▸ Texto*) y un clic en la página insertan un texto libre. En *Propiedades* se cambian el
@@ -221,6 +226,11 @@ Fotos, logotipos o dibujos se insertan en el esquema como imágenes.
 
 Las copias reciben **siglas y números de hilo nuevos**; bobina y contactos copiados juntos siguen conectados.
 También se puede pegar en otro proyecto: los símbolos y artículos usados se copian con los elementos.
+
+Con **cortar y pegar** los elementos se **mueven**: en otra página conservan referencias, números de borne,
+números de hilo y la conexión de las remisiones. Con **copiar y pegar** cada borne copiado propone el
+primer número libre de la regleta, empezando por el más bajo y con el mismo piso (A, B…), y se elige el
+número; los hilos copiados toman un número nuevo.
 
 Un circuito que se usa a menudo se guarda como **macro** ([capítulo 13](13-macro-simboli-cartigli.md#macros)).
 

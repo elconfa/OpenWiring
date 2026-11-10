@@ -14,7 +14,7 @@
 | 6 | Bibliothèque | symboles, macros et articles à insérer |
 | 7 | Vue rapport | messages d'import, d'export et des opérations |
 | 8 | Barre d'état | conseils sur la commande active, fichier, page, coordonnées du curseur |
-| 9 | Onglets des vues | Schéma, Appareils, API, Borniers, Articles, Listes |
+| 9 | Vues | *Schéma* toujours visible ; Appareils, API, Borniers, Câbles, Bus fils, Articles, Listes et les autres dans le bouton déroulant *Autres vues* |
 
 ## Ruban
 

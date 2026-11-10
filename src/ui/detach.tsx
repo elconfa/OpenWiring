@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { usePanelStore, type BoxId } from './panels';
 import { installModalDrag } from './dragModals';
+import { installSuggestLists } from './suggestLists';
 import { tx } from '../i18n/ui';
 import { textKey } from './textKeys';
 
@@ -48,6 +49,7 @@ export function DetachedPanel({ id, title, children }: { id: BoxId; title: strin
     root.className = 'detached-panel';
     d.body.appendChild(root);
     installModalDrag(d);
+    installSuggestLists(d);
     // Tema cambiato o stili aggiunti (sviluppo): si ricopiano
     const mo = new MutationObserver(() => syncLook(d));
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'lang'] });

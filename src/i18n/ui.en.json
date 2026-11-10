@@ -3408,5 +3408,12 @@
  "Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano": "Changing the marking turns the conductors into standard numbers or colours, to be edited by hand afterwards",
  "entrato, aspetta l'uscita": "entered, waiting for the exit",
  "Entrato, aspetta l'uscita": "Entered, waiting for the exit",
- "Nessun filo entra nel bus": "No wire enters the bus"
+ "Nessun filo entra nel bus": "No wire enters the bus",
+ "Altre viste": "Other views",
+ "Dispositivi, PLC, morsettiere, cavi, liste e le altre viste": "Devices, PLC, terminal strips, cables, lists and the other views",
+ "Una pagina per cavo e per bus fili con l'articolo di un cavo: estremità, conduttori e tabella; si aggiornano da sole": "One page per cable and per wire bus with a cable part: ends, conductors and table; they update by themselves",
+ "Il morsetto -{0}:{1} c'è già: i due morsetti avranno lo stesso numero": "Terminal -{0}:{1} already exists: the two terminals will have the same number",
+ "Il primo numero libero della morsettiera, partendo dal più basso; il piano resta quello copiato. Scrivi un altro numero o sceglilo dall'elenco.": "The first free number of the terminal strip, starting from the lowest; the level stays the copied one. Type another number or pick it from the list.",
+ "Numero del morsetto copiato (-{0})": "Number of the copied terminal (-{0})",
+ "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "{0} elements cut: when pasted they keep tags, terminals, cross-references and wire numbers"
 }

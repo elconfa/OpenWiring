@@ -186,6 +186,11 @@ direttamente nella tabella. Sono segnati i fili senza conduttore, quelli che ent
 conduttori che il cavo non ha. La lista stampabile **Collegamenti bus fili** ha un conduttore per riga
 (come *Collegamenti cavi*), con i conduttori liberi del cavo.
 
+Un bus con l'articolo di un cavo (conduttori numerati o colorati) ha anche la sua pagina di **cablaggio**,
+come i cavi: *Liste ▸ Disegni dei cavi (cablaggio)* crea la pagina «Cablaggio bus fili …» con le due
+estremità, i conduttori e la tabella con i liberi. Un bus senza articolo resta solo nella lista
+*Collegamenti bus fili*.
+
 ## Testi
 
 *Testo* (o *Inserisci ▸ Testo*) e un clic sulla pagina inseriscono un testo libero. In *Proprietà* si
@@ -221,6 +226,11 @@ Foto, logo o disegni si inseriscono nello schema come immagini.
 
 Le copie ricevono **sigle e numeri filo nuovi**; bobina e contatti copiati insieme restano collegati tra loro.
 Si può incollare anche in un altro progetto: simboli e articoli usati vengono copiati con gli elementi.
+
+Con **taglia e incolla** gli elementi si **spostano**: in un'altra pagina tengono sigle, numeri dei morsetti,
+numeri filo e il collegamento dei rimandi. Con **copia e incolla** ogni morsetto copiato propone il
+primo numero libero della morsettiera, partendo dal più basso e con lo stesso piano (A, B…), e si sceglie
+il numero; i fili copiati prendono un numero nuovo.
 
 Un circuito che si usa spesso si salva come **macro** ([capitolo 13](13-macro-simboli-cartigli.md#macro)).
 

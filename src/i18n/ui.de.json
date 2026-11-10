@@ -3408,5 +3408,12 @@
  "Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano": "Beim Ändern der Kennzeichnung werden die Leiter zu Standardnummern oder -farben, danach von Hand anpassbar",
  "entrato, aspetta l'uscita": "eingetreten, wartet auf den Ausgang",
  "Entrato, aspetta l'uscita": "Eingetreten, wartet auf den Ausgang",
- "Nessun filo entra nel bus": "Kein Draht tritt in den Bus ein"
+ "Nessun filo entra nel bus": "Kein Draht tritt in den Bus ein",
+ "Altre viste": "Weitere Ansichten",
+ "Dispositivi, PLC, morsettiere, cavi, liste e le altre viste": "Betriebsmittel, SPS, Klemmleisten, Kabel, Listen und die anderen Ansichten",
+ "Una pagina per cavo e per bus fili con l'articolo di un cavo: estremità, conduttori e tabella; si aggiornano da sole": "Eine Seite pro Kabel und pro Leiterbus mit Kabelartikel: Enden, Adern und Tabelle; sie aktualisieren sich selbst",
+ "Il morsetto -{0}:{1} c'è già: i due morsetti avranno lo stesso numero": "Klemme -{0}:{1} gibt es bereits: beide Klemmen haben dieselbe Nummer",
+ "Il primo numero libero della morsettiera, partendo dal più basso; il piano resta quello copiato. Scrivi un altro numero o sceglilo dall'elenco.": "Die erste freie Nummer der Klemmleiste, von der niedrigsten an; die Etage bleibt die kopierte. Eine andere Nummer eingeben oder aus der Liste wählen.",
+ "Numero del morsetto copiato (-{0})": "Nummer der kopierten Klemme (-{0})",
+ "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "{0} Elemente ausgeschnitten: beim Einfügen behalten sie Kennzeichen, Klemmen, Verweise und Drahtnummern"
 }

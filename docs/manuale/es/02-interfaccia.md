@@ -14,7 +14,7 @@
 | 6 | Biblioteca | símbolos, macros y artículos para insertar |
 | 7 | Vista de informe | mensajes de importación, exportación y operaciones |
 | 8 | Barra de estado | indicaciones sobre el comando activo, archivo, página, coordenadas del cursor |
-| 9 | Pestañas de las vistas | Esquema, Dispositivos, PLC, Regletas, Artículos, Listas |
+| 9 | Vistas | *Esquema* siempre visible; Dispositivos, PLC, Regletas, Cables, Bus hilos, Artículos, Listas y las demás en el botón desplegable *Otras vistas* |
 
 ## Cinta de opciones
 

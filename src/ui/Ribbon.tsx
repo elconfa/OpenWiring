@@ -145,7 +145,7 @@ export function ribbonTabs(s: State): RTab[] {
         ] },
         { name: tn('Pagine automatiche'), items: [
           { icon: 'list', label: tx('Liste'), big: true, run: () => st().setDialog('reportPages'), title: tx('Indice, distinta, lista d\'acquisto, dispositivi, morsetti, fili, cavi… come pagine del progetto') },
-          { icon: 'cable', label: tx('Disegni dei cavi (cablaggio)'), run: () => { st().syncDrawingPages('cable'); st().setView('schema'); }, disabled: !s.project.cables?.length, title: tx('Una pagina per cavo: estremità, conduttori e tabella; si aggiornano da sole') },
+          { icon: 'cable', label: tx('Disegni dei cavi (cablaggio)'), run: () => { st().syncDrawingPages('cable'); st().setView('schema'); }, disabled: !s.project.cables?.length && !s.project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && !!e.bundlePart)), title: tx('Una pagina per cavo e per bus fili con l\'articolo di un cavo: estremità, conduttori e tabella; si aggiornano da sole') },
           { icon: 'connector', label: tx('Piedinature dei connettori'), run: () => { st().syncDrawingPages('connector'); st().setView('schema'); }, title: tx('Una pagina per connettore: faccia con i pin numerati e tabella dei collegamenti') },
           { icon: 'system', label: tx('Schema d\'insieme'), run: () => { st().syncDrawingPages('system'); st().setView('schema'); }, disabled: !s.project.cables?.length, title: tx('Luoghi (quadri, pulsantiere, bordo macchina) con i dispositivi, le foto e i cavi di collegamento') },
           { icon: 'update', label: tx('Aggiorna le pagine di lista'), run: () => st().syncReportPages() },

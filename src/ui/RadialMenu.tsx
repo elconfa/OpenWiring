@@ -2,6 +2,7 @@
 // dei comandi): otto comandi attorno al puntatore, scelti in base a cosa è selezionato. Si sceglie con
 // un clic, oppure tenendo premuto il tasto destro, spostandosi verso il comando e lasciando. Il centro
 // apre il menu completo di sempre.
+import { pasteAt } from './pasteChooser';
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../model/store';
 import type { Derived } from '../model/derive';
@@ -43,7 +44,7 @@ export function radialItems(derived: Derived, at: { x: number; y: number }): RIt
   const last = recentSymbols().map(id => getSymbol(id, st.project)).find(Boolean);
   return [
     { icon: 'wire', label: tx('Filo'), run: () => st.setTool({ kind: 'wire' }) },
-    { icon: 'paste', label: tx('Incolla qui'), run: () => st.paste(at), disabled: !st.clipboard },
+    { icon: 'paste', label: tx('Incolla qui'), run: () => void pasteAt(at), disabled: !st.clipboard },
     { icon: 'contact', label: last ? tx(last.name) : tx('Simboli'), run: () => { if (last) st.setTool({ kind: 'place', symbolId: last.id, rot: 0 }); }, disabled: !last },
     { icon: 'terminal', label: tx('Morsetto'), run: () => st.setTool({ kind: 'place', symbolId: 'terminal', rot: 0 }) },
     { icon: 'fit', label: tx('Adatta'), run: A.fitView },

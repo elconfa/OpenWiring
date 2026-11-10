@@ -13,6 +13,7 @@ import { cableStyleOf, lineShow, CABLE_SHOW_KEYS, CABLE_LABEL_POS, CABLE_COND_DI
 import { PANEL_KINDS, PIN_OWN_FIELDS, AUX_OWN_FIELDS } from '../model/types';
 import { cableByPiece, cableInfos, cableSection, conductorsFor, conductorEnds, markingOf, partConductors, pinDeviceOptions } from '../model/cables';
 import { useBundleData, BundleTapsTable, BundleConductorChips } from './BundleTapsTable';
+import { ConductorPicker } from './ConductorPicker';
 import { PiecesSelect } from './CablesView';
 import { ConductorSwatch } from './CablesView';
 import { PROTOCOLS, protocolLabel, GENERIC_BUS, networkLinks, panelLabel, panelAncestors, devicePanels, BUS_CABLE_TYPES, IP_PROTOCOLS, busCableGroups, nodeIp, isIp, netmask, parseIp, networkOfIp } from '../model/network';
@@ -751,7 +752,7 @@ function BundleProps({ wire }: { wire: Wire }) {
           ? <Row label=""><span className="small warn-text">{tx('L\'articolo {0} non ha i dati del cavo (conduttori): si propongono i nomi comuni', wire.bundlePart)}</span></Row>
           : null}
       <Row label={tx('Conduttori')}>{d ? <BundleConductorChips d={d} /> : '—'}</Row>
-      {d && d.taps.length > 0 && <tr><td colSpan={2}><div className="bundle-props-taps"><BundleTapsTable d={d} listId={`bundle-props-${wire.id}`} /></div></td></tr>}
+      {d && d.taps.length > 0 && <tr><td colSpan={2}><div className="bundle-props-taps"><BundleTapsTable d={d} /></div></td></tr>}
       {unnamed > 0 && <Row label=""><span className="small muted">{tx('{0} fili toccano il bus senza conduttore: scrivi il conduttore qui sopra o usa «Nomina i conduttori in ordine»', unnamed)}</span></Row>}
       <Row label="">
         <button disabled={!taps.some(t => t.group === group && !t.name && t.pageId === project.pages.find(pg => pg.elements.includes(wire))?.id)}
@@ -775,14 +776,12 @@ function TapRows({ wire }: { wire: Wire }) {
   return (
     <>
       {mine.map(t => {
-        const listId = `taps-${t.end}`;
         const bus = names.get(t.group);
         return (
           <Row key={t.end} label={mine.length > 1 ? (t.end ? tx('Conduttore nel bus (fine)') : tx('Conduttore nel bus (inizio)')) : tx('Conduttore nel bus')}>
             <span title={bus ? tx('Bus «{0}»', bus) : undefined}>
-              <Field value={t.name ?? ''} list={listId} placeholder={tx('es. L1, PE')} onCommit={v => st().setWireTap(wire.id, t.end, v)} />
+              <ConductorPicker value={t.name ?? ''} width={120} placeholder={tx('es. L1, PE')} choices={conductorChoices(project, taps, t.group, bus, partsIndex(project, useStore.getState().library))} onCommit={v => st().setWireTap(wire.id, t.end, v)} />
             </span>
-            <datalist id={listId}>{conductorChoices(project, taps, t.group, bus, partsIndex(project, useStore.getState().library)).map(c => <option key={c.name} value={c.name}>{c.count ? tx('già usato ({0})', c.count) : tx('libero')}</option>)}</datalist>
           </Row>
         );
       })}

@@ -3408,5 +3408,12 @@
  "Cambiando la marcatura i conduttori diventano numeri o colori standard, da modificare poi a mano": "При смене маркировки жилы получают стандартные номера или цвета, которые затем можно изменить вручную",
  "entrato, aspetta l'uscita": "вошёл, ждёт выхода",
  "Entrato, aspetta l'uscita": "Вошёл, ждёт выхода",
- "Nessun filo entra nel bus": "Ни один провод не входит в шину"
+ "Nessun filo entra nel bus": "Ни один провод не входит в шину",
+ "Altre viste": "Другие виды",
+ "Dispositivi, PLC, morsettiere, cavi, liste e le altre viste": "Устройства, ПЛК, клеммники, кабели, перечни и другие виды",
+ "Una pagina per cavo e per bus fili con l'articolo di un cavo: estremità, conduttori e tabella; si aggiornano da sole": "Одна страница на кабель и на шину проводов с артикулом кабеля: концы, жилы и таблица; обновляются сами",
+ "Il morsetto -{0}:{1} c'è già: i due morsetti avranno lo stesso numero": "Клемма -{0}:{1} уже есть: у двух клемм будет одинаковый номер",
+ "Il primo numero libero della morsettiera, partendo dal più basso; il piano resta quello copiato. Scrivi un altro numero o sceglilo dall'elenco.": "Первый свободный номер клеммника, начиная с наименьшего; уровень остаётся скопированным. Введите другой номер или выберите его из списка.",
+ "Numero del morsetto copiato (-{0})": "Номер скопированной клеммы (-{0})",
+ "Tagliati {0} elementi: incollandoli tengono sigle, morsetti, rimandi e numeri filo": "Вырезано элементов: {0}; при вставке они сохраняют обозначения, клеммы, ссылки и номера проводов"
 }

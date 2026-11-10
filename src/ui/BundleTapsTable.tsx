@@ -1,24 +1,15 @@
 // Fili che entrano o escono da un bus, con il conduttore modificabile (scelto tra quelli del cavo,
 // con i liberi e gli usati), e l'elenco dei conduttori del cavo: usati, in attesa dell'uscita, liberi.
 // Usata dalla vista Bus fili e dalle proprietà del bus (doppio clic sul bus).
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useStore } from '../model/store';
 import { bundleTaps, bundleConductorList, conductorChoices, type BundleTap } from '../model/bundles';
 import { partsIndex } from '../model/devices';
 import { computeNetlist } from '../model/netlist';
 import { columnOf } from '../model/types';
 import { ConductorSwatch } from './CablesView';
+import { ConductorPicker } from './ConductorPicker';
 import { tx } from '../i18n/ui';
-
-function Field({ value, onCommit, list, width }: { value: string; onCommit: (v: string) => void; list?: string; width?: number }) {
-  const [v, setV] = useState(value);
-  useEffect(() => setV(value), [value]);
-  return (
-    <input value={v} list={list} style={width ? { width } : undefined} placeholder="—" onChange={e => setV(e.target.value)}
-      onBlur={() => { if (v.trim() !== value) onCommit(v.trim()); }}
-      onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setV(value); }} />
-  );
-}
 
 /** Dati del bus a cui appartiene il segmento: fili, conduttori del cavo, scelte con usati e liberi */
 export function useBundleData(wireId: string | undefined) {
@@ -52,7 +43,7 @@ export function tapStatus(d: BundleData, t: BundleTap) {
 }
 
 /** Tabella dei fili del bus con il conduttore da correggere; full = anche numero filo e «vai allo schema» */
-export function BundleTapsTable({ d, full, listId }: { d: BundleData; full?: boolean; listId: string }) {
+export function BundleTapsTable({ d, full }: { d: BundleData; full?: boolean }) {
   const st = useStore.getState;
   const ends = (t: BundleTap) => {
     const net = d.nl.wireNet.get(t.wire.id);
@@ -62,9 +53,6 @@ export function BundleTapsTable({ d, full, listId }: { d: BundleData; full?: boo
   if (!d.taps.length) return <div className="muted small">{tx('Nessun filo entra nel bus')}</div>;
   return (
     <>
-      <datalist id={listId}>
-        {d.choices.map(c => <option key={c.name} value={c.name}>{c.count === 1 ? tx('entrato, aspetta l\'uscita') : c.count ? tx('già usato ({0})', c.count) : tx('libero')}</option>)}
-      </datalist>
       <table className="grid">
         <thead><tr><th>{tx('Pagina')}</th>{full && <th>{tx('Numero filo')}</th>}<th>{tx('Collega')}</th><th>{tx('Conduttore nel bus')}</th><th>{tx('Stato')}</th>{full && <th />}</tr></thead>
         <tbody>
@@ -78,7 +66,7 @@ export function BundleTapsTable({ d, full, listId }: { d: BundleData; full?: boo
                 <td className="small">{ends(t)}</td>
                 <td className="nowrap">
                   <ConductorSwatch name={t.name ?? ''} />{' '}
-                  <Field value={t.name ?? ''} list={listId} width={80} onCommit={v => st().setWireTap(t.wire.id, t.end, v)} />
+                  <ConductorPicker value={t.name ?? ''} choices={d.choices} width={80} onCommit={v => st().setWireTap(t.wire.id, t.end, v)} />
                 </td>
                 <td className={s.bad ? 'warn-text small' : 'muted small'}>{s.text}</td>
                 {full && <td><button className="mini" onClick={() => goTo(t)} title={tx('Mostra sullo schema')}>→</button></td>}

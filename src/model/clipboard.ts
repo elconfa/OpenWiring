@@ -23,6 +23,13 @@ export interface ClipData {
   cables?: Cable[];
   /** Angolo in alto a sinistra degli elementi copiati */
   origin: Pt;
+  /**
+   * Elementi tagliati: incollati la prima volta restano gli stessi (id, sigle, morsetti, canali PLC,
+   * rimandi collegati, numeri filo); dalla seconda volta valgono come una copia
+   */
+  cut?: boolean;
+  /** Numeri filo mostrati al momento del taglio (id del filo → numero): si tengono incollando */
+  wireNos?: Record<string, string>;
 }
 
 const BUILTIN = new Set(BUILTIN_SYMBOLS.map(s => s.id));
@@ -63,6 +70,7 @@ export function copyElements(project: Project, page: Page, ids: string[]): ClipD
  */
 export function pasteElements(project: Project, pageId: string, clip: ClipData, dx: number, dy: number): { ids: string[]; newCards: string[] } {
   const page = project.pages.find(p => p.id === pageId)!;
+  if (clip.cut) return pasteCut(project, page, clip, dx, dy);
   for (const s of clip.symbols) if (!getSymbol(s.id, project)) project.customSymbols.push(structuredClone(s));
   for (const p of clip.parts) if (!project.parts.some(x => x.partNr === p.partNr)) project.parts.push(structuredClone(p));
   const copies = structuredClone(clip.elements).map(e => {
@@ -134,6 +142,34 @@ export function pasteElements(project: Project, pageId: string, clip: ClipData, 
     add(c);
   }
   return { ids: copies.map(c => c.id), newCards };
+}
+
+/**
+ * Incolla elementi tagliati: sono spostati, non copiati. Tengono id (così i rimandi sulle altre pagine,
+ * i conduttori dei cavi e le scelte fatte a mano li ritrovano), sigle, numeri di morsetto e canali PLC.
+ * Un elemento il cui id c'è già nel progetto (taglio annullato, incollato due volte) prende un id nuovo.
+ */
+function pasteCut(project: Project, page: Page, clip: ClipData, dx: number, dy: number): { ids: string[]; newCards: string[] } {
+  for (const s of clip.symbols) if (!getSymbol(s.id, project)) project.customSymbols.push(structuredClone(s));
+  for (const p of clip.parts) if (!project.parts.some(x => x.partNr === p.partNr)) project.parts.push(structuredClone(p));
+  const taken = new Set(project.pages.flatMap(pg => pg.elements.map(e => e.id)));
+  const copies = structuredClone(clip.elements).map(e => {
+    if (taken.has(e.id)) e.id = uid(e.kind[0]);
+    if (e.kind === 'wire') { e.points = e.points.map(p => ({ x: p.x + dx, y: p.y + dy })); if (e.labels) e.labels = e.labels.map(l => ({ ...l, x: l.x + dx, y: l.y + dy })); }
+    else if (e.kind === 'cable' || e.kind === 'wiredef') {
+      e.points = [{ x: e.points[0].x + dx, y: e.points[0].y + dy }, { x: e.points[1].x + dx, y: e.points[1].y + dy }];
+      if (e.kind === 'wiredef' && e.label) e.label = { x: e.label.x + dx, y: e.label.y + dy };
+    }
+    else { e.x += dx; e.y += dy; }
+    return e;
+  });
+  // Rimandi: il compagno tagliato insieme e incollato con un id nuovo si ritrova
+  const idMap = new Map(clip.elements.map((e, i) => [e.id, copies[i].id]));
+  for (const c of copies) if (c.kind === 'symbol' && c.linkTo && idMap.has(c.linkTo)) c.linkTo = idMap.get(c.linkTo)!;
+  // Cavi: restano gli stessi; se il cavo non c'è più (incollato in un altro progetto) si riporta
+  for (const c of clip.cables ?? []) if (!(project.cables ?? []).some(x => x.id === c.id)) (project.cables ??= []).push(structuredClone(c));
+  page.elements.push(...copies);
+  return { ids: copies.map(c => c.id), newCards: [] };
 }
 
 /** Macro: circuito riutilizzabile salvato nella libreria personale (es. avviamento motore) */

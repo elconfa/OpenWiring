@@ -14,7 +14,7 @@
 | 6 | Bibliothek | Symbole, Makros und Artikel zum Einfügen |
 | 7 | Meldungsansicht | Meldungen zu Import, Export und Vorgängen |
 | 8 | Statusleiste | Hinweise zum aktiven Befehl, Datei, Seite, Cursorkoordinaten |
-| 9 | Ansichtsregister | Schaltplan, Geräte, SPS, Klemmleisten, Artikel, Listen |
+| 9 | Ansichten | *Schaltplan* immer sichtbar; Geräte, SPS, Klemmleisten, Kabel, Leiterbus, Artikel, Listen und die übrigen in der Aufklappschaltfläche *Weitere Ansichten* |
 
 ## Menüband
 

@@ -1,4 +1,5 @@
 // Area di disegno: zoom/pan, selezione, spostamento, disegno fili, inserimento simboli.
+import { pasteAt } from './pasteChooser';
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { isListPage } from '../model/lists';
 import { useStore } from '../model/store';
@@ -88,7 +89,7 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
       {page && isListPage(page) && <>{item(tx('Personalizza la lista…'), () => st.openListStyleOf(page))}<hr /></>}
       {item(tx('Taglia'), () => st.cutSelection(), { k: key('X'), disabled: !sel.length })}
       {item(tx('Copia'), () => st.copySelection(), { k: key('C'), disabled: !sel.length })}
-      {item(tx('Incolla qui'), () => st.paste(menu.at), { k: key('V'), disabled: !st.clipboard })}
+      {item(tx('Incolla qui'), () => void pasteAt(menu.at), { k: key('V'), disabled: !st.clipboard })}
       {item(tx('Duplica'), () => st.duplicateSelection(), { k: key('D'), disabled: !sel.length })}
       <hr />
       {item(tx('Ruota'), () => st.rotateSelection(), { k: 'R', disabled: !sel.length })}
@@ -559,7 +560,7 @@ export function Canvas({ derived }: { derived: Derived }) {
       return;
     }
     if (tool.kind === 'paste') {
-      st.paste(raw);
+      void pasteAt(raw);
       return;
     }
     if (tool.kind === 'place' && tool.pairOf) { st.placeRepresentation(tool.pairOf, placeAt(snapPt(raw)), tool.rot); return; }

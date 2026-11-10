@@ -49,7 +49,7 @@ export function BundlesView() {
           <span className="muted small">{tx('{0} fili', d?.taps.length ?? 0)}</span>
         </div>
         <div className="table-wrap">
-          {d && <BundleTapsTable d={d} full listId="bundle-conductors" />}
+          {d && <BundleTapsTable d={d} full />}
         </div>
       </div>
       <ColSplitter id="bundles" />

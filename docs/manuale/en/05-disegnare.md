@@ -186,6 +186,11 @@ in the table. Wires without a conductor, wires that enter without leaving and co
 not have are marked. The printable list **Wire bus connections** has one conductor per row (like *Cable
 connections*), with the free conductors of the cable.
 
+A bus with a cable part (numbered or coloured conductors) also gets its **wiring** page, like cables:
+*Lists ▸ Cable drawings (harness)* creates the “Cablaggio bus fili …” page with the two ends, the
+conductors and the table with the free ones. A bus without a part stays only in the *Wire bus
+connections* list.
+
 ## Texts
 
 *Text* (or *Insert ▸ Text*) and a click on the page insert a free text. In *Properties* you change the text
@@ -220,6 +225,11 @@ Photos, logos or drawings are inserted in the schematic as images.
 
 Copies get **new tags and wire numbers**; a coil and its contacts copied together stay connected. You can
 also paste into another project: the symbols and parts used are copied with the elements.
+
+With **cut and paste** the elements are **moved**: on another page they keep tags, terminal numbers,
+wire numbers and the link of the cross-references. With **copy and paste** each copied terminal proposes
+the first free number of the terminal strip, starting from the lowest and with the same level (A, B…),
+and you choose the number; copied wires get a new number.
 
 A circuit used often can be saved as a **macro** ([chapter 13](13-macro-simboli-cartigli.md#macros)).
 

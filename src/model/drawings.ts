@@ -9,7 +9,9 @@ import { landing, landingCtx } from './landing';
 import { uid } from './geometry';
 import { buildDevices, deviceInfo, partsIndex, stripOf, type PlacedElement } from './devices';
 import { cableInfos, cableSection } from './cables';
-import { computeNetlist, type Net } from './netlist';
+import { computeNetlist, type Net, type NetPin } from './netlist';
+import { bundleTaps, bundleCable, bundleConductorList } from './bundles';
+import { columnOf } from './types';
 import { connectorData, connectorRows, allConnectors, pinCount, pinNames } from './connectors';
 import { connectorType, connectorShortName, GENDER_NAMES } from './connectorTypes';
 import { devicePanels } from './network';
@@ -58,6 +60,8 @@ export interface CableSheet {
   sideB: { code: string; refs: string[] };
   rows: CableSheetRow[];
   spare: string[];
+  /** Bus fili usato come cavo (tag = nome del bus, senza trattino) */
+  bus?: boolean;
 }
 
 /**
@@ -68,33 +72,94 @@ export function cableSheet(project: Project, tag: string, library: Part[] = [], 
   const info = cableInfos(project, nets).find(i => i.cable.tag === tag);
   if (!info) return undefined;
   const c = info.cable;
-  const idx = locationIndex(project, library);
-  const count = new Map<string, number>();
   // Capi del conduttore: dove arriva il filo da una parte e dall'altra del cavo (il pin o il morsetto
   // a cui il cablatore lo collega), non tutti i punti del potenziale (un +24 V ne ha decine)
   const ctx = landingCtx(project);
   const pinsOf = info.conductors.map(k => {
     const pg = project.pages.find(x => x.id === k.pageId);
     const ends = pg && k.net ? landing(ctx, pg, k.net, { wire: k.wire }) : [];
-    const list = ends.length ? ends : (k.net?.pins ?? []).slice(0, 2);
-    return list.map(p => ({ ref: `-${p.ref}`, code: placeCode(project, p.el, idx.panels, idx.loc) }));
+    return ends.length ? ends : (k.net?.pins ?? []).slice(0, 2);
   });
-  for (const list of pinsOf) for (const p of list) count.set(p.code, (count.get(p.code) ?? 0) + 1);
-  const codes = [...count.entries()].sort((a, b) => b[1] - a[1]).map(([k]) => k);
-  const ca = codes[0] ?? '', cb = codes[1] ?? '';
-  const order = new Map(c.conductors.map((n, k) => [n, k]));
-  const rows = info.conductors.map((k, i) => {
-    const list = pinsOf[i];
-    // Con un solo luogo i punti si dividono a metà: il primo è il lato A, gli altri il lato B
-    const a = cb ? list.filter(p => p.code === ca) : list.slice(0, 1);
-    const b = cb ? list.filter(p => p.code !== ca) : list.slice(1);
-    return { name: k.name, wireNo: k.net?.wireNo ?? '', a: a.map(p => p.ref).join(', '), b: b.map(p => p.ref).join(', '), loc: k.loc, ...(k.problem ? { problem: k.problem } : {}) };
-  }).sort((x, y) => (order.get(x.name) ?? 99) - (order.get(y.name) ?? 99));
-  const refsOf = (side: 'a' | 'b') => [...new Set(rows.flatMap(r => r[side].split(', ').filter(Boolean).map(s => s.slice(0, s.indexOf(':') > 0 ? s.indexOf(':') : undefined))))];
+  const { sideA, sideB, rows } = splitSides(project, library, info.conductors.map((k, i) => ({
+    name: k.name, wireNo: k.net?.wireNo ?? '', loc: k.loc, ...(k.problem ? { problem: k.problem } : {}), pins: pinsOf[i],
+  })), c.conductors);
   return {
     tag: c.tag, type: c.type ?? '', section: cableSection(c), length: c.length, description: c.description, shield: c.shield, pairs: c.pairs,
-    sideA: { code: ca, refs: refsOf('a') }, sideB: { code: cb, refs: refsOf('b') },
-    rows, spare: info.spare,
+    sideA, sideB, rows, spare: info.spare,
+  };
+}
+
+/**
+ * Lati A e B del disegno: i due luoghi più frequenti tra i punti collegati ai conduttori (con un luogo
+ * solo, il primo punto di ogni conduttore è il lato A e gli altri il lato B); righe nell'ordine del cavo
+ */
+function splitSides(project: Project, library: Part[], list: { name: string; wireNo: string; loc: string; problem?: string; pins: NetPin[] }[], order: string[]) {
+  const idx = locationIndex(project, library);
+  const count = new Map<string, number>();
+  const pinsOf = list.map(r => r.pins.map(p => ({ ref: `-${p.ref}`, code: placeCode(project, p.el, idx.panels, idx.loc) })));
+  for (const l of pinsOf) for (const p of l) count.set(p.code, (count.get(p.code) ?? 0) + 1);
+  const codes = [...count.entries()].sort((a, b) => b[1] - a[1]).map(([k]) => k);
+  const ca = codes[0] ?? '', cb = codes[1] ?? '';
+  const pos = new Map(order.map((n, k) => [n, k]));
+  const rows: CableSheetRow[] = list.map((r, i) => {
+    const l = pinsOf[i];
+    const a = cb ? l.filter(p => p.code === ca) : l.slice(0, 1);
+    const b = cb ? l.filter(p => p.code !== ca) : l.slice(1);
+    return { name: r.name, wireNo: r.wireNo, a: a.map(p => p.ref).join(', '), b: b.map(p => p.ref).join(', '), loc: r.loc, ...(r.problem ? { problem: r.problem } : {}) };
+  }).sort((x, y) => (pos.get(x.name) ?? 1e6) - (pos.get(y.name) ?? 1e6));
+  const refsOf = (side: 'a' | 'b') => [...new Set(rows.flatMap(r => r[side].split(', ').filter(Boolean).map(s => s.slice(0, s.indexOf(':') > 0 ? s.indexOf(':') : undefined))))];
+  return { sideA: { code: ca, refs: refsOf('a') }, sideB: { code: cb, refs: refsOf('b') }, rows };
+}
+
+/** Prefisso dell'elemento di una pagina di cablaggio che rappresenta un bus fili e non un cavo */
+export const BUS_ITEM = 'bus:';
+
+/** Bus fili con un articolo cavo (conduttori numerati o colorati) e senza un cavo del progetto con lo stesso nome */
+export function cableBundles(project: Project, library: Part[] = []): string[] {
+  const parts = partsIndex(project, library);
+  const { groupOf, names } = bundleTaps(project);
+  const out = new Set<string>();
+  for (const pg of project.pages) for (const e of pg.elements) {
+    if (e.kind !== 'wire' || e.bundle === undefined) continue;
+    const g = groupOf.get(e.id), name = g ? names.get(g) : undefined;
+    if (!g || !name || bundleCable(project, name)) continue;
+    if (bundleConductorList(project, g, name, parts)?.length) out.add(name);
+  }
+  return [...out].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
+/** Disegno del cablaggio di un bus fili usato come cavo: conduttori dell'articolo, fili che entrano e che escono */
+export function bundleSheet(project: Project, name: string, library: Part[] = [], nl = computeNetlist(project)): CableSheet | undefined {
+  const parts = partsIndex(project, library);
+  const { taps, groupOf, names } = bundleTaps(project);
+  const group = [...new Set(groupOf.values())].find(g => names.get(g) === name);
+  if (!group) return undefined;
+  const list = bundleConductorList(project, group, name, parts) ?? [];
+  const seg = project.pages.flatMap(pg => pg.elements).find(e => e.kind === 'wire' && e.bundlePart && groupOf.get(e.id) === group);
+  const part = seg?.kind === 'wire' ? parts.get(seg.bundlePart!) : undefined;
+  const ctx = landingCtx(project);
+  const mine = taps.filter(t => t.group === group && t.name);
+  const used = [...new Set(mine.map(t => t.name!))];
+  const rows = used.map(n => {
+    const ts = mine.filter(t => t.name === n);
+    const pins: NetPin[] = [];
+    const locs: string[] = [];
+    let wireNo = '';
+    for (const t of ts) {
+      const pg = project.pages.find(x => x.id === t.pageId);
+      const net = nl.wireNet.get(t.wire.id);
+      if (!pg || !net) continue;
+      wireNo ||= net.wireNo ?? '';
+      locs.push(`${pg.name}.${columnOf(t.at.x)}`);
+      for (const p of landing(ctx, pg, net, { wire: t.wire })) if (!pins.includes(p)) pins.push(p);
+    }
+    const problem = !list.includes(n) ? `il cavo non ha il conduttore ${n}` : ts.length < 2 ? 'entra ma non esce' : undefined;
+    return { name: n, wireNo, loc: locs.join(', '), pins, ...(problem ? { problem } : {}) };
+  });
+  const { sideA, sideB, rows: out } = splitSides(project, library, rows, list);
+  return {
+    tag: name, bus: true, type: part ? part.typeNr || part.descr1 || part.partNr : '', section: part?.cable?.cross ? `${list.length}x${part.cable.cross}` : '',
+    shield: part?.cable?.shield, sideA, sideB, rows: out, spare: list.filter(n => !used.includes(n)),
   };
 }
 
@@ -222,21 +287,21 @@ export function systemSheet(project: Project, library: Part[] = [], nets?: { wir
 // Pagine
 
 const TITLES: Record<DrawingKind, (k: string) => string> = {
-  cable: k => `Cablaggio cavo -${k}`,
+  cable: k => (k.startsWith(BUS_ITEM) ? `Cablaggio bus fili ${k.slice(BUS_ITEM.length)}` : `Cablaggio cavo -${k}`),
   connector: k => `Connettore -${k}`,
   system: () => 'Schema d\'insieme',
 };
 
 /** Elementi rappresentati: sigle dei cavi, dei connettori, o la sola pagina d'insieme */
-export function drawingItems(p: Project, kind: DrawingKind): string[] {
-  if (kind === 'cable') return (p.cables ?? []).map(c => c.tag).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+export function drawingItems(p: Project, kind: DrawingKind, library: Part[] = []): string[] {
+  if (kind === 'cable') return [...(p.cables ?? []).map(c => c.tag).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })), ...cableBundles(p, library).map(n => BUS_ITEM + n)];
   if (kind === 'connector') return allConnectors(p);
   return (p.cables ?? []).length ? [''] : [];
 }
 
 /** Crea le pagine che mancano (una per cavo, connettore o una d'insieme) e toglie quelle che non servono più */
-export function syncDrawingPages(p: Project, kind: DrawingKind): { added: number; removed: number } {
-  const need = drawingItems(p, kind);
+export function syncDrawingPages(p: Project, kind: DrawingKind, library: Part[] = []): { added: number; removed: number } {
+  const need = drawingItems(p, kind, library);
   const before = p.pages.length;
   p.pages = p.pages.filter(pg => pg.type !== kind || need.includes(pg.item ?? ''));
   if (!p.pages.length) p.pages.push({ id: uid('p'), name: '1', title: 'Schema', type: 'multiline', elements: [] });
@@ -262,7 +327,7 @@ export type DrawingData =
   | { kind: 'system'; data: SystemSheet };
 
 export function drawingData(project: Project, page: Page, library: Part[] = [], nl = computeNetlist(project)): DrawingData | undefined {
-  if (page.type === 'cable') return { kind: 'cable', data: cableSheet(project, page.item ?? '', library, nl) };
+  if (page.type === 'cable') return { kind: 'cable', data: page.item?.startsWith(BUS_ITEM) ? bundleSheet(project, page.item.slice(BUS_ITEM.length), library, nl) : cableSheet(project, page.item ?? '', library, nl) };
   if (page.type === 'connector') return { kind: 'connector', data: connectorSheet(project, page.item ?? '', library, nl.nets) };
   if (page.type === 'system') return { kind: 'system', data: systemSheet(project, library, nl) };
   return undefined;
