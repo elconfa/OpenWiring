@@ -30,7 +30,7 @@ desktop su **macOS** e **Windows** (Electron) e anche nel browser.
 
 ![OpenWiring – circuito di comando del progetto di esempio](docs/screenshot.png)
 
-> **Stato:** versione 2.0.10. Schema elettrico, morsettiere, cavi, PLC e layout 2D del quadro sono
+> **Stato:** versione 2.0.11. Schema elettrico, morsettiere, cavi, PLC e layout 2D del quadro sono
 > utilizzabili; il layout 3D e la firma digitale delle app non ci sono ancora: vedi [Roadmap](#roadmap).
 
 ---
