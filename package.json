@@ -1,7 +1,7 @@
 {
   "name": "openwiring",
   "productName": "OpenWiring",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "description": "CAD elettrico open source per schemi multifilari, quadri, morsettiere, cavi e PLC (macOS e Windows)",
   "main": "electron/main.cjs",
   "scripts": {
