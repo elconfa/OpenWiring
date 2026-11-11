@@ -39,3 +39,14 @@ describe('posizione della designazione dei morsetti', () => {
     expect(pinLabelPlace({ ...at, mirror: true }, { ...pin, labelPos: 'tl' })).toMatchObject({ x: 10.8, anchor: 'start' });
   });
 });
+
+describe('testi dei bus fili', () => {
+  it('sigla e conduttori prendono i numeri filo finché non si scelgono', () => {
+    const a = textStylesOf({ textStyles: { wireNo: { size: 2.5, color: '#112233' } } });
+    expect(a.bundleTag).toEqual({ color: '#112233', size: 2.5 });
+    expect(a.bundleTap).toEqual({ color: '#112233', size: 2.5 });
+    const b = textStylesOf({ textStyles: { wireNo: { size: 2.5 }, bundleTag: { size: 3 }, bundleTap: { color: '#ff0000' } } });
+    expect(b.bundleTag.size).toBe(3);
+    expect(b.bundleTap).toEqual({ color: '#ff0000', size: 2.5 });
+  });
+});

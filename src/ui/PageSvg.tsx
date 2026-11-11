@@ -4,8 +4,8 @@ import type { ReportSheet, RevisionCloud } from '../model/derive';
 import { REPORT_DEFAULTS, REPORT_X, reportColumns, styledHeadH, type ReportCol } from '../model/reportStyle';
 import { memo, type ReactNode } from 'react';
 import type { Project, Page, Prim, SymbolInstance, SymbolDef, Pt, FieldKey, TextItem, CableLine, StripStyle } from '../model/types';
-import { PAGE_W, PAGE_H, FRAME, COLUMNS, ROWS, TITLE_TOP, WIRE_COLORS, WIRE_WIDTH_DEFAULT, wireDash, primLineType, textStylesOf, type TextStyleKey, type TextStyle } from '../model/types';
-import { getSymbol, toWorld, readableText, pinLabelPlace, primBounds, samePt } from '../model/geometry';
+import { PAGE_W, PAGE_H, FRAME, COLUMNS, ROWS, TITLE_TOP, WIRE_COLORS, WIRE_WIDTH_DEFAULT, wireDash, primLineType, textStylesOf, wireTextStyle, type TextStyleKey, type TextStyle } from '../model/types';
+import { getSymbol, toWorld, readableText, pinLabelPlace, primBounds, samePt, pairVertical } from '../model/geometry';
 import { DIR_VEC, type TNode } from '../model/wiringOrder';
 import { pageOfLocation, type CrossRefInfo } from '../model/devices';
 import { OVERVIEW, overviewRowHeight, type OverviewData } from '../model/plc';
@@ -368,6 +368,7 @@ function ContactGlyph({ kind, x, y, k, color }: { kind: string; x: number; y: nu
 export const SymbolView = memo(function SymbolView({ inst, sym, derived, selected }: {
   inst: SymbolInstance; sym: SymbolDef; derived: PageDerived; selected: boolean;
 }) {
+  if (inst.pairOf && inst.pairCompact) return <PairCompactView inst={inst} sym={sym} derived={derived} selected={selected} />;
   const tr = `translate(${inst.x} ${inst.y}) rotate(${inst.rot})${inst.mirror ? ' scale(-1 1)' : ''}`;
   const color = selected ? SEL : look.ink;
   // Posizione dei testi: scelta nell'editor per questa rotazione o automatica (symbolTexts.ts)
@@ -565,6 +566,29 @@ export const SymbolView = memo(function SymbolView({ inst, sym, derived, selecte
     </g>
   );
 });
+
+/**
+ * Rappresentazione ridotta di un contatto (riferimento a coppie): pagina e colonna del contatto vero,
+ * disegnino del contatto e morsetti, senza sigla. In verticale si legge dal basso: pagina, contatto, morsetti
+ */
+function PairCompactView({ inst, sym, derived, selected }: { inst: SymbolInstance; sym: SymbolDef; derived: PageDerived; selected: boolean }) {
+  const st = derived.textStyles?.xref ?? DEFAULT_TEXT.xref;
+  const size = inst.pairSize ?? st.size;
+  const fill = selected ? SEL : derived.mono ? look.ink : st.color;
+  const k = size / 1.7, g = CONTACT_GLYPH_W * k;
+  const labels = derived.labels.get(inst.id) ?? {};
+  const pins = sym.pins.map(p => labels[p.id] ?? p.label).filter(Boolean).join('-');
+  const xr = derived.xrefs.get(inst.id);
+  const yText = size * 0.35;
+  return (
+    <g data-id={inst.id} transform={`translate(${inst.x} ${inst.y})${pairVertical(inst) ? ' rotate(-90)' : ''}`} fill={fill} stroke="none" fontSize={size}>
+      <rect x={-g / 2} y={-1.2 * k} width={g} height={2 * k} fill="transparent" />
+      <ContactGlyph kind={sym.contact ?? 'NO'} x={-g / 2} y={0} k={k} color={fill} />
+      {xr?.mainLocation && <RefText x={-g / 2 - 0.8} y={yText} size={size} anchor="end" refs={[{ loc: xr.mainLocation, id: xr.mainId }]} />}
+      {pins && <text x={g / 2 + 0.8} y={yText}>{pins}</text>}
+    </g>
+  );
+}
 
 /** Indirizzo dentro il riquadro del punto I/O e nome simbolico a destra */
 function PlcLabel({ inst, sym, derived, color, vis }: { inst: SymbolInstance; sym: SymbolDef; derived: PageDerived; color: string; vis: (k: SymVisKey) => boolean }) {
@@ -1001,10 +1025,10 @@ function StripDiagram({ data, t, style: S, cols }: { data?: StripSheetData; t: (
 }
 
 /** Nome del conduttore accanto al filo che entra in un bus, dalla parte del filo */
-function BundleTapLabel({ tap, color: def }: { tap: { at: Pt; next: Pt; name: string; size?: number; color?: string }; color: string }) {
+function BundleTapLabel({ tap, def }: { tap: { at: Pt; next: Pt; name: string; size?: number; color?: string }; def: Required<TextStyle> }) {
   const { at, next, name } = tap;
-  // Altezza e colore scelti sul bus (proprietà del bus), altrimenti 1,8 mm e il colore dei numeri filo
-  const size = tap.size ?? 1.8, color = tap.color ?? def;
+  // Altezza e colore scelti sul bus (proprietà del bus), altrimenti quelli del progetto (Aspetto ▸ Testi)
+  const size = tap.size ?? def.size, color = tap.color ?? def.color;
   if (Math.abs(next.x - at.x) < 0.01) {
     // Filo verticale: nome scritto in verticale accanto al filo, appena fuori dal bus
     const down = next.y > at.y;
@@ -1196,7 +1220,7 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
               )}
               {no && (() => {
                 // Colore e altezza: quelli del filo, altrimenti quelli del progetto per i numeri filo
-                const style = derived.textStyles?.wireNo ?? DEFAULT_TEXT.wireNo;
+                const style = wireTextStyle(derived.textStyles ?? DEFAULT_TEXT, e);
                 const color = sel ? SEL : derived.mono ? look.ink : bus ? bus.color : e.labelColor ?? style.color;
                 const size = e.labelSize ?? style.size;
                 const poss = derived.wireLabelPos?.get(e.id);
@@ -1228,7 +1252,7 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
         const L = Math.max(2, look.junctionR * 2.8), a = DIR_VEC[t.stem], b = DIR_VEC[t.join!];
         return <polygon key={`t${i}`} points={`${t.p.x},${t.p.y} ${t.p.x + a.x * L},${t.p.y + a.y * L} ${t.p.x + b.x * L},${t.p.y + b.y * L}`} fill={look.ink} />;
       })}
-      {derived.bundleTaps?.map((t, i) => <BundleTapLabel key={i} tap={derived.mono ? { ...t, color: look.ink } : t} color={derived.textStyles?.wireNo.color ?? DEFAULT_TEXT.wireNo.color} />)}
+      {derived.bundleTaps?.map((t, i) => <BundleTapLabel key={i} tap={derived.mono ? { ...t, color: look.ink } : t} def={(derived.textStyles ?? DEFAULT_TEXT).bundleTap} />)}
       {derived.revisionClouds?.map((c, i) => <Cloud key={i} cloud={c} />)}
     </g>
   );

@@ -110,6 +110,11 @@ in the schematic, auxiliaries first: choose the one to draw and click where it g
 - The real contact and the representation point to each other with cross-references, in both directions.
 - *Properties ▸ Representation of* shows the real contact (one click takes you there); *Make it a real
   contact* turns it into a contact with its own connections.
+- The drawing is **compact**: no tag (it already sits next to the main element), just the small contact
+  drawing with the real contact's page on one side and the terminals on the other (e.g. `/1304.3 ─╱─ 13-14`).
+  It is vertical like the contact; **R** (before or after the click) makes it horizontal. Height and colour
+  are those of *Cross-references* (Appearance ▸ Texts); *Properties ▸ Text height* changes just this one.
+  *Properties ▸ Drawing ▸ full symbol with tag* goes back to the complete symbol.
 - If the real contact is deleted, the check reports the orphaned representation and offers to delete it.
 
 ## Device properties

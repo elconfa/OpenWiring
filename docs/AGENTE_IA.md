@@ -232,6 +232,8 @@ simbolo <id> <sigla> @x,y [rot=0|90|180|270] [specchio] [descr="…"] [dati="…
     stella (solo partenza): collegata a tutti gli arrivi con lo stesso nome.
     coppia=<pagina>@x,y: il simbolo è solo la rappresentazione del contatto con la stessa sigla in
     quel punto (riferimento a coppie, es. ausiliario del salvamotore accanto ai poli): non si collega.
+    ridotta: con coppia=, solo disegnino del contatto, morsetti e pagina, senza sigla (rot=0 verticale,
+    rot=90 orizzontale); hcoppia=1,5 altezza dei suoi testi in mm.
 filo x,y x,y [x,y…] [sezione=1,5] [colore=BU] [n=2.01] [bus=Profinet] [cavo=5W1]
     [tipocavo="…"] [lunghezza=10] [articolocavo=…] [poli=3] [testo="3/N/PE ~400 V"]
     [busfili=<nome>|_] [articolobus=<articolo cavo>] [cond1=L1] [cond2=L1]   (bus di conduttori, modalità BUS: nome del bus, «_» senza

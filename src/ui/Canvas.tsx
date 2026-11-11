@@ -5,7 +5,7 @@ import { isListPage } from '../model/lists';
 import { useStore } from '../model/store';
 import type { Pt, Wire, Element, Page, Project, SymbolDef, TextItem, TextMoveKey, ImageItem, Zone, CableLine } from '../model/types';
 import { PAGE_W, PAGE_H, lookOf } from '../model/types';
-import { getSymbol, instanceBounds, pinsWorld, snapPt, distToSegment, samePt, onSegmentInterior, uid, getGridSize, polylineTouchesBox } from '../model/geometry';
+import { getSymbol, instanceBounds, pinsWorld, snapPt, distToSegment, samePt, onSegmentInterior, uid, getGridSize, polylineTouchesBox, pairCompactBounds } from '../model/geometry';
 import { PageContent, SymbolGraphic, SEL } from './PageSvg';
 import { Minimap } from './Minimap';
 import { RadialMenu, radialItems } from './RadialMenu';
@@ -143,7 +143,7 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
         // Numeri filo: le posizioni attuali (automatica o scelte a mano), più uno qui, uno in meno, o di nuovo automatico
         const cur = pd.wireLabelPos?.get(one.id) ?? [];
         const lbl = menu.label?.wireId === one.id ? menu.label : undefined;
-        const add = labelNear(one.points, menu.at, one.labelSize ?? pd.textStyles?.wireNo.size, wireLabelGap(one, lookOf(settingsOf(st.project)).w.bundle));
+        const add = labelNear(one.points, menu.at, one.labelSize ?? pd.textStyles?.[one.bundle ? 'bundleTag' : 'wireNo'].size, wireLabelGap(one, lookOf(settingsOf(st.project)).w.bundle));
         return (
           <>
             {add && item(tx('Aggiungi il numero filo qui'), () => st.setWireLabels(one.id, [...cur, add]))}
@@ -902,7 +902,7 @@ export function Canvas({ derived }: { derived: Derived }) {
     const cur = derived.pages.get(page.id)?.wireLabelPos?.get(d.wireId) ?? [];
     const i = Math.max(0, d.index);
     if (w?.kind !== 'wire' || !cur[i] || (d.to.x === d.start.x && d.to.y === d.start.y)) return undefined;
-    const p = labelNear(w.points, { x: cur[i].x + d.to.x - d.start.x, y: cur[i].y + d.to.y - d.start.y }, w.labelSize ?? derived.pages.get(page.id)?.textStyles?.wireNo.size, wireLabelGap(w, lookOf(settingsOf(project)).w.bundle));
+    const p = labelNear(w.points, { x: cur[i].x + d.to.x - d.start.x, y: cur[i].y + d.to.y - d.start.y }, w.labelSize ?? derived.pages.get(page.id)?.textStyles?.[w.bundle ? 'bundleTag' : 'wireNo'].size, wireLabelGap(w, lookOf(settingsOf(project)).w.bundle));
     return p ? { list: cur.map((q, k) => (k === i ? p : q)), i } : undefined;
   }
 
@@ -1075,7 +1075,12 @@ export function Canvas({ derived }: { derived: Derived }) {
       )}
       {showGrid && <rect x={0} y={0} width={PAGE_W} height={PAGE_H} fill="url(#grid)" pointerEvents="none" />}
 
-      {ghostSym && tool.kind === 'place' && (
+      {ghostSym && tool.kind === 'place' && tool.pairOf && (() => {
+        // Rappresentazione ridotta: solo il suo ingombro (verticale con R a 0°/180°)
+        const b = pairCompactBounds({ x: ghostAt.x, y: ghostAt.y, rot: tool.rot });
+        return <rect x={b.x0} y={b.y0} width={b.x1 - b.x0} height={b.y1 - b.y0} fill="none" stroke={SEL} strokeWidth={0.25} strokeDasharray="1 0.6" opacity={0.8} pointerEvents="none" />;
+      })()}
+      {ghostSym && tool.kind === 'place' && !tool.pairOf && (
         <g transform={`translate(${ghostAt.x} ${ghostAt.y}) rotate(${fitRot(ghostSym, tool.rot)})`} stroke={SEL} color={SEL} strokeWidth={0.35} fill="none" opacity={0.7}>
           <SymbolGraphic sym={ghostSym} />
           {ghostSym.pins.map(p => <circle key={p.id} cx={p.x} cy={p.y} r={0.6} fill={SEL} />)}
@@ -1151,7 +1156,7 @@ export function Canvas({ derived }: { derived: Derived }) {
         if (!m || !text) return null;
         const p = m.list[m.i];
         const w = page.elements.find(e => e.id === drag.wireId);
-        const size = (w?.kind === 'wire' ? w.labelSize : undefined) ?? derived.pages.get(page.id)?.textStyles?.wireNo.size ?? 1.8;
+        const size = (w?.kind === 'wire' ? w.labelSize : undefined) ?? derived.pages.get(page.id)?.textStyles?.[w?.kind === 'wire' && w.bundle ? 'bundleTag' : 'wireNo'].size ?? 1.8;
         return <text x={p.x} y={p.y} fontSize={size} fill={SEL} textAnchor="middle" pointerEvents="none" transform={p.vertical ? `rotate(-90 ${p.x} ${p.y})` : undefined}>{text}</text>;
       })()}
       {drag?.kind === 'repCol' && (() => {

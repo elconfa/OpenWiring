@@ -3419,5 +3419,11 @@
  "Altezza dei conduttori (mm)": "Hauteur des conducteurs (mm)",
  "Colore dei conduttori": "Couleur des conducteurs",
  "Colore della sigla": "Couleur du repère",
- "riserva": "réserve"
+ "riserva": "réserve",
+ "Sigla dei bus fili (con i rimandi)": "Repère des faisceaux de fils (avec renvois)",
+ "Nomi dei conduttori dei bus fili": "Noms des conducteurs des faisceaux",
+ "ridotto (morsetti e pagina)": "réduit (bornes et page)",
+ "simbolo intero con la sigla": "symbole complet avec repère",
+ "Altezza dei testi (mm)": "Hauteur des textes (mm)",
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Réduit : seulement le petit dessin du contact avec bornes et page, sans repère, à placer à côté de l'élément principal. Tourner (R) pour l'avoir vertical ou horizontal"
 }

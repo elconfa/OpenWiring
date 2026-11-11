@@ -11,7 +11,7 @@ export const TEXT_COVERAGE = {
     symbolId: 'simbolo <id>', x: '@x,y', y: '@x,y', rot: 'rot=', mirror: 'specchio', tag: '<sigla>', pinLabels: 'pin=', autoPins: 'pin=',
     partNr: 'articolo=', extraParts: 'articoli=', userProps: 'proprieta=', description: 'descr=', techData: 'dati=', manufacturer: 'costruttore=',
     typeNr: 'tipo=', orderNr: 'ordine=', note: 'note=', func: 'funzione=', loc: 'luogo=', showTexts: 'testi=', show: 'mostra=',
-    plcChannel: 'canale=', wirePass: 'numerofilo=', linkTo: 'con=', linkStar: 'stella', pairOf: 'coppia=', plcGroup: 'no: i gruppi I/O PLC si inseriscono dall\'interfaccia',
+    plcChannel: 'canale=', wirePass: 'numerofilo=', linkTo: 'con=', linkStar: 'stella', pairOf: 'coppia=', pairCompact: 'ridotta', pairSize: 'hcoppia=', plcGroup: 'no: i gruppi I/O PLC si inseriscono dall\'interfaccia',
     plcSymbol: 'variabile=', plcComment: 'commento=', textOffsets: 'postesti=', contactImage: 'immaginecontatti=', termText: 'versotesti=',
     netAddress: 'indirizzo=', ip: 'ip=', netIfs: 'interfacce=',
   } satisfies Coverage<SymbolInstance>,

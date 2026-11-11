@@ -111,6 +111,11 @@ déjà placés dans le schéma, les auxiliaires d'abord : choisissez celui à de
   sens.
 - *Propriétés ▸ Représentation de* indique le vrai contact (un clic y mène) ; *En faire un vrai contact* la
   transforme en contact avec ses propres liaisons.
+- Le dessin est **réduit** : pas de repère (il est déjà à côté de l'élément principal), seulement le petit
+  dessin du contact avec la page du vrai contact d'un côté et les bornes de l'autre (ex. `/1304.3 ─╱─ 13-14`).
+  Il est vertical comme le contact ; **R** (avant ou après le clic) le met à l'horizontale. Hauteur et couleur
+  sont celles des *Renvois* (Aspect ▸ Textes) ; *Propriétés ▸ Hauteur des textes* change seulement celui-ci.
+  *Propriétés ▸ Dessin ▸ symbole complet avec repère* revient au symbole complet.
 - Si le vrai contact est supprimé, la vérification signale la représentation restée seule et propose de
   l'effacer.
 

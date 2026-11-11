@@ -3419,5 +3419,11 @@
  "Altezza dei conduttori (mm)": "Conductor name height (mm)",
  "Colore dei conduttori": "Conductor name colour",
  "Colore della sigla": "Tag colour",
- "riserva": "spare"
+ "riserva": "spare",
+ "Sigla dei bus fili (con i rimandi)": "Wire bundle tag (with cross-references)",
+ "Nomi dei conduttori dei bus fili": "Wire bundle conductor names",
+ "ridotto (morsetti e pagina)": "compact (terminals and page)",
+ "simbolo intero con la sigla": "full symbol with tag",
+ "Altezza dei testi (mm)": "Text height (mm)",
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Compact: just the small contact drawing with terminals and page, without tag, to place next to the main element. Rotate (R) for vertical or horizontal"
 }

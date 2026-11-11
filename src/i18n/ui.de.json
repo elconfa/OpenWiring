@@ -3419,5 +3419,11 @@
  "Altezza dei conduttori (mm)": "Höhe der Adernamen (mm)",
  "Colore dei conduttori": "Farbe der Adernamen",
  "Colore della sigla": "Farbe des Kennzeichens",
- "riserva": "Reserve"
+ "riserva": "Reserve",
+ "Sigla dei bus fili (con i rimandi)": "Kennzeichnung der Leiterbündel (mit Querverweisen)",
+ "Nomi dei conduttori dei bus fili": "Leiternamen der Leiterbündel",
+ "ridotto (morsetti e pagina)": "kompakt (Anschlüsse und Seite)",
+ "simbolo intero con la sigla": "vollständiges Symbol mit Kennzeichen",
+ "Altezza dei testi (mm)": "Texthöhe (mm)",
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Kompakt: nur das kleine Kontaktbild mit Anschlüssen und Seite, ohne Kennzeichen, neben dem Hauptelement. Drehen (R) für senkrecht oder waagerecht"
 }

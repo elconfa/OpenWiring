@@ -3419,5 +3419,11 @@
  "Altezza dei conduttori (mm)": "Altura de los conductores (mm)",
  "Colore dei conduttori": "Color de los conductores",
  "Colore della sigla": "Color de la sigla",
- "riserva": "reserva"
+ "riserva": "reserva",
+ "Sigla dei bus fili (con i rimandi)": "Sigla de los haces de cables (con referencias)",
+ "Nomi dei conduttori dei bus fili": "Nombres de los conductores de los haces",
+ "ridotto (morsetti e pagina)": "reducido (bornes y página)",
+ "simbolo intero con la sigla": "símbolo completo con sigla",
+ "Altezza dei testi (mm)": "Altura de los textos (mm)",
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Reducido: solo el pequeño dibujo del contacto con bornes y página, sin sigla, para poner junto al elemento principal. Gira (R) para tenerlo vertical u horizontal"
 }

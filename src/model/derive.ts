@@ -4,7 +4,7 @@ import type { Project, Part, FieldKey, Page, Wire, ProjectSettings, Pt } from '.
 import { bundleTaps, isBundle } from './bundles';
 import { GENERIC_BUS } from './network';
 import { textsUnderTag } from './types';
-import { textStylesOf, lookOf } from './types';
+import { textStylesOf, lookOf, wireTextStyle } from './types';
 import type { PageDerived } from '../ui/PageSvg';
 import { allPlaced, crossReferences, effectivePinLabels, locationOf, stripOf, buildDevices, deviceInfo, designation, partsIndex } from './devices';
 import { computeNetlist, withNetlistCache, type NetlistResult } from './netlist';
@@ -313,7 +313,7 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     const texts = new Map<string, string>(), sizes = new Map<string, number>(), gaps = new Map<string, number>();
     for (const e of pg.elements) if (e.kind === 'wire' && wireNumbers.has(e.id)) {
       texts.set(e.id, wireNumbers.get(e.id)!);
-      sizes.set(e.id, e.labelSize ?? textStyles.wireNo.size);
+      sizes.set(e.id, e.labelSize ?? wireTextStyle(textStyles, e).size);
       const gap = wireLabelGap(e, bundleWidth);
       if (gap) gaps.set(e.id, gap);
     }

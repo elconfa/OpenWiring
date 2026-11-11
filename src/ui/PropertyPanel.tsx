@@ -1395,13 +1395,13 @@ function BundleTapStyleRows({ wires }: { wires: Wire[] }) {
   const project = useStore(s => s.project);
   const st = useStore.getState;
   const ids = wires.map(w => w.id);
-  const def = textStylesOf(settingsOf(project)).wireNo;
+  const def = textStylesOf(settingsOf(project)).bundleTap;
   const size = wires.every(w => w.tapSize === wires[0].tapSize) ? wires[0].tapSize : undefined;
   const color = wires.every(w => w.tapColor === wires[0].tapColor) ? wires[0].tapColor : undefined;
   return (
     <>
       <Row label={tx('Altezza dei conduttori (mm)')}>
-        <Field type="number" value={size === undefined ? '' : String(size)} placeholder={tx('predefinito ({0})', '1,8')}
+        <Field type="number" value={size === undefined ? '' : String(size)} placeholder={tx('progetto ({0})', String(def.size).replace('.', ','))}
           onCommit={v => { const n = parseFloat(v.replace(',', '.')); st().setWireProps(ids, { tapSize: n > 0 ? n : undefined }); }} />
       </Row>
       <Row label={tx('Colore dei conduttori')}>
@@ -1418,7 +1418,7 @@ function WireLabelStyleRows({ wires, bundle }: { wires: Wire[]; bundle?: boolean
   const project = useStore(s => s.project);
   const st = useStore.getState;
   const ids = wires.map(w => w.id);
-  const def = textStylesOf(settingsOf(project)).wireNo;
+  const def = textStylesOf(settingsOf(project))[bundle ? 'bundleTag' : 'wireNo'];
   const size = wires.every(w => w.labelSize === wires[0].labelSize) ? wires[0].labelSize : undefined;
   const color = wires.every(w => w.labelColor === wires[0].labelColor) ? wires[0].labelColor : undefined;
   return (
@@ -1446,8 +1446,9 @@ function TextStylesGroup() {
   const set = (k: TextStyleKey, patch: { color?: string; size?: number }) => {
     const next = { ...(s.textStyles ?? {}) };
     const v = { ...(next[k] ?? {}), ...patch };
-    const d = TEXT_STYLES.find(x => x.key === k)!;
-    // Valori uguali ai predefiniti: non si salvano
+    // Valori uguali ai predefiniti (o a quelli del tipo da cui si prendono): non si salvano
+    const rest = { ...next }; delete rest[k];
+    const d = textStylesOf({ textStyles: rest })[k];
     if (v.color === undefined || v.color === d.color) delete v.color;
     if (v.size === undefined || v.size === d.size) delete v.size;
     if (Object.keys(v).length) next[k] = v; else delete next[k];
@@ -2239,13 +2240,28 @@ function PairRow({ inst }: { inst: SymbolInstance }) {
   const st = useStore.getState;
   const real = allPlaced(project).find(e => e.inst.id === inst.pairOf);
   return (
+    <>
     <Row label={tx('Rappresentazione di')}>
       <span title={tx('Solo disegno: non conta come contatto, non si collega e non entra nelle liste. Sigla e morsetti seguono il contatto vero')}>
         {real ? <button className="link" onClick={() => { st().setPage(real.page.id); st().setSelection([real.inst.id]); }}>-{real.inst.tag} /{locationOf(real)}</button>
           : <span className="muted">{tx('contatto non più presente')}</span>}{' '}
-        <button className="mini" onClick={() => st().updateElement(inst.id, { pairOf: undefined })} title={tx('Diventa un contatto vero, con i suoi collegamenti')}>{tx('Rendi contatto vero')}</button>
+        <button className="mini" onClick={() => st().updateElement(inst.id, { pairOf: undefined, pairCompact: undefined, pairSize: undefined })} title={tx('Diventa un contatto vero, con i suoi collegamenti')}>{tx('Rendi contatto vero')}</button>
       </span>
     </Row>
+    <Row label={tx('Disegno')}>
+      <select value={inst.pairCompact ? 'compact' : 'full'} onChange={e => st().updateElement(inst.id, { pairCompact: e.target.value === 'compact' ? true : undefined })}
+        title={tx('Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all\'elemento principale. Ruota (R) per averlo in verticale o in orizzontale')}>
+        <option value="compact">{tx('ridotto (morsetti e pagina)')}</option>
+        <option value="full">{tx('simbolo intero con la sigla')}</option>
+      </select>
+    </Row>
+    {inst.pairCompact && (
+      <Row label={tx('Altezza dei testi (mm)')}>
+        <Field type="number" value={inst.pairSize === undefined ? '' : String(inst.pairSize)} placeholder={tx('progetto ({0})', String(textStylesOf(settingsOf(project)).xref.size).replace('.', ','))}
+          onCommit={v => { const n = parseFloat(v.replace(',', '.')); st().updateElement(inst.id, { pairSize: n > 0 ? n : undefined }); }} />
+      </Row>
+    )}
+    </>
   );
 }
 

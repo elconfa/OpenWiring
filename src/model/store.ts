@@ -1277,7 +1277,7 @@ export const useStore = create<State>((set, get) => {
       const { project, pageId, library } = get();
       const page = currentPage(project, pageId);
       const pd = derive(project, library).pages.get(pageId);
-      const size = (id: string) => { const w = page.elements.find(e => e.id === id); return (w?.kind === 'wire' ? w.labelSize : undefined) ?? pd?.textStyles?.wireNo.size ?? 1.8; };
+      const size = (id: string) => { const w = page.elements.find(e => e.id === id); return (w?.kind === 'wire' ? w.labelSize : undefined) ?? pd?.textStyles?.[w?.kind === 'wire' && w.bundle ? 'bundleTag' : 'wireNo'].size ?? 1.8; };
       const wires = page.elements.filter((e): e is Wire => e.kind === 'wire' && !!pd?.wireNumbers.has(e.id));
       const r = labelsOnLine(wires, pd?.wireLabelPos ?? new Map(), p, q, size);
       get().setWireLabelsMany(r);
@@ -1365,7 +1365,7 @@ export const useStore = create<State>((set, get) => {
       if (sel.length > 1 && sel.every(e => e.kind === 'wire')) {
         const pd = derive(project, library).pages.get(pageId);
         const wires = selection.map(id => sel.find(e => e.id === id)).filter((e): e is Wire => e?.kind === 'wire' && !!pd?.wireNumbers.has(e.id));
-        const size = (id: string) => wires.find(w => w.id === id)?.labelSize ?? pd?.textStyles?.wireNo.size ?? 1.8;
+        const size = (id: string) => { const w = wires.find(x => x.id === id); return w?.labelSize ?? pd?.textStyles?.[w?.bundle ? 'bundleTag' : 'wireNo'].size ?? 1.8; };
         get().setWireLabelsMany(alignWireLabels(wires, pd?.wireLabelPos ?? new Map(), mode, size));
         return;
       }

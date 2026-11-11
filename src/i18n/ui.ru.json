@@ -3419,5 +3419,11 @@
  "Altezza dei conduttori (mm)": "Высота имён жил (мм)",
  "Colore dei conduttori": "Цвет имён жил",
  "Colore della sigla": "Цвет обозначения",
- "riserva": "резерв"
+ "riserva": "резерв",
+ "Sigla dei bus fili (con i rimandi)": "Обозначение жгутов проводов (со ссылками)",
+ "Nomi dei conduttori dei bus fili": "Имена жил в жгутах проводов",
+ "ridotto (morsetti e pagina)": "компактно (выводы и страница)",
+ "simbolo intero con la sigla": "полный символ с обозначением",
+ "Altezza dei testi (mm)": "Высота текста (мм)",
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Компактно: только небольшой значок контакта с выводами и страницей, без обозначения, рядом с главным элементом. Поверните (R) для вертикального или горизонтального вида"
 }

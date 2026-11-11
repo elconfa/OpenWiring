@@ -110,6 +110,11 @@ suoi contatti già piazzati nello schema, prima gli ausiliari: scegli quello da 
   due le direzioni.
 - In *Proprietà ▸ Rappresentazione di* c'è il contatto vero (un clic ci porta); *Rendi contatto vero* la
   trasforma in un contatto con i suoi collegamenti.
+- Il disegno è **ridotto**: niente sigla (sta già accanto all'elemento principale), solo il disegnino del
+  contatto con la pagina del contatto vero da una parte e i morsetti dall'altra (es. `/1304.3 ─╱─ 13-14`).
+  È verticale come il contatto; con **R** (prima del clic o dopo) diventa orizzontale. Altezza e colore sono
+  quelli dei *Riferimenti incrociati* (Aspetto ▸ Testi); in *Proprietà ▸ Altezza dei testi* si cambia solo
+  quella. *Proprietà ▸ Disegno ▸ simbolo intero con la sigla* torna al simbolo completo.
 - Se il contatto vero viene eliminato, la verifica segnala la rappresentazione rimasta sola e propone di
   cancellarla.
 

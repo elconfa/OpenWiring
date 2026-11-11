@@ -8,6 +8,7 @@ import { computeNetlist } from '../src/model/netlist';
 import { derive } from '../src/model/derive';
 import { syncPairs, newRepresentation } from '../src/model/pairs';
 import { pagesToText, importPagesText } from '../src/model/textFormat';
+import { getSymbol, instanceBounds } from '../src/model/geometry';
 
 const S = (id: string, symbolId: string, x: number, y: number, tag: string, extra: Partial<SymbolInstance> = {}): SymbolInstance =>
   ({ kind: 'symbol', id, symbolId, x, y, rot: 0, tag, pinLabels: {}, autoPins: true, ...extra });
@@ -56,5 +57,22 @@ describe('riferimenti a coppie', () => {
     const rep = q.pages.flatMap(pg => pg.elements).find(e => e.kind === 'symbol' && e.pairOf) as SymbolInstance;
     const real = q.pages.flatMap(pg => pg.elements).find(e => e.id === rep.pairOf) as SymbolInstance;
     expect([real.x, real.y, real.tag]).toEqual([100, 60, '1Q1']);
+    expect(rep.pairCompact).toBe(true);
+  });
+  it('rappresentazione ridotta: piccola, verticale a 0°, orizzontale a 90°, altezza nel testo', () => {
+    const p = project();
+    const rep = p.pages[0].elements[1] as SymbolInstance;
+    expect(rep.pairCompact).toBe(true);
+    const sym = getSymbol('no', p)!;
+    const v = instanceBounds(rep, sym);
+    expect(v.y1 - v.y0).toBeGreaterThan(v.x1 - v.x0);
+    const h = instanceBounds({ ...rep, rot: 90 }, sym);
+    expect(h.x1 - h.x0).toBeGreaterThan(h.y1 - h.y0);
+    rep.pairSize = 1.5;
+    const t = pagesToText(p);
+    expect(t).toMatch(/coppia=2@100,60 ridotta hcoppia=1.5/);
+    const q = emptyProject();
+    expect(importPagesText(q, t).errors).toEqual([]);
+    expect(q.pages.flatMap(pg => pg.elements).find(e => e.kind === 'symbol' && e.pairOf)).toMatchObject({ pairCompact: true, pairSize: 1.5 });
   });
 });

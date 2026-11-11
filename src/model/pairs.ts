@@ -44,5 +44,6 @@ export function syncPairs(project: Project): void {
 
 /** Rappresentazione nuova di un contatto, nel punto indicato */
 export function newRepresentation(real: SymbolInstance, id: string, x: number, y: number, rot: SymbolInstance['rot']): SymbolInstance {
-  return { kind: 'symbol', id, symbolId: real.symbolId, x, y, rot, tag: real.tag, pinLabels: { ...real.pinLabels }, autoPins: real.autoPins, pairOf: real.id, ...(real.mirror ? { mirror: true } : {}) };
+  return { kind: 'symbol', id, symbolId: real.symbolId, x, y, rot, tag: real.tag, pinLabels: { ...real.pinLabels }, autoPins: real.autoPins, pairOf: real.id, pairCompact: true, ...(real.mirror ? { mirror: true } : {}) };
 }
+

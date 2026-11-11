@@ -121,7 +121,21 @@ export function primBounds(prims: Prim[]): { x0: number; y0: number; x1: number;
 }
 
 /** Rettangolo di ingombro del simbolo istanziato, in coordinate pagina */
+/** Rappresentazione ridotta disegnata in verticale (come il contatto con rot 0) */
+export const pairVertical = (inst: Pick<SymbolInstance, 'rot'>) => inst.rot === 0 || inst.rot === 180;
+
+/** Ingombro della rappresentazione ridotta: pagina a sinistra, disegnino, morsetti a destra (in orizzontale) */
+export function pairCompactBounds(inst: Pick<SymbolInstance, 'x' | 'y' | 'rot' | 'pairSize'>) {
+  const k = (inst.pairSize ?? 1.9) / 1.7;
+  const a0 = -9 * k, a1 = 10 * k, c = 1.6 * k;
+  return pairVertical(inst)
+    ? { x0: inst.x - c, y0: inst.y - a1, x1: inst.x + c, y1: inst.y - a0 }
+    : { x0: inst.x + a0, y0: inst.y - c, x1: inst.x + a1, y1: inst.y + c };
+}
+
+
 export function instanceBounds(inst: SymbolInstance, sym: SymbolDef) {
+  if (inst.pairOf && inst.pairCompact) return pairCompactBounds(inst);
   const b = primBounds(sym.prims);
   const corners = [
     toWorld(inst, { x: b.x0, y: b.y0 }), toWorld(inst, { x: b.x1, y: b.y0 }),

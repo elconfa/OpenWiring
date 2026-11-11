@@ -263,6 +263,13 @@ export interface SymbolInstance {
    */
   pairOf?: string;
   /**
+   * Rappresentazione ridotta: solo il disegnino del contatto con i morsetti e la pagina del contatto vero,
+   * senza sigla (sta accanto all'elemento principale). Verticale con rot 0/180, orizzontale con 90/270
+   */
+  pairCompact?: boolean;
+  /** Altezza dei testi della rappresentazione ridotta in mm (assente = quella dei riferimenti incrociati) */
+  pairSize?: number;
+  /**
    * Canale di un gruppo I/O PLC: id del gruppo, posizione nel gruppo (0 = primo), canali del gruppo
    * (anche quelli nascosti) e own = canale scelto a mano (non segue il primo canale del gruppo)
    */
@@ -1113,11 +1120,13 @@ export interface RailSetting { y: number; step: number; x0: number; x1: number; 
 export type TerminalTextDir = 'auto' | 'parallel' | 'perpendicular';
 
 /** Tipi di testo sullo schema con colore e altezza propri */
-export type TextStyleKey = 'wireNo' | 'linkName' | 'linkRefs' | 'potential' | 'tag' | 'deviceText' | 'pinLabel' | 'xref' | 'terminal' | 'plcText';
+export type TextStyleKey = 'wireNo' | 'bundleTag' | 'bundleTap' | 'linkName' | 'linkRefs' | 'potential' | 'tag' | 'deviceText' | 'pinLabel' | 'xref' | 'terminal' | 'plcText';
 export interface TextStyle { color?: string; size?: number }
-/** Nome, colore e altezza (mm) predefiniti di ogni tipo di testo */
-export const TEXT_STYLES: { key: TextStyleKey; name: string; color: string; size: number }[] = [
+/** Nome, colore e altezza (mm) predefiniti di ogni tipo di testo; from = se non scelto prende i valori di quel tipo */
+export const TEXT_STYLES: { key: TextStyleKey; name: string; color: string; size: number; from?: TextStyleKey }[] = [
   { key: 'wireNo', name: tn('Numeri filo'), color: '#0b5cad', size: 1.8 },
+  { key: 'bundleTag', name: tn('Sigla dei bus fili (con i rimandi)'), color: '#0b5cad', size: 1.8, from: 'wireNo' },
+  { key: 'bundleTap', name: tn('Nomi dei conduttori dei bus fili'), color: '#0b5cad', size: 1.8, from: 'wireNo' },
   { key: 'linkName', name: tn('Nome dei rimandi'), color: '#1b1f24', size: 2.8 },
   { key: 'linkRefs', name: tn('Pagine dei rimandi'), color: '#1b1f24', size: 1.9 },
   { key: 'potential', name: tn('Nomi dei potenziali'), color: '#1b1f24', size: 2.8 },
@@ -1132,8 +1141,17 @@ export const TEXT_STYLES: { key: TextStyleKey; name: string; color: string; size
 /** Colore e altezza effettivi di ogni tipo di testo del progetto */
 export function textStylesOf(settings: Pick<ProjectSettings, 'textStyles'>): Record<TextStyleKey, Required<TextStyle>> {
   const out = {} as Record<TextStyleKey, Required<TextStyle>>;
-  for (const d of TEXT_STYLES) out[d.key] = { color: settings.textStyles?.[d.key]?.color ?? d.color, size: settings.textStyles?.[d.key]?.size ?? d.size };
+  // I tipi con from vengono dopo il loro tipo di partenza nell'elenco
+  for (const d of TEXT_STYLES) {
+    const base = d.from ? out[d.from] : d;
+    out[d.key] = { color: settings.textStyles?.[d.key]?.color ?? base.color, size: settings.textStyles?.[d.key]?.size ?? base.size };
+  }
   return out;
+}
+
+/** Stile del numero di un filo: la sigla dei bus fili ha il suo */
+export function wireTextStyle(styles: Record<TextStyleKey, Required<TextStyle>>, w: { bundle?: unknown }) {
+  return w.bundle ? styles.bundleTag : styles.wireNo;
 }
 
 export const DEFAULT_SETTINGS: ProjectSettings = {

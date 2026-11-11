@@ -109,6 +109,11 @@ contactos ya colocados en el esquema, primero los auxiliares: elige el que quier
   direcciones.
 - *Propiedades ▸ Representación de* indica el contacto real (un clic lleva a él); *Convertir en contacto
   real* la transforma en un contacto con sus propias conexiones.
+- El dibujo es **reducido**: sin identificador (ya está junto al elemento principal), solo el pequeño dibujo
+  del contacto con la página del contacto real a un lado y los bornes al otro (p. ej. `/1304.3 ─╱─ 13-14`).
+  Es vertical como el contacto; **R** (antes o después del clic) lo pone horizontal. Altura y color son los
+  de las *Referencias cruzadas* (Aspecto ▸ Textos); *Propiedades ▸ Altura de los textos* cambia solo esta.
+  *Propiedades ▸ Dibujo ▸ símbolo completo con sigla* vuelve al símbolo completo.
 - Si se elimina el contacto real, la verificación señala la representación que ha quedado sola y propone
   borrarla.
 

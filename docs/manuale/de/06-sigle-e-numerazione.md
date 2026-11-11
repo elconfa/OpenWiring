@@ -111,6 +111,12 @@ Zielstelle klicken.
 - Echter Kontakt und Darstellung verweisen mit Querverweisen aufeinander, in beide Richtungen.
 - *Eigenschaften ▸ Darstellung von* zeigt den echten Kontakt (ein Klick führt dorthin); *Zum echten Kontakt
   machen* verwandelt sie in einen Kontakt mit eigenen Verbindungen.
+- Die Darstellung ist **kompakt**: kein Kennzeichen (sie steht schon neben dem Hauptelement), nur das kleine
+  Kontaktbild mit der Seite des echten Kontakts auf der einen und den Anschlüssen auf der anderen Seite
+  (z. B. `/1304.3 ─╱─ 13-14`). Sie ist senkrecht wie der Kontakt; **R** (vor oder nach dem Klick) macht sie
+  waagerecht. Höhe und Farbe sind die der *Querverweise* (Darstellung ▸ Texte); *Eigenschaften ▸ Texthöhe*
+  ändert nur diese. *Eigenschaften ▸ Darstellung ▸ vollständiges Symbol mit Kennzeichen* zeigt wieder das
+  ganze Symbol.
 - Wird der echte Kontakt gelöscht, meldet die Prüfung die verwaiste Darstellung und bietet an, sie zu
   löschen.
 
