@@ -2,7 +2,7 @@
 // switch della pagina 400): sono un cavo solo, con una sigla sola
 import { describe, it, expect } from 'vitest';
 import { emptyProject } from '../src/model/project';
-import { busCableRows, allCableTags, assignBusCableTags, unifyBusCableTags } from '../src/model/network';
+import { busCableRows, allCableTags, assignBusCableTags, unifyBusCableTags, syncBusLinkNames } from '../src/model/network';
 import { checkProject } from '../src/model/checks';
 import { derive } from '../src/model/derive';
 import { useStore } from '../src/model/store';
@@ -101,5 +101,29 @@ describe('cavi di rete con i rimandi', () => {
     (p.pages[1].elements[1] as SymbolInstance).linkTo = undefined;
     (p.pages[0].elements[1] as SymbolInstance).linkTo = undefined;
     expect(checkProject(p).some(i => i.level === 'error' && i.msg.includes('-300W1'))).toBe(true);
+  });
+
+  it('i dati del cavo mancanti su un tratto si prendono dagli altri tratti (anche con la stessa sigla)', () => {
+    const p = project('300W1');
+    (p.pages[0].elements[2] as Wire).busCable = { tag: '300W1', type: 'Profinet tipo C', length: 7, partNr: 'PN-C' };
+    expect(unifyBusCableTags(p)).toBe(1);
+    expect((p.pages[1].elements[2] as Wire).busCable).toEqual({ tag: '300W1', type: 'Profinet tipo C', length: 7, partNr: 'PN-C' });
+  });
+
+  it('i rimandi di un cavo di rete si chiamano come il cavo; rinominare il rimando rinomina il cavo', () => {
+    const p = project('300W1');
+    (p.pages[0].elements[1] as SymbolInstance).tag = 'A';
+    (p.pages[1].elements[1] as SymbolInstance).tag = 'A';
+    expect(syncBusLinkNames(p)).toBe(2);
+    expect((p.pages[1].elements[1] as SymbolInstance).tag).toBe('300W1');
+    const st = useStore.getState;
+    st().loadProject(project('300W1'));
+    st().updateInstance('l1', { tag: '300W5' });
+    const pg = st().project.pages;
+    expect([(pg[0].elements[2] as Wire).busCable?.tag, (pg[1].elements[2] as Wire).busCable?.tag]).toEqual(['300W5', '300W5']);
+    expect([(pg[0].elements[1] as SymbolInstance).tag, (pg[1].elements[1] as SymbolInstance).tag]).toEqual(['300W5', '300W5']);
+    // Sigla cambiata sul cavo (tutti i tratti, come fa il pannello delle proprietà): i rimandi la seguono
+    st().setWireProps(['w1', 'w2'], { busCable: { tag: '300W9' } });
+    expect(st().project.pages.map(q => (q.elements[1] as SymbolInstance).tag)).toEqual(['300W9', '300W9']);
   });
 });

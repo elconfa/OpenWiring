@@ -85,7 +85,7 @@ page du robot) est **un seul câble** : il a un seul repère sur tous les tronç
 seul celui du câble, même si vous appariez les renvois après l'avoir dessiné. Changer le repère, le
 type, la longueur ou l'article sur un tronçon change aussi les autres. Si les tronçons ont des repères
 différents, la vérification le signale, et le bouton **Utiliser -… sur tous les tronçons** met partout le
-repère du tronçon de la première page. Donnez aux renvois le même nom que le câble (`1102W1`) : à côté du
+repère du tronçon de la première page. Les renvois du câble prennent d'eux-mêmes le nom du câble (`1102W1`) et le suivent si vous changez le repère ; renommer un renvoi renomme le câble, sur tous les tronçons et sur le renvoi correspondant. Type, longueur et article écrits sur un tronçon passent aux autres tronçons qui ne les ont pas. Ainsi à côté du
 renvoi le repère n'est pas répété. Pour l'afficher ou le masquer sur un tronçon, utilisez l'œil de
 **Repère du câble** ; l'œil de **Numéro de fil** éteint tous les textes de la liaison.
 

@@ -124,9 +124,11 @@ Quelle ist mit **genau einem** Ziel verbunden, auch wenn sich der Name wiederhol
 Beim Einfügen einer Unterbrechungsstelle übernimmt das Programm den Namen aus der Drahtnummer und sucht
 freie Unterbrechungsstellen:
 
-- gibt es **genau eine** freie Stelle mit demselben Namen, werden beide sofort verbunden (eine Meldung in
+- gibt es **genau eine** freie Stelle mit demselben Namen **auf einer anderen Seite**, werden beide sofort verbunden (eine Meldung in
   der Berichtsansicht weist darauf hin);
-- gibt es mehrere, öffnet sich die Liste mit der ersten bereits ausgewählt: *Enter* bestätigt sie;
+- gibt es mehrere, öffnet sich die Liste mit der ersten bereits ausgewählt: *Enter* bestätigt sie. Der erste Eintrag, *— wartet auf das noch nicht gezeichnete Gegenstück (/…)*
+  (oder ein neuer Name, oder *Esc*), lässt sie wartend: sie verbindet sich nicht selbst mit vorhandenen
+  Stellen, auch nicht mit der gleichnamigen auf derselben Seite;
 - gibt es keine, bleibt die Stelle **wartend**: neben dem Pfeil erscheint `/…` in Orange, bis Sie das
   Gegenstück zeichnen.
 

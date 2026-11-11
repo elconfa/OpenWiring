@@ -120,9 +120,11 @@ collegata a **un solo** arrivo, anche se il nome si ripete (per esempio è il nu
 
 Quando inserisci un rimando, il programma prende il nome dal numero del filo e cerca i rimandi liberi:
 
-- se c'è **un solo** rimando libero con lo stesso nome, i due si collegano subito (un messaggio nella vista
+- se c'è **un solo** rimando libero con lo stesso nome **su un'altra pagina**, i due si collegano subito (un messaggio nella vista
   report lo dice);
-- se ce ne sono più di uno compare l'elenco con il primo già scelto: *Invio* lo conferma;
+- se ce ne sono più di uno compare l'elenco con il primo già scelto: *Invio* lo conferma. La prima voce, *— in attesa del corrispondente non ancora disegnato (/…)*
+  (oppure un nome nuovo, o *Esc*), lascia il rimando in attesa: non si collega da solo ai rimandi che ci
+  sono già, nemmeno a quello con lo stesso nome sulla stessa pagina;
 - se non ce n'è nessuno il rimando resta **in attesa**: accanto alla freccia compare `/…` in arancione,
   finché non disegni il corrispondente.
 

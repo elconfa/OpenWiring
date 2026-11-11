@@ -3425,5 +3425,8 @@
  "ridotto (morsetti e pagina)": "kompakt (Anschlüsse und Seite)",
  "simbolo intero con la sigla": "vollständiges Symbol mit Kennzeichen",
  "Altezza dei testi (mm)": "Texthöhe (mm)",
- "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Kompakt: nur das kleine Kontaktbild mit Anschlüssen und Seite, ohne Kennzeichen, neben dem Hauptelement. Drehen (R) für senkrecht oder waagerecht"
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Kompakt: nur das kleine Kontaktbild mit Anschlüssen und Seite, ohne Kennzeichen, neben dem Hauptelement. Drehen (R) für senkrecht oder waagerecht",
+ "— in attesa del corrispondente non ancora disegnato (/…)": "— wartet auf das noch nicht gezeichnete Gegenstück (/…)",
+ "Invio collega il rimando proposto (prende il suo nome). Se il corrispondente non è ancora disegnato scegli «in attesa» o scrivi un nome nuovo: il rimando non si collega da solo a quelli che ci sono già.": "Enter verbindet den vorgeschlagenen Querverweis (er übernimmt dessen Namen). Ist das Gegenstück noch nicht gezeichnet, wählen Sie «wartet» oder geben Sie einen neuen Namen ein: der Querverweis verbindet sich nicht selbst mit vorhandenen.",
+ "Rimando \"{0}\" in attesa del corrispondente (/…): si collega quando lo scegli nelle proprietà o quando disegni l'altro": "Querverweis \"{0}\" wartet auf das Gegenstück (/…): er wird verbunden, wenn Sie es in den Eigenschaften wählen oder das andere zeichnen"
 }

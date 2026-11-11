@@ -228,7 +228,8 @@ simbolo <id> <sigla> @x,y [rot=0|90|180|270] [specchio] [descr="…"] [dati="…
     numerofilo: il numero filo attraversa l'elemento senza cambiare (predefinito per i morsetti).
     Rimandi (link = partenza, link_in = arrivo): con=<pagina> abbina il rimando a quello con lo
     stesso nome e verso opposto su quella pagina (con=<pagina>@x,y se ce n'è più d'uno); con=- lo
-    lascia senza corrispondente (la partenza finisce lì, «//»); senza con= si abbina per nome.
+    lascia senza corrispondente (la partenza finisce lì, «//»); con=? lo lascia in attesa del
+    corrispondente non ancora disegnato (non si abbina da solo); senza con= si abbina per nome.
     stella (solo partenza): collegata a tutti gli arrivi con lo stesso nome.
     coppia=<pagina>@x,y: il simbolo è solo la rappresentazione del contatto con la stessa sigla in
     quel punto (riferimento a coppie, es. ausiliario del salvamotore accanto ai poli): non si collega.

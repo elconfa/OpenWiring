@@ -3425,5 +3425,8 @@
  "ridotto (morsetti e pagina)": "réduit (bornes et page)",
  "simbolo intero con la sigla": "symbole complet avec repère",
  "Altezza dei testi (mm)": "Hauteur des textes (mm)",
- "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Réduit : seulement le petit dessin du contact avec bornes et page, sans repère, à placer à côté de l'élément principal. Tourner (R) pour l'avoir vertical ou horizontal"
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Réduit : seulement le petit dessin du contact avec bornes et page, sans repère, à placer à côté de l'élément principal. Tourner (R) pour l'avoir vertical ou horizontal",
+ "— in attesa del corrispondente non ancora disegnato (/…)": "— en attente du correspondant pas encore dessiné (/…)",
+ "Invio collega il rimando proposto (prende il suo nome). Se il corrispondente non è ancora disegnato scegli «in attesa» o scrivi un nome nuovo: il rimando non si collega da solo a quelli che ci sono già.": "Entrée relie le renvoi proposé (il prend son nom). Si le correspondant n'est pas encore dessiné, choisissez « en attente » ou tapez un nouveau nom : le renvoi ne se relie pas tout seul à ceux qui existent.",
+ "Rimando \"{0}\" in attesa del corrispondente (/…): si collega quando lo scegli nelle proprietà o quando disegni l'altro": "Renvoi « {0} » en attente du correspondant (/…) : il se relie quand vous le choisissez dans les propriétés ou quand vous dessinez l'autre"
 }

@@ -3425,5 +3425,8 @@
  "ridotto (morsetti e pagina)": "compact (terminals and page)",
  "simbolo intero con la sigla": "full symbol with tag",
  "Altezza dei testi (mm)": "Text height (mm)",
- "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Compact: just the small contact drawing with terminals and page, without tag, to place next to the main element. Rotate (R) for vertical or horizontal"
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Compact: just the small contact drawing with terminals and page, without tag, to place next to the main element. Rotate (R) for vertical or horizontal",
+ "— in attesa del corrispondente non ancora disegnato (/…)": "— waiting for a counterpart not yet drawn (/…)",
+ "Invio collega il rimando proposto (prende il suo nome). Se il corrispondente non è ancora disegnato scegli «in attesa» o scrivi un nome nuovo: il rimando non si collega da solo a quelli che ci sono già.": "Enter links the proposed cross-reference (it takes its name). If the counterpart is not drawn yet choose «waiting» or type a new name: the cross-reference does not link by itself to existing ones.",
+ "Rimando \"{0}\" in attesa del corrispondente (/…): si collega quando lo scegli nelle proprietà o quando disegni l'altro": "Cross-reference \"{0}\" waiting for its counterpart (/…): it links when you choose it in the properties or when you draw the other one"
 }

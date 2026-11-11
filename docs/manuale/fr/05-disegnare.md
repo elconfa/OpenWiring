@@ -120,9 +120,11 @@ relié à **une seule** arrivée, même si le nom se répète (par exemple c'est
 Quand vous insérez un renvoi, le programme prend son nom dans le numéro du fil et cherche les renvois
 libres :
 
-- s'il y a **un seul** renvoi libre du même nom, les deux sont reliés tout de suite (un message dans la vue
+- s'il y a **un seul** renvoi libre du même nom **sur une autre page**, les deux sont reliés tout de suite (un message dans la vue
   rapport l'indique) ;
-- s'il y en a plusieurs, la liste s'ouvre avec le premier déjà choisi : *Entrée* le confirme ;
+- s'il y en a plusieurs, la liste s'ouvre avec le premier déjà choisi : *Entrée* le confirme. La première entrée, *— en attente du correspondant pas encore dessiné (/…)*
+  (ou un nouveau nom, ou *Échap*), le laisse en attente : il ne se relie pas tout seul aux renvois
+  existants, pas même à celui du même nom sur la même page ;
 - s'il n'y en a aucun, le renvoi reste **en attente** : `/…` apparaît en orange à côté de la flèche, jusqu'à
   ce que vous dessiniez le correspondant.
 

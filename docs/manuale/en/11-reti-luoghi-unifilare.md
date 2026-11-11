@@ -81,7 +81,7 @@ controller to the robot page) is **one cable**: it has one tag on all segments. 
 own, even if you pair the cross-references after drawing it. Changing the tag, type,
 length or part on one segment changes the others too. If the segments have different tags the check
 reports it, and the **Use -… on all segments** button puts the tag of the segment on the first page on
-all of them. Give the cross-references the same name as the cable (`1102W1`): next to the
+all of them. The cable's cross-references take the cable name by themselves (`1102W1`) and follow it when you change the tag; renaming a cross-reference renames the cable, on all segments and on the matching cross-reference. Type, length and part written on one segment pass to the other segments that lack them. So next to the
 cross-reference the tag is not repeated. To show or hide it on a segment use the eye of **Cable tag**;
 the eye of **Wire number** turns off all the text on the connection.
 

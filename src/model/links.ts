@@ -11,7 +11,10 @@ import { allPlaced, type PlacedElement } from './devices';
 
 /** Rimando lasciato senza corrispondente per scelta (voce vuota): non si abbina nemmeno per nome */
 export const NO_PARTNER = '-';
-/** Per pairLinks: il rimando torna in attesa del corrispondente (si abbina per nome) */
+/**
+ * Rimando in attesa del corrispondente non ancora disegnato (scelta dell'utente): non si abbina da solo
+ * per nome; si collega solo scegliendo il corrispondente (o quando l'altro, inserito dopo, sceglie lui)
+ */
 export const WAITING = '?';
 
 /** Rimando di arrivo (freccia verso il conduttore); gli altri rimandi sono di partenza */
@@ -43,7 +46,7 @@ export function linkPartners(project: Project, placed: PlacedElement[] = linksOf
   for (const s of links) {
     if (!star(s) || !s.inst.tag) continue;
     for (const i of links) {
-      if (!isIncomingLink(i.inst.symbolId) || paired.has(i.inst.id) || i.inst.linkTo === NO_PARTNER) continue;
+      if (!isIncomingLink(i.inst.symbolId) || paired.has(i.inst.id) || i.inst.linkTo === NO_PARTNER || i.inst.linkTo === WAITING) continue;
       const to = i.inst.linkTo ? byId.get(i.inst.linkTo) : undefined;
       if (to !== s && (i.inst.tag !== s.inst.tag || (to && star(to)))) continue;
       out.get(s.inst.id)!.push(i);
@@ -57,7 +60,7 @@ export function linkPartners(project: Project, placed: PlacedElement[] = linksOf
   // arrivo con la partenza libera più vicina che lo precede nell'ordine delle pagine
   const free = new Map<string, PlacedElement[]>();
   for (const l of links) {
-    if (paired.has(l.inst.id) || !l.inst.tag || l.inst.linkTo === NO_PARTNER) continue;
+    if (paired.has(l.inst.id) || !l.inst.tag || l.inst.linkTo === NO_PARTNER || l.inst.linkTo === WAITING) continue;
     const g = free.get(l.inst.tag);
     if (g) g.push(l); else free.set(l.inst.tag, [l]);
   }
@@ -114,7 +117,7 @@ export function waitingLinks(links: PlacedElement[], partners: Map<string, Place
 /**
  * Collega due rimandi (dentro un commit): ciascuno lascia il corrispondente precedente e il
  * rimando prende il nome dell'altro. Con to vuoto il rimando resta senza corrispondente (anche per nome),
- * con WAITING torna in attesa.
+ * con WAITING resta in attesa del corrispondente non ancora disegnato.
  */
 export function pairLinks(project: Project, id: string, to: string): void {
   const all = project.pages.flatMap(p => p.elements).filter((e): e is SymbolInstance => e.kind === 'symbol');
@@ -123,10 +126,11 @@ export function pairLinks(project: Project, id: string, to: string): void {
   if (!a) return;
   const release = (e: SymbolInstance) => {
     const old = e.linkTo ? find(e.linkTo) : undefined;
-    if (old && old.linkTo === e.id) old.linkTo = '';
+    // Il corrispondente lasciato resta in attesa (non si riabbina da solo per nome a un altro rimando)
+    if (old && old.linkTo === e.id) old.linkTo = WAITING;
   };
   release(a);
-  if (to === WAITING) { a.linkTo = ''; return; }
+  if (to === WAITING) { a.linkTo = WAITING; return; }
   const b = to ? find(to) : undefined;
   // Solo partenza con arrivo: due partenze (o due arrivi) non si collegano
   if (!b || b === a || isIncomingLink(a.symbolId) === isIncomingLink(b.symbolId)) { a.linkTo = NO_PARTNER; return; }

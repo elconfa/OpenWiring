@@ -75,12 +75,12 @@ describe('rimandi', () => {
     const p = project([link('a', '5', 40, false, 'b'), link('x', '7', 80, false, '')], [link('b', '5', 40, true, 'a')]);
     pairLinks(p, 'x', 'b');
     const el = (id: string) => p.pages.flatMap(pg => pg.elements).find(e => e.id === id) as SymbolInstance;
-    expect([el('x').linkTo, el('b').linkTo, el('a').linkTo, el('x').tag]).toEqual(['b', 'x', '', '5']);
-    // «a» è rimasta una partenza senza arrivo: in attesa
+    expect([el('x').linkTo, el('b').linkTo, el('a').linkTo, el('x').tag]).toEqual(['b', 'x', '?', '5']);
+    // «a» è rimasta una partenza senza arrivo: in attesa (e non si riabbina da sola per nome)
     expect(checkProject(p).filter(m => /partenza in attesa/.test(m.msg)).length).toBe(1);
     pairLinks(p, 'x', '');
     // La voce vuota: senza corrispondente per scelta («-»), nemmeno per nome
-    expect([el('x').linkTo, el('b').linkTo]).toEqual(['-', '']);
+    expect([el('x').linkTo, el('b').linkTo]).toEqual(['-', '?']);
   });
   it('rimandi non abbinati con lo stesso nome (incollati o messi senza scegliere): si abbinano per nome', () => {
     // Catena 1 → 2 → 3 con gli arrivi e le partenze senza abbinamento: ogni arrivo con la partenza della pagina prima
@@ -160,9 +160,22 @@ describe('rimandi a stella e in attesa', () => {
     expect(freeLinksFor(p, 'o').map(e => e.inst.id)).toEqual(['i']);
     pairLinks(p, 'o', 'i');
     expect([el(p, 'o').tag, partnersOf(p, 'o')]).toEqual(['7.03', ['i']]);
-    // Di nuovo in attesa: si scollega e il corrispondente resta libero
+    // Di nuovo in attesa: si scollega, tutti e due restano in attesa e non si riabbinano per nome
     pairLinks(p, 'o', '?');
-    expect([el(p, 'o').linkTo, el(p, 'i').linkTo]).toEqual(['', '']);
+    expect([el(p, 'o').linkTo, el(p, 'i').linkTo]).toEqual(['?', '?']);
+    expect(partnersOf(p, 'o')).toEqual([]);
+    expect(freeLinksFor(p, 'o').map(e => e.inst.id)).toEqual(['i']);
+  });
+  it('in attesa sulla stessa pagina: due rimandi con lo stesso nome non si collegano da soli', () => {
+    const p = project([link('o', '3.01', 40, false, '?'), link('i', '3.01', 80, true, '')], []);
+    expect(partnersOf(p, 'o')).toEqual([]);
+    expect(partnersOf(p, 'i')).toEqual([]);
+    // Formato testo: con=? resta in attesa
+    const t = pagesToText(p);
+    expect(t).toMatch(/simbolo link 3\.01 @40,40 .*con=\?/);
+    const q = emptyProject();
+    expect(importPagesText(q, t).errors).toEqual([]);
+    expect(q.pages.flatMap(pg => pg.elements).find(e => e.kind === 'symbol' && e.symbolId === 'link')).toMatchObject({ linkTo: '?' });
   });
   it('formato testo: la parola «stella» sulla partenza', () => {
     const p = project([{ ...link('s', '24V', 40), linkStar: true }], [link('i', '24V', 40, true)]);

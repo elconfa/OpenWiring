@@ -80,7 +80,7 @@ alla pagina del robot) è **un cavo solo**: ha una sigla sola su tutti i tratti.
 cavo, anche se i rimandi li abbini dopo averlo disegnato. Cambiando sigla, tipo,
 lunghezza o articolo in un tratto, cambiano anche gli altri. Se i tratti hanno sigle diverse la verifica
 lo segnala, e il pulsante **Usa -… su tutti i tratti** mette su tutti la sigla del tratto sulla prima
-pagina. Dai ai rimandi lo stesso nome del cavo (`1102W1`): accanto al rimando la sigla non si ripete. Per
+pagina. I rimandi del cavo prendono da soli il nome del cavo (`1102W1`) e lo seguono se cambi la sigla; rinominando un rimando si rinomina il cavo, su tutti i tratti e sul rimando corrispondente. Tipo, lunghezza e articolo scritti su un tratto passano agli altri tratti che non li hanno. Così accanto al rimando la sigla non si ripete. Per
 mostrarla o nasconderla su un tratto usa l'occhio di **Sigla cavo**; l'occhio di **Numero filo** spegne
 tutte le scritte sul collegamento.
 

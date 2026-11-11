@@ -123,9 +123,11 @@ is connected to **one** incoming point only, even when the name repeats (for exa
 When you insert an interruption point, the program takes its name from the wire number and looks for free
 interruption points:
 
-- if there is **exactly one** free point with the same name, the two are connected straight away (a message
+- if there is **exactly one** free point with the same name **on another page**, the two are connected straight away (a message
   in the report view says so);
-- if there are several, the list opens with the first one already chosen: *Enter* confirms it;
+- if there are several, the list opens with the first one already chosen: *Enter* confirms it. The first entry, *— waiting for a counterpart not yet drawn (/…)*
+  (or a new name, or *Esc*), leaves it waiting: it does not link by itself to existing points, not even
+  to the one with the same name on the same page;
 - if there is none, the point stays **waiting**: `/…` appears in orange next to the arrow until you draw
   its counterpart.
 

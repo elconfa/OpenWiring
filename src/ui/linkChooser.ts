@@ -2,7 +2,7 @@
 // opposto con lo stesso nome; senza candidati resta in attesa e si collegherà quando si disegna l'altro.
 // Con altri candidati si sceglie in un elenco con il più vicino già proposto (Invio lo collega).
 import { useStore } from '../model/store';
-import { freeLinksFor, isIncomingLink, linkPartners } from '../model/links';
+import { freeLinksFor, isIncomingLink, linkPartners, WAITING } from '../model/links';
 import { allPlaced, locationOf } from '../model/devices';
 import { computeNetlist } from '../model/netlist';
 import { askCombo } from './Ask';
@@ -40,24 +40,31 @@ export async function chooseLinkPartner(instId: string) {
     st().pairLinks(instId, e.inst.id);
     st().logMsg(tx('Rimando "{0}" collegato a {1}', e.inst.tag || tag, where(e)));
   };
-  // Un solo rimando libero con lo stesso nome: si collega senza domande
+  const waiting = () => {
+    st().pairLinks(instId, WAITING);
+    st().logMsg(tx('Rimando "{0}" in attesa del corrispondente (/…): si collega quando lo scegli nelle proprietà o quando disegni l\'altro', allPlaced(st().project).find(e => e.inst.id === instId)?.inst.tag || tag));
+  };
+  // Un solo rimando libero con lo stesso nome su un'altra pagina: si collega senza domande.
+  // Sulla stessa pagina di solito è l'altro capo della stessa catena: si chiede
   const same = c.free.filter(e => tag && e.inst.tag === tag);
-  if (same.length === 1) { pair(same[0]); return; }
+  if (same.length === 1 && same[0].page.id !== me.page.id) { pair(same[0]); return; }
   // Nessun rimando libero dell'altro verso: resta in attesa con il numero del filo
   if (!c.free.length && tag) { st().logMsg(tx('Rimando "{0}" in attesa del corrispondente: si collega da solo quando disegni l\'altro con lo stesso nome', tag)); return; }
   // Scelta tra i rimandi liberi (prima quelli con lo stesso nome, poi i più vicini): il primo è già
-  // proposto e Invio lo collega; un nome nuovo lascia il rimando in attesa, Esc anche
+  // proposto e Invio lo collega. La prima voce, un nome nuovo o Esc lasciano il rimando in attesa
+  // del corrispondente non ancora disegnato: non si collega da solo a un rimando che c'è già
   const r = await askCombo(
     c.incoming ? tx('Rimando di arrivo: da quale partenza?') : tx('Rimando di partenza: verso quale arrivo?'),
     c.free.length
-      ? tx('Invio collega il rimando proposto (prende il suo nome). Scrivi un nome nuovo se il corrispondente non è ancora disegnato: il rimando resta in attesa e si collega quando lo disegni.')
+      ? tx('Invio collega il rimando proposto (prende il suo nome). Se il corrispondente non è ancora disegnato scegli «in attesa» o scrivi un nome nuovo: il rimando non si collega da solo a quelli che ci sono già.')
       : tx('Nessun rimando libero da abbinare: scrivi il nome.'),
-    tag, c.free.map(e => ({ value: e.inst.tag, label: c.items[c.free.indexOf(e) + 1] })), c.free.length ? 0 : -1, tx('nome del rimando'),
+    tag, [{ value: tag, label: tx('— in attesa del corrispondente non ancora disegnato (/…)') }, ...c.free.map(e => ({ value: e.inst.tag, label: c.items[c.free.indexOf(e) + 1] }))], c.free.length ? 1 : 0, tx('nome del rimando'),
   );
-  if (!r) return;
-  if (r.index >= 0) { pair(c.free[r.index]); return; }
+  if (!r) { waiting(); return; }
+  if (r.index >= 1) { pair(c.free[r.index - 1]); return; }
   const name = r.text.replace(/^-/, '').trim();
   if (name && name !== tag) st().updateInstance(instId, { tag: name });
+  waiting();
 }
 
 /** Dopo un cambio di nome: se il rimando è in attesa e c'è un solo rimando libero dell'altro verso con quel nome, li collega */

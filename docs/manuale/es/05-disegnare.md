@@ -121,9 +121,11 @@ está unida a **una sola** llegada, aunque el nombre se repita (por ejemplo es e
 
 Al insertar una remisión, el programa toma el nombre del número del hilo y busca las remisiones libres:
 
-- si hay **una sola** remisión libre con el mismo nombre, las dos se conectan enseguida (un mensaje en la
+- si hay **una sola** remisión libre con el mismo nombre **en otra página**, las dos se conectan enseguida (un mensaje en la
   vista de informes lo indica);
-- si hay varias, se abre la lista con la primera ya elegida: *Intro* la confirma;
+- si hay varias, se abre la lista con la primera ya elegida: *Intro* la confirma. La primera entrada, *— en espera del correspondiente aún no dibujado (/…)*
+  (o un nombre nuevo, o *Esc*), la deja en espera: no se conecta sola a las remisiones existentes, ni
+  siquiera a la del mismo nombre en la misma página;
 - si no hay ninguna, la remisión queda **en espera**: junto a la flecha aparece `/…` en naranja hasta que
   dibujes la correspondiente.
 

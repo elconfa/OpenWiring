@@ -8,7 +8,7 @@ import { PAGE_W, PAGE_H } from './types';
 import { isRailEnd } from './checks';
 import { getSymbol, pinsWorld, samePt, onSegmentInterior, uid, pinDirWorld } from './geometry';
 import { effectivePinLabels, allPlaced } from './devices';
-import { NO_PARTNER, isIncomingLink, pairLinks } from './links';
+import { NO_PARTNER, WAITING, isIncomingLink, pairLinks } from './links';
 import { distOf, distSymbolId, newDistributor, parseOuts, syncDistSymbols } from './distributors';
 import { computeNetlist } from './netlist';
 import { nextTagFor } from './numbering';
@@ -81,7 +81,8 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 #     numerofilo: il numero filo attraversa l'elemento senza cambiare (predefinito per i morsetti).
 #     Rimandi (link = partenza, link_in = arrivo): con=<pagina> abbina il rimando a quello con lo
 #     stesso nome e verso opposto su quella pagina (con=<pagina>@x,y se ce n'è più d'uno); con=- lo
-#     lascia senza corrispondente (la partenza finisce lì, «//»); senza con= si abbina per nome.
+#     lascia senza corrispondente (la partenza finisce lì, «//»); con=? lo lascia in attesa del
+#     corrispondente non ancora disegnato (non si abbina da solo); senza con= si abbina per nome.
 #     stella (solo partenza): collegata a tutti gli arrivi con lo stesso nome.
 #     coppia=<pagina>@x,y: il simbolo è solo la rappresentazione del contatto con la stessa sigla in
 #     quel punto (riferimento a coppie, es. ausiliario del salvamotore accanto ai poli): non si collega.
@@ -321,6 +322,7 @@ export function pagesToText(project: Project, opts: TextExportOptions = {}): str
   const pairReal = (id: string) => { for (const page of project.pages) { const inst = page.elements.find(x => x.id === id); if (inst?.kind === 'symbol') return { page, inst }; } return undefined; };
   const linkWith = (e: SymbolInstance): string | undefined => {
     if (e.linkTo === NO_PARTNER) return '-';
+    if (e.linkTo === WAITING) return '?';
     const o = e.linkTo ? linkEls.find(x => x.inst.id === e.linkTo) : undefined;
     if (!o || o.inst.linkTo !== e.id) return undefined;
     const twins = linkEls.filter(x => x.page === o.page && x.inst.tag === o.inst.tag && x.inst.symbolId === o.inst.symbolId);
@@ -938,6 +940,7 @@ export function importPagesText(project: Project, text: string): TextImportResul
   // Abbinamenti scritti dei rimandi (con=<pagina>[@x,y] o con=-), anche verso pagine non nel testo
   for (const { inst, target, line } of linkTargets) {
     if (target === '-') { inst.linkTo = NO_PARTNER; continue; }
+    if (target === '?') { inst.linkTo = WAITING; continue; }
     const m = /^(.+?)(?:@(-?[\d.]+),(-?[\d.]+))?$/.exec(target)!;
     const pg = work.pages.find(p => p.name === m[1]);
     if (!pg) { errors.push({ line, msg: `con=${target}: pagina ${m[1]} inesistente` }); continue; }

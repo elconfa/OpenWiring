@@ -6,7 +6,7 @@ import { applySheet } from './types';
 import type { TextMoveKey, ExtraPart, UserPropDef, PinDir } from './types';
 import type { DrawingStyleKind, Project, Page, Element, Part, SymbolInstance, Pt, Wire, ProjectInfo, ProjectSettings, DeviceField, PlcCard, IoKind, SymbolDef, TerminalStripData, Jumper, Cable, CableLine, CableMarking, Layout, WireDef, Distributor } from './types';
 import { newLayoutPage, autoLayout as autoLayoutModel, layoutOf, type AutoLayoutOptions } from './layout';
-import { newPanel, newNetworkPage, assignBusCableTags, unifyBusCableTags, assignIps, newIpNetwork, netInterfaces, setNetInterface, stationInterface, splitNetInterface as splitNetInterfaceModel, mergeNetInterface as mergeNetInterfaceModel, assignProfinetNames } from './network';
+import { newPanel, newNetworkPage, assignBusCableTags, unifyBusCableTags, syncBusLinkNames, busCableLinks, assignIps, newIpNetwork, netInterfaces, setNetInterface, stationInterface, splitNetInterface as splitNetInterfaceModel, mergeNetInterface as mergeNetInterfaceModel, assignProfinetNames } from './network';
 import { nextPin, freePins, allConnectors, type ConnectorData } from './connectors';
 import { genderSymbol, type ConnectorGender } from './connectorTypes';
 import { releaseRevision as releaseRevisionModel, openRevision as openRevisionModel, cancelRevision as cancelRevisionModel, unpackProject, isReleased, lastRevision, archiveKb, type Difference, type ReleaseData } from './revisions';
@@ -929,6 +929,8 @@ export const useStore = create<State>((set, get) => {
       assignBusCableTags(next);
       // Tratti uniti dai rimandi dopo essere stati disegnati: la sigla automatica diventa quella del cavo
       unifyBusCableTags(next);
+      // Rimandi dei cavi di rete: si chiamano come il cavo
+      syncBusLinkNames(next);
       // Pagine generate in blocchi nell'ordine scelto, con la loro numerazione (IND.1, MOR.2…)
       arrangePages(next);
       registerPageNumbers(next);
@@ -1490,6 +1492,11 @@ export const useStore = create<State>((set, get) => {
       get().commit(p => {
         for (const pg of p.pages) for (const e of pg.elements) {
           if (e.id !== id || e.kind !== 'symbol') continue;
+          // Rimando di un cavo di rete: il nome è la sigla del cavo, quindi si rinomina il cavo (tutti i tratti)
+          if (patch.tag !== undefined && patch.tag.trim() && getSymbol(e.symbolId, p)?.role === 'link') {
+            const g = busCableLinks(p).get(e.id);
+            if (g) for (const { wire } of g) { wire.busCable = { ...wire.busCable, tag: patch.tag.trim().replace(/^-/, '') }; delete wire.busCable.auto; }
+          }
           // Rimando collegato: il corrispondente prende lo stesso nome
           if (patch.tag !== undefined && e.linkTo && getSymbol(e.symbolId, p)?.role === 'link') {
             for (const q of p.pages) for (const o of q.elements) if (o.kind === 'symbol' && o.id === e.linkTo && o.linkTo === e.id) o.tag = patch.tag;

@@ -84,7 +84,7 @@ a la página del robot) es **un solo cable**: tiene una sola sigla en todos los 
 del cable, aunque emparejes las referencias después de dibujarlo. Al cambiar la
 sigla, el tipo, la longitud o el artículo en un tramo, cambian también los demás. Si los tramos tienen
 siglas distintas, la verificación lo indica, y el botón **Usar -… en todos los tramos** pone en todos la
-sigla del tramo de la primera página. Da a las referencias el mismo nombre que el cable (`1102W1`): junto
+sigla del tramo de la primera página. Las referencias del cable toman solas el nombre del cable (`1102W1`) y lo siguen si cambias la sigla; renombrar una referencia renombra el cable, en todos los tramos y en la referencia correspondiente. Tipo, longitud y artículo escritos en un tramo pasan a los otros tramos que no los tienen. Así, junto
 a la referencia la sigla no se repite. Para mostrarla u ocultarla en un tramo usa el ojo de **Sigla del
 cable**; el ojo de **Número de hilo** apaga todos los textos de la conexión.
 

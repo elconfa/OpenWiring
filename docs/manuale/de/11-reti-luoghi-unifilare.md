@@ -83,7 +83,7 @@ BMK. Ein Abschnitt mit dem vom Programm vergebenen BMK übernimmt selbst das BMK
 Sie die Querverweise erst nach dem Zeichnen paaren. Ändert man BMK, Typ, Länge oder Artikel auf einem Abschnitt, ändern sich auch die
 anderen. Haben die Abschnitte verschiedene BMK, meldet es die Prüfung, und die Schaltfläche
 **-… für alle Abschnitte verwenden** setzt überall das BMK des Abschnitts auf der ersten Seite.
-Geben Sie den Querverweisen denselben Namen wie dem Kabel (`1102W1`): neben dem Querverweis wird das
+Die Querverweise des Kabels übernehmen selbst den Kabelnamen (`1102W1`) und folgen ihm, wenn Sie das BMK ändern; wird ein Querverweis umbenannt, wird das Kabel umbenannt, auf allen Abschnitten und am zugehörigen Querverweis. Typ, Länge und Artikel eines Abschnitts gehen auf die anderen Abschnitte über, denen sie fehlen. Daher gilt: neben dem Querverweis wird das
 BMK nicht wiederholt. Zum Ein- oder Ausblenden auf einem Abschnitt dient das Auge von
 **Kabel-BMK**; das Auge von **Drahtnummer** schaltet alle Texte der Verbindung aus.
 

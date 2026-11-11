@@ -3425,5 +3425,8 @@
  "ridotto (morsetti e pagina)": "компактно (выводы и страница)",
  "simbolo intero con la sigla": "полный символ с обозначением",
  "Altezza dei testi (mm)": "Высота текста (мм)",
- "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Компактно: только небольшой значок контакта с выводами и страницей, без обозначения, рядом с главным элементом. Поверните (R) для вертикального или горизонтального вида"
+ "Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all'elemento principale. Ruota (R) per averlo in verticale o in orizzontale": "Компактно: только небольшой значок контакта с выводами и страницей, без обозначения, рядом с главным элементом. Поверните (R) для вертикального или горизонтального вида",
+ "— in attesa del corrispondente non ancora disegnato (/…)": "— ожидает ещё не нарисованную парную ссылку (/…)",
+ "Invio collega il rimando proposto (prende il suo nome). Se il corrispondente non è ancora disegnato scegli «in attesa» o scrivi un nome nuovo: il rimando non si collega da solo a quelli che ci sono già.": "Enter связывает предложенную ссылку (она получает её имя). Если парная ссылка ещё не нарисована, выберите «ожидает» или введите новое имя: ссылка не будет сама связываться с существующими.",
+ "Rimando \"{0}\" in attesa del corrispondente (/…): si collega quando lo scegli nelle proprietà o quando disegni l'altro": "Ссылка \"{0}\" ожидает парную (/…): связь появится, когда вы выберете её в свойствах или нарисуете другую"
 }

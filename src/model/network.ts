@@ -650,27 +650,78 @@ export function assignBusCableTags(project: Project, only?: Set<string>): number
   return n;
 }
 
+/** Dati del cavo che valgono per tutti i tratti dello stesso cavo (oltre alla sigla) */
+const BUS_CABLE_DATA = ['type', 'length', 'partNr'] as const;
+
+/** Tratto principale di un cavo: con la sigla scritta dall'utente o, se sono tutte automatiche, quello sulla prima pagina */
+function mainSegment(project: Project, wires: { wire: Wire; pageId: string }[]) {
+  const index = new Map(project.pages.map((pg, i) => [pg.id, i]));
+  const order = (w: { wire: Wire; pageId: string }) => (index.get(w.pageId) ?? 0) * 1e4 + Math.min(...w.wire.points.map(q => q.x));
+  const sorted = wires.filter(w => w.wire.busCable?.tag).sort((a, b) => order(a) - order(b));
+  return sorted.find(w => !w.wire.busCable!.auto) ?? sorted[0];
+}
+
 /**
- * Tratti con la sigla automatica che i rimandi (abbinati dopo) uniscono a un cavo con un'altra
- * sigla: prendono quella del cavo, cioè quella scritta dall'utente o, se sono tutte automatiche,
- * quella del tratto sulla prima pagina. Restituisce quanti tratti cambiano.
+ * Tratti uniti dai rimandi (anche abbinati dopo): un cavo solo. I tratti con la sigla automatica
+ * prendono quella del cavo (scritta dall'utente o, se sono tutte automatiche, quella del tratto sulla
+ * prima pagina); tipo, lunghezza e articolo mancanti su un tratto si prendono dagli altri tratti.
+ * Restituisce quanti tratti cambiano.
  */
 export function unifyBusCableTags(project: Project): number {
-  if (!project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus && e.busCable?.auto))) return 0;
-  const index = new Map(project.pages.map((pg, i) => [pg.id, i]));
+  if (!project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus && e.busCable))) return 0;
   let n = 0;
   for (const g of busCableGroups(project)) {
-    const tagged = g.wires.filter(w => w.wire.busCable?.tag);
-    if (new Set(tagged.map(w => w.wire.busCable!.tag)).size < 2) continue;
-    const order = (w: { wire: Wire; pageId: string }) => (index.get(w.pageId) ?? 0) * 1e4 + Math.min(...w.wire.points.map(q => q.x));
-    const sorted = [...tagged].sort((a, b) => order(a) - order(b));
-    const main = sorted.find(w => !w.wire.busCable!.auto) ?? sorted[0];
+    if (g.wires.length < 2) continue;
+    const main = mainSegment(project, g.wires);
+    if (!main) continue;
     const c = main.wire.busCable!;
-    for (const { wire } of tagged) {
-      if (wire === main.wire || !wire.busCable!.auto || wire.busCable!.tag === c.tag) continue;
-      wire.busCable = { ...c, ...Object.fromEntries(Object.entries(wire.busCable!).filter(([k, v]) => k !== 'tag' && v !== undefined)), tag: c.tag };
+    // Dati del cavo: quelli del tratto principale, altrimenti del primo tratto che li ha
+    const data: Partial<NonNullable<Wire['busCable']>> = {};
+    for (const k of BUS_CABLE_DATA) {
+      const v = c[k] ?? g.wires.map(w => w.wire.busCable?.[k]).find(x => x !== undefined && x !== '');
+      if (v !== undefined) (data as Record<string, unknown>)[k] = v;
+    }
+    for (const { wire } of g.wires) {
+      const b = wire.busCable ?? {};
+      const retag = !b.tag || (b.auto && b.tag !== c.tag);
+      const missing = BUS_CABLE_DATA.filter(k => b[k] === undefined && data[k] !== undefined);
+      if (!retag && !missing.length) continue;
+      wire.busCable = { ...b, ...Object.fromEntries(missing.map(k => [k, data[k]])), ...(retag ? { tag: c.tag, auto: c.auto } : {}) };
+      if (!wire.busCable.auto) delete wire.busCable.auto;
       n++;
     }
+  }
+  return n;
+}
+
+/** Rimandi sui capi dei tratti di ogni cavo di rete (id del rimando → gruppo dei tratti) */
+export function busCableLinks(project: Project): Map<string, { wire: Wire; pageId: string }[]> {
+  const out = new Map<string, { wire: Wire; pageId: string }[]>();
+  if (!project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus))) return out;
+  const links = allPlaced(project).filter(e => e.sym.role === 'link');
+  if (!links.length) return out;
+  for (const g of busCableGroups(project)) {
+    for (const l of links) {
+      const q = pinsWorld(l.inst, l.sym)[0];
+      if (q && g.wires.some(w => w.pageId === l.page.id && [w.wire.points[0], w.wire.points[w.wire.points.length - 1]].some(e => near(e, q)))) out.set(l.inst.id, g.wires);
+    }
+  }
+  return out;
+}
+
+/**
+ * Rimandi dei cavi di rete: il nome del rimando è la sigla del cavo (es. -300W1 sulla partenza e
+ * sull'arrivo). Restituisce quanti rimandi cambiano nome.
+ */
+export function syncBusLinkNames(project: Project): number {
+  const map = busCableLinks(project);
+  if (!map.size) return 0;
+  let n = 0;
+  for (const pg of project.pages) for (const e of pg.elements) {
+    if (e.kind !== 'symbol') continue;
+    const g = map.get(e.id);
+    const tag = g ? mainSegment(project, g)?.wire.busCable?.tag : undefined;
+    if (tag && e.tag !== tag) { e.tag = tag; n++; }
   }
   return n;
 }
