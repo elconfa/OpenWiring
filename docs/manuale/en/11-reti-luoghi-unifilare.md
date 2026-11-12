@@ -44,6 +44,24 @@ nor does a sub-location of the same cabinet (e.g. the door).
 If you prefer to keep the component next to the PLC input, when printing only some cabinets tick
 *Add the pages of other cabinets with devices of the chosen cabinets* in the PDF (chapter 18).
 
+### Projected pages
+
+There is also a third way, which keeps everything on the maintenance technician's page: draw the +Q2
+component on the +Q1 input page inside the **+Q2 location box**, and the program creates in +Q2 a
+**projected page** that shows that box.
+
+- Command: *Pages ▸ Projected pages of boxes of other panels* (in the ribbon *Pages ▸ Automatic pages ▸
+  Projected pages*), or right-click the box ▸ *Create the projected page in panel +Q2*. One page is
+  created for each box of another panel that does not have one yet, after the pages of that panel and
+  with the same title.
+- The projected page shows the content of the box **live**, with its texts and cross-references: every
+  change made on the source page is visible at once. Below it there is the clickable note *Drawn on page
+  /311 (+Q1)*; on the source box, bottom right, the cross-reference to the projected page.
+- It is **drawing only**: it has no elements of its own, duplicates nothing in the lists and is printed
+  with its panel. You always edit the source page.
+- With the projected page, the check no longer reports the components in the box as drawn on the pages
+  of another panel.
+
 ## Network diagram
 
 The network diagram shows on a single page all the nodes of the plant and the bus connections between the

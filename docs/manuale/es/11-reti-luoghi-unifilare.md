@@ -45,6 +45,24 @@ puerta).
 Si prefieres dejar el componente junto a la entrada PLC, al imprimir solo algunos cuadros marca en el
 PDF *Añadir las páginas de otros cuadros con dispositivos de los cuadros elegidos* (capítulo 18).
 
+### Páginas proyectadas
+
+Hay también una tercera vía, que deja todo en la página del técnico de mantenimiento: el componente del
++Q2 se dibuja en la página de entradas del +Q1 dentro del **recuadro de ubicación +Q2**, y el programa
+crea en el +Q2 una **página proyectada** que muestra ese recuadro.
+
+- Comando: *Páginas ▸ Páginas proyectadas de los recuadros de otros cuadros* (en la cinta *Páginas ▸
+  Páginas automáticas ▸ Páginas proyectadas*), o clic derecho en el recuadro ▸ *Crear la página
+  proyectada en el cuadro +Q2*. Se crea una página por cada recuadro de otro cuadro que aún no la tiene,
+  después de las páginas de ese cuadro y con el mismo título.
+- La página proyectada muestra **en vivo** el contenido del recuadro, con sus textos y referencias: cada
+  cambio hecho en la página de origen se ve enseguida. Debajo aparece la nota clicable *Dibujado en la
+  página /311 (+Q1)*; en el recuadro de origen, abajo a la derecha, la referencia a la página proyectada.
+- Es **solo dibujo**: no tiene elementos propios, no duplica nada en las listas y se imprime con su
+  cuadro. Siempre se modifica la página de origen.
+- Con la página proyectada, la verificación ya no señala los componentes del recuadro como dibujados en
+  las páginas de otro cuadro.
+
 ## Esquema de red
 
 El esquema de red muestra en una sola página todos los nodos de la instalación y las conexiones de bus entre

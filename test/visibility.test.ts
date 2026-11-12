@@ -37,6 +37,13 @@ describe('mostra/nascondi sullo schema', () => {
     const w: Wire = { kind: 'wire', id: 'w', points: [{ x: 60, y: 76 }, { x: 60, y: 120 }], cross: '1,5', color: 'BU' };
     p.pages[0].elements = [S('k', 'coil', 60, '1K1'), w];
     p.settings = { ...p.settings!, showWireData: true };
+    // Sulla lineetta obliqua (predefinito): il numero resta da solo
+    const tick = () => derive(p).pages.get(p.pages[0].id)!.wireTicks?.get('w');
+    expect(tick()).toBe('BU 1,5');
+    w.show = { color: false };
+    expect(tick()).toBe('1,5');
+    delete w.show;
+    p.settings = { ...p.settings!, wireDataTick: false };
     const label = () => derive(p).pages.get(p.pages[0].id)!.wireNumbers.get('w');
     expect(label()).toMatch(/^\S+ {2}1,5 mm² BU$/);
     w.show = { number: false, color: false };

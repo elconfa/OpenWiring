@@ -86,6 +86,7 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 #     stella (solo partenza): collegata a tutti gli arrivi con lo stesso nome.
 #     coppia=<pagina>@x,y: il simbolo è solo la rappresentazione del contatto con la stessa sigla in
 #     quel punto (riferimento a coppie, es. ausiliario del salvamotore accanto ai poli): non si collega.
+#     afianco: con coppia=, la rappresentazione si mette da sola accanto all'apparecchio
 #     ridotta: con coppia=, solo disegnino del contatto, morsetti e pagina, senza sigla (rot=0 verticale,
 #     rot=90 orizzontale); hcoppia=1,5 altezza dei suoi testi in mm.
 # filo x,y x,y [x,y…] [sezione=1,5] [colore=BU] [n=2.01] [bus=Profinet] [cavo=5W1]
@@ -94,7 +95,7 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 #     nome; cond1/cond2 = conduttore del bus a cui si collega il primo/l'ultimo estremo del filo)
 #     [hcond=2,5] [colorecond=#0050c0]   (bus di conduttori: altezza e colore dei nomi dei conduttori dove entrano i fili)
 #     [linea=dash|dashdot|dot] [spessore=0,5]   (tipo di linea e spessore in mm sullo schema)
-#     [tipo=H07V-K] [hnumero=2,5] [colorenumero=#c00000] [posnumeri=JSON] [mostra=JSON] [proprieta=JSON]
+#     [tipo=H07V-K] [hnumero=2,5] [colorenumero=#c00000] [lineetta=12] [posnumeri=JSON] [mostra=JSON] [proprieta=JSON]
 #     [conduttore=W1:BN] [fissato=W1:3]   (conduttore del cavo -W1 sul filo: scelto a mano, oppure fissato
 #     dalla numerazione automatica perché non cambi; più cavi separati da «;»)
 #     [nodo1=sinistra|destra|su|giu] [nodo2=…]   (nodo a T con verso sul primo/ultimo estremo del filo: il
@@ -350,6 +351,7 @@ export function pagesToText(project: Project, opts: TextExportOptions = {}): str
       if (e.linkStar) parts.push('stella');
       if (e.pairOf) { const r = pairReal(e.pairOf); if (r) parts.push(`coppia=${bare(r.page.name)}@${pt(r.inst)}`); }
       if (e.pairCompact) parts.push('ridotta');
+      if (e.pairSide) parts.push('afianco');
       if (e.pairSize) parts.push(`hcoppia=${num(e.pairSize)}`);
       for (const [k, f] of SYMBOL_ATTRS) { const v = e[f]; if (typeof v === 'string' && v) parts.push(`${k}=${bare(v)}`); }
       if (e.showTexts !== undefined) parts.push(`testi=${e.showTexts ? 'si' : 'no'}`);
@@ -392,6 +394,7 @@ export function pagesToText(project: Project, opts: TextExportOptions = {}): str
       if (w.text) parts.push(`testo=${q(w.text)}`);
       if (w.wireType) parts.push(`tipo=${bare(w.wireType)}`);
       if (w.labelSize) parts.push(`hnumero=${num(w.labelSize)}`);
+      if (w.tickAt !== undefined) parts.push(`lineetta=${num(w.tickAt)}`);
       if (w.labelColor) parts.push(`colorenumero=${bare(w.labelColor)}`);
       if (w.labels?.length) parts.push(`posnumeri=${json(w.labels)}`);
       if (has(w.show)) parts.push(`mostra=${json(w.show)}`);
@@ -554,6 +557,7 @@ function wireAttrs(k: string, v: string, w: Partial<Wire>): boolean {
     case 'spessore': { const n = parseFloat(v.replace(',', '.')); if (n > 0) { w.width = n; return true; } return false; }
     case 'tipo': w.wireType = v; return true;
     case 'hnumero': { const n = parseFloat(v.replace(',', '.')); if (n > 0) { w.labelSize = n; return true; } return false; }
+    case 'lineetta': { const n = parseFloat(v.replace(',', '.')); if (n >= 0) { w.tickAt = n; return true; } return false; }
     case 'colorenumero': w.labelColor = v; return true;
     case 'posnumeri': { const x = parseJson<Wire['labels']>(v); if (Array.isArray(x)) { w.labels = x; return true; } return false; }
     case 'mostra': { const x = parseJson<Wire['show']>(v); if (x && typeof x === 'object') { w.show = x; return true; } return false; }
@@ -659,6 +663,7 @@ export function importPagesText(project: Project, text: string): TextImportResul
           const p = kv(tok);
           if (!p) {
             if (tok.s.toLowerCase() === 'ridotta') { inst.pairCompact = true; continue; }
+            if (tok.s.toLowerCase() === 'afianco') { inst.pairSide = true; continue; }
             if (tok.s.toLowerCase() === 'stella') { if (sym.role !== 'link' || id === 'link_in') err('stella vale solo per i rimandi di partenza (link)'); else inst.linkStar = true; }
             else if (tok.s.toLowerCase() !== 'specchio') err(`"${tok.s}" non riconosciuto`);
             else if (sym.noMirror) err(`simbolo "${id}": non si può specchiare`);

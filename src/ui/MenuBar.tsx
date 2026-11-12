@@ -187,6 +187,7 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
         { label: tx('Schema d\'insieme'), run: () => { st().syncDrawingPages('system'); st().setView('schema'); }, disabled: !s.project.cables?.length, title: tx('Luoghi (quadri, pulsantiere, bordo macchina) con i dispositivi, le foto e i cavi di collegamento') },
         { label: tx('Pagine automatiche (liste)…'), run: () => st().setDialog('reportPages'), title: tx('Indice, distinta, lista d\'acquisto, dispositivi, morsetti, fili, cavi… come pagine del progetto') },
         { label: tx('Aggiorna le pagine di lista'), run: () => st().syncReportPages() },
+        { label: tx('Pagine proiettate dei riquadri di altri quadri'), run: () => { st().createProjectionPages(); st().setView('schema'); }, title: tx('Per ogni riquadro di luogo di un altro quadro (es. +Q1.2 in una pagina del +Q1.1) una pagina nel suo quadro che lo mostra: chi cabla quel quadro lo trova tra le sue pagine') },
         { label: tx('Duplica la pagina corrente…'), run: () => void A.duplicatePageAsk(s.pageId), disabled: page?.type !== 'multiline' },
         { label: tx('Ordina le pagine per numero'), run: () => st().sortPages(), title: tx('12, 12A, 12B, 13…; copertina e pagine senza numero restano dove sono') },
         { label: tx('Elimina la pagina corrente…'), run: () => void A.deletePageAsk(s.pageId), disabled: s.project.pages.length <= 1 },

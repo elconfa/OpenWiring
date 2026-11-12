@@ -1,4 +1,7 @@
 import { pairRepresentations } from './pairs';
+import { projectionSource } from './projection';
+import type { PlacedElement } from './devices';
+import { functionKind } from './articlePins';
 import { pageTNodes } from './wiringOrder';
 import type { Project, Part, FieldKey, Page, Wire, ProjectSettings, Pt } from './types';
 import { bundleTaps, isBundle } from './bundles';
@@ -28,7 +31,7 @@ import { connectorFrames } from './connectors';
 import { cableInfos, cableSection } from './cables';
 import { cableStyleOf, shieldDims, shieldGeometry } from './cableStyle';
 import type { CableMark } from '../ui/PageSvg';
-import { pinsWorld, keyOf, getSymbol } from './geometry';
+import { pinsWorld, keyOf, getSymbol, instanceBounds, pairVertical } from './geometry';
 import { linkPartners, waitingLinks } from './links';
 import { translator, translateTable } from './i18n';
 import { placeWireLabels, wireLabelGap } from './wireLabels';
@@ -68,6 +71,55 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     xrefs.set(rep.inst.id, { mainLocation: locationOf(real), mainId: real.inst.id });
     xrefs.set(real.inst.id, { ...xrefs.get(real.inst.id), mainLocation: locationOf(rep), mainId: rep.inst.id });
   }
+  // Un contatto si rappresenta in un modo solo: se ha la rappresentazione accanto all'apparecchio
+  // non compare anche nell'immagine dei contatti della bobina
+  const repped = new Set(pairRepresentations(project).flatMap(r => (r.real ? [r.real.inst.id] : [])));
+  if (repped.size) for (const [id, x] of xrefs) if (x.contacts?.some(c => c.id && repped.has(c.id))) xrefs.set(id, { ...x, contacts: x.contacts.filter(c => !c.id || !repped.has(c.id)) });
+  // Linea tratteggiata del comando dall'apparecchio alle rappresentazioni ridotte dei suoi contatti
+  // disegnate accanto sulla stessa pagina (in verticale, all'altezza dell'apparecchio)
+  const pairLines = new Map<string, { x1: number; x2: number; y: number }[]>();
+  {
+    const mainOf = new Map<string, PlacedElement>();
+    for (const d of buildDevices(project).values()) if (d.main) for (const e of d.elements) mainOf.set(e.inst.id, d.main);
+    const groups = new Map<string, { page: string; b: ReturnType<typeof instanceBounds>; ys: { x: number; y: number }[] }>();
+    for (const { rep, real } of pairRepresentations(project)) {
+      const m = real && mainOf.get(real.inst.id);
+      if (!m || !rep.inst.pairCompact || m.page.id !== rep.page.id || !pairVertical(rep.inst)) continue;
+      const b = instanceBounds(m.inst, m.sym);
+      if (rep.inst.y < b.y0 || rep.inst.y > b.y1 || (rep.inst.x > b.x0 && rep.inst.x < b.x1)) continue;
+      const g = groups.get(m.inst.id) ?? { page: m.page.id, b, ys: [] };
+      g.ys.push({ x: rep.inst.x, y: rep.inst.y });
+      groups.set(m.inst.id, g);
+    }
+    for (const g of groups.values()) {
+      const y = g.ys[0].y, row = g.ys.filter(p => Math.abs(p.y - y) < 0.6);
+      const right = row.filter(p => p.x >= g.b.x1), left = row.filter(p => p.x <= g.b.x0);
+      const list = pairLines.get(g.page) ?? [];
+      if (right.length) list.push({ x1: g.b.x1 - 1, x2: Math.max(...right.map(p => p.x)), y });
+      if (left.length) list.push({ x1: Math.min(...left.map(p => p.x)), x2: g.b.x0 + 1, y });
+      pairLines.set(g.page, list);
+    }
+  }
+  // Contatti di riserva: le funzioni dell'articolo non usate da nessun elemento del dispositivo si
+  // disegnano nell'immagine dei contatti senza rimando
+  {
+    const parts = partsIndex(project, library);
+    for (const d of buildDevices(project).values()) {
+      const main = d.main;
+      const x = main && xrefs.get(main.inst.id);
+      if (!main || !x?.contacts) continue;
+      const partNr = deviceInfo(d.elements, main, parts).partNr;
+      const fts = partNr ? parts.get(partNr)?.functionTemplates : undefined;
+      if (!fts?.length) continue;
+      const used = new Set(d.elements.flatMap(e => Object.values(labels.get(e.inst.id) ?? {}).filter(Boolean)));
+      const spare = fts.flatMap(ft => {
+        const kind = functionKind(ft), conns = ft.connections.filter(Boolean);
+        if (!kind || kind === 'coil' || !conns.length || conns.some(c => used.has(c))) return [];
+        return [{ kind, labels: conns.join('-') }];
+      });
+      if (spare.length) xrefs.set(main.inst.id, { ...x, contacts: [...x.contacts, ...spare] });
+    }
+  }
   const netlist = computeNetlist(project);
   const linkTargets = new Map<string, { loc: string; id: string }[]>();
   const links = allPlaced(project).filter(e => e.sym.role === 'link');
@@ -105,6 +157,8 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     if (e.sym.role === 'link' && e.inst.tag) for (const p of pinsWorld(e.inst, e.sym)) linkTagAt.set(`${e.page.id}|${keyOf(p)}`, e.inst.tag.replace(/^-/, ''));
   }
   const wireNumbers = new Map<string, string>();
+  /** Sezione e colore scritti sulla lineetta obliqua del filo */
+  const wireTicks = new Map<string, string>();
   /** Collegamenti di rete con la sigla del cavo scritta */
   const cableTagShown = new Set<string>();
   /** Rimandi dei bus di conduttori alle altre pagine (pagina e primo tratto), in fondo al nome */
@@ -147,7 +201,11 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     const atPotential = ends.some(p => potentialPins.has(`${pg.id}|${keyOf(p)}`));
     const shown = (k: WireVisKey) => wireLabelShown(w, k, settings, atPotential);
     const data = wireData({ cross: shown('cross') ? w.cross : undefined, color: shown('color') ? w.color : undefined });
-    const label = [shown('number') ? net?.wireNo : '', data].filter(Boolean).join('  ');
+    // Sezione e colore sulla lineetta obliqua (impostazione del progetto): il numero resta da solo
+    const tick = settings.wireDataTick !== false && !!data;
+    // Sulla lineetta il colore e poi la sezione, senza «mm²» (es. «BK 2,5»)
+    if (tick) wireTicks.set(w.id, [shown('color') ? w.color : '', shown('cross') ? w.cross : ''].filter(Boolean).join(' '));
+    const label = [shown('number') ? net?.wireNo : '', tick ? '' : data].filter(Boolean).join('  ');
     if (label) wireNumbers.set(w.id, label);
   }
   // Sigle complete e testi dei dispositivi
@@ -322,13 +380,23 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
       if (gap) gaps.set(e.id, gap);
     }
     const wireLabelPos = texts.size ? placeWireLabels(project, pg, texts, designations, deviceLines, netlist.junctions.get(pg.id) ?? [], sizes, gaps) : undefined;
-    const pd: PageDerived = { conductorColor, wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) };
+    const pd: PageDerived = { conductorColor, wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireTicks, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', contactImageText: settingsOf(project).contactImageStyle === 'text', pairLines: pairLines.get(pg.id), terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) };
     if (pg.type === 'report') Object.defineProperty(pd, 'reportSheet', { get: () => sheets().get(pg.id), enumerable: true, configurable: true });
     if (['cable', 'connector', 'system'].includes(pg.type)) {
       let drawing: ReturnType<typeof drawingData> | undefined, done = false;
       Object.defineProperty(pd, 'drawing', { get: () => (done ? drawing : (done = true, drawing = withNetlistCache(project, () => drawingData(project, pg, library, netlist)))), enumerable: true, configurable: true });
     }
     pages.set(pg.id, pd);
+  }
+  // Pagine proiettate: il contenuto del riquadro della pagina di origine, con i suoi testi; il riquadro
+  // di origine rimanda alla pagina proiettata
+  for (const pg of project.pages) {
+    const src = projectionSource(project, pg);
+    if (!src) continue;
+    const pd = pages.get(pg.id), sd = pages.get(src.page.id);
+    if (!pd || !sd) continue;
+    pd.projected = { page: src.page, derived: sd, zone: src.zone };
+    (sd.zoneRefs ??= new Map()).set(src.zone.id, { name: pg.name, id: pg.id });
   }
   return { pages, netlist, cableTagShown, linkWaiting: waiting.map(l => ({ id: l.inst.id, pageId: l.page.id })) };
 }

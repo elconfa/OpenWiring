@@ -44,6 +44,24 @@ Schrankseiten gezeichnet werden; ebenso wenig ein Unterort desselben Schranks (z
 Wenn Sie das Bauteil lieber neben dem SPS-Eingang lassen, haken Sie beim Druck nur einiger Schränke
 im PDF *Seiten anderer Schränke mit Geräten der gewählten Schränke hinzufügen* an (Kapitel 18).
 
+### Projizierte Seiten
+
+Es gibt auch einen dritten Weg, der alles auf der Seite des Instandhalters lässt: das Bauteil von +Q2
+wird auf der Eingangsseite von +Q1 im **Ortsrahmen +Q2** gezeichnet, und das Programm erstellt in +Q2
+eine **projizierte Seite**, die diesen Rahmen zeigt.
+
+- Befehl: *Seiten ▸ Projizierte Seiten der Rahmen anderer Schaltschränke* (im Menüband *Seiten ▸
+  Automatische Seiten ▸ Projizierte Seiten*) oder Rechtsklick auf den Rahmen ▸ *Projizierte Seite im
+  Schaltschrank +Q2 erstellen*. Für jeden Rahmen eines anderen Schranks, der noch keine hat, entsteht
+  eine Seite nach den Seiten dieses Schranks und mit demselben Titel.
+- Die projizierte Seite zeigt den Inhalt des Rahmens **live**, mit Texten und Querverweisen: jede
+  Änderung auf der Ursprungsseite ist sofort sichtbar. Darunter steht der anklickbare Hinweis *Gezeichnet
+  auf Seite /311 (+Q1)*; am Ursprungsrahmen unten rechts der Verweis auf die projizierte Seite.
+- Sie ist **nur Zeichnung**: sie hat keine eigenen Elemente, verdoppelt nichts in den Listen und wird mit
+  ihrem Schrank gedruckt. Geändert wird immer die Ursprungsseite.
+- Mit der projizierten Seite meldet die Prüfung die Bauteile im Rahmen nicht mehr als auf den Seiten
+  eines anderen Schranks gezeichnet.
+
 ## Netzwerkplan
 
 Der Netzwerkplan zeigt auf einer einzigen Seite alle Knoten der Anlage und die Busverbindungen zwischen den

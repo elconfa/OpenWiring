@@ -95,6 +95,20 @@ function fuseBlade(dx: number): Prim[] {
   return [L(dx, 0, dx, 5), L(dx, 16, dx, 12), L(ax, ay, bx, by), { t: 'poly', pts: [p(2, 1), p(7, 1), p(7, -1), p(2, -1)], closed: true }, discBar(dx)];
 }
 
+/**
+ * Un polo di contatto come nei simboli della libreria (in verticale, morsetto 1 in alto a y 0, lungo
+ * 16): serve all'immagine dei contatti delle bobine per i poli di potenza divisi uno per riga, per i
+ * contatti di riserva dell'articolo e per i simboli con più poli
+ */
+export function contactPole(kind: string): Pick<SymbolDef, 'prims' | 'pins'> {
+  if (kind === 'CO') {
+    const co = BUILTIN_SYMBOLS.find(s => s.id === 'co')!;
+    return { prims: co.prims, pins: co.pins };
+  }
+  const prims = kind === 'NC' ? ncContact() : kind === 'power' || kind === 'P' ? [...noContact(), A(0, 6.5, 1.5, 180, 360)] : noContact();
+  return { prims, pins: pins2('1', '2') };
+}
+
 export const BUILTIN_SYMBOLS: SymbolDef[] = [
   // ---------------- Contatti e bobine ----------------
   {

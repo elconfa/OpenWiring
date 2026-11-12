@@ -270,6 +270,11 @@ export interface SymbolInstance {
   /** Altezza dei testi della rappresentazione ridotta in mm (assente = quella dei riferimenti incrociati) */
   pairSize?: number;
   /**
+   * Rappresentazione «a fianco del simbolo principale»: la posizione si calcola da sola accanto
+   * all'apparecchio (sulla linea del comando, una dopo l'altra) e segue l'apparecchio quando si sposta
+   */
+  pairSide?: boolean;
+  /**
    * Canale di un gruppo I/O PLC: id del gruppo, posizione nel gruppo (0 = primo), canali del gruppo
    * (anche quelli nascosti) e own = canale scelto a mano (non segue il primo canale del gruppo)
    */
@@ -338,6 +343,11 @@ export interface Wire {
    * automatica. vertical: testo ruotato di -90° (dal basso verso l'alto)
    */
   labels?: { x: number; y: number; vertical: boolean }[];
+  /**
+   * Lineetta obliqua con sezione e colore: distanza (mm) dall'inizio del filo lungo il percorso,
+   * scelta trascinandola; assente = posizione automatica accanto al numero filo
+   */
+  tickAt?: number;
   /** Collegamento di rete/bus (es. "Profinet", "Modbus RTU"): non riceve numero filo */
   bus?: string;
   /** Collegamento di rete: dati del cavo (sigla, tipo, lunghezza, articolo) per la lista cavi */
@@ -756,6 +766,12 @@ export interface Page {
   layout?: Layout;
   /** Quadro (sezione) a cui appartiene la pagina */
   panelId?: string;
+  /**
+   * Pagina proiettata: mostra dal vivo il contenuto del riquadro di luogo zoneId della pagina pageId
+   * (disegnato nelle pagine di un altro quadro), così chi cabla questo quadro lo trova tra le sue
+   * pagine. È solo disegno: nessun elemento proprio, niente doppioni nelle liste
+   */
+  projection?: { pageId: string; zoneId: string };
   /** Pagina disegnata (cable, connector): sigla del cavo o del connettore rappresentato */
   item?: string;
   /** Pagina di lista: titolo della lista rappresentata e foglio (0, 1, …) */
@@ -967,6 +983,16 @@ export interface ProjectSettings {
    * o subito sotto il simbolo
    */
   contactImage?: 'bottom' | 'symbol';
+  /**
+   * Disegno dell'immagine dei contatti: i simboli dei contatti ruotati in orizzontale, con i morsetti
+   * sulle linee e il rimando a sinistra (predefinito), oppure il testo compatto con il disegnino
+   */
+  contactImageStyle?: 'symbols' | 'text';
+  /**
+   * Sezione e colore del filo su una lineetta obliqua che si sposta lungo il filo (predefinito);
+   * false: scritti attaccati al numero filo
+   */
+  wireDataTick?: boolean;
   /** Liste che diventano pagine del progetto (titoli); se manca, tutte quelle non vuote */
   reportPages?: string[];
   /**
@@ -1120,11 +1146,12 @@ export interface RailSetting { y: number; step: number; x0: number; x1: number; 
 export type TerminalTextDir = 'auto' | 'parallel' | 'perpendicular';
 
 /** Tipi di testo sullo schema con colore e altezza propri */
-export type TextStyleKey = 'wireNo' | 'bundleTag' | 'bundleTap' | 'linkName' | 'linkRefs' | 'potential' | 'tag' | 'deviceText' | 'pinLabel' | 'xref' | 'terminal' | 'plcText';
+export type TextStyleKey = 'wireNo' | 'wireData' | 'bundleTag' | 'bundleTap' | 'linkName' | 'linkRefs' | 'potential' | 'tag' | 'deviceText' | 'pinLabel' | 'xref' | 'terminal' | 'plcText';
 export interface TextStyle { color?: string; size?: number }
 /** Nome, colore e altezza (mm) predefiniti di ogni tipo di testo; from = se non scelto prende i valori di quel tipo */
 export const TEXT_STYLES: { key: TextStyleKey; name: string; color: string; size: number; from?: TextStyleKey }[] = [
   { key: 'wireNo', name: tn('Numeri filo'), color: '#0b5cad', size: 1.8 },
+  { key: 'wireData', name: tn('Sezione e colore dei fili (sulla lineetta obliqua)'), color: '#0b5cad', size: 1.8, from: 'wireNo' },
   { key: 'bundleTag', name: tn('Sigla dei bus fili (con i rimandi)'), color: '#0b5cad', size: 1.8, from: 'wireNo' },
   { key: 'bundleTap', name: tn('Nomi dei conduttori dei bus fili'), color: '#0b5cad', size: 1.8, from: 'wireNo' },
   { key: 'linkName', name: tn('Nome dei rimandi'), color: '#1b1f24', size: 2.8 },
@@ -1170,6 +1197,8 @@ export const DEFAULT_SETTINGS: ProjectSettings = {
   drawWireColors: true,
   showRevisionClouds: true,
   contactImage: 'bottom',
+  contactImageStyle: 'symbols',
+  wireDataTick: true,
 };
 
 /**

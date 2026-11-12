@@ -44,6 +44,24 @@ nelle pagine del quadro; nemmeno un sottoluogo dello stesso quadro (es. la porta
 Se preferisci lasciare il componente vicino all'ingresso PLC, stampando solo alcuni quadri spunta
 nel PDF *Aggiungi le pagine di altri quadri con dispositivi dei quadri scelti* (capitolo 18).
 
+### Pagine proiettate
+
+C'è anche una terza strada, che tiene tutto sulla pagina del manutentore: il componente del +Q2 si
+disegna nella pagina degli ingressi del +Q1 dentro il **riquadro di luogo +Q2**, e il programma crea
+nel +Q2 una **pagina proiettata** che mostra quel riquadro.
+
+- Comando: *Pagine ▸ Pagine proiettate dei riquadri di altri quadri* (nel ribbon *Pagine ▸ Pagine
+  automatiche ▸ Pagine proiettate*), oppure tasto destro sul riquadro ▸ *Crea la pagina proiettata nel
+  quadro +Q2*. Si crea una pagina per ogni riquadro di un altro quadro che non ne ha ancora una, dopo le
+  pagine di quel quadro e con lo stesso titolo.
+- La pagina proiettata mostra **dal vivo** il contenuto del riquadro, con i suoi testi e rimandi: ogni
+  modifica fatta sulla pagina di origine si vede subito. Sotto c'è la scritta cliccabile *Disegnato a
+  pagina /311 (+Q1)*; sul riquadro di origine, in basso a destra, il rimando alla pagina proiettata.
+- È **solo disegno**: non ha elementi suoi, non raddoppia nulla nelle liste e si stampa con il suo
+  quadro. Si modifica sempre la pagina di origine.
+- Con la pagina proiettata la verifica non segnala più i componenti del riquadro come disegnati nelle
+  pagine di un altro quadro.
+
 ## Schema di rete
 
 Lo schema di rete mostra in una pagina sola tutti i nodi dell'impianto e i collegamenti bus tra i quadri.

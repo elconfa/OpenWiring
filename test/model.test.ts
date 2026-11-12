@@ -231,6 +231,11 @@ describe('sezione e colore dei fili', () => {
     const toF1 = net.wires.find(w => w.wire.points.some(p => p.x === 260 && p.y === 72))!.wire;
     st().setWireProps([toQ1.id], { cross: '6', color: 'BK' });
     st().setWireProps([toF1.id], { cross: '1,5', color: 'BK' });
+    // Sulla lineetta obliqua (predefinito) e, se scelto, accanto al numero
+    const ticks = derive(st().project).pages.get(pg.id)!.wireTicks!;
+    expect(ticks.get(toQ1.id)).toBe('BK 6');
+    expect(ticks.get(toF1.id)).toBe('BK 1,5');
+    st().updateSettings({ wireDataTick: false });
     const labels = derive(st().project).pages.get(pg.id)!.wireNumbers;
     expect(labels.get(toQ1.id)).toBe('L1  6 mm² BK');
     expect(labels.get(toF1.id)).toBe('L1  1,5 mm² BK');
@@ -250,7 +255,11 @@ describe('sezione e colore dei fili', () => {
     st().loadProject(exampleProject());
     const net = computeNetlist(st().project).nets.find(n => n.pins.some(x => x.ref === '2S1:12'))!;
     st().setWireProps([net.wires[0].wire.id], { cross: '1', color: 'DBU' });
-    expect(derive(st().project).pages.get(st().project.pages[1].id)!.wireNumbers.get(net.wires[0].wire.id)).toBe('2.01  1 mm² DBU');
+    const pd = () => derive(st().project).pages.get(st().project.pages[1].id)!;
+    expect(pd().wireNumbers.get(net.wires[0].wire.id)).toBe('2.01');
+    expect(pd().wireTicks!.get(net.wires[0].wire.id)).toBe('DBU 1');
+    st().updateSettings({ wireDataTick: false });
+    expect(pd().wireNumbers.get(net.wires[0].wire.id)).toBe('2.01  1 mm² DBU');
   });
 });
 

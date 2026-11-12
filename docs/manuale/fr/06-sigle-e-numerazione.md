@@ -81,13 +81,20 @@ puissance sont `1-2`, `3-4`, `5-6`.
 
 ![L'image des contacts de la bobine](../img/en/contatti-bobina.png)
 
-*L'image des contacts de `-2K1` en bas de la page 2 : à gauche de la ligne les contacts de puissance et NO,
-à droite les NF, chacun avec sa position.*
+*L'image des contacts de `-2K1` en bas de la page 2 : chaque contact est son propre symbole dessiné à
+l'horizontale, avec les bornes au-dessus des lignes et la position à gauche.*
 
 - Sous chaque **contact** apparaît la position de la bobine (`/2.2`).
 - Sous la **bobine** apparaît l'**image des contacts** : tous ses contacts avec les bornes et la position.
   Elle est **en bas de la page**, sous la barre inférieure, à la verticale de la bobine ; ou
   bien sous le symbole (*Propriétés du projet ▸ Repères des appareils ▸ Contacts des bobines*).
+- Chaque contact est dessiné avec **son propre symbole** tourné à l'horizontale : NO, NF, inverseur (avec
+  les deux bornes de sortie, p. ex. `12` en haut et `14` en bas) et les pôles de puissance un par ligne avec
+  le demi-cercle. Les bornes sont au-dessus des lignes (le `2` à gauche, le `1` à droite), la position
+  `/page.colonne` à gauche, et la ligne pointillée de commande passe par toutes les lames.
+- Si l'appareil a un **article** avec ses fonctions, les contacts de **réserve** (pas encore utilisés dans
+  le schéma, p. ex. le quatrième pôle `7-8`) sont dessinés aussi, sans position.
+- *Repères des appareils ▸ Dessin des contacts ▸ texte compact* revient à la liste en texte avec le petit dessin.
 - Chaque renvoi est **cliquable** : il mène à la page et sélectionne l'élément. Dans le PDF il devient un lien.
 - Le clic droit sur une bobine propose *Aller au contact…*, sur un contact *Aller à l'élément principal*.
 
@@ -111,11 +118,21 @@ déjà placés dans le schéma, les auxiliaires d'abord : choisissez celui à de
   sens.
 - *Propriétés ▸ Représentation de* indique le vrai contact (un clic y mène) ; *En faire un vrai contact* la
   transforme en contact avec ses propres liaisons.
-- Le dessin est **réduit** : pas de repère (il est déjà à côté de l'élément principal), seulement le petit
-  dessin du contact avec la page du vrai contact d'un côté et les bornes de l'autre (ex. `/1304.3 ─╱─ 13-14`).
-  Il est vertical comme le contact ; **R** (avant ou après le clic) le met à l'horizontale. Hauteur et couleur
-  sont celles des *Renvois* (Aspect ▸ Textes) ; *Propriétés ▸ Hauteur des textes* change seulement celui-ci.
-  *Propriétés ▸ Dessin ▸ symbole complet avec repère* revient au symbole complet.
+- Le dessin est **réduit** : le vrai symbole du contact en plus petit, sans repère (il est déjà à côté de
+  l'élément principal), avec les bornes et la position du vrai contact écrite dessous, tournée comme le
+  symbole. Il est vertical comme le contact ; **R** (avant ou après le clic) le met à l'horizontale et la
+  position passe à gauche. Hauteur et couleur des textes sont celles des *Renvois* (Apparence ▸ Textes) ;
+  *Propriétés ▸ Hauteur des textes* change aussi la taille du dessin. *Propriétés ▸ Dessin ▸ symbole
+  complet avec le repère* revient au symbole complet.
+- Dessinée à côté de l'appareil, à la hauteur de son symbole, la **ligne pointillée de commande** continue
+  de l'appareil jusqu'à la représentation.
+- Un contact n'est représenté **que d'une seule façon** : avec la représentation à côté de l'appareil, il
+  n'apparaît plus dans l'image des contacts en bas de la page, et une nouvelle représentation du même
+  contact remplace l'ancienne.
+- L'emplacement se choisit dans *Propriétés ▸ Représentation du contact*, sur le contact ou sur sa
+  représentation : **en bas de la page** (par défaut, dans l'image des contacts), **à côté du symbole
+  principal** (près de l'appareil sur la ligne de commande, l'une après l'autre, et suit l'appareil quand
+  il bouge), **libre, verticale** ou **libre, horizontale** (se fait glisser où l'on veut).
 - Si le vrai contact est supprimé, la vérification signale la représentation restée seule et propose de
   l'effacer.
 
@@ -217,7 +234,14 @@ saute même quand ils sont écrits sur une autre page.
 - Avec *Fils colorés* (propriétés du projet), le fil est dessiné dans sa couleur ; le PE est vert-jaune pointillé.
 - La section peut changer le long du conducteur (départ en 6 mm², dérivation en 1,5 mm²) ;
   *Appliquer à tout le conducteur* copie section et couleur sur tous les segments.
-- Avec *Section et couleur* activé, elles s'écrivent à côté du numéro (`200.01  1,5 mm² BU`).
+- Avec *Section et couleur* activé, elles sont écrites sur un **trait oblique** qui traverse le fil, avec le
+  texte à côté (`BU 1,5`) : à droite des fils verticaux, de bas en haut, sous les fils horizontaux. Le
+  numéro de fil reste seul de l'autre côté.
+- Le trait se **fait glisser** le long du fil où l'on veut et suit le fil quand il bouge ; clic droit ▸
+  *Trait de section en position automatique* le remet à sa place. Hauteur et couleur du texte sont dans
+  *Apparence ▸ Textes ▸ Section et couleur des fils*.
+- *Numéros de fil ▸ Section et couleur écrites ▸ à côté du numéro de fil* revient au texte attaché au
+  numéro (`200.01  1,5 mm² BU`).
 
 ## Mettre en évidence un potentiel
 

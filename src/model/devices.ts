@@ -117,8 +117,14 @@ export interface CrossRefInfo {
   mainLocation?: string;
   mainId?: string;
   /** Per l'elemento principale: immagine dei contatti */
-  contacts?: { kind: string; labels: string; location: string; id: string }[];
+  contacts?: ContactRef[];
 }
+
+/**
+ * Contatto nell'immagine dei contatti: tipo, morsetti, dove è disegnato e il suo simbolo. Senza
+ * location e id è un contatto di riserva dell'articolo, non usato nello schema
+ */
+export interface ContactRef { kind: string; labels: string; location?: string; id?: string; sym?: SymbolDef }
 
 /** Pagina indicata da una posizione "pagina.colonna" (il nome pagina può contenere punti) */
 export const pageOfLocation = (loc: string) => loc.slice(0, loc.lastIndexOf('.'));
@@ -136,6 +142,7 @@ export function crossReferences(project: Project): Map<string, CrossRefInfo> {
         labels: e.sym.pins.map(p => l[p.id]).join('-'),
         location: locationOf(e),
         id: e.inst.id,
+        sym: e.sym,
       };
     });
     out.set(d.main.inst.id, { contacts });

@@ -4,7 +4,10 @@ import { REPORT_DEFAULTS, REPORT_X, reportColumns, styledHeadH, type ReportCol }
 import { memo, type ReactNode } from 'react';
 import type { Project, Page, Prim, SymbolInstance, SymbolDef, Pt, FieldKey, TextItem, CableLine, StripStyle } from '../model/types';
 import { PAGE_W, PAGE_H, FRAME, COLUMNS, ROWS, WIRE_COLORS, WIRE_WIDTH_DEFAULT, wireDash, primLineType, textStylesOf, wireTextStyle, type TextStyleKey, type TextStyle } from '../model/types';
-import { getSymbol, toWorld, readableText, primBounds, samePt, pairVertical } from '../model/geometry';
+import { getSymbol, toWorld, readableText, primBounds, samePt, pairVertical, pairScale, pairCenter, pairToWorld } from '../model/geometry';
+import { contactPole } from '../model/symbols';
+import { contactImageRows, contactImageScale, rowGeometry, stackRows, BLADE_X } from '../model/contactImage';
+import { tickPoint } from '../model/wireTicks';
 import { DIR_VEC, type TNode } from '../model/wiringOrder';
 import { pageOfLocation, type CrossRefInfo } from '../model/devices';
 import { OVERVIEW, overviewRowHeight, type OverviewData } from '../model/plc';
@@ -227,6 +230,8 @@ export interface PageDerived {
   stripLabel: Set<string>;
   /** Numero filo da mostrare su ogni filo (vuoto se disattivato) */
   wireNumbers: Map<string, string>;
+  /** Sezione e colore da scrivere sulla lineetta obliqua del filo */
+  wireTicks?: Map<string, string>;
   /** Rimandi dei bus di conduttori alle altre pagine: «/pagina» cliccabili in fondo al nome */
   wireRefs?: Map<string, { page: string; id: string }[]>;
   /** Fili che entrano in un bus di conduttori: nome del conduttore scritto accanto */
@@ -253,6 +258,14 @@ export interface PageDerived {
   drawWireColors: boolean;
   /** Immagine dei contatti delle bobine in fondo alla pagina invece che sotto il simbolo */
   contactImageBottom?: boolean;
+  /** Immagine dei contatti come testo con il disegnino (invece dei simboli dei contatti) */
+  contactImageText?: boolean;
+  /** Pagina proiettata: pagina e riquadro di origine con i loro dati, disegnati ritagliati sul riquadro */
+  projected?: { page: Page; derived: PageDerived; zone: Zone };
+  /** Riquadri di luogo con la pagina proiettata nel loro quadro: numero della pagina (rimando cliccabile) */
+  zoneRefs?: Map<string, { name: string; id: string }>;
+  /** Linee tratteggiate del comando dagli apparecchi alle rappresentazioni dei loro contatti accanto */
+  pairLines?: { x1: number; x2: number; y: number }[];
   /** Stampa in bianco e nero (numeri filo in nero) */
   mono?: boolean;
   /** Punti I/O PLC: indirizzo, nome simbolico (vuoto se non assegnato) e rimando alla panoramica */
@@ -351,15 +364,53 @@ export function RichText({ t, transform, fill }: { t: TextItem; transform?: stri
 const CONTACT_GLYPH_W = 3.2;
 
 /**
- * Disegnino di un contatto in orizzontale accanto al rimando: NA, NC, in scambio (CO) o di potenza
- * (P, NA con il semicerchio dei contatti principali); x, y: angolo a sinistra sulla linea mediana
+ * Disegnino di un contatto in orizzontale accanto al rimando: il polo del simbolo della libreria (NA,
+ * NC, in scambio o di potenza con il semicerchio) ruotato con il morsetto 1 a destra; x, y: estremo
+ * sinistro sulla linea dei morsetti
  */
 function ContactGlyph({ kind, x, y, k, color }: { kind: string; x: number; y: number; k: number; color: string }) {
-  const d = kind === 'NC' ? 'M0 0 H1 L2.5 -0.8 M2.2 0 V-1 M2.2 0 H3.2'
-    : kind === 'CO' ? 'M0 0 H1 L2.4 -0.7 M2.2 -1 H3.2 M2.2 0.6 H3.2 M2.2 0.6 V-0.1'
-    : kind === 'NO' ? 'M0 0 H1 L2.3 -0.9 M2.2 0 H3.2'
-    : 'M0 0 H1 L2.3 -0.9 M2.2 0 H3.2 M2.2 0 A0.45 0.45 0 0 1 1.75 -0.45';
-  return <path d={d} transform={`translate(${x} ${y}) scale(${k})`} fill="none" stroke={color} strokeWidth={0.18 / k} strokeLinecap="round" />;
+  const pole = contactPole(kind);
+  const s = (CONTACT_GLYPH_W * k) / 16;
+  return (
+    <g transform={`translate(${x + 16 * s} ${y}) scale(${s}) rotate(90)`} stroke={color} color={color} strokeWidth={0.16 / s} fill="none" strokeLinecap="round">
+      {pole.prims.map((p, i) => <PrimSvg key={i} p={p} />)}
+    </g>
+  );
+}
+
+/**
+ * Immagine dei contatti con i simboli: un contatto per riga, ruotato in orizzontale con
+ * i morsetti sopra le linee e il rimando a sinistra; la linea tratteggiata del comando passa per le
+ * lame sulla verticale cx. bottom: righe che finiscono a y (in fondo alla pagina), altrimenti che
+ * cominciano a y (sotto il simbolo)
+ */
+function ContactImageSymbols({ contacts, cx, y, bottom, xs, fill }: { contacts: NonNullable<CrossRefInfo['contacts']>; cx: number; y: number; bottom: boolean; xs: number; fill: string }) {
+  const rows = contactImageRows(contacts);
+  if (!rows.length) return null;
+  const { s, pinSize } = contactImageScale(xs);
+  const geo = rows.map(r => rowGeometry(r, s, pinSize));
+  const st = stackRows(geo);
+  const y0 = bottom ? y - st.bottom : y - st.top;
+  const ox = cx - BLADE_X * s;
+  return (
+    <g fill={fill} fontSize={pinSize}>
+      <line x1={cx} y1={y0 + st.top} x2={cx} y2={y0 + st.bottom} stroke={look.ink} strokeWidth={0.18} strokeDasharray="1 0.6" />
+      {rows.map((r, i) => {
+        const g = geo[i], yr = y0 + st.ys[i];
+        return (
+          <g key={i}>
+            <g transform={`translate(${ox} ${yr}) scale(${s}) rotate(90)`} stroke={look.ink} color={look.ink} strokeWidth={0.18 / s} fill="none" strokeLinecap="round">
+              {r.prims.map((p, j) => <PrimSvg key={j} p={p} />)}
+            </g>
+            <g stroke="none">
+              {g.labels.map((l, j) => l.text ? <text key={j} x={ox + l.x} y={yr + l.y} textAnchor="middle">{l.text}</text> : null)}
+              {r.location && <RefText x={ox + g.left - 1} y={yr - 0.3} size={xs} anchor="end" refs={[{ loc: r.location, id: r.id }]} />}
+            </g>
+          </g>
+        );
+      })}
+    </g>
+  );
 }
 
 /** Allineamento della sigla scelto nel simbolo, sullo schema: specchiato o capovolto si inverte */
@@ -432,12 +483,20 @@ export const SymbolView = memo(function SymbolView({ inst, sym, derived, selecte
   if (xr?.contacts && xr.contacts.length) {
     const ws = sym.pins.map(p => toWorld(inst, p));
     const kind = (k: string) => k === 'NO' ? 'NA' : k === 'NC' ? 'NC' : k === 'CO' ? 'SC' : 'P';
-    if (inst.contactImage ? inst.contactImage === 'bottom' : derived.contactImageBottom) {
+    const atBottom = !!(inst.contactImage ? inst.contactImage === 'bottom' : derived.contactImageBottom);
+    // Nel testo compatto solo i contatti disegnati (con il rimando), non quelli di riserva dell'articolo
+    const textContacts = xr.contacts.filter((c): c is typeof c & { location: string } => !!c.location);
+    if (!derived.contactImageText) {
+      // Simboli dei contatti sulla verticale della bobina: in fondo alla pagina o sotto il simbolo
+      const cx = (Math.min(...ws.map(w => w.x)) + Math.max(...ws.map(w => w.x))) / 2;
+      const xs = Math.round(sXref.size * 0.9 * 100) / 100;
+      mirrorBox = <ContactImageSymbols contacts={xr.contacts} cx={cx} y={atBottom ? FRAME.bottom - 1.2 : Math.max(...ws.map(w => w.y)) + 3} bottom={atBottom} xs={xs} fill={sXref.fill ?? look.ink} />;
+    } else if (atBottom) {
       // Come EPLAN: in fondo alla pagina, sotto la barra 0 V, sulla verticale della bobina.
       // Contatti NA (e altri) a sinistra della linea, NC a destra
       const cx = (Math.min(...ws.map(w => w.x)) + Math.max(...ws.map(w => w.x))) / 2;
       // I contatti di potenza vanno uno per riga a coppie di morsetti (1-2, 3-4, 5-6), prima degli ausiliari
-      const split = xr.contacts.flatMap(c => {
+      const split = textContacts.flatMap(c => {
         const ps = c.labels.split('-');
         if (c.kind === 'CO' || c.kind === 'NO' || c.kind === 'NC' || ps.length < 4 || ps.length % 2) return [c];
         return Array.from({ length: ps.length / 2 }, (_, k) => ({ ...c, kind: 'P', labels: `${ps[2 * k]}-${ps[2 * k + 1]}` }));
@@ -476,7 +535,7 @@ export const SymbolView = memo(function SymbolView({ inst, sym, derived, selecte
       const k = sXref.size / 1.9, g = CONTACT_GLYPH_W * k;
       mirrorBox = (
         <g fill={sXref.fill ?? look.ink} stroke="none" fontSize={sXref.size * 0.95}>
-          {xr.contacts.map((c, i) => (
+          {textContacts.map((c, i) => (
             <g key={i}>
               <ContactGlyph kind={c.kind} x={x0} y={y0 + i * sXref.size * 1.37 - sXref.size * 0.35} k={k} color={sXref.fill ?? look.ink} />
               <text x={x0 + g + 0.8} y={y0 + i * sXref.size * 1.37}>{c.labels}</text>
@@ -566,24 +625,44 @@ export const SymbolView = memo(function SymbolView({ inst, sym, derived, selecte
 });
 
 /**
- * Rappresentazione ridotta di un contatto (riferimento a coppie): pagina e colonna del contatto vero,
- * disegnino del contatto e morsetti, senza sigla. In verticale si legge dal basso: pagina, contatto, morsetti
+ * Rappresentazione ridotta di un contatto (riferimento a coppie): il simbolo vero più piccolo, senza
+ * sigla, con i morsetti e il rimando al contatto vero; in verticale il rimando è scritto sotto, girato
+ * come il simbolo (dal basso verso l'alto), in orizzontale a sinistra
  */
 function PairCompactView({ inst, sym, derived, selected }: { inst: SymbolInstance; sym: SymbolDef; derived: PageDerived; selected: boolean }) {
   const st = derived.textStyles?.xref ?? DEFAULT_TEXT.xref;
   const size = inst.pairSize ?? st.size;
   const fill = selected ? SEL : derived.mono ? look.ink : st.color;
-  const k = size / 1.7, g = CONTACT_GLYPH_W * k;
+  const ink = selected ? SEL : look.ink;
+  const prims = sym.prims.filter(p => p.t !== 'text');
+  const { b, c } = pairCenter(sym);
+  const k = pairScale(inst);
   const labels = derived.labels.get(inst.id) ?? {};
-  const pins = sym.pins.map(p => labels[p.id] ?? p.label).filter(Boolean).join('-');
   const xr = derived.xrefs.get(inst.id);
-  const yText = size * 0.35;
+  const vertical = pairVertical(inst);
+  const half = ((b.y1 - b.y0) * k) / 2;
+  const pinSize = size * 0.85;
+  const rx = inst.x + size * 0.35, ry = inst.y + half + 0.8;
   return (
-    <g data-id={inst.id} transform={`translate(${inst.x} ${inst.y})${pairVertical(inst) ? ' rotate(-90)' : ''}`} fill={fill} stroke="none" fontSize={size}>
-      <rect x={-g / 2} y={-1.2 * k} width={g} height={2 * k} fill="transparent" />
-      <ContactGlyph kind={sym.contact ?? 'NO'} x={-g / 2} y={0} k={k} color={fill} />
-      {xr?.mainLocation && <RefText x={-g / 2 - 0.8} y={yText} size={size} anchor="end" refs={[{ loc: xr.mainLocation, id: xr.mainId }]} />}
-      {pins && <text x={g / 2 + 0.8} y={yText}>{pins}</text>}
+    <g data-id={inst.id}>
+      <g transform={`translate(${inst.x} ${inst.y}) rotate(${inst.rot})${inst.mirror ? ' scale(-1 1)' : ''} scale(${k}) translate(${-c.x} ${-c.y})`}
+        stroke={ink} color={ink} strokeWidth={0.22 / k} fill="none" strokeLinecap="round">
+        <rect x={b.x0} y={b.y0} width={b.x1 - b.x0} height={b.y1 - b.y0} fill="transparent" stroke="none" />
+        {prims.map((p, i) => <PrimSvg key={i} p={p} />)}
+      </g>
+      <g fill={fill} stroke="none" fontSize={pinSize}>
+        {sym.pins.map(p => {
+          const lbl = labels[p.id] ?? p.label;
+          if (!lbl) return null;
+          const q = pairToWorld(inst, sym, p);
+          return vertical
+            ? <text key={p.id} x={q.x + 0.5} y={q.y < inst.y ? q.y + pinSize : q.y - 0.3}>{lbl}</text>
+            : <text key={p.id} x={q.x + (q.x < inst.x ? 1.3 : -1.3)} y={q.y - 0.5} textAnchor="middle">{lbl}</text>;
+        })}
+        {xr?.mainLocation && (vertical
+          ? <g transform={`rotate(-90 ${rx} ${ry})`}><RefText x={rx} y={ry} size={size} anchor="end" refs={[{ loc: xr.mainLocation, id: xr.mainId }]} /></g>
+          : <RefText x={inst.x - half - 0.8} y={inst.y + size * 0.35} size={size} anchor="end" refs={[{ loc: xr.mainLocation, id: xr.mainId }]} />)}
+      </g>
     </g>
   );
 }
@@ -725,6 +804,46 @@ function WireLabel({ pts, text: raw, color, size = 1.8, pos, wireId, index, refs
   return vertical
     ? <text x={mx - 0.7} y={my} fontSize={size} fill={color} textAnchor="middle" transform={`rotate(-90 ${mx - 0.7} ${my})`}>{text}</text>
     : <text x={mx} y={my - 0.8} fontSize={size} fill={color} textAnchor="middle">{text}</text>;
+}
+
+/**
+ * Lineetta obliqua sul filo con colore e sezione: il testo sta a destra dei fili verticali (girato dal
+ * basso verso l'alto) e sotto quelli orizzontali, dalla parte opposta al numero filo. Si trascina
+ * lungo il filo (data-wire-tick, vedi Canvas)
+ */
+export function WireTick({ p, text, size, color, ink, wireId }: { p: { x: number; y: number; vertical: boolean }; text: string; size: number; color: string; ink: string; wireId?: string }) {
+  // Il testo parte dalla lineetta: verso l'alto sui fili verticali, verso destra sugli orizzontali
+  const tx0 = p.vertical ? p.x + 1.3 + size * 0.75 : p.x - 0.9;
+  const ty0 = p.vertical ? p.y + 0.9 : p.y + 1.3 + size * 0.75;
+  return (
+    <g {...(wireId ? { 'data-wire-tick': wireId, className: 'wire-label' } : {})}>
+      <circle cx={p.x} cy={p.y} r={1.2} fill="transparent" />
+      <line x1={p.x - 0.9} y1={p.y + 0.9} x2={p.x + 0.9} y2={p.y - 0.9} stroke={ink} strokeWidth={0.22} strokeLinecap="round" />
+      <text x={tx0} y={ty0} fontSize={size} fill={color} transform={p.vertical ? `rotate(-90 ${tx0} ${ty0})` : undefined}>{text}</text>
+    </g>
+  );
+}
+
+/**
+ * Contenuto di una pagina proiettata: la pagina di origine ritagliata sul riquadro (con un margine per
+ * la scritta del riquadro), solo disegno; sotto, il rimando cliccabile alla pagina di origine
+ */
+function ProjectedZone({ project, page, data }: { project: Project; page: Page; data: NonNullable<PageDerived['projected']> }) {
+  const { page: src, derived: sd, zone: z } = data;
+  const m = 3, cid = `proj-${page.id}`;
+  const panel = project.panels?.find(p => p.id === src.panelId);
+  const ts = (sd.textStyles ?? DEFAULT_TEXT).xref;
+  return (
+    <g>
+      <defs><clipPath id={cid}><rect x={z.x - m} y={z.y - m - 6} width={z.w + 2 * m} height={z.h + 2 * m + 6} /></clipPath></defs>
+      <g clipPath={`url(#${cid})`} pointerEvents="none">
+        <PageContent project={project} page={src} pageIndex={project.pages.indexOf(src)} derived={sd} bare />
+      </g>
+      <text x={z.x} y={Math.min(z.y + z.h + m + 4, FRAME.bottom - 2)} fontSize={ts.size * 1.1} fill={sd.mono ? look.ink : ts.color} className="xref" data-goto={src.name}>
+        {tx('Disegnato a pagina /{0}{1}: qui è solo rappresentato', src.name, panel ? ` (+${panel.code})` : '')}
+      </text>
+    </g>
+  );
 }
 
 /** Pagina di lista dentro il progetto: tabella con intestazione, posizioni cliccabili */
@@ -1163,17 +1282,20 @@ export function LayoutDrawing({ layout, selection, drag }: { layout: Layout; sel
   );
 }
 
-export function PageContent({ project, page, pageIndex, derived, selection, offset }: {
+export function PageContent({ project, page, pageIndex, derived, selection, offset, bare }: {
   project: Project; page: Page; pageIndex: number; derived: PageDerived;
   selection?: Set<string>; offset?: Pt;
+  /** Solo il disegno, senza foglio né cornice (contenuto di una pagina proiettata) */
+  bare?: boolean;
 }) {
   const L = translator(project);
   const lk = applyLook(project.settings);
   const cableStyle = cableStyleOf(project);
   return (
     <g fontFamily={lk.font}>
-      <rect x={0} y={0} width={PAGE_W} height={PAGE_H} fill={lk.c.paper} />
-      <Frame project={project} page={page} pageIndex={pageIndex} />
+      {!bare && <rect x={0} y={0} width={PAGE_W} height={PAGE_H} fill={lk.c.paper} />}
+      {!bare && <Frame project={project} page={page} pageIndex={pageIndex} />}
+      {derived.projected && <ProjectedZone project={project} page={page} data={derived.projected} />}
       {page.type === 'plc' && <PlcOverview data={derived.overview} t={L.t} S={drawingStyleOf(project, 'plc')} />}
       {page.type === 'strip' && <StripDiagram data={derived.stripSheet} t={L.t} style={stripTextOf(project)} cols={project.settings?.stripStyle} />}
       {page.type === 'report' && <ReportPage data={derived.reportSheet} />}
@@ -1191,6 +1313,14 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
         <ZoneView key={e.id} zone={e} panel={project.panels?.find(p => p.id === e.panelId)} t={L.t} style={project.settings?.zoneStyle} selected={!!selection?.has(e.id)} schematic={page.type !== 'network'}
           offset={selection?.has(e.id) ? offset : undefined} />
       ))}
+      {!bare && page.elements.map(e => {
+        // Riquadro con la pagina proiettata nel suo quadro: rimando cliccabile in basso a destra
+        const r = e.kind === 'zone' ? derived.zoneRefs?.get(e.id) : undefined;
+        return r && e.kind === 'zone' && (
+          <text key={`zr${e.id}`} x={e.x + e.w - 1} y={e.y + e.h - 1.2} fontSize={(derived.textStyles ?? DEFAULT_TEXT).xref.size} textAnchor="end"
+            fill={derived.mono ? look.ink : (derived.textStyles ?? DEFAULT_TEXT).xref.color} className="xref" data-goto={r.name}>{`/${r.name}`}</text>
+        );
+      })}
       {page.elements.map(e => {
         const sel = selection?.has(e.id) ?? false;
         const off = sel && offset ? offset : undefined;
@@ -1227,6 +1357,14 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
                   ? poss.map((pos, i) => <WireLabel key={i} pts={e.points} pos={pos} text={no} color={color} size={size} wireId={e.id} index={e.labels?.length ? i : -1} refs={derived.wireRefs?.get(e.id)} />)
                   : <WireLabel pts={e.points} text={no} color={color} size={size} refs={derived.wireRefs?.get(e.id)} />;
               })()}
+              {derived.wireTicks?.has(e.id) && (() => {
+                // Sezione e colore sulla lineetta obliqua, accanto al numero filo senza toccarlo
+                const st = (derived.textStyles ?? DEFAULT_TEXT).wireData;
+                const numSize = e.labelSize ?? wireTextStyle(derived.textStyles ?? DEFAULT_TEXT, e).size;
+                const text = derived.wireTicks.get(e.id)!;
+                const p = tickPoint(e.points, e.tickAt, derived.wireLabelPos?.get(e.id)?.[0], no ? no.length * numSize * 0.28 : 0, text.length * st.size * 0.56);
+                return p && <WireTick p={p} text={text} size={st.size} color={sel ? SEL : derived.mono ? look.ink : st.color} ink={sel ? SEL : look.ink} wireId={e.id} />;
+              })()}
               {e.poles && <PoleTicks pts={e.points} n={e.poles} color={sel ? SEL : look.ink} />}
             </g>
           );
@@ -1244,6 +1382,7 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
         if (!sym) return null;
         return <g key={e.id} transform={tr}><SymbolView inst={e} sym={sym} derived={derived} selected={sel} /></g>;
       })}
+      {derived.pairLines?.map((l, i) => <line key={`pl${i}`} x1={l.x1} y1={l.y} x2={l.x2} y2={l.y} stroke={look.ink} strokeWidth={look.w.symbol} strokeDasharray="1.5 1" pointerEvents="none" />)}
       {look.junction === 'dot' && derived.junctions.filter(j => !derived.tNodes?.some(t => samePt(t.p, j))).map((j, i) => <circle key={i} cx={j.x} cy={j.y} r={look.junctionR} fill={look.ink} />)}
       {derived.tNodes?.map((t, i) => {
         // Nodo a T con verso: triangolino pieno nell'angolo tra il gambo e il braccio a cui si collega

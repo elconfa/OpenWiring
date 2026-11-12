@@ -151,6 +151,7 @@ export function ribbonTabs(s: State): RTab[] {
           { icon: 'connector', label: tx('Piedinature dei connettori'), run: () => { st().syncDrawingPages('connector'); st().setView('schema'); }, title: tx('Una pagina per connettore: faccia con i pin numerati e tabella dei collegamenti') },
           { icon: 'system', label: tx('Schema d\'insieme'), run: () => { st().syncDrawingPages('system'); st().setView('schema'); }, disabled: !s.project.cables?.length, title: tx('Luoghi (quadri, pulsantiere, bordo macchina) con i dispositivi, le foto e i cavi di collegamento') },
           { icon: 'update', label: tx('Aggiorna le pagine di lista'), run: () => st().syncReportPages() },
+          { icon: 'duplicate', label: tx('Pagine proiettate'), run: () => { st().createProjectionPages(); st().setView('schema'); }, title: tx('Per ogni riquadro di luogo di un altro quadro (es. +Q1.2 in una pagina del +Q1.1) una pagina nel suo quadro che lo mostra: chi cabla quel quadro lo trova tra le sue pagine') },
         ] },
         { name: tn('Organizza'), items: [
           { icon: 'duplicate', label: tx('Duplica'), big: true, run: () => void A.duplicatePageAsk(s.pageId), disabled: !multi, title: tx('Duplica la pagina corrente…') },

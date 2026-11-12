@@ -1,6 +1,7 @@
 // Controlli di progetto (come la «Verifica» di EPLAN): sigle, contatti, rimandi,
 // fili aperti, morsetti, PLC. Ogni problema porta alla posizione nello schema.
 import { pairRepresentations } from './pairs';
+import { projectionSource } from './projection';
 import { bundleTaps, type BundleTap } from './bundles';
 import type { Project, Part, Wire, FunctionTemplate, Pt } from './types';
 import { columnOf, FRAME, PAGE_W, PAGE_H } from './types';
@@ -19,7 +20,7 @@ import { cableInfos, differsFromPart } from './cables';
 import { cableStyleOf, shieldDims, shieldGeometry } from './cableStyle';
 import { connectorProblems } from './connectors';
 import { layoutProblems } from './layout';
-import { networkProblems, locationProblems, ipProblems, allCableTags, busCableRows, foreignDevices } from './network';
+import { networkProblems, locationProblems, ipProblems, busCableGroups, busCableRows, foreignDevices } from './network';
 import { tx } from '../i18n/ui';
 
 /** Chiave stabile di una segnalazione, per ricordare quelle verificate e accettate */
@@ -49,6 +50,7 @@ export type IssueFix = { label: string } & (
   | { kind: 'splitWire'; pageId: string; wireIds: string[] }
   | { kind: 'renumberWires'; wireIds: string[] }
   | { kind: 'deleteElement'; pageId: string; id: string }
+  | { kind: 'deletePage'; pageId: string }
   | { kind: 'allowRot'; symbolId: string; rot: 0 | 90 | 180 | 270 }
   | { kind: 'fitRot'; pageId: string; id: string }
   | { kind: 'cableFromPart'; cableId: string }
@@ -183,10 +185,20 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
     if (d.elements.every(e => e.sym.role === 'oneline')) out.push({ level: 'warn', kind: tx('Unifilare'), msg: tx('-{0}: presente solo nello schema unifilare', d.tag), ...at(d.elements[0]) });
   }
 
+  // Pagine proiettate rimaste senza il riquadro di origine
+  for (const pg of project.pages) if (pg.projection && !projectionSource(project, pg)) {
+    out.push({ level: 'warn', kind: tx('Luoghi'), msg: tx('Pagina {0}: pagina proiettata di un riquadro che non c\'è più', pg.name), pageId: pg.id,
+      fix: { label: tx('Elimina la pagina'), kind: 'deletePage', pageId: pg.id } });
+  }
   // Rappresentazioni (riferimenti a coppie) il cui contatto vero non c'è più
+  // e contatti con più di una rappresentazione (un contatto si rappresenta in un modo solo)
+  const repOf = new Set<string>();
   for (const { rep, real } of pairRepresentations(project)) {
     if (!real) out.push({ level: 'warn', kind: tx('Riferimenti a coppie'), msg: tx('-{0}: rappresentazione di un contatto che non c\'è più', rep.inst.tag), ...at(rep),
       fix: { label: tx('Elimina la rappresentazione'), kind: 'deleteElement', pageId: rep.page.id, id: rep.inst.id } });
+    else if (repOf.has(real.inst.id)) out.push({ level: 'warn', kind: tx('Riferimenti a coppie'), msg: tx('-{0}: il contatto ha già un\'altra rappresentazione', rep.inst.tag), ...at(rep),
+      fix: { label: tx('Elimina la rappresentazione'), kind: 'deleteElement', pageId: rep.page.id, id: rep.inst.id } });
+    else repOf.add(real.inst.id);
   }
 
   // Rimandi senza corrispondente
@@ -340,9 +352,24 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
       });
     }
   }
-  const cableTags = new Map<string, number>();
-  for (const t of allCableTags(project)) cableTags.set(t, (cableTags.get(t) ?? 0) + 1);
-  for (const [t, n] of cableTags) if (n > 1) out.push({ level: 'error', kind: tx('Cavi'), msg: tx('Sigla -{0} usata da {1} cavi', t, n) });
+  // Sigle dei cavi ripetute: ogni cavo dopo il primo è segnalato dove è disegnato (un clic ci porta)
+  const cableTags = new Map<string, { pageId?: string; elementId?: string; loc?: string }[]>();
+  const addTag = (t: string, where: { pageId?: string; elementId?: string; loc?: string }) => cableTags.set(t, [...(cableTags.get(t) ?? []), where]);
+  for (const ci of cableInfos(project)) { const l = ci.lines[0]; addTag(ci.cable.tag, l ? { pageId: l.pageId, elementId: l.line.id, loc: l.loc } : {}); }
+  if (project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus && e.busCable?.tag))) {
+    const pageOf = new Map(project.pages.map(pg => [pg.id, pg]));
+    for (const g of busCableGroups(project, nl.nets)) {
+      for (const t of new Set(g.wires.map(w => w.wire.busCable?.tag).filter((x): x is string => !!x))) {
+        const w = g.wires.find(x => x.wire.busCable?.tag === t)!, pg = pageOf.get(w.pageId);
+        addTag(t, { pageId: w.pageId, elementId: w.wire.id, loc: pg ? `${pg.name}.${columnOf(w.wire.points[0].x)}` : undefined });
+      }
+    }
+  }
+  for (const [t, list] of cableTags) {
+    if (list.length < 2) continue;
+    const where = list.map(x => x.loc ? `/${x.loc}` : '').filter(Boolean).join(' ');
+    for (const x of list.slice(1)) out.push({ level: 'error', kind: tx('Cavi'), msg: tx('Sigla -{0} usata da {1} cavi{2}', t, list.length, where ? ` (${where})` : ''), ...x });
+  }
   // Cavo di rete disegnato in più tratti uniti dai rimandi: la sigla dev'essere la stessa
   for (const r of busCableRows(project)) if (r.otherTags) {
     out.push({ level: 'warn', kind: tx('Cavi'), msg: tx('Il cavo -{0} prosegue con i rimandi in tratti con un\'altra sigla ({1}): è lo stesso cavo, usa la stessa sigla', r.tag, r.otherTags.map(t => `-${t}`).join(', ')), pageId: r.page.id, elementId: r.wire.id, loc: r.loc,

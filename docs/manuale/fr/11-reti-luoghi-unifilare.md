@@ -46,6 +46,24 @@ Si vous préférez garder le composant près de l'entrée API, en imprimant seul
 cochez dans le PDF *Ajouter les pages d'autres armoires avec des appareils des armoires choisies*
 (chapitre 18).
 
+### Pages projetées
+
+Il existe aussi une troisième voie, qui garde tout sur la page du technicien de maintenance : le
+composant de +Q2 se dessine dans la page des entrées de +Q1 à l'intérieur du **cadre d'emplacement +Q2**,
+et le programme crée dans +Q2 une **page projetée** qui montre ce cadre.
+
+- Commande : *Pages ▸ Pages projetées des cadres d'autres armoires* (dans le ruban *Pages ▸ Pages
+  automatiques ▸ Pages projetées*), ou clic droit sur le cadre ▸ *Créer la page projetée dans l'armoire
+  +Q2*. Une page est créée pour chaque cadre d'une autre armoire qui n'en a pas encore, après les pages
+  de cette armoire et avec le même titre.
+- La page projetée montre **en direct** le contenu du cadre, avec ses textes et ses renvois : toute
+  modification faite sur la page d'origine se voit aussitôt. En dessous figure la mention cliquable
+  *Dessiné à la page /311 (+Q1)* ; sur le cadre d'origine, en bas à droite, le renvoi à la page projetée.
+- C'est **seulement du dessin** : elle n'a pas d'éléments propres, ne double rien dans les listes et
+  s'imprime avec son armoire. On modifie toujours la page d'origine.
+- Avec la page projetée, la vérification ne signale plus les composants du cadre comme dessinés dans
+  les pages d'une autre armoire.
+
 ## Schéma réseau
 
 Le schéma réseau montre sur une seule page tous les nœuds de l'installation et les liaisons de bus entre les

@@ -1,4 +1,5 @@
 // Editor delle proprietà a due colonne (Proprietà | Valore), come in FreeCAD.
+import { contactPlaceOf, type ContactPlace } from '../model/pairs';
 import { zoneCodeOnly } from '../model/leaders';
 import { openSettingsAt } from './SettingsDialog';
 import { netSequence, sequenceContext, SEQ_MODE_NAMES } from '../model/wiringOrder';
@@ -464,6 +465,7 @@ function SymbolProps({ inst }: { inst: SymbolInstance }) {
         </Row>
         {sym.role === 'link' && <LinkPartnerRow instId={inst.id} vis={vis('refs')} />}
         {inst.pairOf && <PairRow inst={inst} />}
+        {!inst.pairOf && sym.role === 'aux' && <ContactPlaceRow realId={inst.id} />}
         {(sym.role === 'main' || sym.role === 'aux' || sym.role === 'oneline') && <Row label={tx('Riferimenti incrociati')} vis={vis('xref')} />}
         {sym.role === 'main' && (
           <Row label={tx('Immagine dei contatti')}>
@@ -1929,6 +1931,13 @@ export function TagsSection() {
           <option value="symbol">{tx('sotto il simbolo')}</option>
         </select>
       </Row>
+      <Row label={tx('Disegno dei contatti')}>
+        <select value={s.contactImageStyle ?? 'symbols'} onChange={e => st().updateSettings({ contactImageStyle: e.target.value as 'symbols' | 'text' })}
+          title={tx('Simboli: ogni contatto disegnato in orizzontale con i morsetti e il rimando; testo: elenco compatto con un disegnino')}>
+          <option value="symbols">{tx('simboli dei contatti')}</option>
+          <option value="text">{tx('testo compatto')}</option>
+        </select>
+      </Row>
     </Group>
   );
 }
@@ -1948,6 +1957,13 @@ export function WiresSection() {
         </span>
       </Row>
       <Row label={tx('Sezione e colore')}><input type="checkbox" checked={s.showWireData} onChange={e => st().updateSettings({ showWireData: e.target.checked })} /></Row>
+      <Row label={tx('Sezione e colore scritti')}>
+        <select value={s.wireDataTick === false ? 'number' : 'tick'} onChange={e => st().updateSettings({ wireDataTick: e.target.value === 'tick' })}
+          title={tx('Sulla lineetta obliqua: si trascina lungo il filo; l\'altezza del testo è in Aspetto ▸ Testi')}>
+          <option value="tick">{tx('sulla lineetta obliqua')}</option>
+          <option value="number">{tx('accanto al numero filo')}</option>
+        </select>
+      </Row>
       <Row label={tx('Fili colorati')}><input type="checkbox" checked={s.drawWireColors} onChange={e => st().updateSettings({ drawWireColors: e.target.checked })} /></Row>
       <Row label={tx('Numerazione')}>
         <select value={s.wireNumbering} onChange={e => st().updateSettings({ wireNumbering: e.target.value as 'fixed' | 'live' })}>
@@ -2248,6 +2264,7 @@ function PairRow({ inst }: { inst: SymbolInstance }) {
         <button className="mini" onClick={() => st().updateElement(inst.id, { pairOf: undefined, pairCompact: undefined, pairSize: undefined })} title={tx('Diventa un contatto vero, con i suoi collegamenti')}>{tx('Rendi contatto vero')}</button>
       </span>
     </Row>
+    {real && <ContactPlaceRow realId={real.inst.id} />}
     <Row label={tx('Disegno')}>
       <select value={inst.pairCompact ? 'compact' : 'full'} onChange={e => st().updateElement(inst.id, { pairCompact: e.target.value === 'compact' ? true : undefined })}
         title={tx('Ridotto: solo il disegnino del contatto con morsetti e pagina, senza sigla, da mettere accanto all\'elemento principale. Ruota (R) per averlo in verticale o in orizzontale')}>
@@ -2262,6 +2279,28 @@ function PairRow({ inst }: { inst: SymbolInstance }) {
       </Row>
     )}
     </>
+  );
+}
+
+/**
+ * Dove si rappresenta il contatto: nell'immagine dei contatti in fondo alla pagina (predefinito), a
+ * fianco dell'apparecchio (posizione automatica sulla linea del comando), libero in verticale o in
+ * orizzontale (si sposta dove si vuole). Un contatto ha una sola rappresentazione
+ */
+function ContactPlaceRow({ realId }: { realId: string }) {
+  const project = useStore(s => s.project);
+  const st = useStore.getState;
+  const place = contactPlaceOf(project, realId);
+  return (
+    <Row label={tx('Rappresentazione del contatto')}>
+      <select value={place} onChange={e => st().setContactPlace(realId, e.target.value as ContactPlace)}
+        title={tx('In fondo: nell\'immagine dei contatti sotto la bobina. A fianco: accanto all\'apparecchio sulla linea del comando, segue l\'apparecchio. Libera: si trascina dove si vuole')}>
+        <option value="bottom">{tx('in fondo alla pagina')}</option>
+        <option value="side">{tx('a fianco del simbolo principale')}</option>
+        <option value="free-v">{tx('libera, verticale')}</option>
+        <option value="free-h">{tx('libera, orizzontale')}</option>
+      </select>
+    </Row>
   );
 }
 

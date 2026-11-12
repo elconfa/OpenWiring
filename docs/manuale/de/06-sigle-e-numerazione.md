@@ -81,13 +81,21 @@ abschalten und die Anschlüsse von Hand eintragen (*Eigenschaften ▸ Anschlussp
 
 ![Der Kontaktspiegel der Spule](../img/en/contatti-bobina.png)
 
-*Der Kontaktspiegel von `-2K1` unten auf Seite 2: links der Linie die Haupt- und Schließerkontakte, rechts
-die Öffner, jeweils mit Position.*
+*Der Kontaktspiegel von `-2K1` unten auf Seite 2: jeder Kontakt ist sein eigenes Symbol, waagerecht
+gezeichnet, mit den Anschlüssen über den Linien und der Position links.*
 
 - Unter jedem **Kontakt** erscheint die Position der Spule (`/2.2`).
 - Unter der **Spule** erscheint der **Kontaktspiegel**: alle ihre Kontakte mit Anschlüssen und Position. Er
   steht **unten auf der Seite**, unter der unteren Schiene, senkrecht unter der Spule; alternativ
   unter dem Symbol (*Projekteigenschaften ▸ Betriebsmittelkennzeichen ▸ Kontakte der Spulen*).
+- Jeder Kontakt wird mit **seinem eigenen Symbol** waagerecht gezeichnet: Schließer, Öffner, Wechsler (mit
+  beiden Ausgangsanschlüssen, z. B. `12` oben und `14` unten) und die Hauptpole einer pro Zeile mit dem
+  Halbkreis. Die Anschlüsse stehen über den Linien (`2` links, `1` rechts), die Position `/Seite.Spalte`
+  links, und die gestrichelte Wirklinie läuft durch alle Schaltglieder.
+- Hat das Gerät einen **Artikel** mit Funktionen, werden auch die **Reservekontakte** (im Schaltplan noch
+  nicht verwendet, z. B. der vierte Pol `7-8`) gezeichnet, ohne Position.
+- *Betriebsmittelkennzeichen ▸ Darstellung der Kontakte ▸ kompakter Text* kehrt zur Textliste mit der
+  kleinen Zeichnung zurück.
 - Jeder Querverweis ist **anklickbar**: er führt zur Seite und wählt das Element aus. Im PDF wird er zum Link.
 - Rechtsklick auf eine Spule bietet *Zum Kontakt…*, auf einen Kontakt *Zum Hauptelement*.
 
@@ -111,12 +119,21 @@ Zielstelle klicken.
 - Echter Kontakt und Darstellung verweisen mit Querverweisen aufeinander, in beide Richtungen.
 - *Eigenschaften ▸ Darstellung von* zeigt den echten Kontakt (ein Klick führt dorthin); *Zum echten Kontakt
   machen* verwandelt sie in einen Kontakt mit eigenen Verbindungen.
-- Die Darstellung ist **kompakt**: kein Kennzeichen (sie steht schon neben dem Hauptelement), nur das kleine
-  Kontaktbild mit der Seite des echten Kontakts auf der einen und den Anschlüssen auf der anderen Seite
-  (z. B. `/1304.3 ─╱─ 13-14`). Sie ist senkrecht wie der Kontakt; **R** (vor oder nach dem Klick) macht sie
-  waagerecht. Höhe und Farbe sind die der *Querverweise* (Darstellung ▸ Texte); *Eigenschaften ▸ Texthöhe*
-  ändert nur diese. *Eigenschaften ▸ Darstellung ▸ vollständiges Symbol mit Kennzeichen* zeigt wieder das
-  ganze Symbol.
+- Die Darstellung ist **verkleinert**: das echte Kontaktsymbol kleiner, ohne Kennzeichen (es steht schon
+  neben dem Hauptelement), mit den Anschlüssen und der Position des echten Kontakts darunter, gedreht wie
+  das Symbol. Sie ist senkrecht wie der Kontakt; **R** (vor oder nach dem Klick) macht sie waagerecht und
+  die Position wandert nach links. Texthöhe und -farbe sind die der *Querverweise* (Darstellung ▸ Texte);
+  *Eigenschaften ▸ Texthöhe* ändert auch die Größe der Zeichnung. *Eigenschaften ▸ Darstellung ▸ ganzes
+  Symbol mit Kennzeichen* kehrt zum vollständigen Symbol zurück.
+- Neben dem Gerät auf Höhe seines Symbols gezeichnet, läuft die **gestrichelte Wirklinie** vom Gerät bis
+  zur Darstellung weiter.
+- Ein Kontakt wird **nur auf eine Weise** dargestellt: mit der Darstellung neben dem Gerät erscheint er
+  nicht mehr im Kontaktspiegel unten auf der Seite, und eine neue Darstellung desselben Kontakts ersetzt
+  die alte.
+- Der Platz wird in *Eigenschaften ▸ Darstellung des Kontakts* gewählt, am Kontakt oder an seiner
+  Darstellung: **unten auf der Seite** (Standard, im Kontaktspiegel), **neben dem Hauptsymbol** (neben dem
+  Gerät auf der Wirklinie, eine nach der anderen, folgt dem Gerät beim Verschieben), **frei, senkrecht**
+  oder **frei, waagerecht** (beliebig verschiebbar).
 - Wird der echte Kontakt gelöscht, meldet die Prüfung die verwaiste Darstellung und bietet an, sie zu
   löschen.
 
@@ -220,7 +237,14 @@ Zähler überspringt sie, auch wenn sie auf einer anderen Seite stehen.
 - Mit *Farbige Drähte* (Projekteigenschaften) wird der Draht in seiner Farbe gezeichnet; PE grün-gelb gestrichelt.
 - Der Querschnitt kann sich entlang des Leiters ändern (Einspeisung 6 mm², Abzweig 1,5 mm²);
   *Auf den ganzen Leiter anwenden* kopiert Querschnitt und Farbe auf alle Abschnitte.
-- Mit *Querschnitt und Farbe* eingeschaltet stehen sie neben der Nummer (`200.01  1,5 mm² BU`).
+- Mit eingeschaltetem *Querschnitt und Farbe* stehen sie an einem **Schrägstrich**, der den Draht kreuzt,
+  mit dem Text daneben (`BU 1,5`): bei senkrechten Drähten rechts, von unten nach oben, bei waagerechten
+  unter dem Draht. Die Drahtnummer steht allein auf der anderen Seite.
+- Der Strich lässt sich entlang des Drahts **ziehen** und folgt dem Draht, wenn er verschoben wird;
+  Rechtsklick ▸ *Querschnittsstrich an automatischer Position* setzt ihn zurück. Texthöhe und -farbe stehen
+  unter *Darstellung ▸ Texte ▸ Querschnitt und Farbe der Drähte*.
+- *Drahtnummern ▸ Querschnitt und Farbe geschrieben ▸ neben der Drahtnummer* kehrt zum Text an der Nummer
+  zurück (`200.01  1,5 mm² BU`).
 
 ## Ein Potenzial hervorheben
 

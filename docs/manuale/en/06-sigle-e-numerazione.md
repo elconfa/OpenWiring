@@ -80,13 +80,20 @@ the terminals typed by hand (*Properties ▸ Connection points*). Power contacts
 
 ![The contact image of the coil](../img/en/contatti-bobina.png)
 
-*The contact image of `-2K1` at the bottom of page 2: power and NO contacts to the left of the line, NC to the
-right, each with its position.*
+*The contact image of `-2K1` at the bottom of page 2: each contact is its own symbol drawn horizontally, with
+the terminals above the lines and the position on the left.*
 
 - Below each **contact** appears the position of the coil (`/2.2`).
 - Below the **coil** appears the **contact image**: all its contacts with their terminals and position. It is
   placed **at the bottom of the page**, below the lower rail, on the vertical of the coil; or else
   below the symbol (*Project properties ▸ Device tags ▸ Coil contacts*).
+- Each contact is drawn with **its own symbol** turned horizontal: NO, NC, changeover (with both output
+  terminals, e.g. `12` above and `14` below) and power poles one per row with the semicircle. Terminals sit
+  above the lines (`2` on the left, `1` on the right), the `/page.column` position on the left, and the dashed
+  actuator line runs through all the blades.
+- If the device has an **article** with functions, its **spare** contacts (not yet used in the schematic,
+  e.g. the fourth pole `7-8`) are drawn too, without a position.
+- *Device tags ▸ Contact drawing ▸ compact text* goes back to the text list with the small drawing.
 - Every cross-reference is **clickable**: it takes you to the page and selects the element. In the PDF it
   becomes a link.
 - Right-clicking a coil offers *Go to contact…*, on a contact *Go to the main element*.
@@ -110,11 +117,20 @@ in the schematic, auxiliaries first: choose the one to draw and click where it g
 - The real contact and the representation point to each other with cross-references, in both directions.
 - *Properties ▸ Representation of* shows the real contact (one click takes you there); *Make it a real
   contact* turns it into a contact with its own connections.
-- The drawing is **compact**: no tag (it already sits next to the main element), just the small contact
-  drawing with the real contact's page on one side and the terminals on the other (e.g. `/1304.3 ─╱─ 13-14`).
-  It is vertical like the contact; **R** (before or after the click) makes it horizontal. Height and colour
-  are those of *Cross-references* (Appearance ▸ Texts); *Properties ▸ Text height* changes just this one.
-  *Properties ▸ Drawing ▸ full symbol with tag* goes back to the complete symbol.
+- The drawing is **compact**: the real contact symbol, smaller, without tag (it already sits next to the
+  main element), with the terminals and the real contact's position written below, turned like the symbol.
+  It is vertical like the contact; **R** (before or after the click) makes it horizontal and the position
+  moves to the left. Text height and colour are those of *Cross-references* (Appearance ▸ Texts);
+  *Properties ▸ Text height* also changes the size of the drawing. *Properties ▸ Drawing ▸ full symbol with
+  tag* goes back to the complete symbol.
+- Drawn next to the device, at the height of its symbol, the **dashed actuator line** continues from the
+  device to the representation.
+- A contact is shown **in one way only**: with the representation next to the device it no longer appears in
+  the contact image at the bottom of the page, and a new representation of the same contact replaces the old one.
+- The place is chosen in *Properties ▸ Contact representation*, on the contact or on its representation:
+  **at the bottom of the page** (default, in the contact image), **next to the main symbol** (beside the
+  device on the actuator line, one after the other, following the device when it moves), **free,
+  vertical** or **free, horizontal** (drag it wherever you like).
 - If the real contact is deleted, the check reports the orphaned representation and offers to delete it.
 
 ## Device properties
@@ -213,7 +229,14 @@ them even when they are written on another page.
 - With *Coloured wires* (project properties) the wire is drawn in its colour; PE is dashed green-yellow.
 - The cross-section can change along the conductor (feed at 6 mm², branch at 1.5 mm²);
   *Apply to the whole conductor* copies cross-section and colour to all segments.
-- With *Cross-section and colour* turned on, they are written next to the number (`200.01  1,5 mm² BU`).
+- With *Cross-section and colour* turned on, they are written on an **oblique tick** crossing the wire, with
+  the text next to it (`BU 1,5`): on vertical wires to the right, reading upwards, on horizontal ones below
+  the wire. The wire number stays alone on the other side.
+- **Drag** the tick along the wire wherever you like; it follows the wire when it moves. Right-click ▸
+  *Cross-section tick in automatic position* puts it back. Text height and colour are in *Appearance ▸
+  Texts ▸ Wire cross-section and colour*.
+- *Wire numbers ▸ Cross-section and colour written ▸ next to the wire number* goes back to the text attached
+  to the number (`200.01  1,5 mm² BU`).
 
 ## Highlighting a potential
 

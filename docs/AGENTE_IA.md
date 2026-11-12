@@ -233,6 +233,7 @@ simbolo <id> <sigla> @x,y [rot=0|90|180|270] [specchio] [descr="…"] [dati="…
     stella (solo partenza): collegata a tutti gli arrivi con lo stesso nome.
     coppia=<pagina>@x,y: il simbolo è solo la rappresentazione del contatto con la stessa sigla in
     quel punto (riferimento a coppie, es. ausiliario del salvamotore accanto ai poli): non si collega.
+    afianco: con coppia=, la rappresentazione si mette da sola accanto all'apparecchio
     ridotta: con coppia=, solo disegnino del contatto, morsetti e pagina, senza sigla (rot=0 verticale,
     rot=90 orizzontale); hcoppia=1,5 altezza dei suoi testi in mm.
 filo x,y x,y [x,y…] [sezione=1,5] [colore=BU] [n=2.01] [bus=Profinet] [cavo=5W1]
@@ -241,7 +242,7 @@ filo x,y x,y [x,y…] [sezione=1,5] [colore=BU] [n=2.01] [bus=Profinet] [cavo=5W
     nome; cond1/cond2 = conduttore del bus a cui si collega il primo/l'ultimo estremo del filo)
     [hcond=2,5] [colorecond=#0050c0]   (bus di conduttori: altezza e colore dei nomi dei conduttori dove entrano i fili)
     [linea=dash|dashdot|dot] [spessore=0,5]   (tipo di linea e spessore in mm sullo schema)
-    [tipo=H07V-K] [hnumero=2,5] [colorenumero=#c00000] [posnumeri=JSON] [mostra=JSON] [proprieta=JSON]
+    [tipo=H07V-K] [hnumero=2,5] [colorenumero=#c00000] [lineetta=12] [posnumeri=JSON] [mostra=JSON] [proprieta=JSON]
     [conduttore=W1:BN] [fissato=W1:3]   (conduttore del cavo -W1 sul filo: scelto a mano, oppure fissato
     dalla numerazione automatica perché non cambi; più cavi separati da «;»)
     [nodo1=sinistra|destra|su|giu] [nodo2=…]   (nodo a T con verso sul primo/ultimo estremo del filo: il

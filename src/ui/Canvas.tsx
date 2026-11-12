@@ -5,8 +5,10 @@ import { isListPage } from '../model/lists';
 import { useStore } from '../model/store';
 import type { Pt, Wire, Element, Page, Project, SymbolDef, TextItem, TextMoveKey, ImageItem, Zone, CableLine } from '../model/types';
 import { PAGE_W, PAGE_H, lookOf } from '../model/types';
-import { getSymbol, instanceBounds, pinsWorld, snapPt, distToSegment, samePt, onSegmentInterior, uid, getGridSize, polylineTouchesBox, pairCompactBounds } from '../model/geometry';
-import { PageContent, SymbolGraphic, SEL } from './PageSvg';
+import { getSymbol, instanceBounds, pinsWorld, snapPt, distToSegment, samePt, onSegmentInterior, uid, getGridSize, polylineTouchesBox, pairScale, pairCenter } from '../model/geometry';
+import { PageContent, SymbolGraphic, SEL, WireTick } from './PageSvg';
+import { distanceAlong, pointAlong } from '../model/wireTicks';
+import { projectionOfZone } from '../model/projection';
 import { Minimap } from './Minimap';
 import { RadialMenu, radialItems } from './RadialMenu';
 import type { Derived } from '../model/derive';
@@ -61,6 +63,11 @@ function wireLabelAt(target: EventTarget | null): { wireId: string; index: numbe
   return el ? { wireId: el.getAttribute('data-wire-label')!, index: Number(el.getAttribute('data-label')) } : undefined;
 }
 
+/** Lineetta della sezione sotto il cursore (data-wire-tick in PageSvg) */
+function wireTickAt(target: EventTarget | null): string | undefined {
+  return (target as globalThis.Element | null)?.closest?.('[data-wire-tick]')?.getAttribute('data-wire-tick') ?? undefined;
+}
+
 const MAC = /Mac|iPhone|iPad/.test(navigator.userAgent);
 const key = (k: string) => (MAC ? `⌘${k}` : `Ctrl+${k}`);
 
@@ -87,6 +94,13 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
   return (
     <div className="ctx-menu" style={{ left, top }} onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}>
       {page && isListPage(page) && <>{item(tx('Personalizza la lista…'), () => st.openListStyleOf(page))}<hr /></>}
+      {page && one?.kind === 'zone' && one.panelId !== page.panelId && (() => {
+        // Riquadro di un altro quadro: la sua pagina proiettata (si crea o si apre)
+        const pj = projectionOfZone(st.project, page.id, one.id);
+        const code = st.project.panels?.find(p => p.id === one.panelId)?.code ?? '';
+        return <>{pj ? item(tx('Vai alla pagina proiettata {0}', pj.name), () => st.setPage(pj.id))
+          : item(tx('Crea la pagina proiettata nel quadro +{0}', code), () => { if (st.createProjectionPages([page.id])) { const n = projectionOfZone(useStore.getState().project, page.id, one.id); if (n) useStore.getState().setPage(n.id); } })}<hr /></>;
+      })()}
       {item(tx('Taglia'), () => st.cutSelection(), { k: key('X'), disabled: !sel.length })}
       {item(tx('Copia'), () => st.copySelection(), { k: key('C'), disabled: !sel.length })}
       {item(tx('Incolla qui'), () => void pasteAt(menu.at), { k: key('V'), disabled: !st.clipboard })}
@@ -149,12 +163,13 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
             {add && item(tx('Aggiungi il numero filo qui'), () => st.setWireLabels(one.id, [...cur, add]))}
             {lbl && cur.length > 1 && item(tx('Togli questo numero filo'), () => st.setWireLabels(one.id, cur.filter((_, i) => i !== Math.max(0, lbl.index))))}
             {one.labels?.length ? item(tx('Numero filo in posizione automatica'), () => st.setWireLabels(one.id, undefined)) : null}
+            {one.tickAt !== undefined ? item(tx('Lineetta della sezione in posizione automatica'), () => st.updateElement(one.id, { tickAt: undefined })) : null}
           </>
         );
       })()}
       {st.highlight && item(tx('Togli evidenziazione potenziale'), () => st.setHighlight(null))}
       {xr?.mainId && <><hr />{item(tx('Vai all\'elemento principale'), () => goTo(xr.mainId!))}</>}
-      {xr?.contacts?.length ? <><hr />{xr.contacts.map(c => <span key={c.id}>{item(tx('Vai al contatto {0} (/{1})', c.labels, c.location), () => goTo(c.id))}</span>)}</> : null}
+      {xr?.contacts?.length ? <><hr />{xr.contacts.map(c => c.id && <span key={c.id}>{item(tx('Vai al contatto {0} (/{1})', c.labels, c.location ?? ''), () => goTo(c.id!))}</span>)}</> : null}
       {xr?.contacts?.length && one ? item(tx('Disegna una rappresentazione di un contatto…'), () => void chooseRepresentation(one.id)) : null}
       <hr />
       {item(tx('Seleziona tutto'), () => st.setSelection(page?.elements.map(e => e.id) ?? []), { k: key('A') })}
@@ -173,6 +188,7 @@ type Drag =
   | { kind: 'box'; start: Pt; end: Pt }
   /** Numero filo trascinato (index -1 = quello in posizione automatica) */
   | { kind: 'wireLabel'; wireId: string; index: number; start: Pt; to: Pt }
+  | { kind: 'wireTick'; wireId: string; start: Pt; to: Pt }
   | { kind: 'pan'; startClient: Pt; startVb: ViewBox }
   /** Testo di un simbolo (sigla, righe sotto la sigla, testo del componente) spostato a mano */
   | { kind: 'devText'; instId: string; key: TextMoveKey; start: Pt; to: Pt }
@@ -683,6 +699,13 @@ export function Canvas({ derived }: { derived: Derived }) {
       setDrag({ kind: 'devText', ...dt, start: raw, to: raw });
       return;
     }
+    // Lineetta della sezione: scorre lungo il filo
+    const tick = wireTickAt(ev.target);
+    if (tick && !ev.shiftKey) {
+      st.setSelection([tick]);
+      setDrag({ kind: 'wireTick', wireId: tick, start: raw, to: raw });
+      return;
+    }
     // Numero filo: si trascina dove si vuole
     const label = wireLabelAt(ev.target);
     if (label && !ev.shiftKey) {
@@ -773,7 +796,7 @@ export function Canvas({ derived }: { derived: Derived }) {
         setDrag({ ...drag, w, h });
       }
     }
-    else if (drag.kind === 'wireLabel' || drag.kind === 'devText' || drag.kind === 'wdLabel' || drag.kind === 'cabLabel' || drag.kind === 'zoneLabel' || drag.kind === 'repCol') setDrag({ ...drag, to: raw });
+    else if (drag.kind === 'wireLabel' || drag.kind === 'wireTick' || drag.kind === 'devText' || drag.kind === 'wdLabel' || drag.kind === 'cabLabel' || drag.kind === 'zoneLabel' || drag.kind === 'repCol') setDrag({ ...drag, to: raw });
     else if (drag.kind === 'zoneSize') setDrag({ ...drag, to: snapPt(raw) });
     else if (drag.kind === 'cableEnd') {
       // La linea resta orizzontale o verticale come era (Maiusc: libera)
@@ -819,6 +842,12 @@ export function Canvas({ derived }: { derived: Derived }) {
     if (tool.kind === 'wiredef' && wirePts.length === 1) {
       const p = snapPt(mouse, 1);
       if (Math.hypot(p.x - wirePts[0].x, p.y - wirePts[0].y) >= 3) { st.addWireDef(wirePts[0], p); setWirePts([]); }
+    }
+    if (drag?.kind === 'wireTick') {
+      const w = page.elements.find(e => e.id === drag.wireId);
+      if (w?.kind === 'wire' && Math.hypot(drag.to.x - drag.start.x, drag.to.y - drag.start.y) > 0.3) {
+        st.updateElement(drag.wireId, { tickAt: Math.round(distanceAlong(w.points, drag.to) * 2) / 2 });
+      }
     }
     if (drag?.kind === 'wireLabel') {
       const moved = draggedLabel(drag);
@@ -1076,9 +1105,13 @@ export function Canvas({ derived }: { derived: Derived }) {
       {showGrid && <rect x={0} y={0} width={PAGE_W} height={PAGE_H} fill="url(#grid)" pointerEvents="none" />}
 
       {ghostSym && tool.kind === 'place' && tool.pairOf && (() => {
-        // Rappresentazione ridotta: solo il suo ingombro (verticale con R a 0°/180°)
-        const b = pairCompactBounds({ x: ghostAt.x, y: ghostAt.y, rot: tool.rot });
-        return <rect x={b.x0} y={b.y0} width={b.x1 - b.x0} height={b.y1 - b.y0} fill="none" stroke={SEL} strokeWidth={0.25} strokeDasharray="1 0.6" opacity={0.8} pointerEvents="none" />;
+        // Rappresentazione ridotta: il simbolo vero in scala (verticale con R a 0°/180°)
+        const k = pairScale({}), { c } = pairCenter(ghostSym);
+        return (
+          <g transform={`translate(${ghostAt.x} ${ghostAt.y}) rotate(${tool.rot}) scale(${k}) translate(${-c.x} ${-c.y})`} stroke={SEL} color={SEL} strokeWidth={0.3 / k} fill="none" opacity={0.75} pointerEvents="none">
+            <SymbolGraphic sym={ghostSym} noText />
+          </g>
+        );
       })()}
       {ghostSym && tool.kind === 'place' && !tool.pairOf && (
         <g transform={`translate(${ghostAt.x} ${ghostAt.y}) rotate(${fitRot(ghostSym, tool.rot)})`} stroke={SEL} color={SEL} strokeWidth={0.35} fill="none" opacity={0.7}>
@@ -1150,6 +1183,14 @@ export function Canvas({ derived }: { derived: Derived }) {
       {tool.kind === 'cable' && wirePts.length > 0 && (
         <line x1={wirePts[0].x} y1={wirePts[0].y} x2={cursor.x} y2={cursor.y} stroke={SEL} strokeWidth={0.35} strokeDasharray="3 0.8 0.6 0.8" pointerEvents="none" />
       )}
+      {drag?.kind === 'wireTick' && (() => {
+        const w = page.elements.find(e => e.id === drag.wireId);
+        const text = derived.pages.get(page.id)?.wireTicks?.get(drag.wireId);
+        if (w?.kind !== 'wire' || !text) return null;
+        const p = pointAlong(w.points, Math.round(distanceAlong(w.points, drag.to) * 2) / 2);
+        const size = derived.pages.get(page.id)?.textStyles?.wireData.size ?? 1.8;
+        return p && <g pointerEvents="none"><WireTick p={p} text={text} size={size} color={SEL} ink={SEL} /></g>;
+      })()}
       {drag?.kind === 'wireLabel' && (() => {
         const m = draggedLabel(drag);
         const text = derived.pages.get(page.id)?.wireNumbers.get(drag.wireId);

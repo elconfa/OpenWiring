@@ -1,5 +1,6 @@
 // Reti e bus di campo: protocolli, quadri (sezioni del progetto), nodi con porte,
 // collegamenti tra dispositivi e tra quadri, liste e controlli.
+import { projectionPages } from './projection';
 import { tx } from '../i18n/ui';
 import { nextProjectPageNo } from './pageOrder';
 import type { Project, Panel, Page, Zone, Wire, IpNetwork, SymbolInstance, Part, Pt, PlcStation } from './types';
@@ -151,11 +152,14 @@ export function foreignDevices(project: Project): ForeignDevice[] {
   const chain = (p: Panel) => { const ids: string[] = []; for (let q: Panel | undefined = p; q && !ids.includes(q.id); q = panels.find(x => x.id === q!.parentId)) ids.push(q.id); return ids; };
   const related = (a: Panel, b: Panel) => chain(a).includes(b.id) || chain(b).includes(a.id);
   const out = new Map<string, ForeignDevice>();
+  // Riquadri con la pagina proiettata nel loro quadro: i componenti dentro si stampano con quel quadro
+  const projected = projectionPages(project);
+  const covered = (e: PlacedElement) => e.page.elements.some(z => z.kind === 'zone' && projected.has(`${e.page.id}|${z.id}`) && inside(z, e.inst.x, e.inst.y));
   for (const d of buildDevices(project).values()) {
     const p = own.get(d.tag);
     if (!p || !wired(p)) continue;
     for (const e of d.elements) {
-      if (e.inst.pairOf) continue;
+      if (e.inst.pairOf || covered(e)) continue;
       const pp = panels.find(x => x.id === e.page.panelId);
       if (!pp || related(p, pp)) continue;
       const key = `${d.tag}\u0000${pp.id}`;

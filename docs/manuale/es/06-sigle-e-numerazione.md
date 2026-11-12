@@ -80,13 +80,21 @@ escribir los bornes a mano (*Propiedades ▸ Puntos de conexión*). Los contacto
 
 ![La imagen de contactos de la bobina](../img/en/contatti-bobina.png)
 
-*La imagen de contactos de `-2K1` al pie de la página 2: a la izquierda de la línea los contactos de
-potencia y NA, a la derecha los NC, cada uno con su posición.*
+*La imagen de contactos de `-2K1` al pie de la página 2: cada contacto es su propio símbolo dibujado en
+horizontal, con los bornes sobre las líneas y la posición a la izquierda.*
 
 - Debajo de cada **contacto** aparece la posición de la bobina (`/2.2`).
 - Debajo de la **bobina** aparece la **imagen de contactos**: todos sus contactos con los bornes y la
   posición. Está **al pie de la página**, bajo la barra inferior, en la vertical de la bobina;
   o bien bajo el símbolo (*Propiedades del proyecto ▸ Siglas de dispositivos ▸ Contactos de las bobinas*).
+- Cada contacto se dibuja con **su propio símbolo** girado en horizontal: NA, NC, conmutado (con los dos
+  bornes de salida, p. ej. `12` arriba y `14` abajo) y los polos de potencia uno por fila con el
+  semicírculo. Los bornes están sobre las líneas (el `2` a la izquierda, el `1` a la derecha), la posición
+  `/página.columna` a la izquierda, y la línea discontinua de mando pasa por todas las cuchillas.
+- Si el dispositivo tiene un **artículo** con sus funciones, también se dibujan los contactos de
+  **reserva** (aún no usados en el esquema, p. ej. el cuarto polo `7-8`), sin posición.
+- *Siglas de dispositivos ▸ Dibujo de los contactos ▸ texto compacto* vuelve a la lista de texto con el
+  pequeño dibujo.
 - Cada referencia es **un enlace**: lleva a la página y selecciona el elemento. En el PDF se convierte en enlace.
 - El clic derecho en una bobina ofrece *Ir al contacto…*, en un contacto *Ir al elemento principal*.
 
@@ -109,11 +117,21 @@ contactos ya colocados en el esquema, primero los auxiliares: elige el que quier
   direcciones.
 - *Propiedades ▸ Representación de* indica el contacto real (un clic lleva a él); *Convertir en contacto
   real* la transforma en un contacto con sus propias conexiones.
-- El dibujo es **reducido**: sin identificador (ya está junto al elemento principal), solo el pequeño dibujo
-  del contacto con la página del contacto real a un lado y los bornes al otro (p. ej. `/1304.3 ─╱─ 13-14`).
-  Es vertical como el contacto; **R** (antes o después del clic) lo pone horizontal. Altura y color son los
-  de las *Referencias cruzadas* (Aspecto ▸ Textos); *Propiedades ▸ Altura de los textos* cambia solo esta.
-  *Propiedades ▸ Dibujo ▸ símbolo completo con sigla* vuelve al símbolo completo.
+- El dibujo es **reducido**: el símbolo real del contacto más pequeño, sin sigla (ya está junto al elemento
+  principal), con los bornes y la posición del contacto real escrita debajo, girada como el símbolo. Es
+  vertical como el contacto; **R** (antes o después del clic) lo pone en horizontal y la posición pasa a la
+  izquierda. Altura y color de los textos son los de las *Referencias cruzadas* (Aspecto ▸ Textos);
+  *Propiedades ▸ Altura de los textos* cambia también el tamaño del dibujo. *Propiedades ▸ Dibujo ▸
+  símbolo completo con la sigla* vuelve al símbolo completo.
+- Dibujada junto al aparato, a la altura de su símbolo, la **línea discontinua de mando** sigue desde el
+  aparato hasta la representación.
+- Un contacto se representa **de una sola manera**: con la representación junto al aparato ya no aparece en
+  la imagen de contactos al pie de la página, y una nueva representación del mismo contacto sustituye a la
+  anterior.
+- El lugar se elige en *Propiedades ▸ Representación del contacto*, en el contacto o en su
+  representación: **al pie de la página** (por defecto, en la imagen de contactos), **junto al símbolo
+  principal** (al lado del aparato sobre la línea de mando, una tras otra, y sigue al aparato cuando se
+  mueve), **libre, vertical** o **libre, horizontal** (se arrastra donde se quiera).
 - Si se elimina el contacto real, la verificación señala la representación que ha quedado sola y propone
   borrarla.
 
@@ -218,7 +236,14 @@ contador los salta aunque estén escritos en otra página.
   discontinuo.
 - La sección puede cambiar a lo largo del conductor (salida de 6 mm², derivación de 1,5 mm²);
   *Aplicar a todo el conductor* copia sección y color en todos los tramos.
-- Con *Sección y color* activado, se escriben junto al número (`200.01  1,5 mm² BU`).
+- Con *Sección y color* activado, se escriben en un **trazo oblicuo** que cruza el hilo, con el texto al
+  lado (`BU 1,5`): a la derecha de los hilos verticales, de abajo arriba, debajo de los horizontales. El
+  número de hilo queda solo al otro lado.
+- El trazo se **arrastra** a lo largo del hilo donde se quiera y sigue al hilo cuando se mueve; clic
+  derecho ▸ *Trazo de la sección en posición automática* lo devuelve a su sitio. Altura y color del texto
+  están en *Aspecto ▸ Textos ▸ Sección y color de los hilos*.
+- *Números de hilo ▸ Sección y color escritos ▸ junto al número de hilo* vuelve al texto pegado al número
+  (`200.01  1,5 mm² BU`).
 
 ## Resaltar un potencial
 

@@ -1,4 +1,5 @@
-import { syncPairs, newRepresentation } from './pairs';
+import { syncPairs, newRepresentation, placeSideReps, setContactPlace, type ContactPlace } from './pairs';
+import { createProjections } from './projection';
 import { create } from 'zustand';
 import { nextRail } from './fixedPos';
 import { nextRot, fitRot, allowedRots, ROTS } from './rotations';
@@ -260,6 +261,10 @@ export interface State {
   /** Pagina nuova dopo quella indicata: in fondo il numero dopo il più alto, in mezzo un numero con lettera (12A) */
   /** Pagina nuova dopo quella indicata, con il numero proposto (vedi proposePageName) o quello scelto */
   addPage(after?: string, name?: string): void;
+  /** Dove rappresentare un contatto: in fondo, a fianco dell'apparecchio, libero verticale o orizzontale */
+  setContactPlace(realId: string, place: ContactPlace): void;
+  /** Pagine proiettate dei riquadri di altri quadri (delle pagine indicate, o di tutte) */
+  createProjectionPages(pageIds?: string[]): number;
   /** Mette tutte le pagine numerate in ordine di numero */
   sortPages(): void;
   deletePage(id: string): void;
@@ -815,8 +820,14 @@ export const useStore = create<State>((set, get) => {
       const real = project.pages.flatMap(p => p.elements).find((e): e is SymbolInstance => e.kind === 'symbol' && e.id === realId);
       if (!real) return;
       const inst = newRepresentation(real, uid('s'), at.x, at.y, rot);
+      // Un contatto ha una sola rappresentazione: quella nuova prende il posto della vecchia
+      const old = project.pages.some(p => p.elements.some(e => e.kind === 'symbol' && e.pairOf === realId));
       // Solo disegno: non interrompe i fili e non si collega
-      get().commit(p => { currentPage(p, pageId).elements.push(inst); });
+      get().commit(p => {
+        for (const pg of p.pages) pg.elements = pg.elements.filter(e => !(e.kind === 'symbol' && e.pairOf === realId));
+        currentPage(p, pageId).elements.push(inst);
+      });
+      if (old) get().logMsg(tx('Rappresentazione di -{0} spostata: un contatto ha una sola rappresentazione', real.tag));
       set({ tool: { kind: 'select' } });
       get().setSelection([inst.id]);
       return inst;
@@ -926,7 +937,7 @@ export const useStore = create<State>((set, get) => {
         // Fili del PLC con il nome dall'indirizzo: i loro rimandi prendono lo stesso nome
         stale(syncPlcLinkNames(next));
         // Rappresentazioni dei contatti (riferimenti a coppie): sigla e morsetti del contatto vero
-        stale(syncPairs(next));
+        stale(syncPairs(next)); placeSideReps(next);
         // Stazioni WAGO (prima gli analogici): una scheda nuova rifà gli indirizzi della stazione
         stale(keepAnalogFirst(next).length);
         // I collegamenti di rete nuovi (disegnati, incollati o cambiati in bus) ricevono la sigla del cavo
@@ -1040,6 +1051,16 @@ export const useStore = create<State>((set, get) => {
         get().logMsg(tx('C\'è già una pagina {0}: i riferimenti /{0}.… diventano ambigui', nm), 'warn');
       }
       get().setPage(id);
+    },
+    setContactPlace(realId, place) {
+      get().commit(p => setContactPlace(p, realId, place));
+    },
+    createProjectionPages(pageIds) {
+      let made: Page[] = [];
+      get().commit(p => { made = createProjections(p, pageIds ? new Set(pageIds) : undefined); });
+      if (made.length) get().logMsg(tx('Pagine proiettate create: {0}', made.map(m => m.name).join(', ')));
+      else get().logMsg(tx('Nessun riquadro di un altro quadro senza la sua pagina proiettata'), 'warn');
+      return made.length;
     },
     deletePage(id) {
       if (get().project.pages.length <= 1) return;
@@ -2029,6 +2050,8 @@ export const useStore = create<State>((set, get) => {
           } else if (f.kind === 'linkStar') {
             const e = find(f.pageId, f.id);
             if (e?.kind === 'symbol') e.linkStar = true;
+          } else if (f.kind === 'deletePage') {
+            if (p.pages.length > 1) p.pages = p.pages.filter(x => x.id !== f.pageId);
           } else if (f.kind === 'deleteElement') {
             const pg = p.pages.find(x => x.id === f.pageId);
             if (pg) pg.elements = pg.elements.filter(e => e.id !== f.id);

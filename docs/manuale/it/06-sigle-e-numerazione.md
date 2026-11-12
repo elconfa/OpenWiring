@@ -80,13 +80,20 @@ scrivere i morsetti a mano (*Proprietà ▸ Punti di connessione*). I contatti d
 
 ![L'immagine dei contatti della bobina](../img/it/contatti-bobina.png)
 
-*L'immagine dei contatti di `-2K1` in fondo alla pagina 2: a sinistra della linea i contatti di potenza e
-NA, a destra gli NC, ognuno con la sua posizione.*
+*L'immagine dei contatti di `-2K1` in fondo alla pagina 2: ogni contatto è il suo simbolo in orizzontale,
+con i morsetti sopra le linee e la posizione a sinistra.*
 
 - Sotto ogni **contatto** compare la posizione della bobina (`/2.2`).
 - Sotto la **bobina** compare l'**immagine dei contatti**: tutti i suoi contatti con i morsetti e la
   posizione. Sta **in fondo alla pagina**, sotto la barra inferiore, sulla verticale della
   bobina; in alternativa sotto il simbolo (*Proprietà del progetto ▸ Sigle dispositivi ▸ Contatti delle bobine*).
+- Ogni contatto è disegnato con il **suo simbolo** ruotato in orizzontale: NA, NC, in scambio (con i due
+  morsetti di uscita, es. `12` sopra e `14` sotto) e i poli di potenza uno per riga con il semicerchio.
+  I morsetti stanno sopra le linee (il `2` a sinistra, l'`1` a destra), la posizione `/pagina.colonna` a
+  sinistra e la linea tratteggiata del comando passa per tutte le lame.
+- Se il dispositivo ha un **articolo** con le funzioni, i contatti di **riserva** (non ancora usati nello
+  schema, es. il quarto polo `7-8`) sono disegnati anche loro, senza posizione.
+- *Sigle dispositivi ▸ Disegno dei contatti ▸ testo compatto* torna all'elenco di testo con il disegnino.
 - Ogni riferimento è **cliccabile**: porta alla pagina e seleziona l'elemento. Nel PDF diventa un
   collegamento.
 - Il tasto destro su una bobina offre *Vai al contatto…*, su un contatto *Vai all'elemento principale*.
@@ -110,11 +117,21 @@ suoi contatti già piazzati nello schema, prima gli ausiliari: scegli quello da 
   due le direzioni.
 - In *Proprietà ▸ Rappresentazione di* c'è il contatto vero (un clic ci porta); *Rendi contatto vero* la
   trasforma in un contatto con i suoi collegamenti.
-- Il disegno è **ridotto**: niente sigla (sta già accanto all'elemento principale), solo il disegnino del
-  contatto con la pagina del contatto vero da una parte e i morsetti dall'altra (es. `/1304.3 ─╱─ 13-14`).
-  È verticale come il contatto; con **R** (prima del clic o dopo) diventa orizzontale. Altezza e colore sono
-  quelli dei *Riferimenti incrociati* (Aspetto ▸ Testi); in *Proprietà ▸ Altezza dei testi* si cambia solo
-  quella. *Proprietà ▸ Disegno ▸ simbolo intero con la sigla* torna al simbolo completo.
+- Il disegno è **ridotto**: il simbolo vero del contatto più piccolo, senza sigla (sta già accanto
+  all'elemento principale), con i morsetti e la posizione del contatto vero scritta sotto, girata come il
+  simbolo. È verticale come il contatto; con **R** (prima del clic o dopo) diventa orizzontale e la
+  posizione va a sinistra. Altezza e colore dei testi sono quelli dei *Riferimenti incrociati* (Aspetto ▸
+  Testi); *Proprietà ▸ Altezza dei testi* cambia anche la grandezza del disegno. *Proprietà ▸ Disegno ▸
+  simbolo intero con la sigla* torna al simbolo completo.
+- Disegnata accanto all'apparecchio, all'altezza del suo simbolo, la **linea tratteggiata del comando**
+  prosegue dall'apparecchio fino alla rappresentazione.
+- Un contatto si rappresenta **in un modo solo**: con la rappresentazione accanto all'apparecchio non
+  compare più nell'immagine dei contatti in fondo alla pagina, e una rappresentazione nuova dello stesso
+  contatto prende il posto della vecchia.
+- Il posto si sceglie in *Proprietà ▸ Rappresentazione del contatto*, sul contatto o sulla sua
+  rappresentazione: **in fondo alla pagina** (di serie, nell'immagine dei contatti), **a fianco del simbolo
+  principale** (accanto all'apparecchio sulla linea del comando, una dopo l'altra, e segue l'apparecchio
+  quando si sposta), **libera verticale** o **libera orizzontale** (si trascina dove si vuole).
 - Se il contatto vero viene eliminato, la verifica segnala la rappresentazione rimasta sola e propone di
   cancellarla.
 
@@ -214,7 +231,14 @@ quando sono scritti su un'altra pagina.
 - Con *Fili colorati* (proprietà del progetto) il filo è disegnato nel suo colore; il PE è giallo-verde tratteggiato.
 - La sezione può cambiare lungo il conduttore (partenza da 6 mm², derivazione da 1,5 mm²);
   *Applica a tutto il conduttore* copia sezione e colore su tutti i tratti.
-- Con *Sezione e colore* acceso, sono scritti accanto al numero (`200.01  1,5 mm² BU`).
+- Con *Sezione e colore* acceso, sono scritti su una **lineetta obliqua** che attraversa il filo, con il
+  testo accanto (`BU 1,5`): sui fili verticali a destra, dal basso verso l'alto, sugli orizzontali sotto il
+  filo. Il numero filo resta da solo dall'altra parte.
+- La lineetta si **trascina** lungo il filo dove si vuole e segue il filo quando si sposta; tasto destro ▸
+  *Lineetta della sezione in posizione automatica* la rimette al suo posto. L'altezza e il colore del testo
+  sono in *Aspetto ▸ Testi ▸ Sezione e colore dei fili*.
+- *Numeri filo ▸ Sezione e colore scritti ▸ accanto al numero filo* torna alla scritta attaccata al numero
+  (`200.01  1,5 mm² BU`).
 
 ## Evidenziare un potenziale
 

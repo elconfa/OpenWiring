@@ -13,10 +13,10 @@ export function representationChoices(mainId: string) {
   const { project } = useStore.getState();
   // Prima gli ausiliari (il caso più comune), in fondo i contatti di potenza
   const contacts = [...(crossReferences(project).get(mainId)?.contacts ?? [])].sort((a, b) => Number(a.kind === 'power') - Number(b.kind === 'power'));
-  return contacts.map(c => ({
+  return contacts.flatMap(c => (c.id ? [{
     value: c.id,
     label: [c.labels || '—', kindLabel(c.kind), `/${c.location}`].filter(Boolean).join(' · '),
-  }));
+  }] : []));
 }
 
 /** Sceglie un contatto dell'elemento principale e avvia il disegno della sua rappresentazione */
