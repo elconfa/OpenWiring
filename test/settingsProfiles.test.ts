@@ -94,4 +94,20 @@ describe('profili aziendali bloccati', () => {
     useStore.getState().updateSettings({ tagFormat: 'X{n}' });
     expect(useStore.getState().project.settings.tagFormat).toBe('X{n}');
   });
+
+  it('copertina, cavi, riquadri di luogo e stile delle liste stanno nei profili', () => {
+    const a = emptyProject();
+    a.settings = { ...settingsOf(a), cover: { title: 'Prova' } as never, cableStyle: { shield: 'x' } as never, zoneStyle: { fill: 'y' } as never, listTextScale: 1.5 };
+    const parts = ['cover', 'cableStyle', 'zoneStyle', 'listStyle'];
+    expect(parts.flatMap(partKeys).sort()).toEqual(['cableStyle', 'cover', 'drawingStyles', 'listTextScale', 'stripStyle', 'zoneStyle']);
+    const prof = makeProfile(a, 'Stili', parts);
+    expect(prof.settings.listTextScale).toBe(1.5);
+    expect(prof.settings.cover).toEqual({ title: 'Prova' });
+    const b = emptyProject();
+    expect(profileChanges(b, prof).map(c => c.part)).toEqual(expect.arrayContaining(parts.filter(x => x !== 'listStyle').concat('listStyle')));
+    applyProfile(b, prof);
+    expect(settingsOf(b).listTextScale).toBe(1.5);
+    expect(settingsOf(b).zoneStyle).toEqual({ fill: 'y' });
+    expect(profileChanges(b, prof)).toEqual([]);
+  });
 });

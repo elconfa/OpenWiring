@@ -13,7 +13,7 @@ import { computeNetlist, connections, withNetlistCache } from './netlist';
 import { pageRevision } from './revisions';
 import { documentsReport } from './partDocs';
 import { thermalReport, cableCalcReport } from './calculations';
-import { cardType, cardOrderInfo, ioAssignments } from './plc';
+import { cardOrderInfo, ioAssignments } from './plc';
 import { pageOfLocation } from './devices';
 
 import { customListTable } from './customLists';

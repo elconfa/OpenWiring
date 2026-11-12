@@ -40,6 +40,8 @@ encuentra cualquier comando escribiendo su nombre.
 | *Ver* | paneles, tema, hoja, idioma de la interfaz y de los esquemas, cuadrícula, miniaturas, mapa de la hoja, menú radial, estilo de la cinta |
 | *Ayuda* | manual, recorrido guiado, atajos, guía para agentes IA, actualizaciones, información, sitio del proyecto |
 
+Las confirmaciones (eliminar, renumerar, salir sin guardar) son ventanas de la aplicación y siguen el tema; con el editor de símbolos o de cajetín abierto, los comandos de Inicio que actúan sobre el esquema están desactivados, y cambiar a otra vista con cambios sin guardar pide confirmación.
+
 ![La pestaña Proyecto](../img/en/menu-progetto.png)
 
 *La pestaña Proyecto.*

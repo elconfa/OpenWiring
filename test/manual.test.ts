@@ -1,7 +1,7 @@
 // Il manuale (docs/manuale): immagini e collegamenti esistono, gli esempi in formato testo si importano.
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join } from 'node:path';
 import { emptyProject } from '../src/model/store';
 import { importPagesText } from '../src/model/textFormat';
 

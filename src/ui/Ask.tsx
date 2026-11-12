@@ -53,6 +53,11 @@ export function askChoice(title: string, message: string, choices: string[]): Pr
   });
 }
 
+/** Conferma sì/no (sostituisce window.confirm): true se l'utente sceglie il pulsante di conferma */
+export async function askConfirm(title: string, message: string, okLabel = tx('OK')): Promise<boolean> {
+  return (await askChoice(title, message, [okLabel, tx('Annulla')])) === 0;
+}
+
 /**
  * Scelta da un elenco (una riga per voce, anche lunga): restituisce l'indice, null se l'utente
  * chiude. La voce "selected" è evidenziata e si sceglie con Invio.

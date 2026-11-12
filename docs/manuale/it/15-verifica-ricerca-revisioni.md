@@ -26,7 +26,7 @@ all'elemento e lo seleziona.
 | Collegamenti solo apparenti | un filo che passa sopra un punto di connessione senza terminarci: sembra collegato ma non lo è |
 | Orfani | componenti, potenziali, rimandi e nodi senza collegamenti, fili isolati, contatti senza bobina |
 | Collegamenti incompleti | morsetti liberi di bobine, contatti, lampade, pulsanti, punti I/O; fili con un estremo libero (le barre che arrivano al bordo sono ammesse) |
-| Disegno | simboli inesistenti o sovrapposti, fili sovrapposti, elementi fuori dal foglio, numeri filo ripetuti, pagine vuote |
+| Disegno | simboli inesistenti o sovrapposti, fili sovrapposti, elementi fuori dal foglio, numeri filo ripetuti, pagine vuote, rotazioni non ammesse dal simbolo (si corregge ammettendo la rotazione nel simbolo) |
 | Bus di conduttori | fili che toccano il bus senza il nome del conduttore, conduttori che entrano nel bus e non escono |
 | Sigle e dati | sigle doppie o mancanti, più contatti di quelli dell'articolo, morsetti ripetuti |
 | Cavi, connettori, reti, PLC, layout | vedi i capitoli relativi |

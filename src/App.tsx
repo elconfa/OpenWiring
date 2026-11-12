@@ -223,7 +223,12 @@ export function App() {
         // Anche gli altri progetti che erano aperti
         const main = useStore.getState().project;
         for (const o of others ?? []) {
-          useStore.getState().openAlongside(parseProject(o.text), o.filePath);
+          try {
+            useStore.getState().openAlongside(parseProject(o.text), o.filePath);
+          } catch (e) {
+            useStore.getState().logMsg(tx('Progetto {0} non ripristinato: {1}', o.filePath ?? '', e instanceof Error ? e.message : String(e)), 'error');
+            continue;
+          }
           if (o.dirty) useStore.setState({ dirty: true });
         }
         // Torna attivo il progetto che lo era

@@ -1,3 +1,4 @@
+import { askConfirm } from './Ask';
 // Albero del modello (come la "Vista combinata" di FreeCAD).
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../model/store';
@@ -5,7 +6,7 @@ import { buildDevices, deviceInfo, partsIndex, type Device } from '../model/devi
 import { allStrips, stripRows, physicalCount } from '../model/terminals';
 import { panelLabel, orderedPanels, devicePanels } from '../model/network';
 import { structureTree } from '../model/structure';
-import { tn, tx } from '../i18n/ui';
+import { tx } from '../i18n/ui';
 import { isGenerated, pageGroup } from '../model/pageOrder';
 import { isListPage, listEntries, outdated, type ListEntry } from '../model/lists';
 import { INDEX_TITLE, LEGEND_TITLE } from '../model/reports';
@@ -268,7 +269,7 @@ export function ProjectTree() {
               title={tx('Da incollare nel progetto attivo con «Incolla pagina», con sigle e numeri filo nuovi')}><span>{tx('Copia pagina')}</span></button>}
             <button onClick={() => { setOtherMenu(null); st().switchProject(o.key, otherMenu.page?.id); }}><span>{otherMenu.page ? tx('Apri') : tx('Rendi attivo')}</span></button>
             <hr />
-            <button onClick={() => { setOtherMenu(null); if (!o.dirty || window.confirm(tx('{0} ha modifiche non salvate. Chiuderlo lo stesso?', o.project.info.name || tx('Progetto')))) st().closeOther(o.key); }}><span>{tx('Chiudi il progetto')}</span></button>
+            <button onClick={async () => { setOtherMenu(null); if (!o.dirty || await askConfirm(tx('Conferma'), tx('{0} ha modifiche non salvate. Chiuderlo lo stesso?', o.project.info.name || tx('Progetto')), tx('Continua'))) st().closeOther(o.key); }}><span>{tx('Chiudi il progetto')}</span></button>
             <div className="ctx-note">{o.project.info.name}{otherMenu.page ? ` · ${otherMenu.page.name}` : ''}</div>
           </div>
         );

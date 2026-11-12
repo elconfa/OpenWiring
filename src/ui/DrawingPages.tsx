@@ -39,7 +39,7 @@ function Missing({ text }: { text: string }) {
 
 /** Tabella semplice: intestazione grigia e righe con le linee di separazione */
 function Grid({ x, y, cols, rows, rowH = 4.4, size = 2 }: { x: number; y: number; cols: { title: string; w: number }[]; rows: string[][]; rowH?: number; size?: number }) {
-  const xs = cols.reduce<number[]>((a, c, i) => [...a, i ? a[i - 1] + cols[i - 1].w : x], []);
+  const xs = cols.reduce<number[]>((a, _c, i) => [...a, i ? a[i - 1] + cols[i - 1].w : x], []);
   const w = cols.reduce((a, c) => a + c.w, 0);
   const fit = (s: string, cw: number) => { const n = Math.floor(cw / (size * 0.55)); return s.length > n ? `${s.slice(0, Math.max(1, n - 1))}…` : s; };
   return (

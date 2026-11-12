@@ -480,7 +480,7 @@ tr.lock-row td { color: var(--warn); font-size: 12px; padding: 4px 6px; }
 .text-edit-row { display: flex; gap: 4px; align-items: center; }
 .text-edit-row > input, .text-edit-row > .text-preview { flex: 1; min-width: 0; }
 .text-preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
-.layer-list { display: flex; flex-direction: column; gap: 2px; padding: 2px 6px 8px; }
+.layer-list { display: flex; flex-direction: column; gap: 2px; padding: 2px 6px 8px; max-height: min(60vh, 420px); overflow-y: auto; }
 .layer-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto auto auto; align-items: center; gap: 3px; font-size: 12px; }
 .layer-row.current .layer-name { font-weight: 600; }
 .layer-row .layer-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; }
@@ -545,6 +545,7 @@ button.link:hover { text-decoration: underline; }
 .ai-settings-body { display: grid; grid-template-columns: 220px 1fr; gap: 12px; min-height: 300px; }
 .ai-profile-list { display: flex; flex-direction: column; gap: 4px; }
 .ai-profile-list .tab { text-align: left; }
+.ai-profile-list .tab.active .muted { color: inherit; opacity: .8; }
 .ai-profile-form { display: flex; flex-direction: column; gap: 8px; }
 .ai-profile-form label.row { display: grid; grid-template-columns: 130px 1fr auto; gap: 8px; align-items: center; }
 .ai-profile-form code { user-select: all; background: var(--title-bg); padding: 1px 4px; border-radius: 3px; }
@@ -777,7 +778,7 @@ kbd { font: 10.5px ui-monospace, Menlo, monospace; color: var(--muted); border: 
 .bs-main { flex: 1; overflow: auto; padding: 22px 36px; }
 .bs-main h2 { margin: 0 0 16px; font-weight: 600; font-size: 22px; }
 .bs-main .start-screen { max-width: 980px; }
-.bs-list { display: flex; flex-direction: column; gap: 2px; max-width: 760px; }
+.bs-list { display: flex; flex-direction: column; gap: 2px; max-width: 760px; max-height: min(60vh, 420px); overflow-y: auto; }
 .bs-row { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; border: 1px solid transparent; background: transparent; padding: 8px 12px; border-radius: 6px; }
 .bs-row:hover:not(:disabled) { background: var(--accent-soft); border-color: transparent; }
 
@@ -812,7 +813,7 @@ kbd { font: 10.5px ui-monospace, Menlo, monospace; color: var(--muted); border: 
 .ab-split .ab-btn { color: var(--text); }
 .ab-split .ab-btn.on { color: #fff; }
 .ab-more { border: none; background: transparent; padding: 0 2px; height: 30px; color: var(--muted); border-radius: 4px; }
-.ab-drop { position: absolute; top: calc(100% + 6px); left: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.22); padding: 4px; min-width: 220px; display: flex; flex-direction: column; gap: 1px; }
+.ab-drop { position: absolute; top: calc(100% + 6px); left: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.22); padding: 4px; min-width: 220px; display: flex; flex-direction: column; gap: 1px; max-height: min(60vh, 420px); overflow-y: auto; }
 .ab-drop button { display: flex; align-items: center; gap: 8px; border: 1px solid transparent; background: transparent; text-align: left; padding: 2px 6px; border-radius: 5px; color: var(--text); }
 .ab-drop button:hover:not(:disabled), .ab-drop button.on { background: var(--accent-soft); border-color: transparent; }
 .ab-empty { padding: 6px 8px; white-space: normal; max-width: 220px; }

@@ -8,7 +8,7 @@ import { blackBoxFromPart, BUILTIN_SYMBOLS } from '../model/symbols';
 import { getSymbol } from '../model/geometry';
 import { SymbolPreview } from './SymbolLibrary';
 import * as A from './actions';
-import { askText, ask } from './Ask';
+import { ask } from './Ask';
 import { useGrid, Th, gridProps } from './grid';
 import { ColSplitter } from './split';
 import { edzDocs, fileName, isWebDoc } from '../model/partDocs';
@@ -82,8 +82,8 @@ export function PartsManager() {
   });
   // Articoli della libreria tra quelli elencati (ricerca e criteri fanno da filtro, es. un costruttore)
   const removable = rows.filter(p => p.inLibrary);
-  const removeListed = () => {
-    if (A.removeListedParts(removable.map(p => p.partNr), filtered) && sel && removable.some(p => p.partNr === sel)) setSel(undefined);
+  const removeListed = async () => {
+    if (await A.removeListedParts(removable.map(p => p.partNr), filtered) && sel && removable.some(p => p.partNr === sel)) setSel(undefined);
   };
   // Con migliaia di articoli si disegnano solo le righe visibili (altezza delle righe fissa)
   const ROW = 23;

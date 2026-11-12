@@ -8,6 +8,7 @@ import { partsIndex } from '../model/devices';
 import type { Distributor, DistGroup } from '../model/types';
 import { ColSplitter } from './split';
 import { PartInput } from './PropertyPanel';
+import { askConfirm } from './Ask';
 import { tx } from '../i18n/ui';
 import { EmptyState } from './EmptyState';
 
@@ -129,7 +130,7 @@ export function DistributorsView() {
                 <button onClick={() => upd({ groups: [...d.groups, { name: d.kind === 'bar' ? `L${d.groups.length + 1}` : d.kind === 'earth' ? (d.groups.some(g => g.name === 'N') ? `PE${d.groups.length + 1}` : 'N') : String(d.groups.length + 1), inMax: d.groups[d.groups.length - 1]?.inMax, outs: [...(d.groups[d.groups.length - 1]?.outs ?? [''])] }] })}>{tx(GROUP_NAMES[d.kind][2])}</button>
                 <button disabled={d.groups.length < 2} title={tx('Ingresso e uscite del primo gruppo uguali per tutti')} onClick={() => upd({ groups: d.groups.map(g => ({ ...g, inMax: d.groups[0].inMax, outs: [...d.groups[0].outs] })) })}>{tx('Uguali al primo')}</button>
                 <button onClick={() => st().placeDistGroup(d.id)} title={tx('Mette sullo schema i gruppi che mancano, uno per clic')}>{tx('Inserisci sullo schema')}</button>
-                <button onClick={() => { if (window.confirm(tx('Eliminare -{0} e i suoi simboli sullo schema?', d.tag))) st().deleteDistributor(d.id); }}>{tx('Elimina')}</button>
+                <button onClick={async () => { if (await askConfirm(tx('Conferma'), tx('Eliminare -{0} e i suoi simboli sullo schema?', d.tag), tx('Elimina'))) st().deleteDistributor(d.id); }}>{tx('Elimina')}</button>
               </div>
             </>
           )}

@@ -9,7 +9,7 @@ import {
   unlinkedPlcDevices, stationNames, cardOrderInfo, cardChannelMismatch, cardDevice as cardDeviceOf, cardFormat, stationFormat,
 } from '../model/plc';
 import { buildDevices } from '../model/devices';
-import { ask } from './Ask';
+import { ask, askConfirm } from './Ask';
 import { locationOf } from '../model/devices';
 import { settingsOf } from '../model/numbering';
 import { saveFile, safeName, openFiles } from '../io/fileio';
@@ -143,8 +143,8 @@ export function PlcView() {
           <input type="checkbox" checked={!!settingsOf(project).wirePlcNames} onChange={e => st().updateSettings({ wirePlcNames: e.target.checked })} />{tx('Fili con il nome dall\'indirizzo')}
         </label>
         <CardFromPart station={newStation} />
-        <button disabled={!cards.length} onClick={() => {
-          if (window.confirm(tx('Riassegnare gli indirizzi di tutte le schede in ordine di elenco? Gli indirizzi attuali cambieranno.'))) st().reassignPlcAddresses();
+        <button disabled={!cards.length} onClick={async () => {
+          if (await askConfirm(tx('Conferma'), tx('Riassegnare gli indirizzi di tutte le schede in ordine di elenco? Gli indirizzi attuali cambieranno.'), tx('Riassegna'))) st().reassignPlcAddresses();
         }}>{tx('Riassegna indirizzi')}</button>
         <div className="tb-spacer" />
         <button disabled={!cards.length} onClick={() => st().syncPlcOverviews()} title={tx('Crea una pagina panoramica per ogni scheda (e toglie quelle di schede eliminate)')}>{tx('Pagine panoramiche')}</button>
@@ -221,8 +221,8 @@ export function PlcView() {
                     ))}
                     <button onClick={() => st().movePlcCard(c.id, -1)} title={tx('Sposta su')}>↑</button>
                     <button onClick={() => st().movePlcCard(c.id, 1)} title={tx('Sposta giù')}>↓</button>
-                    <button onClick={() => {
-                      if (window.confirm(used ? tx('La scheda -{0} ha {1} canali usati nello schema: i punti I/O resteranno senza scheda. Eliminarla?', c.tag, used) : tx('Eliminare la scheda -{0}?', c.tag))) st().deletePlcCard(c.id);
+                    <button onClick={async () => {
+                      if (await askConfirm(tx('Conferma'), used ? tx('La scheda -{0} ha {1} canali usati nello schema: i punti I/O resteranno senza scheda. Eliminarla?', c.tag, used) : tx('Eliminare la scheda -{0}?', c.tag), tx('Continua'))) st().deletePlcCard(c.id);
                     }} title={tx('Elimina')}>✕</button>
                   </td>
                 </tr>

@@ -2,7 +2,7 @@
 // costruzione: se si aggiunge un campo a uno di questi tipi senza scriverlo qui, la compilazione
 // (npm run typecheck, anche nella CI) fallisce. Valore: l'attributo del testo, oppure «no: motivo»
 // per i dati che il testo non porta di proposito (il test di andata e ritorno li esclude).
-import type { SymbolInstance, Wire, TextItem, CableLine, WireDef, Zone, ImageItem, Cable, TerminalStripData, BusCable } from './types';
+import type { SymbolInstance, Wire, TextItem, CableLine, WireDef, Zone, Cable, TerminalStripData, BusCable } from './types';
 
 type Coverage<T> = Record<Exclude<keyof T, 'kind' | 'id'>, string>;
 

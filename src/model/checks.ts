@@ -8,6 +8,7 @@ import { distSlots } from './distributors';
 import { computeNetlist, withNetlistCache, type Net } from './netlist';
 import { getSymbol, instanceBounds } from './geometry';
 import { buildDevices, allPlaced, locationOf, partsIndex, deviceInfo, type PlacedElement } from './devices';
+import { allowedRots } from './rotations';
 import { nextTagFor } from './numbering';
 import { linkPartners, isIncomingLink, NO_PARTNER } from './links';
 import { isBundle } from './bundles';
@@ -48,6 +49,8 @@ export type IssueFix = { label: string } & (
   | { kind: 'splitWire'; pageId: string; wireIds: string[] }
   | { kind: 'renumberWires'; wireIds: string[] }
   | { kind: 'deleteElement'; pageId: string; id: string }
+  | { kind: 'allowRot'; symbolId: string; rot: 0 | 90 | 180 | 270 }
+  | { kind: 'fitRot'; pageId: string; id: string }
   | { kind: 'cableFromPart'; cableId: string }
   | { kind: 'clearCardOrder'; cardId: string }
   | { kind: 'busCableTag'; wireIds: string[]; tag: string }
@@ -379,6 +382,14 @@ export function schemaProblems(project: Project, nl = computeNetlist(project), p
   // Simboli inesistenti (libreria non caricata o simbolo cancellato)
   for (const pg of project.pages) {
     for (const e of pg.elements) {
+      if (e.kind === 'symbol') {
+        const sd = getSymbol(e.symbolId, project);
+        if (sd && !allowedRots(sd).includes(e.rot)) {
+          const mine = project.customSymbols.some(x => x.id === sd.id);
+          out.push({ level: 'warn', kind: tx('Simboli'), msg: tx('{0}rotazione {1}° non ammessa dal simbolo "{2}" (ammesse: {3})', e.tag ? `-${e.tag}: ` : '', e.rot, sd.name, allowedRots(sd).join(', ')), pageId: pg.id, elementId: e.id, loc: `${pg.name}.${columnOf(e.x)}`,
+            fix: mine ? { label: tx('Ammetti {0}° nel simbolo', e.rot), kind: 'allowRot', symbolId: sd.id, rot: e.rot } : { label: tx('Ruota alla posizione ammessa'), kind: 'fitRot', pageId: pg.id, id: e.id } });
+        }
+      }
       if (e.kind === 'symbol' && !getSymbol(e.symbolId, project)) out.push({ level: 'error', kind: tx('Simboli'), msg: tx('{0}simbolo "{1}" non trovato (libreria mancante?)', e.tag ? `-${e.tag}: ` : '', e.symbolId), pageId: pg.id, elementId: e.id, loc: `${pg.name}.${columnOf(e.x)}` });
     }
   }

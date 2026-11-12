@@ -9,6 +9,7 @@ import { partsIndex } from '../model/devices';
 import { WIRE_SECTIONS, type Cable, type CableMarking } from '../model/types';
 import { useGrid, Th, gridProps } from './grid';
 import { ColSplitter, ResizableSection } from './split';
+import { askConfirm } from './Ask';
 import { tx } from '../i18n/ui';
 import { EmptyState } from './EmptyState';
 
@@ -245,7 +246,7 @@ export function CablesView() {
               </div>
               {!many && (
                 <div className="row-btns">
-                  <button className="danger" onClick={() => { if (window.confirm(tx('Eliminare il cavo -{0} e tutte le sue linee?', c.tag))) st().deleteCable(c.id); }}>{tx('Elimina cavo')}</button>
+                  <button className="danger" onClick={async () => { if (await askConfirm(tx('Conferma'), tx('Eliminare il cavo -{0} e tutte le sue linee?', c.tag), tx('Elimina'))) st().deleteCable(c.id); }}>{tx('Elimina cavo')}</button>
                 </div>
               )}
               {!many && c.conductors.some(isPeName) && markingOf(c) === 'numbers' && (

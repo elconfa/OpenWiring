@@ -79,6 +79,11 @@ export function withNetlistCache<T>(project: Project, fn: () => T): T {
   try { return fn(); } finally { cache = prev; }
 }
 
+/** Dopo una modifica che cambia i collegamenti (nomi dei rimandi, fili): la rete in cache non vale più */
+export function invalidateNetlist(project: Project): void {
+  if (cache?.project === project) cache.result = undefined;
+}
+
 export function computeNetlist(project: Project): NetlistResult {
   if (cache?.project === project) return (cache.result ??= computeNetlistNow(project));
   return computeNetlistNow(project);

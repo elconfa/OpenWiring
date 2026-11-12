@@ -27,7 +27,7 @@ mène à l'élément et le sélectionne.
 | Connexions seulement apparentes | un fil qui passe sur un point de connexion sans s'y terminer : il semble relié mais ne l'est pas |
 | Orphelins | composants, potentiels, renvois et nœuds sans liaisons, fils isolés, contacts sans bobine |
 | Connexions incomplètes | bornes libres de bobines, contacts, voyants, boutons-poussoirs, points E/S ; fils avec une extrémité libre (les barres qui arrivent au bord sont admises) |
-| Dessin | symboles inexistants ou superposés, fils superposés, éléments hors de la feuille, numéros de fil répétés, pages vides |
+| Dessin | symboles inexistants ou superposés, fils superposés, éléments hors de la feuille, numéros de fil répétés, pages vides, rotations non admises par le symbole (corrigées en admettant la rotation dans le symbole) |
 | Bus de conducteurs | fils qui touchent le bus sans nom de conducteur, conducteurs qui entrent dans le bus sans en sortir |
 | Repères et données | repères en double ou manquants, plus de contacts que l'article n'en a, bornes répétées |
 | Câbles, connecteurs, réseaux, API, implantation | voir les chapitres correspondants |

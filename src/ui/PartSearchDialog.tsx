@@ -17,8 +17,9 @@ export function PartSearchDialog({ initial, onClose }: { initial: string; onClos
   const [progress, setProgress] = useState('');
   const stop = useRef(false);
   useEffect(() => {
-    void window.elettro?.foldersGet?.().then(f => setDir(f.defaults.projects ?? f.last.projects ?? f.documents));
-    return () => { stop.current = true; };
+    let alive = true;
+    void window.elettro?.foldersGet?.().then(f => { if (alive) setDir(f.defaults.projects ?? f.last.projects ?? f.documents); });
+    return () => { alive = false; stop.current = true; };
   }, []);
 
   const run = async () => {

@@ -1,7 +1,7 @@
 import { syncPairs, newRepresentation } from './pairs';
 import { create } from 'zustand';
 import { nextRail } from './fixedPos';
-import { nextRot, fitRot } from './rotations';
+import { nextRot, fitRot, allowedRots, ROTS } from './rotations';
 import { applySheet } from './types';
 import type { TextMoveKey, ExtraPart, UserPropDef, PinDir } from './types';
 import type { DrawingStyleKind, Project, Page, Element, Part, SymbolInstance, Pt, Wire, ProjectInfo, ProjectSettings, DeviceField, PlcCard, IoKind, SymbolDef, TerminalStripData, Jumper, Cable, CableLine, CableMarking, Layout, WireDef, Distributor } from './types';
@@ -37,7 +37,7 @@ import { planTerminalRow, applyTerminalRow, type TerminalPick, type TerminalRowM
 import { newCable, remarkCable, repairPartCables, cableFromPart, crossedWires, copyCableProps, pasteCableProps, lockCableConductors, syncCablesWithPart, differsFromPart, type CableClip } from './cables';
 import { allocateChannel, cardByTag, PLC_CARD_TYPES, newCard, cardType, reassignAddresses, adaptAddressFormat, keepAnalogFirst, stationFormat, needsReassign, cardFromPart, applyTagImport, syncOverviewPages, stationNames, type TagImportRow, type TagImportResult } from './plc';
 import { DEFAULT_SETTINGS, DEVICE_FIELDS, PIN_OWN_FIELDS, AUX_OWN_FIELDS } from './types';
-import { getSymbol, pinsWorld, samePt, snap, uid, setLibrarySymbols, instanceBounds } from './geometry';
+import { getSymbol, snap, uid, setLibrarySymbols, instanceBounds } from './geometry';
 import { blackBoxFromPart, BUILTIN_SYMBOLS } from './symbols';
 import { isDeletedSymbol, deletedCategory, applySymbolChoices, mergeSymbols, remapSymbol, type SymbolDiff, type SymbolChoice } from './symbolSync';
 import { stripOf, sameDeviceIds, terminalLevelIds, mergeTargets, migrateAuxDescriptions, partsIndex } from './devices';
@@ -46,9 +46,9 @@ import { linkPartners, pairLinks } from './links';
 import { nameTapsInOrder } from './bundles';
 import { withShow, type WireVisKey, type SymVisKey } from './visibility';
 import { buildPlcGroup, firstFreeChannel, groupConfig, groupMembers, newGroupId, type PlcGroupCfg } from './plcGroup';
-import { nextTerminal, nextToPlace, nextLevel, parseTerminalNo, terminalNo, ensureStrip, renumberStrip as renumberStripModel, renameStrip as renameStripModel, renameTerminals as renameTerminalsModel, addLevel, addJumper as addJumperModel, removeFromJumpers, addSpares as addSparesModel, removeSpares as removeSparesModel, setSparePart, syncStripPages, allStrips } from './terminals';
+import { nextTerminal, nextToPlace, parseTerminalNo, terminalNo, ensureStrip, renumberStrip as renumberStripModel, renameStrip as renameStripModel, renameTerminals as renameTerminalsModel, addLevel, addJumper as addJumperModel, removeFromJumpers, addSpares as addSparesModel, removeSpares as removeSparesModel, setSparePart, syncStripPages, allStrips } from './terminals';
 import { nextTagFor, renumberDevices, settingsOf } from './numbering';
-import { computeNetlist, lockWireNumbers, clearWireNumbers, syncPlcLinkNames, withNetlistCache } from './netlist';
+import { computeNetlist, lockWireNumbers, clearWireNumbers, syncPlcLinkNames, withNetlistCache, invalidateNetlist } from './netlist';
 import { kvGet, kvSet } from '../io/storage';
 import { replaceHits, type SearchHit, type SearchOpts } from './search';
 import { arrangePages, isGenerated, moveGroup, nextProjectPageNo, pageGroup, registerPageNumbers, renumberPages as renumberPagesModel } from './pageOrder';
@@ -918,19 +918,24 @@ export const useStore = create<State>((set, get) => {
       const lock = () => withNetlistCache(next, () => { if (fixed()) lockWireNumbers(next); lockCableConductors(next); });
       lock();
       fn(next);
-      lock();
-      // Fili del PLC con il nome dall'indirizzo: i loro rimandi prendono lo stesso nome
-      syncPlcLinkNames(next);
-      // Rappresentazioni dei contatti (riferimenti a coppie): sigla e morsetti del contatto vero
-      syncPairs(next);
-      // Stazioni WAGO (prima gli analogici): una scheda nuova rifà gli indirizzi della stazione
-      keepAnalogFirst(next);
-      // I collegamenti di rete nuovi (disegnati, incollati o cambiati in bus) ricevono la sigla del cavo
-      assignBusCableTags(next);
-      // Tratti uniti dai rimandi dopo essere stati disegnati: la sigla automatica diventa quella del cavo
-      unifyBusCableTags(next);
-      // Rimandi dei cavi di rete: si chiamano come il cavo
-      syncBusLinkNames(next);
+      // Post-elaborazione con una sola rete in cache: dopo ogni passo che cambia qualcosa la cache si butta
+      // (la rete calcolata prima di fn non vale: fn può aver cambiato i fili, quindi la cache si apre solo ora)
+      withNetlistCache(next, () => {
+        const stale = (n: number) => { if (n) invalidateNetlist(next); };
+        lock();
+        // Fili del PLC con il nome dall'indirizzo: i loro rimandi prendono lo stesso nome
+        stale(syncPlcLinkNames(next));
+        // Rappresentazioni dei contatti (riferimenti a coppie): sigla e morsetti del contatto vero
+        stale(syncPairs(next));
+        // Stazioni WAGO (prima gli analogici): una scheda nuova rifà gli indirizzi della stazione
+        stale(keepAnalogFirst(next).length);
+        // I collegamenti di rete nuovi (disegnati, incollati o cambiati in bus) ricevono la sigla del cavo
+        stale(assignBusCableTags(next));
+        // Tratti uniti dai rimandi dopo essere stati disegnati: la sigla automatica diventa quella del cavo
+        stale(unifyBusCableTags(next));
+        // Rimandi dei cavi di rete: si chiamano come il cavo
+        syncBusLinkNames(next);
+      });
       // Pagine generate in blocchi nell'ordine scelto, con la loro numerazione (IND.1, MOR.2…)
       arrangePages(next);
       registerPageNumbers(next);
@@ -2027,6 +2032,15 @@ export const useStore = create<State>((set, get) => {
           } else if (f.kind === 'deleteElement') {
             const pg = p.pages.find(x => x.id === f.pageId);
             if (pg) pg.elements = pg.elements.filter(e => e.id !== f.id);
+          } else if (f.kind === 'allowRot') {
+            const sd = p.customSymbols.find(x => x.id === f.symbolId);
+            if (sd) {
+              const list = allowedRots(sd);
+              if (!list.includes(f.rot)) { const n = ROTS.filter(x => x === f.rot || list.includes(x)); sd.rotations = n.length === 4 ? undefined : n; }
+            }
+          } else if (f.kind === 'fitRot') {
+            const e = find(f.pageId, f.id);
+            if (e?.kind === 'symbol') e.rot = fitRot(getSymbol(e.symbolId, p), e.rot);
           } else if (f.kind === 'splitWire') {
             const pg = p.pages.find(x => x.id === f.pageId);
             if (pg) splitWiresAtPins(p, pg, f.wireIds);
@@ -2137,7 +2151,9 @@ export const useStore = create<State>((set, get) => {
       if (get().viewing || cur.revisionState !== 'review') return false;
       const back = await cancelRevisionModel(cur);
       if (!back) return false;
-      get().commit(p => { Object.keys(p).forEach(k => delete (p as unknown as Record<string, unknown>)[k]); Object.assign(p, parseProject(JSON.stringify(back))); }, true);
+      let restored: Project;
+      try { restored = parseProject(JSON.stringify(back)); } catch (e) { get().logMsg(tx('Revisione non annullata: la copia archiviata non si legge ({0})', e instanceof Error ? e.message : String(e)), 'error'); return false; }
+      get().commit(p => { Object.keys(p).forEach(k => delete (p as unknown as Record<string, unknown>)[k]); Object.assign(p, restored); }, true);
       if (!get().project.pages.some(pg => pg.id === get().pageId)) set({ pageId: get().project.pages[0].id });
       get().logMsg(tx('Revisione annullata: il progetto è tornato alla {0} rilasciata', lastRevision(cur)?.index ?? ''));
       return true;
@@ -2148,7 +2164,8 @@ export const useStore = create<State>((set, get) => {
       const real = s.viewing?.back ?? { project: s.project, past: s.past, future: s.future, dirty: s.dirty, pageId: s.pageId };
       const rev = real.project.revisions?.find(r => r.id === id);
       if (!rev?.archive) return;
-      const p = parseProject(JSON.stringify(await unpackProject(rev.archive)));
+      let p: Project;
+      try { p = parseProject(JSON.stringify(await unpackProject(rev.archive))); } catch (e) { get().logMsg(tx('Revisione {0} non apribile: {1}', rev.index, e instanceof Error ? e.message : String(e)), 'error'); return; }
       set({ viewing: { index: rev.index, date: rev.date, back: real }, project: p, past: [], future: [], dirty: real.dirty, selection: [], pageId: p.pages[0]?.id ?? '', view: 'schema' });
       get().logMsg(tx('Revisione {0} del {1} aperta in sola lettura', rev.index, rev.date));
     },

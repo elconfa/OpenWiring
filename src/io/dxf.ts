@@ -24,7 +24,6 @@ export function pageToDxf(project: Project, page: Page, library: Part[] = []): s
   };
   const labels = effectivePinLabels(project);
   const d = derive(project, library);
-  const nl = d.netlist;
   const pd = d.pages.get(page.id)!;
 
   g(0, 'SECTION'); g(2, 'HEADER'); g(9, '$INSUNITS'); g(70, '4'); g(9, '$EXTMIN'); g(10, 0); g(20, 0); g(9, '$EXTMAX'); g(10, PAGE_W); g(20, PAGE_H); g(0, 'ENDSEC');

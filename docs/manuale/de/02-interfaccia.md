@@ -40,6 +40,8 @@ zwischen Menüband, kompaktem Menüband und **klassischen Menüs** für alle, di
 | *Ansicht* | Fenster, Design, Blatt, Sprache der Oberfläche und der Schaltpläne, Raster, Miniaturen, Blattübersicht, Radialmenü, Stil des Menübands |
 | *Hilfe* | Handbuch, geführte Tour, Tastenkürzel, Anleitung für KI-Agenten, Updates, Info, Projektwebsite |
 
+Bestätigungen (löschen, neu nummerieren, ohne Speichern verlassen) sind Fenster der App und folgen dem Design; bei geöffnetem Symbol- oder Schriftfeld-Editor sind die Home-Befehle für den Schaltplan deaktiviert, und der Wechsel in eine andere Ansicht mit ungespeicherten Änderungen fragt nach.
+
 ![Die Registerkarte Projekt](../img/en/menu-progetto.png)
 
 *Die Registerkarte Projekt.*

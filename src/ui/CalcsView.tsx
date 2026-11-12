@@ -5,6 +5,7 @@ import { useStore } from '../model/store';
 import type { CableCalc, ThermalCalc } from '../model/types';
 import { INSTALL_TYPES, MATERIALS, METHODS, cableDefaults, cableResult, thermalDevices, thermalResult } from '../model/calculations';
 import { Field } from './PropertyPanel';
+import { askConfirm } from './Ask';
 import { tx } from '../i18n/ui';
 
 const n1 = (v: number) => (Math.round(v * 10) / 10).toLocaleString();
@@ -38,7 +39,7 @@ function ThermalPanel() {
         </select>}
         {!panels.length && <b>{tx('Tutto il progetto (nessun luogo definito)')}</b>}
         {!c && <button className="primary" onClick={() => set({})}>{tx('Calcola questo quadro')}</button>}
-        {c && <button onClick={() => { if (window.confirm(tx('Togliere il calcolo termico di questo quadro?'))) st().setThermal(panelId, undefined); }}>{tx('Togli il calcolo')}</button>}
+        {c && <button onClick={async () => { if (await askConfirm(tx('Conferma'), tx('Togliere il calcolo termico di questo quadro?'), tx('Togli'))) st().setThermal(panelId, undefined); }}>{tx('Togli il calcolo')}</button>}
         <div className="tb-spacer" />
         <span className="muted small">{tx('Metodo della superficie efficace (IEC/TR 60890): ΔT = Pv / (k·A)')}</span>
       </div>

@@ -40,6 +40,8 @@ its name.
 | *View* | panels, theme, sheet, interface and schematic language, grid, thumbnails, sheet map, radial menu, ribbon style |
 | *Help* | manual, guided tour, shortcuts, guide for AI agents, updates, about, project website |
 
+Confirmations (delete, renumber, leave without saving) are app dialogs and follow the theme; while the symbol or title block editor is open, the Home commands that act on the schematic are disabled, and switching to another view with unsaved changes asks for confirmation.
+
 ![The Project tab](../img/en/menu-progetto.png)
 
 *The Project tab.*

@@ -669,8 +669,11 @@ export function importPagesText(project: Project, text: string): TextImportResul
           if (k === 'rot') {
             const r = parseInt(v, 10);
             if (![0, 90, 180, 270].includes(r)) err('rot deve essere 0, 90, 180 o 270');
-            else if (!allowedRots(sym).includes(r as SymbolInstance['rot'])) err(`simbolo "${id}": rot=${r} non ammessa (ammesse: ${allowedRots(sym).join(', ')})`);
-            else inst.rot = r as SymbolInstance['rot'];
+            else {
+              // Rotazione fuori dall'elenco del simbolo: l'elemento si tiene (lo schema la ammette), la verifica la segnala
+              inst.rot = r as SymbolInstance['rot'];
+              if (!allowedRots(sym).includes(inst.rot)) warnings.push({ line, msg: `simbolo "${id}": rot=${r} non ammessa dal simbolo (ammesse: ${allowedRots(sym).join(', ')}): mantenuta` });
+            }
           }
           else if (k === 'testi') inst.showTexts = /^(si|sì|yes|1|true)$/i.test(v);
           else if (k === 'coppia') pairTargets.push({ inst, target: v, line });

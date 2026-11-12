@@ -22,6 +22,7 @@ import { openPropsDialog } from './PropsDialog';
 import { chooseReplacement } from './ReplaceSymbolDialog';
 import { chooseRepresentation } from './representationChooser';
 import { checkUpdates } from './updates';
+import { checkProjectSymbols, openUnifySymbols } from './LibrarySync';
 import { insertImageFromFile, insertDxfDrawing } from './images';
 import { usePanelStore } from './panels';
 import { SymbolPreview } from './SymbolLibrary';
@@ -89,6 +90,7 @@ export function ribbonTabs(s: State): RTab[] {
         { name: tn('Modifica'), items: [
           { icon: 'rotate', label: tx('Ruota'), big: true, cmd: 'rotate', run: () => st().rotateSelection(), disabled: !hasSel },
           { icon: 'mirror', label: tx('Specchia'), run: () => st().mirrorSelection(), disabled: !hasSel },
+          { icon: 'select', label: tx('Seleziona tutto'), cmd: 'selectAll', run: () => st().setSelection(page?.elements.map(e => e.id) ?? []), disabled: !schema },
           { icon: 'align', label: tx('Allinea'), disabled: s.selection.length < 2 || !schema, title: tx('Con soli fili selezionati si allineano i loro numeri'),
             menu: () => ALIGN_MODES.map(m => ({ label: `${m.icon}  ${tx(m.name)}`, run: () => st().alignSelection(m.id) })) },
           { icon: 'delete', label: tx('Elimina'), cmd: 'delete', run: () => st().deleteSelection(), disabled: !hasSel },
@@ -170,6 +172,8 @@ export function ribbonTabs(s: State): RTab[] {
           { icon: 'props', label: tx('Proprietà del progetto'), run: A.showProjectProps },
           { icon: 'user', label: tx('Proprietà definite dall\'utente…'), run: () => st().setDialog('userProps'), title: tx('Proprietà proprie per dispositivi, pagine, collegamenti, progetto e articoli; import ed export XML') },
           { icon: 'template', label: tx('Profili…'), run: () => openSettingsAt('profiles') },
+          { icon: 'coil', label: tx('Confronta i simboli con la libreria personale…'), run: () => checkProjectSymbols(true), title: tx('Simboli del progetto diversi da quelli della libreria personale, o solo nel progetto: scegli quale versione tenere') },
+          { icon: 'coil', label: tx('Unifica i simboli doppi della libreria…'), run: openUnifySymbols, title: tx('Simboli della libreria personale con lo stesso disegno o lo stesso nome: se ne tiene uno e i progetti passano a quello') },
         ] },
         { name: tn('Numerazione'), items: [
           { icon: 'number', label: tx('Rinumera dispositivi…'), run: A.renumberDevices },
@@ -196,6 +200,7 @@ export function ribbonTabs(s: State): RTab[] {
         ] },
         { name: tn('Assistente'), items: [
           { icon: 'ai', label: tx('Assistente IA'), big: true, cmd: 'ai', run: () => st().setDialog('ai') },
+          { icon: 'ai', label: tx('Modifica con un assistente IA esterno (testo)…'), run: () => st().setDialog('text') },
           { icon: 'text', label: tx('Pagine in testo (assistenti IA)…'), run: () => st().setDialog('text'), title: tx('Esporta e importa le pagine in un formato testo che un assistente di intelligenza artificiale sa leggere e modificare') },
           { icon: 'settings', label: tx('Assistenti IA: profili e account…'), run: () => st().setDialog('aiSettings') },
         ] },
@@ -326,6 +331,13 @@ export function ribbonTabs(s: State): RTab[] {
         ] },
       ],
     });
+  }
+  // Editor dei simboli o del cartiglio aperto: i gruppi che agiscono sullo schema restano visibili ma spenti
+  if (s.view === 'symbol') {
+    const OFF = [tn('Appunti'), tn('Disegno'), tn('Modifica'), tn('Trova'), tn('Controllo')];
+    for (const g of tabs.find(t => t.id === 'home')?.groups ?? []) {
+      if (OFF.includes(g.name)) g.items = g.items.map(it => ('icon' in it ? { ...it, disabled: true } : it));
+    }
   }
   return tabs;
 }

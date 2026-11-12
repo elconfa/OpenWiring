@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../model/store';
 import { search, FIELD_LABELS, type SearchOpts, type SearchField } from '../model/search';
+import { askConfirm } from './Ask';
 import { tx } from '../i18n/ui';
 
 export function SearchDialog() {
@@ -46,8 +47,8 @@ export function SearchDialog() {
         </div>
         <div className="modal-actions">
           <span className="muted small" style={{ marginRight: 'auto' }}>{q ? tx('{0} risultati', hits.length) : tx('Clic su un risultato per andare all\'elemento')}</span>
-          <button disabled={!replaceable.length} onClick={() => {
-            if (window.confirm(tx('Sostituire "{0}" con "{1}" in {2} valori?', q, rep, replaceable.length))) st().replaceInProject(replaceable, q, rep, opts);
+          <button disabled={!replaceable.length} onClick={async () => {
+            if (await askConfirm(tx('Conferma'), tx('Sostituire "{0}" con "{1}" in {2} valori?', q, rep, replaceable.length), tx('Sostituisci'))) st().replaceInProject(replaceable, q, rep, opts);
           }}>{tx('Sostituisci tutto')}</button>
           <button onClick={close}>{tx('Chiudi')}</button>
         </div>

@@ -20,6 +20,10 @@ export const SETTINGS_PARTS: SettingsPart[] = [
   { id: 'look', name: tn('Linee, colori e giunzioni'), keys: ['look'] },
   { id: 'drawing', name: tn('Disegno e collegamenti'), keys: ['showDeviceTexts', 'grid', 'terminalText', 'connectorFrames', 'freeSymbolTexts', 'autoConnect', 'plcAddressFormat'] },
   { id: 'fixed', name: tn('Posizioni fisse'), keys: ['railTop', 'railBottom', 'plcRow'] },
+  { id: 'cover', name: tn('Copertina'), keys: ['cover'] },
+  { id: 'cableStyle', name: tn('Cavi'), keys: ['cableStyle'] },
+  { id: 'zoneStyle', name: tn('Riquadri di luogo'), keys: ['zoneStyle'] },
+  { id: 'listStyle', name: tn('Stile di liste, morsettiere e disegni'), keys: ['stripStyle', 'drawingStyles', 'listTextScale'] },
   { id: 'lists', name: tn('Pagine di lista'), keys: ['reportPages', 'autoReportPages', 'reportBlocks', 'reportBlocksAt', 'pageArrangement', 'reportStyles', 'customLists'] },
 ];
 
@@ -36,6 +40,7 @@ const KEY_NAMES: Partial<Record<keyof ProjectSettings, string>> = {
   freeSymbolTexts: tn('Testi dei simboli spostabili'), autoConnect: tn('Collegamento automatico'), plcAddressFormat: tn('Formato degli indirizzi PLC'),
   railTop: tn('Fili in alto'), railBottom: tn('Fili in basso'), plcRow: tn('Riga fissa dei punti I/O PLC'),
   reportPages: tn('Liste come pagine'), autoReportPages: tn('Pagine di lista automatiche'), reportBlocks: tn('Liste divise per quadro'), reportBlocksAt: tn('Posto delle liste per quadro'), pageArrangement: tn('Ordine e prefissi delle pagine generate'), reportStyles: tn('Impaginazione delle liste'), customLists: tn('Liste personalizzate'),
+  cover: tn('Copertina'), cableStyle: tn('Stile dei cavi'), zoneStyle: tn('Riquadri di luogo'), stripStyle: tn('Stile delle morsettiere'), drawingStyles: tn('Stile dei disegni'), listTextScale: tn('Scala dei testi delle liste'),
 };
 export const keyName = (k: keyof ProjectSettings) => KEY_NAMES[k] ?? k;
 

@@ -40,6 +40,8 @@ barra multifunzione, barra multifunzione compatta e **menu classici**, per chi p
 | *Visualizza* | riquadri, tema, foglio, lingua dell'interfaccia e degli schemi, griglia, miniature, mappa del foglio, menu a raggiera, stile della barra |
 | *Aiuto* | manuale, giro guidato, scorciatoie, guida per agenti IA, aggiornamenti, informazioni, sito del progetto |
 
+Le conferme (eliminare, rinumerare, uscire senza salvare) sono finestre dell'app e seguono il tema; con l'editor dei simboli o del cartiglio aperto i comandi di Home che agiscono sullo schema sono spenti, e passando a un'altra vista con modifiche non salvate l'app chiede conferma.
+
 ![La scheda Progetto](../img/it/menu-progetto.png)
 
 *La scheda Progetto.*

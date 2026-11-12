@@ -56,7 +56,7 @@ export function tx(s: string, ...args: (string | number | undefined | null)[]): 
     const v = CATALOGS[lang][s];
     if (v) out = v; else missing.add(s);
   }
-  return args.length ? out.replace(/\{(\d+)\}/g, (m, i) => (args[+i] ?? '') + '') : out;
+  return args.length ? out.replace(/\{(\d+)\}/g, (_m, i) => (args[+i] ?? '') + '') : out;
 }
 
 /** Nome della lingua dell'interfaccia in italiano, per le istruzioni agli assistenti IA */

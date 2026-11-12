@@ -26,7 +26,7 @@ element and selects it.
 | Apparent connections only | a wire passing over a connection point without ending there: it looks connected but it is not |
 | Orphans | components, potentials, interruption points and nodes without connections, isolated wires, contacts without a coil |
 | Incomplete connections | free terminals of coils, contacts, lamps, pushbuttons, I/O points; wires with a free end (bars reaching the border are allowed) |
-| Drawing | non-existent or overlapping symbols, overlapping wires, elements outside the sheet, repeated wire numbers, empty pages |
+| Drawing | non-existent or overlapping symbols, overlapping wires, elements outside the sheet, repeated wire numbers, empty pages, rotations not allowed by the symbol (fixed by allowing the rotation in the symbol) |
 | Conductor buses | wires touching the bus without the conductor name, conductors entering the bus and not leaving |
 | Tags and data | duplicate or missing tags, more contacts than the part has, repeated terminals |
 | Cables, connectors, networks, PLC, layout | see the relevant chapters |

@@ -1,11 +1,10 @@
 // Rendering SVG di una pagina di schema: usato sia dall'editor sia dall'export PDF.
-import { isIncomingLink } from '../model/links';
 import type { ReportSheet, RevisionCloud } from '../model/derive';
 import { REPORT_DEFAULTS, REPORT_X, reportColumns, styledHeadH, type ReportCol } from '../model/reportStyle';
 import { memo, type ReactNode } from 'react';
 import type { Project, Page, Prim, SymbolInstance, SymbolDef, Pt, FieldKey, TextItem, CableLine, StripStyle } from '../model/types';
-import { PAGE_W, PAGE_H, FRAME, COLUMNS, ROWS, TITLE_TOP, WIRE_COLORS, WIRE_WIDTH_DEFAULT, wireDash, primLineType, textStylesOf, wireTextStyle, type TextStyleKey, type TextStyle } from '../model/types';
-import { getSymbol, toWorld, readableText, pinLabelPlace, primBounds, samePt, pairVertical } from '../model/geometry';
+import { PAGE_W, PAGE_H, FRAME, COLUMNS, ROWS, WIRE_COLORS, WIRE_WIDTH_DEFAULT, wireDash, primLineType, textStylesOf, wireTextStyle, type TextStyleKey, type TextStyle } from '../model/types';
+import { getSymbol, toWorld, readableText, primBounds, samePt, pairVertical } from '../model/geometry';
 import { DIR_VEC, type TNode } from '../model/wiringOrder';
 import { pageOfLocation, type CrossRefInfo } from '../model/devices';
 import { OVERVIEW, overviewRowHeight, type OverviewData } from '../model/plc';
@@ -14,14 +13,13 @@ import { COVER_DEFAULTS, coverLines, coverStyleOf } from '../model/cover';
 import { layoutOf, layoutView, railUsage } from '../model/layout';
 import { protocolOf, nodeIp } from '../model/network';
 import { translator } from '../model/i18n';
-import { titleBlockPrims, TB_AREA } from '../model/titleBlocks';
+import { titleBlockPrims } from '../model/titleBlocks';
 import { linkTextLayout, type WireLabelPos } from '../model/wireLabels';
 import type { ShowMap, SymVisKey } from '../model/visibility';
 import { flowLines, LINE_GAP } from '../model/textFlow';
 import { layoutRich } from '../model/textRich';
 import { terminalTextLayout } from '../model/terminalText';
 import { textPlace, orientPlace, textOffset } from '../model/symbolTexts';
-import type { Table } from '../model/reports';
 import type { Layout, LayoutItem, Zone, ZoneStyle, Panel, TerminalTextDir, TextMoveKey, ImageItem, WireDef } from '../model/types';
 import { wireDefLabel, wireDefCrossings, wireDefLabelAt } from '../model/wireDefs';
 import { plotPrims } from '../model/types';
@@ -161,7 +159,7 @@ function CableView({ line, mark, selected, style: base }: { line: CableLine; mar
   const along = (p: Pt) => (horiz ? p.x : p.y);
   const tip = (p: Pt, u: number): Pt => (horiz ? { x: u, y: p.y } : { x: p.x, y: u });
   const at = end ? (sh ? tip(s1, Math.max(along(s1), sh.hi)) : s1) : (sh ? tip(s0, Math.min(along(s0), sh.lo)) : s0);
-  const up = (from: number, list: typeof lines) => { let yy = from; return list.map((l, k) => { if (k) yy -= step(list[k - 1]); return yy; }).reverse(); };
+  const up = (from: number, list: typeof lines) => { let yy = from; return list.map((_l, k) => { if (k) yy -= step(list[k - 1]); return yy; }).reverse(); };
   const down = (from: number, list: typeof lines) => { let yy = from; return list.map((l, k) => { yy += k ? step(l) : l.size * 0.8; return yy; }); };
   let x: number, anchor: 'start' | 'end', ys: number[];
   if (horiz) {

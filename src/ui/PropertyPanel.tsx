@@ -35,7 +35,7 @@ import { getSymbol, snap } from '../model/geometry';
 import { settingsOf, formatPattern } from '../model/numbering';
 import { buildDevices, effectivePinLabels, deviceInfo, designation, partsIndex, stripOf, mergeTargets, locationOf, allPlaced, extraPartsText } from '../model/devices';
 import { letterOfTag, nextTagFor } from '../model/numbering';
-import { askChoice } from './Ask';
+import { askChoice, askConfirm } from './Ask';
 import { replaceImage, naturalRatio } from './images';
 import { bundleTaps, isBundle, conductorChoices, bundleCable } from '../model/bundles';
 import { linkChoices, currentLinkPartner, pairByName } from './linkChooser';
@@ -903,7 +903,7 @@ function BusCableRows({ wire, tagShown }: { wire: Wire; tagShown: boolean }) {
   const parts = [...partsIndex(project, library).values()];
   return (
     <>
-      <Row label={tx('Sigla cavo')} vis={{ on: tagShown, set: on => st().setWireShow([wire.id], 'cable', on) }}><Field value={c.tag ?? ''} placeholder="automatica" onCommit={v => set({ tag: v.replace(/^-/, '').trim() || undefined })} /></Row>
+      <Row label={tx('Sigla cavo')} vis={{ on: tagShown, set: on => st().setWireShow([wire.id], 'cable', on) }}><Field value={c.tag ?? ''} placeholder={tx('automatica')} onCommit={v => set({ tag: v.replace(/^-/, '').trim() || undefined })} /></Row>
       <Row label={tx('Tipo cavo')}><Field value={c.type ?? ''} list="bus-cable-types" placeholder={BUS_CABLE_TYPES[wire.bus!] ?? (wire.bus === GENERIC_BUS ? tx('es. cavo del pad del robot, 10 m') : tx('es. Cat5e SF/UTP'))} onCommit={v => set({ type: v.trim() || undefined })} /></Row>
       <Row label={tx('Lunghezza (m)')}><Field value={c.length !== undefined ? String(c.length).replace('.', ',') : ''} placeholder={tx('es. 2')}
         onCommit={v => { const n = parseFloat(v.replace(',', '.')); set({ length: isNaN(n) ? undefined : n }); }} /></Row>
@@ -928,7 +928,7 @@ function IpNetworksGroup() {
         <Row key={n.id} label={n.name || tx('Rete')}>
           <span className="panel-row">
             <Field value={n.name} placeholder={tx('Nome')} onCommit={v => st().updateIpNetwork(n.id, { name: v.trim() })} />
-            <button title={tx('Elimina la rete')} onClick={() => { if (window.confirm(tx('Eliminare la rete {0}?', n.name))) st().deleteIpNetwork(n.id); }}>✕</button>
+            <button title={tx('Elimina la rete')} onClick={async () => { if (await askConfirm(tx('Conferma'), tx('Eliminare la rete {0}?', n.name), tx('Elimina'))) st().deleteIpNetwork(n.id); }}>✕</button>
           </span>
           <span className="panel-row">
             <Field value={`${n.address}/${n.prefix}`} placeholder="192.168.0.0/24" onCommit={v => {
@@ -1054,10 +1054,10 @@ function CableProps({ line, derived }: { line: CableLine; derived: Derived }) {
         <Row label={tx('Comandi')}>
           <button onClick={() => { st().setCableSel(c.id); st().setView('cables'); }}>{tx('Apri nel pannello Cavi')}</button>
           <button onClick={() => st().copyCableProps(c.id)} title={tx('Copia tipo, sezione, conduttori, colori scelti a mano e gli altri dati, tranne la sigla')}>{tx('Copia proprietà')}</button>
-          <button onClick={() => { if (window.confirm(tx('Riassegnare in ordine di pagina i conduttori automatici del cavo -{0}? I fili possono cambiare conduttore (quelli scelti a mano restano).', c.tag))) st().reassignConductors([c.id]); }}
+          <button onClick={async () => { if (await askConfirm(tx('Conferma'), tx('Riassegnare in ordine di pagina i conduttori automatici del cavo -{0}? I fili possono cambiare conduttore (quelli scelti a mano restano).', c.tag), tx('Riassegna'))) st().reassignConductors([c.id]); }}
             title={tx('I conduttori assegnati in automatico restano ai loro fili anche aggiungendo fili su pagine precedenti; questo comando li riassegna da capo in ordine di pagina')}>{tx('Riassegna i conduttori in ordine')}</button>
           {clip && clip.tag !== c.tag && <button onClick={() => st().pasteCableProps([c.id])}>{tx('Incolla proprietà di -{0}', clip.tag)}</button>}
-          <button onClick={() => { if (window.confirm(tx('Eliminare il cavo -{0} e tutte le sue linee?', c.tag))) st().deleteCable(c.id); }}>{tx('Elimina cavo')}</button>
+          <button onClick={async () => { if (await askConfirm(tx('Conferma'), tx('Eliminare il cavo -{0} e tutte le sue linee?', c.tag), tx('Elimina'))) st().deleteCable(c.id); }}>{tx('Elimina cavo')}</button>
         </Row>
       </Group>
       <CableLineGroup line={line} lines={info.lines.map(l => l.line)} shield={!!c.shield} />
@@ -1783,9 +1783,9 @@ export function TitleBlockSection() {
         <button onClick={() => st().openTitleBlockEditor(templateFor(project))}
           title={tx('Apre il modello nell\'editor (i modelli inclusi vengono copiati)')}>{templateFor(project).builtin ? tx('Personalizza…') : tx('Modifica…')}</button>{' '}
         <button onClick={() => st().openTitleBlockEditor()}>{tx('Nuovo…')}</button>{' '}
-        {!templateFor(project).builtin && <button onClick={() => {
+        {!templateFor(project).builtin && <button onClick={async () => {
           const t = templateFor(project);
-          if (window.confirm(tx('Eliminare il cartiglio "{0}" dal progetto e dalla libreria personale?', t.name))) st().deleteTitleBlock(t.id);
+          if (await askConfirm(tx('Conferma'), tx('Eliminare il cartiglio "{0}" dal progetto e dalla libreria personale?', t.name), tx('Elimina'))) st().deleteTitleBlock(t.id);
         }}>{tx('Elimina')}</button>}
       </Row>
       <Row label={tx('Logo')}>
@@ -1816,7 +1816,7 @@ export function TemplatesSection() {
       {templates.map(t => (
         <Row key={t.id} label={t.name}>
           <button onClick={() => newFromTemplate(t.id)}>{tx('Nuovo progetto')}</button>{' '}
-          <button onClick={() => { if (window.confirm(tx('Eliminare il modello "{0}"?', t.name))) st().deleteTemplate(t.id); }}>✕</button>
+          <button onClick={async () => { if (await askConfirm(tx('Conferma'), tx('Eliminare il modello "{0}"?', t.name), tx('Elimina'))) st().deleteTemplate(t.id); }}>✕</button>
         </Row>
       ))}
       <Row label="">
@@ -1872,7 +1872,7 @@ export function PlacesSection() {
           <span className="panel-row">
             <Field value={p.code} onCommit={v => v.trim() && st().updatePanel(p.id, { code: v.replace(/^\+/, '').trim() })} />
             <Field value={p.name} placeholder={tx('Nome')} onCommit={v => st().updatePanel(p.id, { name: v.trim() })} />
-            <button title={tx('Elimina il luogo (le pagine tornano generali)')} onClick={() => { if (window.confirm(tx('Eliminare il luogo +{0}?', p.code))) st().deletePanel(p.id); }}>✕</button>
+            <button title={tx('Elimina il luogo (le pagine tornano generali)')} onClick={async () => { if (await askConfirm(tx('Conferma'), tx('Eliminare il luogo +{0}?', p.code), tx('Elimina'))) st().deletePanel(p.id); }}>✕</button>
           </span>
           <select className="panel-kind" value={p.kind ?? ''} onChange={e => st().updatePanel(p.id, { kind: e.target.value || undefined })}>
             <option value="">{tx('— tipo —')}</option>

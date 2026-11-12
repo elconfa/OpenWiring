@@ -27,7 +27,7 @@ Zeile** führt zum Element und wählt es aus.
 | Nur scheinbare Verbindungen | ein Draht, der über einen Anschlusspunkt läuft, ohne dort zu enden: er sieht verbunden aus, ist es aber nicht |
 | Verwaiste Elemente | Bauteile, Potenziale, Unterbrechungspunkte und Knoten ohne Verbindungen, isolierte Drähte, Kontakte ohne Spule |
 | Unvollständige Verbindungen | freie Anschlüsse von Spulen, Kontakten, Leuchten, Tastern, E/A-Punkten; Drähte mit einem freien Ende (Schienen bis zum Rand sind zulässig) |
-| Zeichnung | nicht vorhandene oder überlappende Symbole, überlappende Drähte, Elemente außerhalb des Blatts, wiederholte Drahtnummern, leere Seiten |
+| Zeichnung | nicht vorhandene oder überlappende Symbole, überlappende Drähte, Elemente außerhalb des Blatts, wiederholte Drahtnummern, leere Seiten, vom Symbol nicht zugelassene Drehungen (Korrektur: die Drehung im Symbol zulassen) |
 | Leiterbusse | Drähte, die den Bus ohne Leitername berühren, Leiter, die in den Bus eintreten und nicht austreten |
 | BMK und Daten | doppelte oder fehlende BMK, mehr Kontakte als der Artikel hat, wiederholte Klemmen |
 | Kabel, Steckverbinder, Netze, SPS, Aufbau | siehe die jeweiligen Kapitel |

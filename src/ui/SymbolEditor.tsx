@@ -15,7 +15,8 @@ import { BUILTIN_SYMBOLS } from '../model/symbols';
 import { TB_AREA, TB_PLACEHOLDERS, fillTitleText, placeholderValues } from '../model/titleBlocks';
 import { dxfToPrims, dxfSymbolInfo, dxfSymbolPrims } from '../io/dxfImport';
 import { openFiles } from '../io/fileio';
-import { ask, askText } from './Ask';
+import { setEditorDirty } from './editorDirty';
+import { ask, askText, askChoice, askConfirm } from './Ask';
 import { ALIGN_MODES } from '../model/align';
 import { snapPoints, nearestSnap, type SnapPt } from '../symcad/geom';
 import { trimAt, extendAt, offsetPrim, measure } from '../symcad/edit';
@@ -49,8 +50,6 @@ interface Cmd {
 }
 /** Pulsante premuto nel disegno, finché non si capisce se è un clic o un trascinamento */
 type Press = { raw: Pt; sx: number; sy: number; hit?: Item; grip?: GripRef & Pt; mid?: GripRef & Pt; cmdDrag?: boolean };
-/** Comandi di disegno: finito un elemento ne chiedono subito un altro (Invio o Esc per uscire) */
-const DRAW_CMDS = new Set<string>(['line', 'pline', 'circle', 'rect', 'arc', 'ellipse']);
 /** Comandi che si possono anche trascinare dal primo al secondo punto */
 const DRAG_CMDS = new Set<string>(['line', 'rect', 'circle', 'ellipse', 'arc']);
 
@@ -224,6 +223,8 @@ export function SymbolEditor() {
   const [pinDir, setPinDir] = useState<PinDir | null>(null);
   const [vb, setVb] = useState(isTb ? { x: -5, y: -10, w: TB_AREA.w + 10, h: TB_AREA.h + 20 } : { x: -30, y: -20, w: 60, h: 50 });
   const [dirty, setDirty] = useState(false);
+  // Chi esce dall'editor (schede Schema / Altre viste) deve sapere se ci sono modifiche non salvate
+  useEffect(() => { setEditorDirty(dirty); return () => setEditorDirty(false); }, [dirty]);
   /** CAD: aggancio ai punti del disegno (F3), livello attivo, misura, offset */
   const [osnap, setOsnap] = useState(true);
   const [curLayer, setCurLayer] = useState('0');
@@ -1047,7 +1048,10 @@ export function SymbolEditor() {
     if (!f) return;
     const g = dxfToPrims(new TextDecoder().decode(f.data), TB_AREA.w, TB_AREA.h);
     if (!g.prims.length) { st().logMsg(tx('{0}: nessun elemento grafico leggibile (serve un DXF in formato testo)', f.name)); return; }
-    if (sym.prims.length && !window.confirm(tx('Sostituire la grafica attuale con quella di {0}? (Annulla = aggiungi)', f.name))) update({ prims: [...sym.prims, ...g.prims] });
+    // Con una grafica già presente: sostituirla o aggiungere (chiudendo la finestra non si importa nulla)
+    const how = sym.prims.length ? await askChoice(tx('Importa DXF'), tx('Sostituire la grafica attuale con quella di {0}?', f.name), [tx('Sostituisci'), tx('Aggiungi')]) : 0;
+    if (how === null) return;
+    if (how === 1) update({ prims: [...sym.prims, ...g.prims] });
     else update({ prims: g.prims });
     setSel([]);
     st().logMsg(tx('{0}: {1} elementi importati, {2} × {3} mm{4}', f.name, g.prims.length, g.width, g.height, g.scale !== 1 ? ` (ridotti in scala ${g.scale.toFixed(3)} per stare nei ${TB_AREA.w} × ${TB_AREA.h} mm del cartiglio)` : ''));
@@ -1097,8 +1101,8 @@ export function SymbolEditor() {
     setDirty(false);
     st().logMsg(tx('Cartiglio "{0}" salvato{1}', t.name, use ? ' e usato nel progetto' : ''));
   };
-  const save = () => {
-    if (!sym.pins.length && !window.confirm(tx('Il simbolo non ha punti di connessione: salvarlo comunque?'))) return;
+  const save = async () => {
+    if (!sym.pins.length && !await askConfirm(tx('Conferma'), tx('Il simbolo non ha punti di connessione: salvarlo comunque?'), tx('Continua'))) return;
     const n = sym.id ? usedBy(sym.id) : 0;
     const s = st().saveSymbol({ ...sym, name: sym.name.trim() || tx('Nuovo simbolo') });
     setDirty(false);
@@ -1113,13 +1117,13 @@ export function SymbolEditor() {
     setDirty(false);
     st().logMsg(tx('Simbolo "{0}" salvato nella libreria personale; lo schema non cambia', s.name));
   };
-  const restore = () => {
-    if (!window.confirm(tx('Togliere dalla libreria la versione modificata e tornare al simbolo di base? I componenti già nello schema non cambiano.'))) return;
+  const restore = async () => {
+    if (!await askConfirm(tx('Conferma'), tx('Togliere dalla libreria la versione modificata e tornare al simbolo di base? I componenti già nello schema non cambiano.'), tx('Togli'))) return;
     st().restoreBuiltin(sym.id);
     st().logMsg(tx('Libreria: di nuovo il simbolo di base "{0}"', sym.name));
     st().setView('schema');
   };
-  const close = () => { if (!dirty || window.confirm(tx('Ci sono modifiche non salvate. Chiudere l\'editor?'))) st().setView('schema'); };
+  const close = async () => { if (!dirty || await askConfirm(tx('Conferma'), tx('Ci sono modifiche non salvate. Chiudere l\'editor?'), tx('Continua'))) st().setView('schema'); };
 
   // Griglia: 1 mm chiara, passo dei punti di connessione più scuro
   const gx0 = Math.floor(vb.x) - 2, gy0 = Math.floor(vb.y) - 2;

@@ -8,6 +8,7 @@ import { MacroGhost } from './Canvas';
 import type { Macro } from '../model/clipboard';
 import { primBounds, getSymbol } from '../model/geometry';
 import { SymbolGraphic } from './PageSvg';
+import { askConfirm } from './Ask';
 import { tx } from '../i18n/ui';
 import { chooseSymbolFolder } from './symbolFolderSync';
 import { symbolTree, countOf, categoriesOf, type TreeNode } from '../model/symbolTree';
@@ -134,9 +135,9 @@ export function SymbolLibrary() {
   const isOpen = (path: string, def: boolean) => !!ql || (pref.open[path] ?? (def || path.startsWith('#base/')));
   const toggle = (path: string, def: boolean) => setPref({ ...pref, open: { ...pref.open, [path]: !(pref.open[path] ?? (def || path.startsWith('#base/'))) } });
   const grid = (items: React.ReactNode) => <div className={pref.large ? 'sym-grid large' : 'sym-grid'}>{items}</div>;
-  const removeGroup = (n: TreeNode) => {
+  const removeGroup = async (n: TreeNode) => {
     const cats = categoriesOf(n);
-    if (window.confirm(tx('Rimuovere {0} simboli del gruppo "{1}" dalla libreria? I progetti che li usano ne conservano una copia.', countOf(n), n.path))) cats.forEach(c => st().removeSymbolCategory(c));
+    if (await askConfirm(tx('Conferma'), tx('Rimuovere {0} simboli del gruppo "{1}" dalla libreria? I progetti che li usano ne conservano una copia.', countOf(n), n.path), tx('Rimuovi'))) cats.forEach(c => st().removeSymbolCategory(c));
   };
   /** Simboli di una cartella e delle sue sottocartelle */
   const symbolsOf = (n: TreeNode): SymbolDef[] => [...n.items, ...n.children.flatMap(symbolsOf)];
@@ -336,7 +337,7 @@ export function SymbolLibrary() {
           {found.length > 0 && (
             <div className="pad">
               <button className="danger" title={tx('Toglie dalla libreria gli articoli elencati: tutti, o quelli trovati con la ricerca')}
-                onClick={() => removeListedParts(found.map(p => p.partNr), !!ql)}>{tx('Elimina elencati…')}</button>
+                onClick={() => void removeListedParts(found.map(p => p.partNr), !!ql)}>{tx('Elimina elencati…')}</button>
             </div>
           )}
           {parts.map(p => (
@@ -417,7 +418,7 @@ function MacroList({ macros }: { macros: Macro[] }) {
             <span className="muted small">{m.category} · {m.clip.elements.length} {tx('elementi')}</span>
             <div className="row-btns">
               <button className="mini" onClick={e => { e.stopPropagation(); void exportMacros([m.id]); }}>{tx('Esporta')}</button>
-              <button className="mini" onClick={e => { e.stopPropagation(); if (window.confirm(tx('Eliminare la macro "{0}"?', m.name))) st().deleteMacro(m.id); }}>{tx('Elimina')}</button>
+              <button className="mini" onClick={async e => { e.stopPropagation(); if (await askConfirm(tx('Conferma'), tx('Eliminare la macro "{0}"?', m.name), tx('Elimina'))) st().deleteMacro(m.id); }}>{tx('Elimina')}</button>
             </div>
           </div>
         </div>

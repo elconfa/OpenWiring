@@ -40,6 +40,8 @@ choisit entre ruban, ruban compact et **menus classiques**, pour qui préfère l
 | *Affichage* | panneaux, thème, feuille, langue de l'interface et des schémas, grille, miniatures, plan de la feuille, menu radial, style du ruban |
 | *Aide* | manuel, visite guidée, raccourcis, guide pour agents IA, mises à jour, à propos, site du projet |
 
+Les confirmations (supprimer, renuméroter, quitter sans enregistrer) sont des fenêtres de l'application et suivent le thème ; l'éditeur de symboles ou de cartouche ouvert, les commandes d'Accueil qui agissent sur le schéma sont désactivées, et passer à une autre vue avec des modifications non enregistrées demande confirmation.
+
 ![L'onglet Projet](../img/en/menu-progetto.png)
 
 *L'onglet Projet.*

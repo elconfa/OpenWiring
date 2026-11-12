@@ -15,11 +15,12 @@ describe('guida per agenti IA', () => {
     const block = /## 7\. Esempio[\s\S]*?```text\n([\s\S]*?)```/.exec(g)![1];
     expect(importPagesText(emptyProject(), block).errors).toEqual([]);
   });
-  it('il formato testo rifiuta rotazioni non ammesse e lo specchio dei simboli non specchiabili', () => {
+  it('il formato testo mantiene con avviso le rotazioni non ammesse e rifiuta lo specchio dei simboli non specchiabili', () => {
     const p = emptyProject();
     p.customSymbols.push({ id: 'u1', name: 'Prova', category: 'x', letter: 'K', role: 'single', prims: [], pins: [{ id: '1', x: 0, y: 0, dir: 'up', label: '1' }], rotations: [0, 90], noMirror: true });
     const r = importPagesText(p, 'pagina 1 "Prova"\nsimbolo u1 -1K1 @40,40 rot=180\nsimbolo u1 -1K2 @80,40 rot=90 specchio\nsimbolo u1 -1K3 @120,40 rot=90');
-    expect(r.errors.map(e => e.msg)).toEqual(['simbolo "u1": rot=180 non ammessa (ammesse: 0, 90)', 'simbolo "u1": non si può specchiare']);
+    expect(r.errors.map(e => e.msg)).toEqual(['simbolo "u1": non si può specchiare']);
+    expect(r.warnings.map(e => e.msg)).toEqual(['simbolo "u1": rot=180 non ammessa dal simbolo (ammesse: 0, 90): mantenuta']);
   });
   it('docs/AGENTE_IA.md è aggiornato (UPDATE_GUIDE=1 per rigenerarlo)', () => {
     if (process.env.UPDATE_GUIDE) writeFileSync(FILE, g);

@@ -20,11 +20,10 @@ import { useAi, activeProfile } from './aiState';
 import { aiAsk, PROVIDERS } from '../io/ai';
 import { translateSystem, translatePrompt, parseTranslations } from '../model/aiPrompts';
 import { projectTexts, translateText, TARGET_LANGS } from '../model/i18n';
-import { pageOfLocation } from '../model/devices';
 import { plcopenXml } from '../model/plc';
 import { nextRevisionIndex } from '../model/revisions';
 import { dictionaryCsv } from '../model/i18n';
-import { ask, askText, askChoice, askChecks } from './Ask';
+import { ask, askText, askChoice, askConfirm, askChecks } from './Ask';
 import { duplicatePageDefaults } from '../model/clipboard';
 import { panelLabel } from '../model/network';
 import { applyProfile } from '../model/settingsProfiles';
@@ -39,10 +38,10 @@ import { parseCaedex, parseCaedexCodes, parseIaxNames, planWmc, wmcReport, apply
 
 const st = () => useStore.getState();
 
-const confirmDiscard = () => !(st().viewing?.back.dirty ?? st().dirty) || window.confirm(tx('Ci sono modifiche non salvate. Continuare?'));
+const confirmDiscard = async () => !(st().viewing?.back.dirty ?? st().dirty) || await askConfirm(tx('Modifiche non salvate'), tx('Ci sono modifiche non salvate. Continuare?'), tx('Continua'));
 
-export function newProject() {
-  if (!confirmDiscard()) return;
+export async function newProject() {
+  if (!(await confirmDiscard())) return;
   const p = emptyProject();
   // Profilo di impostazioni per i progetti nuovi (Impostazioni ▸ Profili)
   const prof = st().profiles.find(x => x.isDefault);
@@ -51,14 +50,14 @@ export function newProject() {
   st().logMsg(prof ? tx('Nuovo progetto con il profilo "{0}"', prof.name) : tx('Nuovo progetto'));
 }
 
-export function loadExample() {
-  if (!confirmDiscard()) return;
+export async function loadExample() {
+  if (!(await confirmDiscard())) return;
   st().loadProject(exampleProject());
   st().logMsg(tx('Caricato il progetto di esempio "Avviamento motore pompa"'));
 }
 
 export async function openProject() {
-  if (!confirmDiscard()) return;
+  if (!(await confirmDiscard())) return;
   const [f] = await openFiles(PROJECT_FILTER);
   if (!f) return;
   try {
@@ -111,7 +110,7 @@ export async function confirmCloseAll(): Promise<boolean> {
 
 /** Riapre un progetto recente dal suo percorso (schermata iniziale); se il file non c'è più lo toglie dall'elenco */
 export async function openRecent(path: string): Promise<boolean> {
-  if (!confirmDiscard()) return false;
+  if (!(await confirmDiscard())) return false;
   const f = await window.elettro?.readProject?.(path);
   if (!f) {
     removeRecent(path);
@@ -151,7 +150,7 @@ export async function autoSaveProject(): Promise<boolean> {
  * morsetti e rimandi ricostruiti dalla grafica (vedi io/pdfSchematic.ts).
  */
 export async function importPdfSchematic() {
-  if (!confirmDiscard()) return;
+  if (!(await confirmDiscard())) return;
   const [f] = await openFiles([{ name: 'Schema in PDF', extensions: ['pdf'] }]);
   if (!f) return;
   try {
@@ -334,12 +333,12 @@ export async function deletePart(partNr: string): Promise<boolean> {
   return true;
 }
 
-export function removeListedParts(partNrs: string[], filtered: boolean): boolean {
+export async function removeListedParts(partNrs: string[], filtered: boolean): Promise<boolean> {
   if (!partNrs.length) return false;
   const msg = filtered
     ? tx('Eliminare dalla libreria i {0} articoli elencati, con le loro foto? I progetti che li usano ne conservano una copia.', partNrs.length)
     : tx('Eliminare tutti i {0} articoli della libreria, con le loro foto? I progetti che li usano ne conservano una copia.', partNrs.length);
-  if (!window.confirm(msg)) return false;
+  if (!(await askConfirm(tx('Elimina articoli'), msg, tx('Elimina')))) return false;
   st().removeParts(partNrs);
   st().logMsg(tx('{0} articoli eliminati dalla libreria', partNrs.length));
   return true;
@@ -716,7 +715,7 @@ export async function releasePackage(revId: string) {
 
 export async function cancelRevision() {
   const last = st().project.revisions?.at(-1);
-  if (!last || !window.confirm(tx('Annullare la revisione aperta? Tutte le modifiche fatte dopo il rilascio della {0} vanno perse.', last.index))) return;
+  if (!last || !(await askConfirm(tx('Annulla revisione'), tx('Annullare la revisione aperta? Tutte le modifiche fatte dopo il rilascio della {0} vanno perse.', last.index), tx('Annulla la revisione')))) return;
   if (!(await st().cancelRevision())) st().logMsg(tx('La revisione {0} non ha la copia archiviata (rilasciata con una versione precedente del programma): non si può tornare indietro', last.index), 'warn');
 }
 
@@ -732,8 +731,8 @@ export async function saveMacroFromSelection() {
   if (r && name) st().saveMacro(name, r[1].trim() || 'Macro');
 }
 
-export function newFromTemplate(id: string) {
-  if (confirmDiscard()) st().newFromTemplate(id);
+export async function newFromTemplate(id: string) {
+  if (await confirmDiscard()) st().newFromTemplate(id);
 }
 
 /** Nuovo luogo (quadro, pulsantiera, bordo macchina…) con codice e nome */
@@ -746,8 +745,8 @@ export async function addPlace() {
   st().updatePanel(pn.id, { code: code.replace(/^\+/, '').trim().toUpperCase() });
 }
 
-export function renumberDevices() {
-  if (window.confirm(tx('Rinumerare tutti i dispositivi secondo il modello? I contatti seguono la sigla della bobina.'))) st().renumber();
+export async function renumberDevices() {
+  if (await askConfirm(tx('Rinumera dispositivi'), tx('Rinumerare tutti i dispositivi secondo il modello? I contatti seguono la sigla della bobina.'), tx('Rinumera'))) st().renumber();
 }
 
 /**
@@ -769,12 +768,12 @@ export async function renumberPages() {
   const start = parseInt(r[0], 10), step = parseInt(r[1], 10);
   if (!(start >= 0) || !(step > 0)) { st().logMsg(tx('Numero o passo non validi'), 'warn'); return; }
   const revised = !!st().project.revisions?.length;
-  if (revised && !window.confirm(tx('Il progetto ha revisioni: i numeri delle pagine emesse cambiano e la rinumerazione finisce tra le modifiche della revisione. Continuare?'))) return;
+  if (revised && !(await askConfirm(tx('Rinumera pagine'), tx('Il progetto ha revisioni: i numeri delle pagine emesse cambiano e la rinumerazione finisce tra le modifiche della revisione. Continuare?'), tx('Continua')))) return;
   st().renumberPages(start, step);
 }
 
-export function renumberWires() {
-  if (window.confirm(tx('Ricalcolare da capo tutti i numeri filo? I numeri assegnati, anche quelli manuali, verranno sostituiti.'))) st().renumberWires();
+export async function renumberWires() {
+  if (await askConfirm(tx('Numeri filo'), tx('Ricalcolare da capo tutti i numeri filo? I numeri assegnati, anche quelli manuali, verranno sostituiti.'), tx('Ricalcola'))) st().renumberWires();
 }
 
 /** Proprietà del progetto nel pannello a sinistra */
@@ -918,8 +917,8 @@ export async function openProjectAlongside() {
 }
 
 /** Chiude il progetto attivo quando ce ne sono altri aperti (chiede se ci sono modifiche) */
-export function closeActiveProject() {
+export async function closeActiveProject() {
   if (!st().others.length) { st().logMsg(tx('È l\'unico progetto aperto'), 'warn'); return; }
-  if (!confirmDiscard()) return;
+  if (!(await confirmDiscard())) return;
   st().closeActive();
 }

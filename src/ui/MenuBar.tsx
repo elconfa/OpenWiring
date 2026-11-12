@@ -19,6 +19,12 @@ import { tx, tn, UI_LANGS, uiLang } from '../i18n/ui';
 import { Icon } from './icons';
 import { startTour } from './Tour';
 import { checkProjectSymbols, openUnifySymbols } from './LibrarySync';
+import { goView } from './editorDirty';
+import { getSymbol } from '../model/geometry';
+import { canReplace } from '../model/replaceSymbol';
+import { chooseReplacement } from './ReplaceSymbolDialog';
+import { chooseRepresentation } from './representationChooser';
+import type { SymbolDef, SymbolInstance } from '../model/types';
 
 export type Item =
   | { label: string; run: () => void; key?: string; disabled?: boolean; checked?: boolean; title?: string }
@@ -38,6 +44,10 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
   const hasSel = s.selection.length > 0;
   const schema = s.view === 'schema';
   const page = s.project.pages.find(p => p.id === s.pageId);
+  // Simbolo selezionato (voci sul componente, come nella scheda Simbolo della barra multifunzione)
+  const symbols = schema && page ? page.elements.filter((e): e is SymbolInstance => e.kind === 'symbol' && s.selection.includes(e.id)) : [];
+  const one = symbols.length === 1 && s.selection.length === 1 ? symbols[0] : undefined;
+  const sym: SymbolDef | undefined = one ? getSymbol(one.symbolId, s.project) : undefined;
   const tool = (t: Parameters<typeof s.setTool>[0]) => () => { st().setView('schema'); st().setTool(t); };
   const tables = A.allReports();
   const panels = usePanelStore.getState().layout;
@@ -90,7 +100,13 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
         { label: tx('Copia'), key: keyLabel('copy'), run: () => st().copySelection(), disabled: !hasSel || !schema },
         { label: tx('Incolla'), key: keyLabel('paste'), run: () => st().setTool({ kind: 'paste' }), disabled: !s.clipboard || !schema, title: tx('Gli elementi copiati seguono il puntatore: clic per posarli, Esc per annullare') },
         { label: tx('Duplica'), key: keyLabel('duplicate'), run: () => st().duplicateSelection(), disabled: !hasSel },
+        { label: tx('Copia proprietà'), run: () => { if (one) st().copyDeviceProps(one.id); }, disabled: !one || sym?.role === 'potential' || sym?.role === 'link', title: tx('Copia i dati del dispositivo selezionato per incollarli su altri') },
         { label: tx('Elimina'), key: keyLabel('delete'), run: () => st().deleteSelection(), disabled: !hasSel },
+        { label: tx('Modifica il componente…'), run: () => { if (sym) st().openSymbolEditor(sym); }, disabled: !sym },
+        { label: tx('Sostituisci simbolo…'), run: () => { if (one && sym) void chooseReplacement(sym).then(id => { if (id) st().replaceSymbol(one.id, id); }); }, disabled: !one || !sym || !canReplace(one) },
+        { label: tx('Rappresentazione…'), title: tx('Riferimento a coppie: disegna il contatto anche in un altro punto (per esempio l\'ausiliario accanto ai poli). Su un contatto lo disegna subito; su una bobina o un salvamotore chiede quale dei suoi contatti'),
+          run: () => { if (!one) return; if (sym?.role === 'aux') st().startRepresentation(one.id); else void chooseRepresentation(one.id); },
+          disabled: !one || !!one.pairOf || (sym?.role !== 'aux' && sym?.role !== 'main') },
         { label: tx('Seleziona tutto'), key: keyLabel('selectAll'), run: () => st().setSelection(page?.elements.map(e => e.id) ?? []), disabled: !schema },
         sep,
         { label: tx('Ruota'), key: keyLabel('rotate'), run: () => st().rotateSelection(), disabled: !hasSel },
@@ -178,6 +194,7 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
     },
     {
       name: 'Progetto', items: [
+        { label: tx('Profili…'), run: () => openSettingsAt('profiles'), title: tx('Profili di impostazioni: salva, applica e blocca le impostazioni del progetto') },
         { label: tx('Impostazioni del progetto…'), key: keyLabel('settings'), run: () => st().setDialog('settings'), title: tx('Tutte le impostazioni del progetto in una pagina, e le cartelle predefinite') },
         { label: tx('Proprietà del progetto'), run: A.showProjectProps },
         { label: tx('Proprietà definite dall\'utente…'), run: () => st().setDialog('userProps'), title: tx('Proprietà proprie per dispositivi, pagine, collegamenti, progetto e articoli; import ed export XML') },
@@ -208,6 +225,7 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
         { label: tx('Traduci con l\'assistente IA'), run: () => void A.aiTranslate(), title: tx('Claude, ChatGPT o Gemini traducono i testi mancanti; restano da verificare') },
         sep,
         { label: tx('Revisioni…'), run: () => st().setDialog('revisions') },
+        { label: tx('Modifiche della revisione'), run: () => { st().setView('reports'); st().setReportTab('revision'); }, title: tx('Pagine e modifiche rispetto all\'ultima revisione rilasciata, con le note') },
         { label: tx('Rilascia revisione…'), run: () => void A.releaseRevision(), disabled: !!s.viewing || s.project.revisionState === 'released' },
         { label: tx('Apri revisione nuova'), run: () => st().openRevision(), disabled: !!s.viewing || s.project.revisionState !== 'released' },
         { label: tx('Salva come modello…'), run: A.saveAsTemplate },
@@ -299,7 +317,6 @@ const OTHER_VIEWS = [['devices', 'Dispositivi'], ['plc', 'PLC'], ['terminals', '
  */
 export function ViewTabs() {
   const view = useStore(s => s.view);
-  const st = useStore.getState;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -313,7 +330,7 @@ export function ViewTabs() {
   const cur = OTHER_VIEWS.find(([v]) => v === view);
   return (
     <div className="tb-tabs" role="tablist">
-      <button role="tab" aria-selected={view === 'schema'} className={view === 'schema' ? 'tab active' : 'tab'} onClick={() => st().setView('schema')}>{tx('Schema')}</button>
+      <button role="tab" aria-selected={view === 'schema'} className={view === 'schema' ? 'tab active' : 'tab'} onClick={() => void goView('schema')}>{tx('Schema')}</button>
       <div className="menu view-menu" ref={ref}>
         <button role="tab" aria-selected={!!cur} aria-haspopup="true" aria-expanded={open} className={cur ? 'tab active' : 'tab'}
           onClick={() => setOpen(o => !o)} title={tx('Dispositivi, PLC, morsettiere, cavi, liste e le altre viste')}>
@@ -322,7 +339,7 @@ export function ViewTabs() {
         {open && (
           <div className="menu-drop view-menu-drop" role="menu">
             {OTHER_VIEWS.map(([v, l]) => (
-              <button key={v} role="menuitemradio" aria-checked={view === v} className="menu-item" onClick={() => { setOpen(false); st().setView(v); }}>
+              <button key={v} role="menuitemradio" aria-checked={view === v} className="menu-item" onClick={() => { setOpen(false); void goView(v); }}>
                 <span className="menu-check">{view === v ? '✓' : ''}</span>
                 <span className="menu-label">{tx(l)}</span>
               </button>

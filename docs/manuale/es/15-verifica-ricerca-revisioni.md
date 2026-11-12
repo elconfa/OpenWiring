@@ -26,7 +26,7 @@ elemento y lo selecciona.
 | Conexiones solo aparentes | un hilo que pasa por encima de un punto de conexión sin terminar en él: parece conectado pero no lo está |
 | Huérfanos | componentes, potenciales, puntos de interrupción y nodos sin conexiones, hilos aislados, contactos sin bobina |
 | Conexiones incompletas | bornes libres de bobinas, contactos, pilotos, pulsadores, puntos de E/S; hilos con un extremo libre (las barras que llegan al borde se admiten) |
-| Dibujo | símbolos inexistentes o superpuestos, hilos superpuestos, elementos fuera de la hoja, números de hilo repetidos, páginas vacías |
+| Dibujo | símbolos inexistentes o superpuestos, hilos superpuestos, elementos fuera de la hoja, números de hilo repetidos, páginas vacías, giros no admitidos por el símbolo (se corrige admitiendo el giro en el símbolo) |
 | Bus de conductores | hilos que tocan el bus sin el nombre del conductor, conductores que entran en el bus y no salen |
 | Siglas y datos | siglas duplicadas o que faltan, más contactos que los del artículo, bornes repetidos |
 | Cables, conectores, redes, PLC, disposición | ver los capítulos correspondientes |

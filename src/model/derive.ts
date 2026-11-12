@@ -277,14 +277,17 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     }
   }
   // Pagine di lista: righe del foglio
-  const reportSheets = new Map<string, ReportSheet>();
   // Scala di tutti i testi delle liste sui caratteri della lista (scelti o di serie)
   const k = listTextScale(project), RD = REPORT_DEFAULTS;
   const scaled = (st: ReportStyle): ReportStyle => (k === 1 ? st : {
     ...st, titleSize: (st.titleSize ?? RD.titleSize) * k, headSize: (st.headSize ?? RD.headSize) * k, textSize: (st.textSize ?? RD.textSize) * k,
     columns: st.columns && Object.fromEntries(Object.entries(st.columns).map(([c, v]) => [c, v.size ? { ...v, size: v.size * k } : v])),
   });
-  if (project.pages.some(p => p.type === 'report')) {
+  // Calcolo pigro: le liste e i disegni dei cavi si preparano solo quando qualcuno legge reportSheet/drawing
+  // della pagina (la pagina aperta, la stampa e il PDF, le miniature), non a ogni modifica dello schema
+  let sheetsCache: Map<string, ReportSheet> | undefined;
+  const sheets = () => sheetsCache ??= withNetlistCache(project, () => {
+    const out = new Map<string, ReportSheet>();
     // Blocchi: le liste intere e, per le liste divise per quadro, le righe di ogni luogo
     const tables = new Map(reportBlocks(project, library, given ?? projectReports(project, library)).map(b => [blockKey(b.title, b.panel), b.table]));
     for (const pg of project.pages) {
@@ -293,9 +296,10 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
       // Impaginazione scelta per la lista: ordine delle righe, altezza delle righe, colonne
       const style = reportStyleOf(project, t.title), rowH = styledRowH(t, style), tt = sortedTable(t, style);
       const r = sheetRanges(t, style)[pg.reportSheet ?? 0], first = r?.first ?? 0, n = r?.n ?? 0;
-      reportSheets.set(pg.id, { table: translateTable(project, { ...tt, rowH, rows: tt.rows.slice(first, first + n), goto: tt.goto?.slice(first, first + n), symbols: tt.symbols?.slice(first, first + n) }), first, keys: columnKeys(t.columns), style: scaled(style) });
+      out.set(pg.id, { table: translateTable(project, { ...tt, rowH, rows: tt.rows.slice(first, first + n), goto: tt.goto?.slice(first, first + n), symbols: tt.symbols?.slice(first, first + n) }), first, keys: columnKeys(t.columns), style: scaled(style) });
     }
-  }
+    return out;
+  });
   // Colore del conduttore: il primo colore scelto su uno dei suoi fili vale per tutti gli altri
   // (anche sulle altre pagine, tramite i rimandi, e oltre i morsetti di passaggio)
   const groupColor = new Map<string, string>();
@@ -318,7 +322,13 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
       if (gap) gaps.set(e.id, gap);
     }
     const wireLabelPos = texts.size ? placeWireLabels(project, pg, texts, designations, deviceLines, netlist.junctions.get(pg.id) ?? [], sizes, gaps) : undefined;
-    pages.set(pg.id, { conductorColor, wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), reportSheet: reportSheets.get(pg.id), drawing: ['cable', 'connector', 'system'].includes(pg.type) ? drawingData(project, pg, library, netlist) : undefined, connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) });
+    const pd: PageDerived = { conductorColor, wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) };
+    if (pg.type === 'report') Object.defineProperty(pd, 'reportSheet', { get: () => sheets().get(pg.id), enumerable: true, configurable: true });
+    if (['cable', 'connector', 'system'].includes(pg.type)) {
+      let drawing: ReturnType<typeof drawingData> | undefined, done = false;
+      Object.defineProperty(pd, 'drawing', { get: () => (done ? drawing : (done = true, drawing = withNetlistCache(project, () => drawingData(project, pg, library, netlist)))), enumerable: true, configurable: true });
+    }
+    pages.set(pg.id, pd);
   }
   return { pages, netlist, cableTagShown, linkWaiting: waiting.map(l => ({ id: l.inst.id, pageId: l.page.id })) };
 }

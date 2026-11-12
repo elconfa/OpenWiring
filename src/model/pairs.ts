@@ -32,14 +32,16 @@ export function pairRepresentations(project: Project): PairRef[] {
 }
 
 /** Sigla e morsetti delle rappresentazioni uguali a quelli del contatto vero (dentro un commit) */
-export function syncPairs(project: Project): void {
+export function syncPairs(project: Project): number {
+  let changed = 0;
   for (const { rep, real } of pairRepresentations(project)) {
     if (!real) continue;
     const r = rep.inst, s = real.inst;
-    if (r.tag !== s.tag) r.tag = s.tag;
-    if (r.autoPins !== s.autoPins) r.autoPins = s.autoPins;
-    if (JSON.stringify(r.pinLabels) !== JSON.stringify(s.pinLabels)) r.pinLabels = { ...s.pinLabels };
+    if (r.tag !== s.tag) { r.tag = s.tag; changed++; }
+    if (r.autoPins !== s.autoPins) { r.autoPins = s.autoPins; changed++; }
+    if (JSON.stringify(r.pinLabels) !== JSON.stringify(s.pinLabels)) { r.pinLabels = { ...s.pinLabels }; changed++; }
   }
+  return changed;
 }
 
 /** Rappresentazione nuova di un contatto, nel punto indicato */

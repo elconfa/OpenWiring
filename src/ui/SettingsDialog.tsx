@@ -10,7 +10,8 @@ import { keyLabel } from './shortcuts';
 import { startTour } from './Tour';
 import { DEFAULT_SETTINGS } from '../model/types';
 import { isElectron, openDocument, type FolderKind } from '../io/fileio';
-import { SETTINGS_TREE, SettingsDatalists, SettingsFilter, settingsMatch, type SettingsBranch, type SettingsLeaf } from './PropertyPanel';
+import { partKeys } from '../model/settingsProfiles';
+import { Locked, SETTINGS_TREE, SettingsDatalists, SettingsFilter, settingsMatch, type SettingsBranch, type SettingsLeaf } from './PropertyPanel';
 import { Embedded } from './DialogShell';
 import { CableStyleDialog, CoverDialog, ZoneStyleRows } from './PageStyleDialogs';
 import { ListStyleDialog } from './ListStyleDialog';
@@ -226,15 +227,15 @@ const EXTRA_LEAVES: Record<string, SettingsLeaf[]> = {
     { id: 'userProps', title: tn('Proprietà definite dall\'utente'), free: true, render: () => <UserPropsDialog /> },
   ],
   sheet: [
-    { id: 'cover', title: tn('Copertina'), keys: ['cover'], free: true, render: () => <CoverDialog /> },
+    { id: 'cover', title: tn('Copertina'), keys: partKeys('cover'), free: true, render: () => <CoverDialog /> },
   ],
   look: [
-    { id: 'cableStyle', title: tn('Cavi'), keys: ['cableStyle'], free: true, render: () => <CableStyleDialog /> },
-    { id: 'zoneStyle', title: tn('Riquadri di luogo'), keys: ['zoneStyle'], render: () => <ZoneStyleRows /> },
+    { id: 'cableStyle', title: tn('Cavi'), keys: partKeys('cableStyle'), free: true, render: () => <CableStyleDialog /> },
+    { id: 'zoneStyle', title: tn('Riquadri di luogo'), keys: partKeys('zoneStyle'), render: () => <Locked part="zoneStyle"><ZoneStyleRows /></Locked> },
   ],
   lists: [
     { id: 'reportPages', title: tn('Pagine automatiche'), free: true, render: () => <ReportPagesDialog /> },
-    { id: 'listStyle', title: tn('Stile di liste, morsettiere e disegni'), keys: ['reportStyles', 'stripStyle', 'drawingStyles', 'listTextScale'], free: true, render: () => <ListStyleDialog /> },
+    { id: 'listStyle', title: tn('Stile di liste, morsettiere e disegni'), keys: ['reportStyles', ...partKeys('listStyle')], free: true, render: () => <ListStyleDialog /> },
     { id: 'customLists', title: tn('Liste personalizzate'), free: true, render: () => <CustomListsDialog /> },
   ],
 };
@@ -251,8 +252,16 @@ const ALL_KEYS = [...new Set(TREE.filter(b => !b.free).flatMap(b => b.leaves.fla
 
 /** Una pagina dell'albero: tabella delle proprietà (o contenuto libero per il ramo Programma) */
 function LeafBody({ branch, leaf }: { branch: SettingsBranch; leaf: SettingsBranch['leaves'][number] }) {
+  const lock = useStore(s => s.project.settings.locks);
+  const locked = !!lock?.parts.includes(leaf.id);
+  // Pagine libere (finestre incorporate): bloccate da un profilo si vedono ma non si cambiano
   return branch.free || leaf.free
-    ? <div className="settings-free"><Embedded.Provider value>{leaf.render()}</Embedded.Provider></div>
+    ? <div className="settings-free">
+      {locked && <p className="small warn-text">🔒 {tx('Bloccato dal profilo «{0}»: si sblocca in Impostazioni ▸ Profili', lock!.profile)}</p>}
+      {locked
+        ? <fieldset disabled className="lock-fs"><Embedded.Provider value>{leaf.render()}</Embedded.Provider></fieldset>
+        : <Embedded.Provider value>{leaf.render()}</Embedded.Provider>}
+    </div>
     : <table className="prop-table"><tbody className="settings-sec">{leaf.render()}<SettingsDatalists /></tbody></table>;
 }
 
