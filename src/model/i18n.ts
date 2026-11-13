@@ -123,6 +123,7 @@ const BUILTIN: Record<string, [string, string]> = {
   'riserva': ['Spare', 'Reserve'],
   'tra quadri': ['between cabinets', 'zwischen Schränken'],
   'libero': ['spare', 'frei'],
+  'scorta': ['spare', 'Reserve'],
   'stazione': ['station', 'Station'],
   'scheda plc': ['PLC module', 'SPS-Baugruppe'],
   // Titoli di pagina tipici

@@ -3481,5 +3481,15 @@
  "Rappresentazione del contatto": "Contact representation",
  "Vai alla pagina proiettata {0}": "Go to projected page {0}",
  "Pagina {0}: pagina proiettata di un riquadro che non c'è più": "Page {0}: projected page of a box that no longer exists",
- "Elimina la pagina": "Delete the page"
+ "Elimina la pagina": "Delete the page",
+ "Di scorta": "Spare",
+ "conduttore di scorta, senza numero filo": "spare conductor, no wire number",
+ "Conduttore di scorta (es. fili di un cavo portati a morsetti di riserva): niente numero filo, tratteggiato con la scritta «scorta», evidenziato nel disegno del cavo; i morsetti a cui arriva restano di riserva nelle liste. Vale per tutto il conduttore": "Spare conductor (e.g. cable cores taken to spare terminals): no wire number, dashed with the word «spare», highlighted in the cable drawing; the terminals it reaches stay spare in the lists. Applies to the whole conductor",
+ "scorta": "spare",
+ "Allinea le lineette di sezione e colore con una linea": "Align the cross-section and colour ticks with a line",
+ "La linea non attraversa fili con la lineetta di sezione e colore": "The line does not cross wires with a cross-section and colour tick",
+ "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Align cross-section and colour ticks: click and click to draw a line across the wires; their ticks go on the line · Esc to finish",
+ "Allinea sez.": "Align sect.",
+ "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Align cross-section and colour ticks (Shift+N): draw a line across the wires, the ticks go on the line",
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Draw a line across the wires: their cross-section and colour ticks go on the line"
 }

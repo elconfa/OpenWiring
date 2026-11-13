@@ -242,8 +242,23 @@ contador los salta aunque estén escritos en otra página.
 - El trazo se **arrastra** a lo largo del hilo donde se quiera y sigue al hilo cuando se mueve; clic
   derecho ▸ *Trazo de la sección en posición automática* lo devuelve a su sitio. Altura y color del texto
   están en *Aspecto ▸ Textos ▸ Sección y color de los hilos*.
+- Para alinear varios trazos: **Mayús+N** (o *Alinear secc.*), luego dos clics para trazar una línea a
+  través de los hilos; sus trazos van donde la línea los cruza. Como **N** para los números de hilo.
 - *Números de hilo ▸ Sección y color escritos ▸ junto al número de hilo* vuelve al texto pegado al número
   (`200.01  1,5 mm² BU`).
+
+### Conductores de reserva
+
+Un conductor del cable llevado a **bornes de reserva** (por ejemplo entre dos cuadros) se dibuja como
+los demás y luego se marca *Propiedades del hilo ▸ De reserva*. Vale para todo el conductor:
+
+- no recibe **número de hilo**: en el esquema es discontinuo y lleva la palabra `reserva`;
+- recibe igualmente su **conductor del cable**; en el dibujo del cable la fila es discontinua en naranja
+  con `reserva` en lugar del número, y en la lista *Conexiones de cables* la nota es `reserva`;
+- los **bornes** a los que llega (solo conductores de reserva) siguen **de reserva** en las listas de
+  bornes y en el esquema de la regleta, con sus destinos.
+
+En el formato de texto es `scorta=si` en el hilo.
 
 ## Resaltar un potencial
 

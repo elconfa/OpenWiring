@@ -51,6 +51,7 @@ export const COMMANDS: Command[] = [
   { id: 'quickV', name: tn('Collegamento rapido in verticale'), group: G_DRAW, keys: ['V'], schema: true, run: () => st().setTool({ kind: 'quickWire', axis: 'v' }) },
   { id: 'quickH', name: tn('Collegamento rapido in orizzontale'), group: G_DRAW, keys: ['H'], schema: true, run: () => st().setTool({ kind: 'quickWire', axis: 'h' }) },
   { id: 'wireLabels', name: tn('Allinea numeri filo con una linea'), group: G_DRAW, keys: ['N'], schema: true, run: () => st().setTool({ kind: 'wireLabels' }) },
+  { id: 'wireTicks', name: tn('Allinea le lineette di sezione e colore con una linea'), group: G_DRAW, keys: ['Maiusc+N'], schema: true, run: () => st().setTool({ kind: 'wireTicks' }) },
   { id: 'terminalRow', name: tn('Morsetti in fila sui fili'), group: G_DRAW, keys: ['M'], schema: true, run: () => startTerminalRow() },
   { id: 'settings', name: tn('Impostazioni del progetto…'), group: G_PROJ, keys: [], run: () => st().setDialog('settings') },
   { id: 'checks', name: tn('Verifica (controlli di progetto)'), group: G_PROJ, keys: [], run: () => A.openReport('checks') },

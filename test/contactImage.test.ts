@@ -6,7 +6,7 @@ import type { Project, SymbolInstance, Wire, Pt } from '../src/model/types';
 import { derive } from '../src/model/derive';
 import { newRepresentation } from '../src/model/pairs';
 import { contactImageRows, rowGeometry, stackRows } from '../src/model/contactImage';
-import { tickPoint, distanceAlong, pointAlong } from '../src/model/wireTicks';
+import { tickPoint, distanceAlong, pointAlong, ticksOnLine } from '../src/model/wireTicks';
 import { pagesToText, importPagesText } from '../src/model/textFormat';
 import { getSymbol } from '../src/model/geometry';
 
@@ -126,6 +126,17 @@ describe('lineetta della sezione', () => {
     pd = derive(p).pages.get(p.pages[0].id)!;
     expect(pd.wireTicks?.has('w')).toBe(false);
     expect(pd.wireNumbers.get('w')).toMatch(/2,5 mm² BK/);
+  });
+  it('allineate con una linea: la lineetta va dove la linea attraversa il filo', () => {
+    const wires = [
+      { id: 'a', points: [{ x: 60, y: 40 }, { x: 60, y: 100 }] },
+      { id: 'b', points: [{ x: 80, y: 100 }, { x: 80, y: 30 }] },
+      { id: 'c', points: [{ x: 40, y: 20 }, { x: 100, y: 20 }, { x: 100, y: 90 }] },
+      { id: 'd', points: [{ x: 200, y: 40 }, { x: 200, y: 100 }] },
+    ];
+    const r = ticksOnLine(wires, { x: 50, y: 70 }, { x: 120, y: 70 });
+    expect([...r.entries()]).toEqual([['a', 30], ['b', 30], ['c', 110]]);
+    expect(tickPoint(wires[2].points, r.get('c'))).toMatchObject({ x: 100, y: 70 });
   });
   it('formato testo: lineetta=', () => {
     const p = emptyProject();

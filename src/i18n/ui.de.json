@@ -3481,5 +3481,15 @@
  "Rappresentazione del contatto": "Darstellung des Kontakts",
  "Vai alla pagina proiettata {0}": "Zur projizierten Seite {0}",
  "Pagina {0}: pagina proiettata di un riquadro che non c'è più": "Seite {0}: projizierte Seite eines Rahmens, den es nicht mehr gibt",
- "Elimina la pagina": "Seite löschen"
+ "Elimina la pagina": "Seite löschen",
+ "Di scorta": "Reserve",
+ "conduttore di scorta, senza numero filo": "Reserveader, ohne Drahtnummer",
+ "Conduttore di scorta (es. fili di un cavo portati a morsetti di riserva): niente numero filo, tratteggiato con la scritta «scorta», evidenziato nel disegno del cavo; i morsetti a cui arriva restano di riserva nelle liste. Vale per tutto il conduttore": "Reserveader (z. B. Adern eines Kabels an Reserveklemmen): keine Drahtnummer, gestrichelt mit der Aufschrift «Reserve», in der Kabelzeichnung hervorgehoben; die erreichten Klemmen bleiben in den Listen Reserve. Gilt für den ganzen Leiter",
+ "scorta": "Reserve",
+ "Allinea le lineette di sezione e colore con una linea": "Querschnitt- und Farbstriche an einer Linie ausrichten",
+ "La linea non attraversa fili con la lineetta di sezione e colore": "Die Linie kreuzt keine Drähte mit Querschnitt- und Farbstrich",
+ "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Querschnitt- und Farbstriche ausrichten: zweimal klicken, um eine Linie über die Drähte zu ziehen; ihre Striche kommen auf die Linie · Esc zum Beenden",
+ "Allinea sez.": "Quers. ausr.",
+ "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Querschnitt- und Farbstriche ausrichten (Umschalt+N): eine Linie über die Drähte ziehen, die Striche kommen auf die Linie",
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Eine Linie über die Drähte ziehen: ihre Querschnitt- und Farbstriche kommen auf die Linie"
 }

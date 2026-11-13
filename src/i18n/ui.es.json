@@ -3481,5 +3481,15 @@
  "Rappresentazione del contatto": "Representación del contacto",
  "Vai alla pagina proiettata {0}": "Ir a la página proyectada {0}",
  "Pagina {0}: pagina proiettata di un riquadro che non c'è più": "Página {0}: página proyectada de un recuadro que ya no existe",
- "Elimina la pagina": "Eliminar la página"
+ "Elimina la pagina": "Eliminar la página",
+ "Di scorta": "De reserva",
+ "conduttore di scorta, senza numero filo": "conductor de reserva, sin número de hilo",
+ "Conduttore di scorta (es. fili di un cavo portati a morsetti di riserva): niente numero filo, tratteggiato con la scritta «scorta», evidenziato nel disegno del cavo; i morsetti a cui arriva restano di riserva nelle liste. Vale per tutto il conduttore": "Conductor de reserva (p. ej. hilos de un cable llevados a bornes de reserva): sin número de hilo, discontinuo con la palabra «reserva», resaltado en el dibujo del cable; los bornes a los que llega siguen de reserva en las listas. Vale para todo el conductor",
+ "scorta": "reserva",
+ "Allinea le lineette di sezione e colore con una linea": "Alinear los trazos de sección y color con una línea",
+ "La linea non attraversa fili con la lineetta di sezione e colore": "La línea no cruza hilos con trazo de sección y color",
+ "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Alinear trazos de sección y color: clic y clic para trazar una línea a través de los hilos; sus trazos van sobre la línea · Esc para terminar",
+ "Allinea sez.": "Alinear secc.",
+ "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Alinear trazos de sección y color (Mayús+N): traza una línea a través de los hilos, los trazos van sobre la línea",
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Se traza una línea a través de los hilos: sus trazos de sección y color van sobre la línea"
 }

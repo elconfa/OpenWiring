@@ -348,6 +348,12 @@ export interface Wire {
    * scelta trascinandola; assente = posizione automatica accanto al numero filo
    */
   tickAt?: number;
+  /**
+   * Conduttore di scorta (es. i fili di un cavo portati a morsetti di riserva tra due quadri): resta
+   * disegnato e prende il conduttore del cavo, ma non ha numero filo, è tratteggiato con la scritta
+   * «scorta» e i morsetti a cui arriva contano come morsetti di riserva. Vale per tutto il conduttore
+   */
+  spare?: boolean;
   /** Collegamento di rete/bus (es. "Profinet", "Modbus RTU"): non riceve numero filo */
   bus?: string;
   /** Collegamento di rete: dati del cavo (sigla, tipo, lunghezza, articolo) per la lista cavi */

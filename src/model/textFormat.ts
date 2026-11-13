@@ -95,7 +95,8 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 #     nome; cond1/cond2 = conduttore del bus a cui si collega il primo/l'ultimo estremo del filo)
 #     [hcond=2,5] [colorecond=#0050c0]   (bus di conduttori: altezza e colore dei nomi dei conduttori dove entrano i fili)
 #     [linea=dash|dashdot|dot] [spessore=0,5]   (tipo di linea e spessore in mm sullo schema)
-#     [tipo=H07V-K] [hnumero=2,5] [colorenumero=#c00000] [lineetta=12] [posnumeri=JSON] [mostra=JSON] [proprieta=JSON]
+#     [tipo=H07V-K] [hnumero=2,5] [colorenumero=#c00000] [lineetta=12] [scorta=si] [posnumeri=JSON] [mostra=JSON] [proprieta=JSON]
+#     (scorta=si: conduttore di scorta, senza numero filo; i morsetti a cui arriva restano di riserva)
 #     [conduttore=W1:BN] [fissato=W1:3]   (conduttore del cavo -W1 sul filo: scelto a mano, oppure fissato
 #     dalla numerazione automatica perché non cambi; più cavi separati da «;»)
 #     [nodo1=sinistra|destra|su|giu] [nodo2=…]   (nodo a T con verso sul primo/ultimo estremo del filo: il
@@ -395,6 +396,7 @@ export function pagesToText(project: Project, opts: TextExportOptions = {}): str
       if (w.wireType) parts.push(`tipo=${bare(w.wireType)}`);
       if (w.labelSize) parts.push(`hnumero=${num(w.labelSize)}`);
       if (w.tickAt !== undefined) parts.push(`lineetta=${num(w.tickAt)}`);
+      if (w.spare) parts.push('scorta=si');
       if (w.labelColor) parts.push(`colorenumero=${bare(w.labelColor)}`);
       if (w.labels?.length) parts.push(`posnumeri=${json(w.labels)}`);
       if (has(w.show)) parts.push(`mostra=${json(w.show)}`);
@@ -557,6 +559,7 @@ function wireAttrs(k: string, v: string, w: Partial<Wire>): boolean {
     case 'spessore': { const n = parseFloat(v.replace(',', '.')); if (n > 0) { w.width = n; return true; } return false; }
     case 'tipo': w.wireType = v; return true;
     case 'hnumero': { const n = parseFloat(v.replace(',', '.')); if (n > 0) { w.labelSize = n; return true; } return false; }
+    case 'scorta': { if (/^(si|sì|1|true)$/i.test(v)) { w.spare = true; return true; } if (/^(no|0|false)$/i.test(v)) return true; return false; }
     case 'lineetta': { const n = parseFloat(v.replace(',', '.')); if (n >= 0) { w.tickAt = n; return true; } return false; }
     case 'colorenumero': w.labelColor = v; return true;
     case 'posnumeri': { const x = parseJson<Wire['labels']>(v); if (Array.isArray(x)) { w.labels = x; return true; } return false; }

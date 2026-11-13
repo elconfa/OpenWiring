@@ -91,6 +91,7 @@ const HINTS: Record<string, string> = {
   zone: 'Quadro: clic su un angolo e clic sull\'angolo opposto · i nodi dentro il riquadro appartengono a quel quadro',
   cable: 'Cavo: clic su un lato dei fili e clic sull\'altro lato · i fili attraversati diventano conduttori del cavo · Esc annulla',
   quickWire: tn('Collegamento rapido: clic tra due punti di connessione (V uno sopra l\'altro, H uno accanto all\'altro) o tra il punto del clic e un punto di connessione · Esc o tasto destro per terminare'),
+  wireTicks: tn('Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare'),
   wireLabels: tn('Allinea numeri filo: clic e clic per tracciare una linea attraverso i fili; i loro numeri vanno sulla linea, dal lato in cui erano · Esc per terminare'),
   paste: tn('Incolla: clic per posare gli elementi copiati · Esc o tasto destro per annullare'),
 };

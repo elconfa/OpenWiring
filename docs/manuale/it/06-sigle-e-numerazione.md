@@ -237,8 +237,23 @@ quando sono scritti su un'altra pagina.
 - La lineetta si **trascina** lungo il filo dove si vuole e segue il filo quando si sposta; tasto destro ▸
   *Lineetta della sezione in posizione automatica* la rimette al suo posto. L'altezza e il colore del testo
   sono in *Aspetto ▸ Testi ▸ Sezione e colore dei fili*.
+- Per allineare più lineette: **Maiusc+N** (o *Allinea sez.*), poi due clic per tracciare una linea attraverso
+  i fili; le loro lineette vanno dove la linea li attraversa. Come **N** per i numeri filo.
 - *Numeri filo ▸ Sezione e colore scritti ▸ accanto al numero filo* torna alla scritta attaccata al numero
   (`200.01  1,5 mm² BU`).
+
+### Conduttori di scorta
+
+Un conduttore del cavo portato a **morsetti di riserva** (per esempio tra due quadri) si disegna come
+gli altri e poi si segna *Proprietà del filo ▸ Di scorta*. Vale per tutto il conduttore:
+
+- non prende il **numero filo**: sullo schema è tratteggiato e porta la scritta `scorta`;
+- prende comunque il suo **conduttore del cavo**; nel disegno del cavo la riga è tratteggiata in arancione
+  con `scorta` al posto del numero, e nella lista *Collegamenti cavi* la nota è `scorta`;
+- i **morsetti** a cui arriva (solo conduttori di scorta) restano **di riserva** nelle liste dei morsetti e
+  nello schema della morsettiera, con le loro destinazioni.
+
+Nel formato testo è `scorta=si` sul filo.
 
 ## Evidenziare un potenziale
 

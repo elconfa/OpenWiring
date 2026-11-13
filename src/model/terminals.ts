@@ -451,6 +451,11 @@ export interface TerminalConn {
   levels: string[];
   /** Piano successivo al primo: l'articolo è quello del primo piano */
   sameAs?: string;
+  /**
+   * Morsetto disegnato a cui arrivano solo conduttori di scorta (Wire.spare): nelle liste conta come
+   * morsetto di riserva, ma resta disegnato e con le sue destinazioni
+   */
+  spareWire?: boolean;
 }
 
 export function terminalConnections(p: Project, strip?: string, nets?: Net[]): TerminalConn[] {
@@ -467,6 +472,7 @@ export function terminalConnections(p: Project, strip?: string, nets?: Net[]): T
     const groups = new Map<string, TerminalRow[]>();
     for (const r of rows) groups.set(phys(r), [...(groups.get(phys(r)) ?? []), r]);
     for (const row of rows) {
+      let spareNets = 0, otherNets = 0;
       const side = (pinIdx: number) => {
         const targets = new Set<string>(), wires = new Set<string>();
         const own = new Set(row.els.map(e => e.inst.id));
@@ -474,6 +480,7 @@ export function terminalConnections(p: Project, strip?: string, nets?: Net[]): T
           const pin = e.sym.pins[pinIdx];
           const n = pin && pinNet.get(`${e.inst.id}|${pin.id}`);
           if (!n) continue;
+          if (n.spare) spareNets++; else if (n.wires.length) otherNets++;
           // Dove arriva il filo di questo lato (pin o morsetto), non tutto il potenziale
           const from = pinsWorld(e.inst, e.sym)[pinIdx];
           const land = landing(ctx, e.page, n, { from, exclude: own });
@@ -498,6 +505,7 @@ export function terminalConnections(p: Project, strip?: string, nets?: Net[]): T
         partNr: own ?? g.map(r => d.spareParts?.[r.no]).find(Boolean) ?? d.partNr,
         levels: g.length > 1 ? g.map(r => r.no) : [],
         sameAs: g.length > 1 && g[0] !== row ? g[0].no : undefined,
+        ...(spareNets && !otherNets ? { spareWire: true } : {}),
       });
     }
   }

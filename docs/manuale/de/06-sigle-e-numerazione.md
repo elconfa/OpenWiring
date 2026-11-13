@@ -243,8 +243,24 @@ Zähler überspringt sie, auch wenn sie auf einer anderen Seite stehen.
 - Der Strich lässt sich entlang des Drahts **ziehen** und folgt dem Draht, wenn er verschoben wird;
   Rechtsklick ▸ *Querschnittsstrich an automatischer Position* setzt ihn zurück. Texthöhe und -farbe stehen
   unter *Darstellung ▸ Texte ▸ Querschnitt und Farbe der Drähte*.
+- Mehrere Striche ausrichten: **Umschalt+N** (oder *Quers. ausr.*), dann zwei Klicks für eine Linie über die
+  Drähte; ihre Striche kommen dorthin, wo die Linie sie kreuzt. Wie **N** für die Drahtnummern.
 - *Drahtnummern ▸ Querschnitt und Farbe geschrieben ▸ neben der Drahtnummer* kehrt zum Text an der Nummer
   zurück (`200.01  1,5 mm² BU`).
+
+### Reserveadern
+
+Eine Kabelader, die auf **Reserveklemmen** geführt wird (zum Beispiel zwischen zwei Schaltschränken),
+wird wie die anderen gezeichnet und dann unter *Drahteigenschaften ▸ Reserve* markiert. Das gilt für den
+ganzen Leiter:
+
+- er erhält keine **Drahtnummer**: im Schaltplan ist er gestrichelt und trägt die Aufschrift `Reserve`;
+- er erhält trotzdem seine **Kabelader**; in der Kabelzeichnung ist die Zeile orange gestrichelt mit
+  `Reserve` statt der Nummer, in der Liste *Kabelverbindungen* steht als Bemerkung `Reserve`;
+- die **Klemmen**, die er erreicht (nur Reserveadern), bleiben in den Klemmenlisten und im
+  Klemmleistenplan **Reserve**, mit ihren Zielen.
+
+Im Textformat ist es `scorta=si` am Draht.
 
 ## Ein Potenzial hervorheben
 

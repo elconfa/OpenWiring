@@ -157,6 +157,7 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     if (e.sym.role === 'link' && e.inst.tag) for (const p of pinsWorld(e.inst, e.sym)) linkTagAt.set(`${e.page.id}|${keyOf(p)}`, e.inst.tag.replace(/^-/, ''));
   }
   const wireNumbers = new Map<string, string>();
+  const spareWord = translator(project).t('scorta');
   /** Sezione e colore scritti sulla lineetta obliqua del filo */
   const wireTicks = new Map<string, string>();
   /** Collegamenti di rete con la sigla del cavo scritta */
@@ -205,7 +206,9 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     const tick = settings.wireDataTick !== false && !!data;
     // Sulla lineetta il colore e poi la sezione, senza «mm²» (es. «BK 2,5»)
     if (tick) wireTicks.set(w.id, [shown('color') ? w.color : '', shown('cross') ? w.cross : ''].filter(Boolean).join(' '));
-    const label = [shown('number') ? net?.wireNo : '', tick ? '' : data].filter(Boolean).join('  ');
+    // Conduttore di scorta: al posto del numero la scritta «scorta» (nella lingua dello schema)
+    const no = net?.spare ? spareWord : net?.wireNo;
+    const label = [shown('number') ? no : '', tick ? '' : data].filter(Boolean).join('  ');
     if (label) wireNumbers.set(w.id, label);
   }
   // Sigle complete e testi dei dispositivi

@@ -29,6 +29,7 @@ import { textBounds } from './textFlow';
 import { replaceSymbol as replaceSymbolModel, canReplace } from './replaceSymbol';
 import { alignDeltas, type AlignMode, type AlignBox } from './align';
 import { alignWireLabels, labelsOnLine, type WireLabelPos } from './wireLabels';
+import { ticksOnLine } from './wireTicks';
 import { derive } from './derive';
 import { tNodeAt } from './wiringOrder';
 import { placeByNumber, sortByNumber, proposePageName } from './pages';
@@ -72,6 +73,7 @@ export type Tool =
   | { kind: 'macro'; macroId: string }
   /** Allinea numeri filo: si traccia una linea attraverso i fili, i numeri vanno sulla linea */
   | { kind: 'wireLabels' }
+  | { kind: 'wireTicks' }
   /** Collegamento rapido: clic tra due punti di connessione in colonna (v) o in riga (h) */
   | { kind: 'quickWire'; axis: 'h' | 'v' }
   /** Incolla al puntatore: gli elementi copiati seguono il mouse e si posano con un clic */
@@ -306,6 +308,8 @@ export interface State {
   setWireLabelsMany(labels: Map<string, WireLabelPos[]>): void;
   /** Numeri filo messi sulla linea tracciata da p a q (strumento «Allinea numeri filo») */
   wireLabelsOnLine(p: Pt, q: Pt): number;
+  /** Lineette di sezione e colore dei fili attraversati dalla linea p–q portate sulla linea */
+  wireTicksOnLine(p: Pt, q: Pt): number;
   /** Sposta a mano un testo del simbolo sullo schema (undefined = di nuovo nella posizione del simbolo) */
   setTextOffset(instId: string, key: TextMoveKey, off: Pt | undefined): void;
   /** Tutti i testi dei simboli indicati di nuovo nella posizione del simbolo */
@@ -382,7 +386,7 @@ export interface State {
    * avevano gli stessi punti. null = di nuovo automatico per i punti indicati
    */
   setWireOrder(keys: string[], order: string[] | null): void;
-  setWireProps(wireIds: string[], patch: Partial<Pick<Wire, 'cross' | 'color' | 'wireType' | 'bus' | 'poles' | 'text' | 'busCable' | 'lineType' | 'width' | 'labelSize' | 'labelColor' | 'tapSize' | 'tapColor'>>, wholeConductor?: boolean): void;
+  setWireProps(wireIds: string[], patch: Partial<Pick<Wire, 'cross' | 'color' | 'wireType' | 'bus' | 'poles' | 'text' | 'busCable' | 'lineType' | 'width' | 'labelSize' | 'labelColor' | 'tapSize' | 'tapColor' | 'spare'>>, wholeConductor?: boolean): void;
   moveSelection(dx: number, dy: number): void;
   rotateSelection(): void;
   /** Rotazione scelta nelle proprietà (solo tra quelle ammesse dal simbolo), con i collegamenti automatici */
@@ -1300,6 +1304,18 @@ export const useStore = create<State>((set, get) => {
           if (w.kind === 'wire' && l?.length) w.labels = l.map(x => ({ ...x }));
         }
       });
+    },
+    wireTicksOnLine(p, q) {
+      const { project, pageId, library } = get();
+      const page = currentPage(project, pageId);
+      const pd = derive(project, library).pages.get(pageId);
+      const wires = page.elements.filter((e): e is Wire => e.kind === 'wire' && !!pd?.wireTicks?.has(e.id));
+      const r = ticksOnLine(wires, p, q);
+      if (!r.size) return 0;
+      get().commit(np => {
+        for (const w of currentPage(np, pageId).elements) if (w.kind === 'wire' && r.has(w.id)) w.tickAt = r.get(w.id);
+      });
+      return r.size;
     },
     wireLabelsOnLine(p, q) {
       const { project, pageId, library } = get();

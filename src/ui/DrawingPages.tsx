@@ -8,6 +8,9 @@ import { look } from './look';
 import { drawingStyleOf, type ResolvedDrawingStyle } from '../model/drawingStyle';
 import type { Project } from '../model/types';
 
+/** Colore dei conduttori di scorta nel disegno del cavo */
+const SPARE = '#b35900';
+
 const cut = (s: string, n: number) => (s.length > n ? `${s.slice(0, Math.max(1, Math.floor(n) - 1))}…` : s);
 
 const MUTED = '#5b636d', LIGHT = '#d0d5dc';
@@ -105,7 +108,7 @@ function CableDrawing({ c, t, S }: { c: CableSheet; t: T; S: ResolvedDrawingStyl
         {c.rows.map((r, i) => (
           <g key={i}>
             <path d={`M${boxA.x + boxA.w} ${yAt(i)} L${boxA.x + boxA.w + 18} ${yAt(i)} L${sheath.x0} ${yIn(i)} L${sheath.x1} ${yIn(i)} L${boxB.x - 18} ${yAt(i)} L${boxB.x} ${yAt(i)}`}
-              stroke={r.problem ? '#cf222e' : look.ink} />
+              stroke={r.problem ? '#cf222e' : r.spare ? SPARE : look.ink} strokeDasharray={r.spare ? '1.2 0.8' : undefined} />
           </g>
         ))}
       </g>
@@ -113,7 +116,7 @@ function CableDrawing({ c, t, S }: { c: CableSheet; t: T; S: ResolvedDrawingStyl
         {c.rows.map((r, i) => (
           <g key={i}>
             <text x={boxA.x + boxA.w + 1.5} y={yAt(i) - 0.5}>{r.name}</text>
-            <text x={boxB.x - 1.5} y={yAt(i) - 0.5} textAnchor="end">{r.wireNo}</text>
+            <text x={boxB.x - 1.5} y={yAt(i) - 0.5} textAnchor="end" fill={r.spare ? SPARE : undefined}>{r.spare ? t('scorta') : r.wireNo}</text>
           </g>
         ))}
       </g>
@@ -128,7 +131,7 @@ function CableDrawing({ c, t, S }: { c: CableSheet; t: T; S: ResolvedDrawingStyl
       </>}
       {/* Tabella dei conduttori */}
       {cols.length > 0 && <Grid x={FRAME.left + 10} y={tableY} rowH={rowH} size={Math.min(S.tableSize, rowH * 0.6)} cols={cols}
-        rows={[...c.rows.map(r => cell({ name: r.name, wireNo: r.wireNo, a: r.a, b: r.b, loc: r.loc, note: r.problem ?? '' })), ...c.spare.map(s => cell({ name: s, note: t('libero') }))]} />}
+        rows={[...c.rows.map(r => cell({ name: r.name, wireNo: r.wireNo, a: r.a, b: r.b, loc: r.loc, note: r.problem ?? (r.spare ? t('scorta') : '') })), ...c.spare.map(s => cell({ name: s, note: t('libero') }))]} />}
     </g>
   );
 }

@@ -115,6 +115,7 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
         ...ALIGN_MODES.map(m => ({ label: `${m.icon}  ${tx(m.name)}`, run: () => st().alignSelection(m.id), disabled: (s.selection.length < 2) || !schema,
           title: tx('Con soli fili selezionati si allineano i loro numeri') })),
         { label: tx('Allinea numeri filo con una linea'), key: keyLabel('wireLabels'), run: () => st().setTool({ kind: 'wireLabels' }), disabled: !schema, title: tx('Si traccia una linea attraverso i fili: i loro numeri vanno sulla linea') },
+        { label: tx('Allinea le lineette di sezione e colore con una linea'), key: keyLabel('wireTicks'), run: () => st().setTool({ kind: 'wireTicks' }), disabled: !schema, title: tx('Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea') },
         { label: tx('Morsetti in fila sui fili'), key: keyLabel('terminalRow'), run: () => startTerminalRow(), disabled: !schema, title: tx('Un morsetto su ogni filo scelto (linea attraverso i fili o Ctrl/Cmd+clic), numerato nell\'ordine scelto') },
         sep,
         { label: tx('Cerca e sostituisci…'), key: keyLabel('search'), run: () => st().setDialog('search') },

@@ -41,6 +41,8 @@ export interface Net {
   named: boolean;
   /** Numero filo (es. "200.01"), oppure il nome del potenziale; vuoto se la rete non ha fili */
   wireNo: string;
+  /** Conduttore di scorta: un suo filo è segnato «di scorta»; nessun numero filo */
+  spare?: boolean;
   pins: NetPin[];
   wires: { wire: Wire; pageId: string }[];
   /** Punti di potenziale e rimandi collegati (per i controlli di cortocircuito) */
@@ -234,7 +236,7 @@ function numberWires(project: Project, all: Net[]) {
     copies.push([copy, g]);
   }
   numberGroups(project, nets);
-  for (const [copy, g] of copies) for (const m of g) { m.wireNo = copy.wireNo; if (copy.plcNamed) m.plcNamed = true; }
+  for (const [copy, g] of copies) for (const m of g) { m.wireNo = copy.wireNo; if (copy.plcNamed) m.plcNamed = true; if (copy.spare) m.spare = true; }
 }
 
 function numberGroups(project: Project, nets: Net[]) {
@@ -256,6 +258,8 @@ function numberGroups(project: Project, nets: Net[]) {
         if (!best || pi < best.pi || (pi === best.pi && cmp(p, best.p) < 0)) best = { pi, p };
       }
     }
+    // Conduttore di scorta: nessun numero filo
+    if (n.wires.some(w => w.wire.spare)) { n.spare = true; n.wireNo = ''; continue; }
     if (n.named && s.wireKeepPotentialNames) { n.wireNo = n.name; continue; }
     // Filo collegato a un canale PLC: il nome è l'indirizzo (prima del numero fissato e del rimando)
     const plc = s.wirePlcNames && !n.named ? plcWireName(project, n) : undefined;

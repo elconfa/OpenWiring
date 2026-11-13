@@ -9,6 +9,7 @@ import { getSymbol, instanceBounds, pinsWorld, snapPt, distToSegment, samePt, on
 import { PageContent, SymbolGraphic, SEL, WireTick } from './PageSvg';
 import { distanceAlong, pointAlong } from '../model/wireTicks';
 import { projectionOfZone } from '../model/projection';
+import { keyLabel } from './shortcuts';
 import { Minimap } from './Minimap';
 import { RadialMenu, radialItems } from './RadialMenu';
 import type { Derived } from '../model/derive';
@@ -110,6 +111,7 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
       {item(tx('Specchia'), () => st.mirrorSelection(), { disabled: !sel.length })}
       {sel.length > 1 && <><hr />{ALIGN_MODES.map(m => <span key={m.id}>{item(`${m.icon}  ${tx(m.name)}`, () => st.alignSelection(m.id))}</span>)}<hr /></>}
       {item(tx('Allinea numeri filo con una linea'), () => st.setTool({ kind: 'wireLabels' }), { k: 'N' })}
+      {item(tx('Allinea le lineette di sezione e colore con una linea'), () => st.setTool({ kind: 'wireTicks' }), { k: keyLabel('wireTicks') })}
       {item(tx('Morsetti in fila sui fili…'), () => startTerminalRow(), { k: 'M' })}
       {item(tx('Elimina'), () => st.deleteSelection(), { k: 'Canc', disabled: !sel.length })}
       {item(tx('Crea macro dalla selezione…'), () => void saveMacroFromSelection(), { disabled: !sel.length })}
@@ -611,6 +613,15 @@ export function Canvas({ derived }: { derived: Derived }) {
       if (!wirePts.length) { setWirePts([p]); return; }
       const a = wirePts[0];
       if (Math.abs(p.x - a.x) >= 8 && Math.abs(p.y - a.y) >= 8) st.addZone(Math.min(a.x, p.x), Math.min(a.y, p.y), Math.abs(p.x - a.x), Math.abs(p.y - a.y));
+      setWirePts([]);
+      return;
+    }
+    if (tool.kind === 'wireTicks') {
+      // Due clic: le lineette dei fili attraversati vanno sulla linea (orizzontale o verticale)
+      const p = snapPt(raw, 1);
+      if (!wirePts.length) { setWirePts([p]); return; }
+      const a = wirePts[0], q = straight(a, p);
+      if (!st.wireTicksOnLine(a, q)) st.logMsg(tx('La linea non attraversa fili con la lineetta di sezione e colore'), 'warn');
       setWirePts([]);
       return;
     }
@@ -1163,6 +1174,10 @@ export function Canvas({ derived }: { derived: Derived }) {
         <rect x={Math.min(wirePts[0].x, cursor.x)} y={Math.min(wirePts[0].y, cursor.y)} width={Math.abs(cursor.x - wirePts[0].x)} height={Math.abs(cursor.y - wirePts[0].y)}
           fill="none" stroke={SEL} strokeWidth={0.4} strokeDasharray="4 1 1 1" pointerEvents="none" />
       )}
+      {tool.kind === 'wireTicks' && wirePts.length > 0 && (() => {
+        const q = straight(wirePts[0], snapPt(mouse, 1));
+        return <line x1={wirePts[0].x} y1={wirePts[0].y} x2={q.x} y2={q.y} stroke="#0b5cad" strokeWidth={0.3} strokeDasharray="0.6 0.6" pointerEvents="none" />;
+      })()}
       {tool.kind === 'wireLabels' && wirePts.length > 0 && (() => {
         const q = straight(wirePts[0], snapPt(mouse, 1));
         return <line x1={wirePts[0].x} y1={wirePts[0].y} x2={q.x} y2={q.y} stroke="#0b5cad" strokeWidth={0.3} strokeDasharray="1.2 0.8" pointerEvents="none" />;

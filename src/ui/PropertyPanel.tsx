@@ -1669,6 +1669,12 @@ function WireDataRows({ wires, withNumber, noLabel }: { wires: Wire[]; withNumbe
         </select>
       </Row>
       {!noLabel && <WireLabelStyleRows wires={wires} />}
+      <Row label={tx('Di scorta')}>
+        <label className="row" title={tx('Conduttore di scorta (es. fili di un cavo portati a morsetti di riserva): niente numero filo, tratteggiato con la scritta «scorta», evidenziato nel disegno del cavo; i morsetti a cui arriva restano di riserva nelle liste. Vale per tutto il conduttore')}>
+          <input type="checkbox" checked={wires.every(w => w.spare)} ref={el => { if (el) el.indeterminate = !wires.every(w => w.spare) && wires.some(w => w.spare); }}
+            onChange={e => st().setWireProps(ids, { spare: e.target.checked || undefined }, true)} /> {tx('conduttore di scorta, senza numero filo')}
+        </label>
+      </Row>
       <Row label={tx('Tutto il conduttore')}>
         <button title={tx('Copia sezione, colore, tipo di linea e spessore su tutti i fili collegati (anche le derivazioni)')}
           onClick={() => st().setWireProps(ids, { cross: wires[0].cross, color: wires[0].color, lineType: wires[0].lineType, width: wires[0].width }, true)}>{tx('Applica a tutto il conduttore')}</button>

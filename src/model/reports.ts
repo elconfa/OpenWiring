@@ -202,7 +202,7 @@ const jumperText = (j: Jumper) => `${j.kind === 'comb' ? 'Pettine' : 'Fisso'} ${
 export function terminalReport(project: Project): Table {
   const conns = terminalConnections(project);
   const rows = conns.map(c => [
-    c.row.strip, c.row.no, c.row.level, c.row.spare ? 'Riserva' : c.type,
+    c.row.strip, c.row.no, c.row.level, c.row.spare || c.spareWire ? 'Riserva' : c.type,
     c.ext, c.extWire, c.int, c.intWire, c.jumper ? jumperText(c.jumper) : '', c.locations.map(l => l.loc).join(', '),
     // Morsetto a più piani: un solo articolo, scritto sul primo piano
     c.sameAs ? `= ${c.sameAs}` : c.partNr ?? '',
@@ -382,7 +382,7 @@ export function cableConnectionReport(project: Project): Table {
     const order = new Map(i.cable.conductors.map((n, k) => [n, k]));
     for (const k of [...i.conductors].sort((a, b) => (order.get(a.name) ?? 99) - (order.get(b.name) ?? 99))) {
       const [from, to] = conductorEnds(k);
-      rows.push([`-${i.cable.tag}`, k.name, from, to, k.net?.wireNo ?? '', i.cable.cross ? `${i.cable.cross} mm²` : '', k.loc, k.problem ?? '']);
+      rows.push([`-${i.cable.tag}`, k.name, from, to, k.net?.wireNo ?? '', i.cable.cross ? `${i.cable.cross} mm²` : '', k.loc, k.problem ?? (k.net?.spare ? 'scorta' : '')]);
       goto.push({ 6: k.pageName });
     }
     for (const n of i.spare) { rows.push([`-${i.cable.tag}`, n, '', '', '', '', '', 'libero']); goto.push({}); }
@@ -560,10 +560,10 @@ export function terminalSequenceReport(project: Project): Table {
       groups.set(k, [...(groups.get(k) ?? []), c]);
     }
     for (const [no, g] of groups) {
-      const first = g.find(c => !c.row.spare) ?? g[0];
+      const first = g.find(c => !c.row.spare && !c.spareWire) ?? g[0];
       const levels = g.length > 1 ? g.map(c => c.row.level).join('/') : '';
       const jumpers = [...new Set(g.map(c => (c.jumper ? jumperText(c.jumper) : '')).filter(Boolean))].join('; ');
-      piece(no, levels, first.row.spare ? 'Riserva' : first.type, first.partNr ?? '', jumpers, [...new Set(g.flatMap(c => c.locations.map(l => l.loc)))]);
+      piece(no, levels, first.row.spare || first.spareWire ? 'Riserva' : first.type, first.partNr ?? '', jumpers, [...new Set(g.flatMap(c => c.locations.map(l => l.loc)))]);
       if (g.some(c => c.separator)) piece('', '', 'Separatore', d.separatorPartNr ?? '');
     }
     for (let i = 0; i < (endPlate?.qty ?? 0); i++) piece('', '', 'Piastra di chiusura', endPlate!.partNr);

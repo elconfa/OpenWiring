@@ -1097,7 +1097,7 @@ function StripDiagram({ data, t, style: S, cols }: { data?: StripSheetData; t: (
       </g>
       {data.rows.map((r, i) => {
         const y = top + rowH * i, cy = y + rowH / 2 + S.textSize / 3;
-        const c = r.row.spare ? MUTED : look.ink;
+        const c = r.row.spare || r.spareWire ? MUTED : look.ink;
         return (
           <g key={r.row.no}>
             <rect x={box.x} y={y} width={box.w} height={rowH} fill="none" stroke={look.ink} strokeWidth={0.3} />
@@ -1337,7 +1337,8 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
           // Bus di conduttori: linea spessa
           const base = bus ? look.w.bus : e.width ?? (e.bundle !== undefined ? look.w.bundle : colored ? look.w.wireColored : look.w.wire);
           const sw = sel ? Math.max(base + 0.15, bus ? 0.9 : 0.5) : base;
-          const ls = wireDash(e.lineType, base);
+          // Conduttore di scorta: tratteggiato se non è scelto un altro tipo di linea
+          const ls = wireDash(e.lineType ?? (e.spare ? 'dash' : undefined), base);
           return (
             <g key={e.id} transform={tr}>
               <polyline data-id={e.id} points={pts}

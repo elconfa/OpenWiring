@@ -45,6 +45,8 @@ export interface CableSheetRow {
   b: string;
   loc: string;
   problem?: string;
+  /** Conduttore di scorta (filo segnato «di scorta»): senza numero filo, evidenziato */
+  spare?: boolean;
 }
 
 export interface CableSheet {
@@ -81,7 +83,7 @@ export function cableSheet(project: Project, tag: string, library: Part[] = [], 
     return ends.length ? ends : (k.net?.pins ?? []).slice(0, 2);
   });
   const { sideA, sideB, rows } = splitSides(project, library, info.conductors.map((k, i) => ({
-    name: k.name, wireNo: k.net?.wireNo ?? '', loc: k.loc, ...(k.problem ? { problem: k.problem } : {}), pins: pinsOf[i],
+    name: k.name, wireNo: k.net?.wireNo ?? '', loc: k.loc, ...(k.problem ? { problem: k.problem } : {}), ...(k.net?.spare ? { spare: true } : {}), pins: pinsOf[i],
   })), c.conductors);
   return {
     tag: c.tag, type: c.type ?? '', section: cableSection(c), length: c.length, description: c.description, shield: c.shield, pairs: c.pairs,
@@ -93,7 +95,7 @@ export function cableSheet(project: Project, tag: string, library: Part[] = [], 
  * Lati A e B del disegno: i due luoghi più frequenti tra i punti collegati ai conduttori (con un luogo
  * solo, il primo punto di ogni conduttore è il lato A e gli altri il lato B); righe nell'ordine del cavo
  */
-function splitSides(project: Project, library: Part[], list: { name: string; wireNo: string; loc: string; problem?: string; pins: NetPin[] }[], order: string[]) {
+function splitSides(project: Project, library: Part[], list: { name: string; wireNo: string; loc: string; problem?: string; spare?: boolean; pins: NetPin[] }[], order: string[]) {
   const idx = locationIndex(project, library);
   const count = new Map<string, number>();
   const pinsOf = list.map(r => r.pins.map(p => ({ ref: `-${p.ref}`, code: placeCode(project, p.el, idx.panels, idx.loc) })));
@@ -105,7 +107,7 @@ function splitSides(project: Project, library: Part[], list: { name: string; wir
     const l = pinsOf[i];
     const a = cb ? l.filter(p => p.code === ca) : l.slice(0, 1);
     const b = cb ? l.filter(p => p.code !== ca) : l.slice(1);
-    return { name: r.name, wireNo: r.wireNo, a: a.map(p => p.ref).join(', '), b: b.map(p => p.ref).join(', '), loc: r.loc, ...(r.problem ? { problem: r.problem } : {}) };
+    return { name: r.name, wireNo: r.wireNo, a: a.map(p => p.ref).join(', '), b: b.map(p => p.ref).join(', '), loc: r.loc, ...(r.problem ? { problem: r.problem } : {}), ...(r.spare ? { spare: true } : {}) };
   }).sort((x, y) => (pos.get(x.name) ?? 1e6) - (pos.get(y.name) ?? 1e6));
   const refsOf = (side: 'a' | 'b') => [...new Set(rows.flatMap(r => r[side].split(', ').filter(Boolean).map(s => s.slice(0, s.indexOf(':') > 0 ? s.indexOf(':') : undefined))))];
   return { sideA: { code: ca, refs: refsOf('a') }, sideB: { code: cb, refs: refsOf('b') }, rows };

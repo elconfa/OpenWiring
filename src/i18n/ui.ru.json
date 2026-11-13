@@ -3481,5 +3481,15 @@
  "Rappresentazione del contatto": "Изображение контакта",
  "Vai alla pagina proiettata {0}": "Перейти к проецируемой странице {0}",
  "Pagina {0}: pagina proiettata di un riquadro che non c'è più": "Страница {0}: проецируемая страница рамки, которой больше нет",
- "Elimina la pagina": "Удалить страницу"
+ "Elimina la pagina": "Удалить страницу",
+ "Di scorta": "Резервный",
+ "conduttore di scorta, senza numero filo": "резервная жила, без номера провода",
+ "Conduttore di scorta (es. fili di un cavo portati a morsetti di riserva): niente numero filo, tratteggiato con la scritta «scorta», evidenziato nel disegno del cavo; i morsetti a cui arriva restano di riserva nelle liste. Vale per tutto il conduttore": "Резервная жила (например жилы кабеля, заведённые на резервные клеммы): без номера провода, штриховая с надписью «резерв», выделена на чертеже кабеля; клеммы, к которым она подходит, остаются резервными в списках. Действует для всего проводника",
+ "scorta": "резерв",
+ "Allinea le lineette di sezione e colore con una linea": "Выровнять штрихи сечения и цвета по линии",
+ "La linea non attraversa fili con la lineetta di sezione e colore": "Линия не пересекает провода со штрихом сечения и цвета",
+ "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Выровнять штрихи сечения и цвета: щелчок и щелчок, чтобы провести линию через провода; их штрихи встают на линию · Esc для завершения",
+ "Allinea sez.": "Выровн. сеч.",
+ "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Выровнять штрихи сечения и цвета (Shift+N): провести линию через провода, штрихи встают на линию",
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Проводится линия через провода: их штрихи сечения и цвета встают на линию"
 }

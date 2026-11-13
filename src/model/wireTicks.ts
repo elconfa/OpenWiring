@@ -76,3 +76,32 @@ export function tickPoint(pts: Pt[], tickAt: number | undefined, number?: Pt, ha
   }
   return pointAlong(pts, start + Math.max(1, Math.min(len - 1, d)));
 }
+
+/**
+ * Lineette allineate con una linea tracciata attraverso i fili (come «Allinea numeri filo»): per ogni
+ * filo il primo tratto attraversato ad angolo retto; la lineetta va nel punto d'incrocio. Restituisce
+ * la nuova distanza lungo il filo (Wire.tickAt) per ogni filo attraversato
+ */
+export function ticksOnLine(wires: { id: string; points: Pt[] }[], p: Pt, q: Pt): Map<string, number> {
+  const horizontal = Math.abs(q.x - p.x) >= Math.abs(q.y - p.y);
+  const lo = horizontal ? Math.min(p.x, q.x) : Math.min(p.y, q.y), hi = horizontal ? Math.max(p.x, q.x) : Math.max(p.y, q.y);
+  const at = horizontal ? p.y : p.x;
+  const out = new Map<string, number>();
+  for (const w of wires) {
+    let run = 0;
+    for (let i = 0; i < w.points.length - 1; i++) {
+      const a = w.points[i], b = w.points[i + 1], l = segLen(a, b);
+      // Linea orizzontale: tratti verticali che la attraversano, e viceversa
+      const segV = Math.abs(a.x - b.x) < 0.01 && l > 0.01, segH = Math.abs(a.y - b.y) < 0.01 && l > 0.01;
+      const pos = horizontal ? a.x : a.y;
+      const s0 = horizontal ? Math.min(a.y, b.y) : Math.min(a.x, b.x), s1 = horizontal ? Math.max(a.y, b.y) : Math.max(a.x, b.x);
+      if ((horizontal ? segV : segH) && pos >= lo && pos <= hi && at >= s0 && at <= s1) {
+        const from = horizontal ? Math.abs(at - a.y) : Math.abs(at - a.x);
+        out.set(w.id, Math.round((run + from) * 2) / 2);
+        break;
+      }
+      run += l;
+    }
+  }
+  return out;
+}

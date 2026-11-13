@@ -3481,5 +3481,15 @@
  "Rappresentazione del contatto": "Représentation du contact",
  "Vai alla pagina proiettata {0}": "Aller à la page projetée {0}",
  "Pagina {0}: pagina proiettata di un riquadro che non c'è più": "Page {0} : page projetée d'un cadre qui n'existe plus",
- "Elimina la pagina": "Supprimer la page"
+ "Elimina la pagina": "Supprimer la page",
+ "Di scorta": "De réserve",
+ "conduttore di scorta, senza numero filo": "conducteur de réserve, sans numéro de fil",
+ "Conduttore di scorta (es. fili di un cavo portati a morsetti di riserva): niente numero filo, tratteggiato con la scritta «scorta», evidenziato nel disegno del cavo; i morsetti a cui arriva restano di riserva nelle liste. Vale per tutto il conduttore": "Conducteur de réserve (p. ex. fils d'un câble amenés à des bornes de réserve) : pas de numéro de fil, en pointillé avec la mention « réserve », mis en évidence dans le dessin du câble ; les bornes qu'il atteint restent de réserve dans les listes. Vaut pour tout le conducteur",
+ "scorta": "réserve",
+ "Allinea le lineette di sezione e colore con una linea": "Aligner les traits de section et couleur avec une ligne",
+ "La linea non attraversa fili con la lineetta di sezione e colore": "La ligne ne traverse aucun fil avec un trait de section et couleur",
+ "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Aligner les traits de section et couleur : clic et clic pour tracer une ligne à travers les fils ; leurs traits vont sur la ligne · Échap pour terminer",
+ "Allinea sez.": "Aligner sect.",
+ "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Aligner les traits de section et couleur (Maj+N) : tracez une ligne à travers les fils, les traits vont sur la ligne",
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "On trace une ligne à travers les fils : leurs traits de section et couleur vont sur la ligne"
 }

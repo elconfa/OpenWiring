@@ -240,8 +240,24 @@ saute même quand ils sont écrits sur une autre page.
 - Le trait se **fait glisser** le long du fil où l'on veut et suit le fil quand il bouge ; clic droit ▸
   *Trait de section en position automatique* le remet à sa place. Hauteur et couleur du texte sont dans
   *Apparence ▸ Textes ▸ Section et couleur des fils*.
+- Pour aligner plusieurs traits : **Maj+N** (ou *Aligner sect.*), puis deux clics pour tracer une ligne à
+  travers les fils ; leurs traits vont là où la ligne les croise. Comme **N** pour les numéros de fil.
 - *Numéros de fil ▸ Section et couleur écrites ▸ à côté du numéro de fil* revient au texte attaché au
   numéro (`200.01  1,5 mm² BU`).
+
+### Conducteurs de réserve
+
+Un conducteur du câble amené à des **bornes de réserve** (par exemple entre deux armoires) se dessine
+comme les autres puis se marque *Propriétés du fil ▸ De réserve*. Cela vaut pour tout le conducteur :
+
+- il ne prend pas de **numéro de fil** : sur le schéma il est en pointillé et porte la mention `réserve` ;
+- il prend quand même son **conducteur du câble** ; dans le dessin du câble la ligne est en pointillé
+  orange avec `réserve` à la place du numéro, et dans la liste *Connexions des câbles* la note est
+  `réserve` ;
+- les **bornes** qu'il atteint (uniquement des conducteurs de réserve) restent **de réserve** dans les
+  listes des bornes et dans le schéma du bornier, avec leurs destinations.
+
+Dans le format texte c'est `scorta=si` sur le fil.
 
 ## Mettre en évidence un potentiel
 

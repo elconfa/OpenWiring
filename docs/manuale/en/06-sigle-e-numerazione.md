@@ -235,8 +235,23 @@ them even when they are written on another page.
 - **Drag** the tick along the wire wherever you like; it follows the wire when it moves. Right-click ▸
   *Cross-section tick in automatic position* puts it back. Text height and colour are in *Appearance ▸
   Texts ▸ Wire cross-section and colour*.
+- To align several ticks: **Shift+N** (or *Align sect.*), then two clicks to draw a line across the wires;
+  their ticks go where the line crosses them. Like **N** for wire numbers.
 - *Wire numbers ▸ Cross-section and colour written ▸ next to the wire number* goes back to the text attached
   to the number (`200.01  1,5 mm² BU`).
+
+### Spare conductors
+
+A cable conductor taken to **spare terminals** (for example between two panels) is drawn like the others
+and then marked *Wire properties ▸ Spare*. It applies to the whole conductor:
+
+- it gets no **wire number**: on the schematic it is dashed and carries the word `spare`;
+- it still gets its **cable conductor**; in the cable drawing the row is dashed in orange with `spare`
+  instead of the number, and in the *Cable connections* list the note is `spare`;
+- the **terminals** it reaches (spare conductors only) stay **spare** in the terminal lists and in the
+  terminal strip diagram, with their destinations.
+
+In the text format it is `scorta=si` on the wire.
 
 ## Highlighting a potential
 
