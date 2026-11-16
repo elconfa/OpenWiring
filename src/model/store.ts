@@ -1,3 +1,4 @@
+import { deviceLetter } from './letterCodes';
 import { syncPairs, newRepresentation, placeSideReps, setContactPlace, type ContactPlace } from './pairs';
 import { createProjections } from './projection';
 import { create } from 'zustand';
@@ -282,7 +283,8 @@ export interface State {
   movePage(id: string, delta: number): void;
   updateInfo(patch: Partial<ProjectInfo>): void;
   updateSettings(patch: Partial<ProjectSettings>): void;
-  renumber(): void;
+  /** Rinumera i dispositivi; newLetters = anche la lettera torna quella del simbolo (cambio della norma delle lettere) */
+  renumber(newLetters?: boolean): void;
   renumberWires(): void;
 
   setTool(t: Tool): void;
@@ -1166,10 +1168,10 @@ export const useStore = create<State>((set, get) => {
       });
       if (reassigned) get().logMsg(tx('Formato PLC cambiato: unità o aree di indirizzo diverse, indirizzi riassegnati in ordine di scheda'), 'warn');
     },
-    renumber() {
+    renumber(newLetters) {
       let changed = 0;
       get().commit(p => {
-        for (const [a, b] of renumberDevices(p)) if (a !== b) changed++;
+        for (const [a, b] of renumberDevices(p, newLetters)) if (a !== b) changed++;
       });
       get().logMsg(tx('Rinumerazione dispositivi: {0} sigle modificate', changed));
     },
@@ -1261,7 +1263,7 @@ export const useStore = create<State>((set, get) => {
       else if (sym.role === 'terminal') tag = presetTag ?? nextTerminal(project, lastStrip(project) ?? 'X1');
       else if (sym.role === 'pin') tag = presetTag ?? nextPin(project, lastConnector(project) ?? 'X10', get().library);
       else if (isDistSymbol(symbolId)) tag = presetTag ?? distOf(project, symbolId)?.d.tag ?? '';
-      else tag = nextTagFor(project, sym.letter, page, at.x);
+      else tag = nextTagFor(project, deviceLetter(sym, project), page, at.x);
       const inst: SymbolInstance = {
         kind: 'symbol', id: uid('s'), symbolId, x: at.x, y: at.y, rot, tag,
         pinLabels: {}, autoPins: true, partNr,

@@ -1,4 +1,5 @@
 // Numerazione di sigle dispositivo e numeri filo secondo i modelli del progetto.
+import { deviceLetter } from './letterCodes';
 import type { Project, ProjectSettings, Page } from './types';
 import { DEFAULT_SETTINGS, columnOf } from './types';
 import { buildDevices, stripOf } from './devices';
@@ -106,7 +107,7 @@ export function letterOfTag(tag: string, pageName?: string): string | undefined 
  * ordine pagina → colonna/posizione → riga. I contatti seguono la sigla della bobina.
  * Restituisce la mappa vecchia sigla → nuova sigla.
  */
-export function renumberDevices(project: Project): Map<string, string> {
+export function renumberDevices(project: Project, newLetters = false): Map<string, string> {
   const s = settingsOf(project);
   const devices = [...buildDevices(project).values()]
     .filter(d => d.elements.every(e => e.sym.role !== 'terminal' && e.sym.role !== 'pin') && !(project.plc?.cards ?? []).some(c => c.tag === d.tag))
@@ -116,7 +117,8 @@ export function renumberDevices(project: Project): Map<string, string> {
   const counters = new Map<string, number>();
   const map = new Map<string, string>();
   for (const { d, anchor } of devices) {
-    const letter = letterOfTag(d.tag, anchor.page.name) ?? anchor.sym.letter;
+    // Con newLetters la lettera torna quella del simbolo secondo l'impostazione (es. passando alla IEC 81346-2:2019)
+    const letter = (newLetters ? deviceLetter(anchor.sym, project) : '') || (letterOfTag(d.tag, anchor.page.name) ?? anchor.sym.letter);
     if (!letter) continue;
     const key = `${s.tagScope === 'page' ? anchor.page.id : ''}|${letter}`;
     const n = (counters.get(key) ?? 0) + 1;

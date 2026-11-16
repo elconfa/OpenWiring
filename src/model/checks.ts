@@ -1,5 +1,6 @@
 // Controlli di progetto (come la «Verifica» di EPLAN): sigle, contatti, rimandi,
 // fili aperti, morsetti, PLC. Ogni problema porta alla posizione nello schema.
+import { deviceLetter } from './letterCodes';
 import { pairRepresentations } from './pairs';
 import { projectionSource } from './projection';
 import { bundleTaps, type BundleTap } from './bundles';
@@ -103,7 +104,7 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
     if (!['main', 'single', 'aux'].includes(e.sym.role) || e.inst.tag.trim()) continue;
     // Grafica importata da PDF non riconosciuta come componente: un solo avviso riassuntivo
     if (e.sym.source === 'Import PDF') { pdfGraphics++; continue; }
-    const tag = e.sym.letter && e.sym.role !== 'aux' ? nextTagFor(project, e.sym.letter, e.page, e.inst.x, newTags) : '';
+    const tag = e.sym.letter && e.sym.role !== 'aux' ? nextTagFor(project, deviceLetter(e.sym, project), e.page, e.inst.x, newTags) : '';
     if (tag) newTags.push(tag);
     out.push({ level: 'error', kind: tx('Sigle'), msg: tx('{0} senza sigla', e.sym.name), ...at(e), fix: tag ? { label: tx('Assegna -{0}', tag), kind: 'assignTag', pageId: e.page.id, id: e.inst.id, tag } : undefined });
   }

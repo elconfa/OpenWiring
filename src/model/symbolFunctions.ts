@@ -388,8 +388,9 @@ const RULES: Rule[] = [
   { id: 'contatto-scambio', re: /scambio|commutazione|\bco\b|changeover|\bsw\b contact/, when: s => s.role === 'aux' || /contatt|contact/i.test(s.name) },
   { id: 'contatto-nc', re: /\bnc\b|\(nc\)|normalmente chius|apertur|break contact/, when: s => s.role === 'aux' || /contatt|contact|contacto/i.test(s.name) },
   { id: 'contatto-na', re: /\bno\b|\bna\b|\(no\)|\(na\)|normalmente apert|chiusur|make contact|^contatto\b/, when: s => s.role === 'aux' || /contatt|contact|contacto/i.test(s.name) },
-  { id: 'contattore', re: /contattor|contactor|teleruttor|acti9 ict|\bict\b/ },
+  // La bobina «relè/contattore» resta una bobina: contattore solo se il simbolo è il contattore intero
   { id: 'bobina', re: /bobin|\bcoil\b|bobine/ },
+  { id: 'contattore', re: /contattor|contactor|teleruttor|acti9 ict|\bict\b/ },
   { id: 'rele', re: /\brel[eè]\b|\brele\b|\brelay\b|\brele[ i]|\brelais/ },
   // Utilizzatori
   { id: 'motore-passo', re: /motore passo|stepper/ },

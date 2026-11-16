@@ -949,6 +949,8 @@ export interface ProjectSettings {
   tagFormat: string;
   /** Il numero progressivo riparte su ogni pagina o è unico nel progetto */
   tagScope: 'page' | 'project';
+  /** Lettere delle sigle: assente = lettera singola del simbolo (K, Q, S…); iec2019 = due lettere IEC 81346-2:2019 (KF, QA, SF…) */
+  letterCodes?: 'iec2019';
   /** Modello del numero filo, es. "{pagina}.{n:2}" → 200.01; {n:A} = contatore in lettere, {quadro} = codice del quadro */
   wireFormat: string;
   /** Il contatore riparte su ogni pagina, su ogni quadro (pagine senza quadro insieme) o è unico nel progetto */

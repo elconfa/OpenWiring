@@ -1,4 +1,5 @@
 // Editor delle proprietà a due colonne (Proprietà | Valore), come in FreeCAD.
+import { deviceLetter } from '../model/letterCodes';
 import { contactPlaceOf, type ContactPlace } from '../model/pairs';
 import { zoneCodeOnly } from '../model/leaders';
 import { openSettingsAt } from './SettingsDialog';
@@ -23,7 +24,7 @@ import type { Lang, TerminalTextDir, ExtraPart, Part, UserPropAssign, RailSettin
 import { railOf, PLC_ROW_DEFAULT } from '../model/fixedPos';
 import { activeDefs } from '../model/userProps';
 import { pinCount, connectorRows } from '../model/connectors';
-import { compareWithFile, newFromTemplate, saveAsTemplate, addPlace, renumberDevices, renumberWires } from './actions';
+import { compareWithFile, newFromTemplate, saveAsTemplate, addPlace, renumberDevices, renumberWires, changeLetterCodes } from './actions';
 import { openFiles } from '../io/fileio';
 import { wirePasses, defaultWirePass, computeNetlist } from '../model/netlist';
 import { titleBlockTemplates, templateFor } from '../model/titleBlocks';
@@ -378,7 +379,7 @@ function SymbolProps({ inst }: { inst: SymbolInstance }) {
     ? [...(sym.role === 'link' ? linkChoices(inst.id).free.map(e => ({ value: e.inst.tag, label: `/${locationOf(e)}${e.page.title ? ` · ${e.page.title}` : ''}` })) : []),
       ...[...new Set(allPlaced(project).filter(e => e.sym.role === sym.role && e.inst.id !== inst.id).map(e => e.inst.tag))].map(t => ({ value: t }))]
       .filter((x, i, a) => x.value && a.findIndex(y => y.value === x.value) === i)
-    : [...devices.keys()].filter(t => !sym.letter || sym.role === 'netnode' || letterOfTag(t, instPage.name) === sym.letter).map(t => ({ value: t, label: devices.get(t)?.main?.inst.description }));
+    : [...devices.keys()].filter(t => !sym.letter || sym.role === 'netnode' || [sym.letter, deviceLetter(sym, project)].includes(letterOfTag(t, instPage.name) ?? '')).map(t => ({ value: t, label: devices.get(t)?.main?.inst.description }));
   const parts = partsIndex(project, library);
   const isPlc = sym.role === 'plc';
   const upd = (patch: Partial<SymbolInstance>) => st().updateElement(inst.id, patch);
@@ -396,7 +397,7 @@ function SymbolProps({ inst }: { inst: SymbolInstance }) {
     const targets = mergeTargets(project, inst.id, tag);
     if (!targets.length) { upd({ tag }); return true; }
     const page = project.pages.find(pg => pg.elements.some(e => e.id === inst.id)) ?? project.pages[0];
-    const free = nextTagFor(project, letterOfTag(tag, page.name) ?? sym.letter, page, inst.x);
+    const free = nextTagFor(project, letterOfTag(tag, page.name) ?? deviceLetter(sym, project), page, inst.x);
     const list = targets.slice(0, 4).map(x => `${tx(x.sym.name)} (/${locationOf(x)})`).join(', ') + (targets.length > 4 ? ' …' : '');
     const choice = await askChoice(tx('La sigla -{0} è già usata', tag),
       tx('Nello schema c\'è già -{0}: {1}.\nUnendo i componenti diventano un unico apparecchio: i contatti mostrano il rimando alla bobina e la bobina l\'elenco dei contatti. Descrizione e articolo restano quelli del componente esistente.', tag, list),
@@ -1925,6 +1926,13 @@ export function TagsSection() {
         <select value={s.tagScope} onChange={e => st().updateSettings({ tagScope: e.target.value as 'page' | 'project' })}>
           <option value="page">{tx('riparte su ogni pagina')}</option>
           <option value="project">{tx('unico nel progetto')}</option>
+        </select>
+      </Row>
+      <Row label={tx('Lettere')}>
+        <select value={s.letterCodes ?? ''} title={tx('IEC 81346-2:2019: due lettere ricavate dalla funzione del simbolo (QA contattore, KF relè e PLC, SF pulsante, BG sensore, FC protezione…)')}
+          onChange={e => void changeLetterCodes((e.target.value || undefined) as 'iec2019' | undefined)}>
+          <option value="">{tx('una lettera (K, Q, S, F…)')}</option>
+          <option value="iec2019">{tx('due lettere IEC 81346-2:2019 (KF, QA, SF, BG…)')}</option>
         </select>
       </Row>
       <Row label={tx('Applica')}>

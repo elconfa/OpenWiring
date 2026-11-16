@@ -14,7 +14,7 @@ export const SETTINGS_PARTS: SettingsPart[] = [
   { id: 'titleBlock', name: tn('Cartiglio (modello, logo, indirizzo, campi)'), keys: [] },
   { id: 'sheet', name: tn('Formato del foglio, cornice, colonne e righe'), keys: ['sheet'] },
   { id: 'revisions', name: tn('Revisioni'), keys: ['revisionFormat', 'revisionPageNo', 'showRevisionClouds'] },
-  { id: 'tags', name: tn('Sigle dispositivi'), keys: ['tagFormat', 'tagScope', 'contactImage', 'contactImageStyle'] },
+  { id: 'tags', name: tn('Sigle dispositivi'), keys: ['tagFormat', 'tagScope', 'letterCodes', 'contactImage', 'contactImageStyle'] },
   { id: 'wires', name: tn('Numeri filo'), keys: ['showWireNumbers', 'wireNoMinLength', 'showWireData', 'wireDataTick', 'drawWireColors', 'wireNumbering', 'wireFormat', 'wireScope', 'wireReserve', 'wireOrder', 'wireKeepPotentialNames', 'wirePlcNames'] },
   { id: 'texts', name: tn('Testi'), keys: ['textStyles'] },
   { id: 'look', name: tn('Linee, colori e giunzioni'), keys: ['look'] },
@@ -32,7 +32,7 @@ export const partKeys = (id: string) => SETTINGS_PARTS.find(p => p.id === id)?.k
 /** Nomi delle impostazioni per l'elenco delle differenze */
 const KEY_NAMES: Partial<Record<keyof ProjectSettings, string>> = {
   revisionFormat: tn('Formato dell\'indice di revisione'), revisionPageNo: tn('Pagine inserite in revisione'), showRevisionClouds: tn('Nuvolette sulle modifiche'),
-  tagFormat: tn('Modello della sigla'), tagScope: tn('Contatore delle sigle'), contactImage: tn('Contatti delle bobine'), contactImageStyle: tn('Disegno dei contatti delle bobine'),
+  tagFormat: tn('Modello della sigla'), tagScope: tn('Contatore delle sigle'), letterCodes: tn('Lettere delle sigle'), contactImage: tn('Contatti delle bobine'), contactImageStyle: tn('Disegno dei contatti delle bobine'),
   showWireNumbers: tn('Numeri filo mostrati'), wireNoMinLength: tn('Niente numero sui fili corti'), showWireData: tn('Sezione e colore'), wireDataTick: tn('Sezione e colore sulla lineetta obliqua'), drawWireColors: tn('Fili colorati'), wireNumbering: tn('Numerazione dei fili'),
   wireFormat: tn('Modello del numero filo'), wireScope: tn('Contatore dei fili'), wireReserve: tn('Numeri di riserva per pagina'), wireOrder: tn('Ordine dei fili sulla pagina'), wireKeepPotentialNames: tn('Potenziali (L1, N, PE)'), wirePlcNames: tn('Fili del PLC: nome dall\'indirizzo'),
   textStyles: tn('Colore e altezza dei testi'), sheet: tn('Formato del foglio'), look: tn('Spessori, colori, giunzioni e carattere'),

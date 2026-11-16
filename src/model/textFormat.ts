@@ -2,6 +2,7 @@
 // modificabile da una persona o da un assistente di intelligenza artificiale. I collegamenti
 // si possono scrivere per sigla e punto di connessione ("collega -2S1:14 -2K1:A1"): il
 // programma calcola il percorso del filo.
+import { deviceLetter } from './letterCodes';
 import { isDeletedSymbol } from './symbolSync';
 import type { Project, Page, Element, SymbolInstance, Wire, SymbolDef, PinDir, PinDef, Prim, Pt, Cable, PageType } from './types';
 import { PAGE_W, PAGE_H } from './types';
@@ -860,7 +861,7 @@ export function importPagesText(project: Project, text: string): TextImportResul
       }
       if (e.kind === 'symbol' && e.tag === '\u0000auto') {
         const sym = getSymbol(e.symbolId, work)!;
-        e.tag = nextTagFor(work, sym.letter || 'X', page, e.x);
+        e.tag = nextTagFor(work, deviceLetter(sym, work) || 'X', page, e.x);
       }
       page.elements.push(e);
     }

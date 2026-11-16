@@ -3716,5 +3716,14 @@
  "Ventilatore": "Fan",
  "Vista frontale di apparecchio": "Device front view",
  "Voltmetro": "Voltmeter",
- "Wattmetro, analizzatore di rete": "Wattmeter, power analyzer"
+ "Wattmetro, analizzatore di rete": "Wattmeter, power analyzer",
+ "Cambia anche quelle": "Change those too",
+ "due lettere IEC 81346-2:2019 (KF, QA, SF, BG…)": "two letters IEC 81346-2:2019 (KF, QA, SF, BG…)",
+ "I dispositivi nuovi avranno la lettera singola del simbolo (es. -2K1). Cambiare anche le sigle già messe? I dispositivi vengono rinumerati secondo il modello.": "New devices will get the single letter of the symbol (e.g. -2K1). Change the tags already placed too? Devices are renumbered according to the pattern.",
+ "I dispositivi nuovi avranno le due lettere della IEC 81346-2:2019 (es. -2KF1, -3QA2), ricavate dalla funzione del simbolo. Cambiare anche le sigle già messe? I dispositivi vengono rinumerati secondo il modello.": "New devices will get the two IEC 81346-2:2019 letters (e.g. -2KF1, -3QA2), derived from the symbol's function. Change the tags already placed too? Devices are renumbered according to the pattern.",
+ "IEC 81346-2:2019: due lettere ricavate dalla funzione del simbolo (QA contattore, KF relè e PLC, SF pulsante, BG sensore, FC protezione…)": "IEC 81346-2:2019: two letters derived from the symbol's function (QA contactor, KF relay and PLC, SF push button, BG sensor, FC protection…)",
+ "Lettere": "Letters",
+ "Lettere delle sigle": "Tag letters",
+ "Solo i dispositivi nuovi": "Only new devices",
+ "una lettera (K, Q, S, F…)": "one letter (K, Q, S, F…)"
 }

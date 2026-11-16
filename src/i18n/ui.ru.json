@@ -3716,5 +3716,14 @@
  "Ventilatore": "Вентилятор",
  "Vista frontale di apparecchio": "Вид спереди устройства",
  "Voltmetro": "Вольтметр",
- "Wattmetro, analizzatore di rete": "Ваттметр, анализатор сети"
+ "Wattmetro, analizzatore di rete": "Ваттметр, анализатор сети",
+ "Cambia anche quelle": "Изменить и их",
+ "due lettere IEC 81346-2:2019 (KF, QA, SF, BG…)": "две буквы МЭК 81346-2:2019 (KF, QA, SF, BG…)",
+ "I dispositivi nuovi avranno la lettera singola del simbolo (es. -2K1). Cambiare anche le sigle già messe? I dispositivi vengono rinumerati secondo il modello.": "Новые устройства получат одну букву символа (напр. -2K1). Изменить и уже присвоенные обозначения? Устройства будут перенумерованы по шаблону.",
+ "I dispositivi nuovi avranno le due lettere della IEC 81346-2:2019 (es. -2KF1, -3QA2), ricavate dalla funzione del simbolo. Cambiare anche le sigle già messe? I dispositivi vengono rinumerati secondo il modello.": "Новые устройства получат две буквы МЭК 81346-2:2019 (напр. -2KF1, -3QA2) по функции символа. Изменить и уже присвоенные обозначения? Устройства будут перенумерованы по шаблону.",
+ "IEC 81346-2:2019: due lettere ricavate dalla funzione del simbolo (QA contattore, KF relè e PLC, SF pulsante, BG sensore, FC protezione…)": "МЭК 81346-2:2019: две буквы по функции символа (QA контактор, KF реле и ПЛК, SF кнопка, BG датчик, FC защита…)",
+ "Lettere": "Буквы",
+ "Lettere delle sigle": "Буквы обозначений",
+ "Solo i dispositivi nuovi": "Только новые устройства",
+ "una lettera (K, Q, S, F…)": "одна буква (K, Q, S, F…)"
 }

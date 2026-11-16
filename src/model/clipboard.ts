@@ -1,6 +1,7 @@
 // Copia/incolla di elementi tra pagine e tra progetti, duplicazione di pagine.
 // Le copie ricevono sigle nuove (le bobine e i contatti copiati insieme restano collegati),
 // numeri filo nuovi e, per i punti I/O PLC, il primo canale libero.
+import { deviceLetter } from './letterCodes';
 import { nextProjectPageNo } from './pageOrder';
 import type { Project, Element, SymbolDef, Part, Pt, Page, Cable } from './types';
 import { nextCableTag } from './cables';
@@ -110,7 +111,7 @@ export function pasteElements(project: Project, pageId: string, clip: ClipData, 
     const role = sym?.role;
     if (sym && (role === 'main' || role === 'single') && sym.letter && c.tag) {
       const mapped = tagMap.get(c.tag);
-      const next = mapped ?? nextTagFor(project, sym.letter, page, c.x);
+      const next = mapped ?? nextTagFor(project, deviceLetter(sym, project), page, c.x);
       tagMap.set(c.tag, next);
       c.tag = next;
     } else if (role === 'aux' && tagMap.has(c.tag)) {

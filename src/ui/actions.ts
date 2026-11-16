@@ -801,6 +801,18 @@ export async function addPlace() {
   st().updatePanel(pn.id, { code: code.replace(/^\+/, '').trim().toUpperCase() });
 }
 
+/** Lettere delle sigle (una lettera o IEC 81346-2:2019); propone di rifare le sigle già messe */
+export async function changeLetterCodes(v: 'iec2019' | undefined) {
+  st().updateSettings({ letterCodes: v });
+  const devices = st().project.pages.some(pg => pg.elements.some(e => e.kind === 'symbol' && e.tag));
+  if (!devices) return;
+  const c = await askChoice(tx('Lettere delle sigle'),
+    v ? tx('I dispositivi nuovi avranno le due lettere della IEC 81346-2:2019 (es. -2KF1, -3QA2), ricavate dalla funzione del simbolo. Cambiare anche le sigle già messe? I dispositivi vengono rinumerati secondo il modello.')
+      : tx('I dispositivi nuovi avranno la lettera singola del simbolo (es. -2K1). Cambiare anche le sigle già messe? I dispositivi vengono rinumerati secondo il modello.'),
+    [tx('Cambia anche quelle'), tx('Solo i dispositivi nuovi')]);
+  if (c === 0) st().renumber(true);
+}
+
 export async function renumberDevices() {
   if (await askConfirm(tx('Rinumera dispositivi'), tx('Rinumerare tutti i dispositivi secondo il modello? I contatti seguono la sigla della bobina.'), tx('Rinumera'))) st().renumber();
 }

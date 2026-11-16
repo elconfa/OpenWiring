@@ -3716,5 +3716,14 @@
  "Ventilatore": "Lüfter",
  "Vista frontale di apparecchio": "Gerätefrontansicht",
  "Voltmetro": "Voltmeter",
- "Wattmetro, analizzatore di rete": "Wattmeter, Netzanalysator"
+ "Wattmetro, analizzatore di rete": "Wattmeter, Netzanalysator",
+ "Cambia anche quelle": "Auch diese ändern",
+ "due lettere IEC 81346-2:2019 (KF, QA, SF, BG…)": "zwei Buchstaben IEC 81346-2:2019 (KF, QA, SF, BG…)",
+ "I dispositivi nuovi avranno la lettera singola del simbolo (es. -2K1). Cambiare anche le sigle già messe? I dispositivi vengono rinumerati secondo il modello.": "Neue Geräte erhalten den Einzelbuchstaben des Symbols (z. B. -2K1). Auch die bereits vergebenen Kennzeichen ändern? Die Geräte werden nach dem Muster neu nummeriert.",
+ "I dispositivi nuovi avranno le due lettere della IEC 81346-2:2019 (es. -2KF1, -3QA2), ricavate dalla funzione del simbolo. Cambiare anche le sigle già messe? I dispositivi vengono rinumerati secondo il modello.": "Neue Geräte erhalten die zwei Buchstaben nach IEC 81346-2:2019 (z. B. -2KF1, -3QA2), abgeleitet aus der Funktion des Symbols. Auch die bereits vergebenen Kennzeichen ändern? Die Geräte werden nach dem Muster neu nummeriert.",
+ "IEC 81346-2:2019: due lettere ricavate dalla funzione del simbolo (QA contattore, KF relè e PLC, SF pulsante, BG sensore, FC protezione…)": "IEC 81346-2:2019: zwei Buchstaben aus der Funktion des Symbols (QA Schütz, KF Relais und SPS, SF Taster, BG Sensor, FC Schutz…)",
+ "Lettere": "Buchstaben",
+ "Lettere delle sigle": "Kennbuchstaben",
+ "Solo i dispositivi nuovi": "Nur neue Geräte",
+ "una lettera (K, Q, S, F…)": "ein Buchstabe (K, Q, S, F…)"
 }
