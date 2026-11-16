@@ -245,8 +245,10 @@ export interface State {
   loadProject(p: Project, filePath?: string): void;
   /** Altri progetti aperti insieme a quello attivo (ognuno con la sua cronologia e la pagina aperta) */
   others: OpenProject[];
-  /** Apre un progetto accanto a quelli aperti e lo rende attivo */
+  /** Apre un progetto accanto a quelli aperti e lo rende attivo; se quel file è già aperto rende attivo quello */
   openAlongside(p: Project, filePath?: string): void;
+  /** Dove è già aperto un file: 'active' (il progetto attivo), la chiave di un altro aperto, oppure null */
+  openSlotOf(filePath?: string): 'active' | string | null;
   /** Rende attivo un altro progetto aperto (con la pagina indicata) */
   switchProject(key: string, pageId?: string): void;
   /** Chiude un progetto aperto che non è quello attivo (le modifiche non salvate si perdono) */
@@ -258,6 +260,11 @@ export interface State {
   copyPage(pageId: string, fromKey?: string): void;
   pastePage(after?: string): void;
   markSaved(filePath?: string): void;
+  /**
+   * Fine di un salvataggio del progetto indicato: se nel frattempo è diventato attivo un altro
+   * progetto, il file salvato si segna sul progetto giusto (anche se ora è tra gli altri aperti)
+   */
+  markSavedProject(project: Project, filePath: string, othersAtStart: OpenProject[]): void;
 
   setPage(id: string): void;
   /** Pagina nuova dopo quella indicata: in fondo il numero dopo il più alto, in mezzo un numero con lettera (12A) */
@@ -328,7 +335,7 @@ export interface State {
    */
   deviceToPart(instId: string, partNr: string): void;
   /** Sostituisce i dati dell'utente (già uniti con mergeUserData) e li salva nell'archivio */
-  applyUserData(d: { library: Part[]; symbols: SymbolDef[]; macros: Macro[]; templates: ProjectTemplate[]; titleBlocks: TitleBlockTemplate[]; favorites: string[] }): void;
+  applyUserData(d: { library: Part[]; symbols: SymbolDef[]; macros: Macro[]; templates: ProjectTemplate[]; titleBlocks: TitleBlockTemplate[]; favorites: string[]; profiles?: SettingsProfile[] }): void;
   /** Proprietà copiate da un dispositivo (tutti i dati tranne la sigla), da incollare su altri */
   propClipboard: { tag: string; props: Partial<Pick<SymbolInstance, DeviceField>> } | null;
   /** Copia descrizione, articolo, codici, dati tecnici e proprietà del dispositivo, non la sigla */
@@ -979,8 +986,21 @@ export const useStore = create<State>((set, get) => {
       set({ viewing: null, project: p, pageId: p.pages[0]?.id ?? '', past: [], future: [], selection: [], dirty: false, filePath, savedAt: filePath ? Date.now() : null, treeSel: { type: 'project' }, view: 'schema' });
     },
     others: [],
+    openSlotOf(filePath) {
+      if (!filePath) return null;
+      const s = get();
+      if (samePath(s.filePath, filePath)) return 'active';
+      return s.others.find(o => samePath(o.filePath, filePath))?.key ?? null;
+    },
     openAlongside(p, filePath) {
       if (get().viewing) { get().logMsg(tx('Chiudi prima la revisione che stai guardando'), 'warn'); return; }
+      // Lo stesso file aperto due volte: le modifiche di una copia si perderebbero salvando l'altra
+      const open = get().openSlotOf(filePath);
+      if (open) {
+        if (open !== 'active') get().switchProject(open);
+        get().logMsg(tx('{0} è già aperto: ti porto su quello invece di aprirne una seconda copia', p.info.name || filePath!), 'warn');
+        return;
+      }
       const cur = slotOf(get());
       get().loadProject(p, filePath);
       set({ others: [...get().others, cur] });
@@ -1035,6 +1055,17 @@ export const useStore = create<State>((set, get) => {
       get().logMsg(tx('Pagina incollata come {0} (da {1}): sigle e numeri filo nuovi', name, c.from || tx('progetto')));
     },
     markSaved(filePath) { set(s => ({ dirty: false, filePath: filePath ?? s.filePath, savedAt: Date.now() })); },
+    markSavedProject(project, filePath, othersAtStart) {
+      const s = get();
+      if (s.project === project) { s.markSaved(filePath); return; }
+      const slot = s.others.find(o => o.project === project);
+      if (slot) {
+        set({ others: s.others.map(o => (o === slot ? { ...o, filePath, dirty: false, savedAt: Date.now() } : o)) });
+        return;
+      }
+      // Stesso progetto attivo ma modificato durante il salvataggio: il file è suo, le modifiche nuove restano da salvare
+      if (s.others === othersAtStart) set({ filePath, savedAt: Date.now() });
+    },
 
     setPage(id) { set({ pageId: id, selection: [], treeSel: { type: 'page', id }, view: 'schema' }); },
     addPage(after, name) {
@@ -1664,6 +1695,7 @@ export const useStore = create<State>((set, get) => {
       void kvSet('templates', d.templates);
       void kvSet('titleBlocks', d.titleBlocks);
       void kvSet('favorites', d.favorites);
+      if (d.profiles) { set({ profiles: d.profiles }); void kvSet('profiles', d.profiles); }
     },
     deviceToPart(instId, partNr) {
       partNr = partNr.trim();
@@ -2996,6 +3028,13 @@ export function ensureSymbolInProject(p: Project, symbolId: string) {
 const BUILTIN_IDS = new Set(BUILTIN_SYMBOLS.map(x => x.id));
 
 /** Stato del progetto attivo da mettere da parte quando se ne attiva un altro */
+/** Stesso file su disco (su Windows maiuscole e barre non contano) */
+export function samePath(a?: string, b?: string): boolean {
+  if (!a || !b) return false;
+  const n = (x: string) => x.replace(/\\/g, '/').toLowerCase();
+  return n(a) === n(b);
+}
+
 function slotOf(s: Pick<State, 'project' | 'filePath' | 'dirty' | 'savedAt' | 'past' | 'future' | 'pageId'>): OpenProject {
   return { key: uid('o'), project: s.project, filePath: s.filePath, dirty: s.dirty, savedAt: s.savedAt, past: s.past, future: s.future, pageId: s.pageId };
 }

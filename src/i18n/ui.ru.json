@@ -3491,5 +3491,18 @@
  "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Выровнять штрихи сечения и цвета: щелчок и щелчок, чтобы провести линию через провода; их штрихи встают на линию · Esc для завершения",
  "Allinea sez.": "Выровн. сеч.",
  "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Выровнять штрихи сечения и цвета (Shift+N): провести линию через провода, штрихи встают на линию",
- "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Проводится линия через провода: их штрихи сечения и цвета встают на линию"
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Проводится линия через провода: их штрихи сечения и цвета встают на линию",
+ "{0} è aperto anche accanto con altre modifiche: salvando quella copia cancelleresti queste. Chiudila senza salvare o salvala con un altro nome": "{0} также открыт рядом с другими изменениями: сохранение той копии сотрёт эти. Закройте её без сохранения или сохраните под другим именем",
+ "{0} è già aperto: ti porto su quello invece di aprirne una seconda copia": "{0} уже открыт: переход к нему вместо открытия второй копии",
+ "{0} elementi del file (articoli, simboli, macro, modelli, cartigli o profili) ci sono già qui ma con dati diversi. Gli elementi nuovi si aggiungono comunque.": "{0} элементов файла (изделия, символы, макросы, шаблоны, штампы или профили) уже есть здесь, но с другими данными. Новые элементы добавляются в любом случае.",
+ "{0} era aperto anche accanto: chiusa quella copia, ora è vecchia": "{0} был также открыт рядом: эта устаревшая копия закрыта",
+ "Attenzione: è un altro progetto": "Внимание: это другой проект",
+ "Dati utente esportati in {0}: {1} articoli, {2} simboli, {3} macro, {4} modelli di progetto, {5} cartigli, {6} profili di impostazioni": "Данные пользователя экспортированы в {0}: {1} изделий, {2} символов, {3} макросов, {4} шаблонов проекта, {5} штампов, {6} профилей настроек",
+ "Il file {0} contiene un altro progetto, non «{1}». Sovrascrivendolo quel progetto si perde (resta solo nella copia di sicurezza).": "Файл {0} содержит другой проект, а не «{1}». При перезаписи тот проект будет потерян (останется только в резервной копии).",
+ "Il file {0} non è un profilo di impostazioni né un progetto di OpenWiring.": "Файл {0} не является ни профилем настроек, ни проектом OpenWiring.",
+ "Legge un file .ecadprofile, o le impostazioni e il cartiglio di un progetto .ecad, e mostra cosa cambia prima di applicarlo": "Читает файл .ecadprofile или настройки и штамп проекта .ecad и показывает, что изменится, перед применением",
+ "profili di impostazioni": "профили настроек",
+ "Salvataggio automatico saltato: il file {0} contiene un altro progetto. Salva con nome per non perderlo": "Автосохранение пропущено: файл {0} содержит другой проект. Используйте «Сохранить как», чтобы не потерять его",
+ "Sovrascrivi lo stesso": "Всё равно перезаписать",
+ "Un file .ecadprofile, oppure un progetto .ecad da cui prendere impostazioni e cartiglio": "Файл .ecadprofile или проект .ecad, из которого берутся настройки и штамп"
 }

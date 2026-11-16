@@ -3,7 +3,8 @@ import { proposePageName } from '../model/pages';
 import { withFullParts, flushParts, applyFromDb, shrinkPicture } from './partsDbSync';
 import { parseCommercialCsv, mergeCommercial } from '../io/commercialCsv';
 import type { Part } from '../model/types';
-import { useStore, emptyProject } from '../model/store';
+import { samePath, useStore, emptyProject } from '../model/store';
+import type { Project } from '../model/types';
 import { exampleProject } from '../model/example';
 import { openFiles, openSymbolFolder, saveFile, PROJECT_FILTER, serializeProject, parseProject, safeName, saveFolder, isElectron, openDocument } from '../io/fileio';
 import { importEdz, importFromFiles, importExtracted, toDataUrl, extractArchive, decodeXml, type EdzResult, type EdzOptions } from '../io/edz';
@@ -56,10 +57,23 @@ export async function loadExample() {
   st().logMsg(tx('Caricato il progetto di esempio "Avviamento motore pompa"'));
 }
 
+/**
+ * Il file è già aperto (attivo o accanto): si va su quello invece di caricarlo di nuovo,
+ * altrimenti due copie dello stesso file si sovrascriverebbero a vicenda. true = già aperto.
+ */
+function goToOpen(path: string | undefined, name: string): boolean {
+  const open = st().openSlotOf(path);
+  if (!open) return false;
+  if (open !== 'active') st().switchProject(open);
+  st().logMsg(tx('{0} è già aperto: ti porto su quello invece di aprirne una seconda copia', name), 'warn');
+  return true;
+}
+
 export async function openProject() {
-  if (!(await confirmDiscard())) return;
   const [f] = await openFiles(PROJECT_FILTER);
   if (!f) return;
+  if (goToOpen(f.path, f.name)) return;
+  if (!(await confirmDiscard())) return;
   try {
     const p = parseProject(new TextDecoder().decode(f.data));
     st().loadProject(p, f.path);
@@ -71,6 +85,27 @@ export async function openProject() {
   }
 }
 
+/**
+ * Il file sul disco contiene lo stesso progetto (almeno una pagina in comune, le pagine hanno id unici
+ * e restano anche con «Salva con nome»). false = è un altro progetto: sovrascriverlo lo perderebbe.
+ * Se il file non c'è o non si legge, si salva.
+ */
+export async function sameProjectOnDisk(project: Project, filePath: string): Promise<boolean> {
+  const f = await window.elettro?.readProject?.(filePath);
+  if (!f) return true;
+  try {
+    const disk = JSON.parse(new TextDecoder().decode(f.data)) as { pages?: { id?: string }[] };
+    return sameProjectPages(project, disk.pages ?? []);
+  } catch { return true; }
+}
+
+/** Almeno una pagina in comune (o una delle due parti senza pagine) */
+export function sameProjectPages(project: Project, diskPages: { id?: string }[]): boolean {
+  const ids = new Set(project.pages.map(p => p.id));
+  const disk = diskPages.map(p => p.id).filter((x): x is string => !!x);
+  return !disk.length || !ids.size || disk.some(id => ids.has(id));
+}
+
 /** Salva il progetto attivo; true se è stato salvato (false se l'utente ha annullato il dialogo) */
 export async function saveProject(saveAs = false): Promise<boolean> {
   const { project, filePath, viewing } = st();
@@ -80,8 +115,23 @@ export async function saveProject(saveAs = false): Promise<boolean> {
     if (path) st().logMsg(tx('Copia della revisione {0} salvata: {1}', viewing.index, path));
     return !!path;
   }
-  const path = await saveFile(`${safeName(project.info.name)}.ecad`, serializeProject(project), PROJECT_FILTER, saveAs ? undefined : filePath, backupKeep());
-  if (path) { st().markSaved(path); st().logMsg(tx('Progetto salvato: {0}', path)); if (isElectron()) addRecent(path, project.info.name || path); }
+  const othersAtStart = st().others;
+  let target = saveAs ? undefined : filePath;
+  if (target && !(await sameProjectOnDisk(project, target))) {
+    const c = await askChoice(tx('Attenzione: è un altro progetto'),
+      tx('Il file {0} contiene un altro progetto, non «{1}». Sovrascrivendolo quel progetto si perde (resta solo nella copia di sicurezza).', target, project.info.name || tx('progetto')),
+      [tx('Salva con nome…'), tx('Sovrascrivi lo stesso'), tx('Annulla')]);
+    if (c === null || c === 2) return false;
+    if (c === 0) target = undefined;
+  }
+  const path = await saveFile(`${safeName(project.info.name)}.ecad`, serializeProject(project), PROJECT_FILTER, target, backupKeep());
+  // Salvato con nome sopra un file aperto anche accanto: quella copia ora è vecchia, salvarla cancellerebbe queste modifiche
+  const twin = path ? st().others.find(o => o.project !== project && samePath(o.filePath, path)) : undefined;
+  if (twin && !twin.dirty) {
+    st().closeOther(twin.key);
+    st().logMsg(tx('{0} era aperto anche accanto: chiusa quella copia, ora è vecchia', path!), 'warn');
+  } else if (twin) st().logMsg(tx('{0} è aperto anche accanto con altre modifiche: salvando quella copia cancelleresti queste. Chiudila senza salvare o salvala con un altro nome', path!), 'error');
+  if (path) { st().markSavedProject(project, path, othersAtStart); st().logMsg(tx('Progetto salvato: {0}', path)); if (isElectron()) addRecent(path, project.info.name || path); }
   return !!path;
 }
 
@@ -110,6 +160,7 @@ export async function confirmCloseAll(): Promise<boolean> {
 
 /** Riapre un progetto recente dal suo percorso (schermata iniziale); se il file non c'è più lo toglie dall'elenco */
 export async function openRecent(path: string): Promise<boolean> {
+  if (goToOpen(path, path.split(/[\\/]/).pop() ?? path)) return true;
   if (!(await confirmDiscard())) return false;
   const f = await window.elettro?.readProject?.(path);
   if (!f) {
@@ -138,6 +189,10 @@ export async function openRecent(path: string): Promise<boolean> {
 export async function autoSaveProject(): Promise<boolean> {
   const { project, filePath, viewing, dirty } = st();
   if (!isElectron() || !filePath || !dirty || viewing) return false;
+  if (!(await sameProjectOnDisk(project, filePath))) {
+    st().logMsg(tx('Salvataggio automatico saltato: il file {0} contiene un altro progetto. Salva con nome per non perderlo', filePath), 'error');
+    return false;
+  }
   const path = await saveFile(`${safeName(project.info.name)}.ecad`, serializeProject(project), PROJECT_FILTER, filePath, backupKeep());
   // Salvato quello che c'era quando è partito: se nel frattempo è cambiato, resta da salvare
   if (path && st().project === project) st().markSaved(path);
@@ -351,12 +406,12 @@ export async function exportUserData() {
   const s = st();
   const data = makeUserData({
     app: typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : undefined,
-    library: await withFullParts(s.library, true), symbols: s.symbolLibrary, macros: s.macros, templates: s.templates, titleBlocks: s.tbLibrary, favorites: s.favorites,
+    library: await withFullParts(s.library, true), symbols: s.symbolLibrary, macros: s.macros, templates: s.templates, titleBlocks: s.tbLibrary, favorites: s.favorites, profiles: s.profiles,
   });
   const day = data.exported.slice(0, 10);
   const p = await saveFile(`OpenWiring_dati_utente_${day}.json`, new TextEncoder().encode(JSON.stringify(data)), [{ name: tx('Dati utente OpenWiring'), extensions: ['json'] }]);
-  if (p) s.logMsg(tx('Dati utente esportati in {0}: {1} articoli, {2} simboli, {3} macro, {4} modelli di progetto, {5} cartigli', p,
-    data.library.length, data.symbols.length, data.macros.length, data.templates.length, data.titleBlocks.length));
+  if (p) s.logMsg(tx('Dati utente esportati in {0}: {1} articoli, {2} simboli, {3} macro, {4} modelli di progetto, {5} cartigli, {6} profili di impostazioni', p,
+    data.library.length, data.symbols.length, data.macros.length, data.templates.length, data.titleBlocks.length, data.profiles.length));
 }
 
 /** Dati dell'utente da un'altra installazione: si aggiungono a quelli presenti */
@@ -367,12 +422,12 @@ export async function importUserData() {
   if (!r.data) { st().logMsg(tx(r.error ?? ''), 'error'); return; }
   const s = st();
   // Confronto con gli articoli completi (attributi e foto del database), non con quelli leggeri
-  const cur = { library: await withFullParts(s.library, true), symbols: s.symbolLibrary, macros: s.macros, templates: s.templates, titleBlocks: s.tbLibrary, favorites: s.favorites };
+  const cur = { library: await withFullParts(s.library, true), symbols: s.symbolLibrary, macros: s.macros, templates: s.templates, titleBlocks: s.tbLibrary, favorites: s.favorites, profiles: s.profiles };
   const conflicts = userDataConflicts(cur, r.data);
   let overwrite = false;
   if (conflicts) {
     const c = await askChoice(tx('Dati utente da {0}', f.name),
-      tx('{0} elementi del file (articoli, simboli, macro, modelli o cartigli) ci sono già qui ma con dati diversi. Gli elementi nuovi si aggiungono comunque.', conflicts),
+      tx('{0} elementi del file (articoli, simboli, macro, modelli, cartigli o profili) ci sono già qui ma con dati diversi. Gli elementi nuovi si aggiungono comunque.', conflicts),
       [tx('Tieni i miei'), tx('Usa quelli del file'), tx('Annulla')]);
     if (c === null || c === 2) return;
     overwrite = c === 1;

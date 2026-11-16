@@ -3491,5 +3491,18 @@
  "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Aligner les traits de section et couleur : clic et clic pour tracer une ligne à travers les fils ; leurs traits vont sur la ligne · Échap pour terminer",
  "Allinea sez.": "Aligner sect.",
  "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Aligner les traits de section et couleur (Maj+N) : tracez une ligne à travers les fils, les traits vont sur la ligne",
- "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "On trace une ligne à travers les fils : leurs traits de section et couleur vont sur la ligne"
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "On trace une ligne à travers les fils : leurs traits de section et couleur vont sur la ligne",
+ "{0} è aperto anche accanto con altre modifiche: salvando quella copia cancelleresti queste. Chiudila senza salvare o salvala con un altro nome": "{0} est aussi ouvert à côté avec d'autres modifications : enregistrer cette copie effacerait celles-ci. Fermez-la sans enregistrer ou enregistrez-la sous un autre nom",
+ "{0} è già aperto: ti porto su quello invece di aprirne una seconda copia": "{0} est déjà ouvert : on y passe au lieu d'en ouvrir une deuxième copie",
+ "{0} elementi del file (articoli, simboli, macro, modelli, cartigli o profili) ci sono già qui ma con dati diversi. Gli elementi nuovi si aggiungono comunque.": "{0} éléments du fichier (articles, symboles, macros, modèles, cartouches ou profils) existent déjà ici mais avec des données différentes. Les nouveaux éléments sont ajoutés de toute façon.",
+ "{0} era aperto anche accanto: chiusa quella copia, ora è vecchia": "{0} était aussi ouvert à côté : cette copie, désormais périmée, a été fermée",
+ "Attenzione: è un altro progetto": "Attention : c'est un autre projet",
+ "Dati utente esportati in {0}: {1} articoli, {2} simboli, {3} macro, {4} modelli di progetto, {5} cartigli, {6} profili di impostazioni": "Données utilisateur exportées dans {0} : {1} articles, {2} symboles, {3} macros, {4} modèles de projet, {5} cartouches, {6} profils de paramètres",
+ "Il file {0} contiene un altro progetto, non «{1}». Sovrascrivendolo quel progetto si perde (resta solo nella copia di sicurezza).": "Le fichier {0} contient un autre projet, pas « {1} ». En l'écrasant, ce projet est perdu (il ne reste que dans la copie de sécurité).",
+ "Il file {0} non è un profilo di impostazioni né un progetto di OpenWiring.": "Le fichier {0} n'est ni un profil de paramètres ni un projet OpenWiring.",
+ "Legge un file .ecadprofile, o le impostazioni e il cartiglio di un progetto .ecad, e mostra cosa cambia prima di applicarlo": "Lit un fichier .ecadprofile, ou les paramètres et le cartouche d'un projet .ecad, et montre ce qui change avant de l'appliquer",
+ "profili di impostazioni": "profils de paramètres",
+ "Salvataggio automatico saltato: il file {0} contiene un altro progetto. Salva con nome per non perderlo": "Enregistrement automatique ignoré : le fichier {0} contient un autre projet. Utilisez Enregistrer sous pour ne pas le perdre",
+ "Sovrascrivi lo stesso": "Écraser quand même",
+ "Un file .ecadprofile, oppure un progetto .ecad da cui prendere impostazioni e cartiglio": "Un fichier .ecadprofile, ou un projet .ecad dont prendre les paramètres et le cartouche"
 }

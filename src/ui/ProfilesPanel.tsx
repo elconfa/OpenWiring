@@ -1,15 +1,18 @@
 // Impostazioni ▸ Profili: profili di impostazioni della libreria personale da
 // salvare, applicare (vedendo prima cosa cambia), aggiornare, rinominare, eliminare, scegliere per i
 // progetti nuovi, esportare e importare come file .ecadprofile; anche le impostazioni del progetto
-// aperto si esportano e si importano nello stesso formato.
+// aperto si esportano e si importano nello stesso formato. Al posto del .ecadprofile si può scegliere
+// anche un progetto .ecad: si prendono tutte le sue impostazioni e il suo cartiglio.
 import { useState } from 'react';
 import { useStore } from '../model/store';
 import { SETTINGS_PARTS, applicableParts, makeLock, makeProfile, parseProfile, profileChanges, serializeProfile, unlockOk, type SettingsProfile } from '../model/settingsProfiles';
-import { openFiles, saveFile, safeName } from '../io/fileio';
+import { openFiles, saveFile, safeName, parseProject } from '../io/fileio';
 import { ask, askChoice, askText } from './Ask';
 import { tx } from '../i18n/ui';
 
 const FILTER = [{ name: 'Profilo di impostazioni OpenWiring', extensions: ['ecadprofile'] }];
+/** In lettura anche un progetto, da cui prendere le impostazioni */
+const READ_FILTER = [{ name: 'Profilo o progetto OpenWiring', extensions: ['ecadprofile', 'ecad'] }];
 const ALL = SETTINGS_PARTS.map(p => p.id);
 const partName = (id: string) => tx(SETTINGS_PARTS.find(p => p.id === id)?.name ?? id);
 
@@ -25,11 +28,21 @@ async function exportProfile(p: SettingsProfile) {
 }
 
 async function readProfileFile(): Promise<SettingsProfile | undefined> {
-  const [f] = await openFiles(FILTER);
+  const [f] = await openFiles(READ_FILTER);
   if (!f) return undefined;
-  const p = parseProfile(new TextDecoder().decode(f.data));
-  if (!p) await askChoice(tx('Importa profilo'), tx('Il file {0} non è un profilo di impostazioni di OpenWiring.', f.name), [tx('OK')]);
+  const text = new TextDecoder().decode(f.data);
+  const p = parseProfile(text) ?? profileFromProjectFile(text, f.name);
+  if (!p) await askChoice(tx('Importa profilo'), tx('Il file {0} non è un profilo di impostazioni né un progetto di OpenWiring.', f.name), [tx('OK')]);
   return p;
+}
+
+/** Tutte le impostazioni e il cartiglio di un file di progetto .ecad, come profilo */
+export function profileFromProjectFile(text: string, fileName: string): SettingsProfile | undefined {
+  if (!/\.ecad$/i.test(fileName)) return undefined;
+  try {
+    const proj = parseProject(text);
+    return makeProfile(proj, proj.info.name || fileName.replace(/\.ecad$/i, ''), ALL);
+  } catch { return undefined; }
 }
 
 function PartChecks({ parts, allowed, onChange }: { parts: string[]; allowed: string[]; onChange: (p: string[]) => void }) {
@@ -179,7 +192,8 @@ export function ProfilesPanel() {
       ) : <p className="small">{tx('Nessun profilo salvato.')}</p>}
       <div className="profile-actions">
         <button className="primary" onClick={() => setMode({ kind: 'save', parts: ALL.filter(x => x !== 'titleBlock'), name: '', description: '', lock: false, password: '' })}>{tx('Salva le impostazioni come profilo…')}</button>
-        <button onClick={async () => { const p = await readProfileFile(); if (p) st().addProfile(p); }}>{tx('Importa profilo…')}</button>
+        <button onClick={async () => { const p = await readProfileFile(); if (p) st().addProfile(p); }}
+          title={tx('Un file .ecadprofile, oppure un progetto .ecad da cui prendere impostazioni e cartiglio')}>{tx('Importa profilo…')}</button>
       </div>
       <h4>{tx('Impostazioni di questo progetto')}</h4>
       {project.settings.locks && (
@@ -193,7 +207,7 @@ export function ProfilesPanel() {
         <button onClick={() => void exportProfile(makeProfile(project, project.info.name || tx('Impostazioni'), ALL))}
           title={tx('Tutte le impostazioni del progetto in un file .ecadprofile')}>{tx('Esporta le impostazioni del progetto…')}</button>
         <button onClick={async () => { const p = await readProfileFile(); if (p) setMode({ kind: 'apply', profile: p, parts: [...p.parts], fromFile: true }); }}
-          title={tx('Legge un file .ecadprofile e mostra cosa cambia prima di applicarlo')}>{tx('Importa impostazioni nel progetto…')}</button>
+          title={tx('Legge un file .ecadprofile, o le impostazioni e il cartiglio di un progetto .ecad, e mostra cosa cambia prima di applicarlo')}>{tx('Importa impostazioni nel progetto…')}</button>
       </div>
     </div>
   );

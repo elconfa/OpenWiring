@@ -3491,5 +3491,18 @@
  "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Alinear trazos de sección y color: clic y clic para trazar una línea a través de los hilos; sus trazos van sobre la línea · Esc para terminar",
  "Allinea sez.": "Alinear secc.",
  "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Alinear trazos de sección y color (Mayús+N): traza una línea a través de los hilos, los trazos van sobre la línea",
- "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Se traza una línea a través de los hilos: sus trazos de sección y color van sobre la línea"
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Se traza una línea a través de los hilos: sus trazos de sección y color van sobre la línea",
+ "{0} è aperto anche accanto con altre modifiche: salvando quella copia cancelleresti queste. Chiudila senza salvare o salvala con un altro nome": "{0} también está abierto al lado con otros cambios: guardar esa copia borraría estos. Ciérrala sin guardar o guárdala con otro nombre",
+ "{0} è già aperto: ti porto su quello invece di aprirne una seconda copia": "{0} ya está abierto: se pasa a ese en lugar de abrir una segunda copia",
+ "{0} elementi del file (articoli, simboli, macro, modelli, cartigli o profili) ci sono già qui ma con dati diversi. Gli elementi nuovi si aggiungono comunque.": "{0} elementos del archivo (artículos, símbolos, macros, plantillas, cajetines o perfiles) ya existen aquí pero con datos distintos. Los elementos nuevos se añaden igualmente.",
+ "{0} era aperto anche accanto: chiusa quella copia, ora è vecchia": "{0} también estaba abierto al lado: esa copia, ya obsoleta, se ha cerrado",
+ "Attenzione: è un altro progetto": "Atención: es otro proyecto",
+ "Dati utente esportati in {0}: {1} articoli, {2} simboli, {3} macro, {4} modelli di progetto, {5} cartigli, {6} profili di impostazioni": "Datos de usuario exportados a {0}: {1} artículos, {2} símbolos, {3} macros, {4} plantillas de proyecto, {5} cajetines, {6} perfiles de configuración",
+ "Il file {0} contiene un altro progetto, non «{1}». Sovrascrivendolo quel progetto si perde (resta solo nella copia di sicurezza).": "El archivo {0} contiene otro proyecto, no «{1}». Al sobrescribirlo ese proyecto se pierde (queda solo en la copia de seguridad).",
+ "Il file {0} non è un profilo di impostazioni né un progetto di OpenWiring.": "El archivo {0} no es un perfil de configuración ni un proyecto de OpenWiring.",
+ "Legge un file .ecadprofile, o le impostazioni e il cartiglio di un progetto .ecad, e mostra cosa cambia prima di applicarlo": "Lee un archivo .ecadprofile, o la configuración y el cajetín de un proyecto .ecad, y muestra qué cambia antes de aplicarlo",
+ "profili di impostazioni": "perfiles de configuración",
+ "Salvataggio automatico saltato: il file {0} contiene un altro progetto. Salva con nome per non perderlo": "Guardado automático omitido: el archivo {0} contiene otro proyecto. Usa Guardar como para no perderlo",
+ "Sovrascrivi lo stesso": "Sobrescribir igualmente",
+ "Un file .ecadprofile, oppure un progetto .ecad da cui prendere impostazioni e cartiglio": "Un archivo .ecadprofile, o un proyecto .ecad del que tomar la configuración y el cajetín"
 }

@@ -3491,5 +3491,18 @@
  "Allinea le lineette di sezione e colore: clic e clic per tracciare una linea attraverso i fili; le loro lineette vanno sulla linea · Esc per terminare": "Align cross-section and colour ticks: click and click to draw a line across the wires; their ticks go on the line · Esc to finish",
  "Allinea sez.": "Align sect.",
  "Allinea le lineette di sezione e colore (Maiusc+N): traccia una linea attraverso i fili, le lineette vanno sulla linea": "Align cross-section and colour ticks (Shift+N): draw a line across the wires, the ticks go on the line",
- "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Draw a line across the wires: their cross-section and colour ticks go on the line"
+ "Si traccia una linea attraverso i fili: le loro lineette di sezione e colore vanno sulla linea": "Draw a line across the wires: their cross-section and colour ticks go on the line",
+ "{0} è aperto anche accanto con altre modifiche: salvando quella copia cancelleresti queste. Chiudila senza salvare o salvala con un altro nome": "{0} is also open alongside with other changes: saving that copy would erase these. Close it without saving or save it under another name",
+ "{0} è già aperto: ti porto su quello invece di aprirne una seconda copia": "{0} is already open: switching to it instead of opening a second copy",
+ "{0} elementi del file (articoli, simboli, macro, modelli, cartigli o profili) ci sono già qui ma con dati diversi. Gli elementi nuovi si aggiungono comunque.": "{0} items in the file (parts, symbols, macros, templates, title blocks or profiles) already exist here but with different data. New items are added anyway.",
+ "{0} era aperto anche accanto: chiusa quella copia, ora è vecchia": "{0} was also open alongside: that copy is now outdated and has been closed",
+ "Attenzione: è un altro progetto": "Warning: this is a different project",
+ "Dati utente esportati in {0}: {1} articoli, {2} simboli, {3} macro, {4} modelli di progetto, {5} cartigli, {6} profili di impostazioni": "User data exported to {0}: {1} parts, {2} symbols, {3} macros, {4} project templates, {5} title blocks, {6} settings profiles",
+ "Il file {0} contiene un altro progetto, non «{1}». Sovrascrivendolo quel progetto si perde (resta solo nella copia di sicurezza).": "The file {0} contains a different project, not «{1}». Overwriting it loses that project (it remains only in the backup copy).",
+ "Il file {0} non è un profilo di impostazioni né un progetto di OpenWiring.": "The file {0} is neither an OpenWiring settings profile nor an OpenWiring project.",
+ "Legge un file .ecadprofile, o le impostazioni e il cartiglio di un progetto .ecad, e mostra cosa cambia prima di applicarlo": "Reads an .ecadprofile file, or the settings and title block of an .ecad project, and shows what changes before applying it",
+ "profili di impostazioni": "settings profiles",
+ "Salvataggio automatico saltato: il file {0} contiene un altro progetto. Salva con nome per non perderlo": "Autosave skipped: the file {0} contains a different project. Use Save as so it is not lost",
+ "Sovrascrivi lo stesso": "Overwrite anyway",
+ "Un file .ecadprofile, oppure un progetto .ecad da cui prendere impostazioni e cartiglio": "An .ecadprofile file, or an .ecad project to take settings and title block from"
 }
