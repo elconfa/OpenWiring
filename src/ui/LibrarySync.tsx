@@ -161,6 +161,22 @@ export function SymbolSyncHost() {
 
 let showUnify: (() => void) | undefined;
 /** Apre la finestra dei doppioni della libreria personale */
+/**
+ * Funzione a tutti i simboli della libreria personale (DA_FARE 164), riconosciuta da nome, cartella,
+ * ruolo e codice d'ordine: in un'installazione nuova cataloga in un colpo tutta la libreria.
+ */
+export async function assignFunctionsAsk() {
+  const lib = st().symbolLibrary;
+  const without = lib.filter(x => !x.func).length;
+  const c = await askChoice(tx('Assegna le funzioni ai simboli'),
+    tx('La funzione dice cosa fa il simbolo (contatto NA, magnetotermico, modulo ingressi digitali…) e si riconosce dal nome, dalla cartella e dal codice. Simboli nella libreria: {0}, senza funzione: {1}.', lib.length, without),
+    [tx('Solo quelli senza funzione'), tx('Tutti (rifà anche quelle già scelte)'), tx('Annulla')]);
+  if (c !== 0 && c !== 1) return;
+  const n = st().assignSymbolFunctions(c === 1);
+  const unknown = st().symbolLibrary.filter(x => x.func === 'altro').length;
+  st().logMsg(tx('Funzione assegnata a {0} simboli; {1} non riconosciuti restano in «Altro»: cercali con «Altro» nella libreria e scegli la funzione nell\'editor', n, unknown));
+}
+
 export function openUnifySymbols() {
   if (!duplicateGroups(st().symbolLibrary).length) { st().logMsg(tx('Nessun simbolo doppio nella libreria personale')); return; }
   showUnify?.();

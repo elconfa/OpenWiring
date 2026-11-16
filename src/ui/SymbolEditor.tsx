@@ -26,6 +26,32 @@ import { saveFile } from '../io/fileio';
 import type { SymLayer } from '../model/types';
 import { type Item, type Clip, withGroups, groupItems, explodeItems, lockItems, lockedItems, isLocked, alignItems, mirrorItems, sameItem, itemsBounds, itemsInBox, moveItems, rotateItems, scaleItems, deleteItems, copyItems, clipOrigin, rotateClip, pasteClip, symbolAsGraphic, gripsOf, moveGrip, rotateDir, midGripsOf, insertVertex, removeVertex, nearestSide } from '../model/symbolEdit';
 import { tx, tn } from '../i18n/ui';
+import { functionById, guessFunction } from '../model/symbolFunctions';
+import { pickFunction } from './FunctionPicker';
+
+/** Funzione del simbolo: quella scelta, o la proposta dal nome e dalla categoria (in grigio) */
+function FunctionField({ sym, update }: { sym: SymbolDef; update: (p: Partial<SymbolDef>) => void }) {
+  const userFunctions = useStore(s => s.userFunctions);
+  const guess = guessFunction(sym);
+  const cur = functionById(sym.func, userFunctions);
+  const proposed = functionById(guess, userFunctions);
+  const choose = async () => {
+    const id = await pickFunction(tx('Funzione di «{0}»', sym.name), sym.func, guess, sym.letter);
+    if (id === undefined) return;
+    if (id === null) { update({ func: undefined }); return; }
+    const f = functionById(id, useStore.getState().userFunctions);
+    // Lettera ancora quella di partenza: si prende quella tipica della funzione
+    update({ func: id, ...(f?.letter && (!sym.letter || sym.letter === 'A') ? { letter: f.letter } : {}) });
+  };
+  return (
+    <span className="fn-value">
+      <button className="fn-choose" onClick={() => void choose()} title={tx('Scegli dall\'elenco delle funzioni o aggiungine una nuova')}>
+        {cur ? tx(cur.name) : sym.func ? sym.func : <span className="muted">{proposed && guess !== 'altro' ? tx('proposta: {0}', tx(proposed.name)) : tx('— scegli —')}</span>}
+      </button>
+      {!sym.func && proposed && guess !== 'altro' && <button className="mini" title={tx('Usa la funzione proposta')} onClick={() => update({ func: guess })}>✓</button>}
+    </span>
+  );
+}
 import { ROTS, allowedRots, type Rot } from '../model/rotations';
 
 type PinTool = 'pin' | 'pin-in' | 'pin-out' | 'pin-term';
@@ -1491,6 +1517,10 @@ export function SymbolEditor() {
                 <input value={sym.category} list="sym-categories" title={tx('Simboli con la stessa categoria stanno insieme nella libreria')} onChange={e => update({ category: e.target.value })} />
                 <datalist id="sym-categories">{[...new Set([...BUILTIN_SYMBOLS, ...st().symbolLibrary].map(x => x.category))].map(c => <option key={c} value={c} />)}</datalist>
               </td></tr>
+              <tr><td className="prop-name" title={tx('Cosa fa il simbolo, al di là del disegno: serve a trovare i simboli equivalenti e i doppioni')}>{tx('Funzione')}</td><td className="prop-value">
+                <FunctionField sym={sym} update={update} />
+              </td></tr>
+              <tr><td className="prop-name">{tx('IEC 60617')}</td><td className="prop-value"><input value={sym.iec60617 ?? ''} placeholder={functionById(sym.func ?? guessFunction(sym), st().userFunctions)?.iec60617 ?? tx('es. S00227')} title={tx('Numero del simbolo nella norma IEC 60617, se lo è')} onChange={e => update({ iec60617: e.target.value.trim().toUpperCase() || undefined })} /></td></tr>
               <tr><td className="prop-name">{tx('Lettera (IEC 81346)')}</td><td className="prop-value"><input value={sym.letter} onChange={e => update({ letter: e.target.value.toUpperCase() })} /></td></tr>
               <tr><td className="prop-name">{tx('Ruolo')}</td><td className="prop-value">
                 <select value={sym.role} onChange={e => update({ role: e.target.value as SymbolRole, contact: e.target.value === 'aux' ? sym.contact ?? 'NO' : undefined, io: e.target.value === 'plc' ? sym.io ?? 'DI' : undefined })}>

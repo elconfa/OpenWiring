@@ -969,6 +969,14 @@ kbd { font: 10.5px ui-monospace, Menlo, monospace; color: var(--muted); border: 
 .modal.branch-picker .branch-new { min-height: 1.2em; color: var(--accent); }
 .modal.branch-picker .branch-list { flex: none; height: min(50vh, 440px); overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-2); padding: 4px; }
 .modal.branch-picker .branch-list .tree-row.active { background: var(--accent-soft); }
+.modal.function-picker .fn-group { font-weight: 600; cursor: default; color: var(--muted); }
+.modal.function-picker .fn-letter { margin-left: auto; padding: 0 6px; }
+.modal.function-picker .fn-new { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.modal.function-picker .fn-new input[type="text"]:first-child { flex: 1 1 220px; }
+.modal.function-picker .fn-new .fn-letter-input { width: 64px; }
+.modal.function-picker .modal-actions .spacer { flex: 1; }
+.fn-value { display: flex; gap: 4px; align-items: center; }
+.fn-value button.fn-choose { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Pannello Proprietà: colonna dei nomi regolabile (trascinando il bordo dell'intestazione) e testi lunghi a capo */
 .props-main .prop-table th { z-index: 2; }

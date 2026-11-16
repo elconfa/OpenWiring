@@ -22,7 +22,7 @@ import { openPropsDialog } from './PropsDialog';
 import { chooseReplacement } from './ReplaceSymbolDialog';
 import { chooseRepresentation } from './representationChooser';
 import { checkUpdates } from './updates';
-import { checkProjectSymbols, openUnifySymbols } from './LibrarySync';
+import { assignFunctionsAsk, checkProjectSymbols, openUnifySymbols } from './LibrarySync';
 import { insertImageFromFile, insertDxfDrawing } from './images';
 import { usePanelStore } from './panels';
 import { SymbolPreview } from './SymbolLibrary';
@@ -176,6 +176,7 @@ export function ribbonTabs(s: State): RTab[] {
           { icon: 'template', label: tx('Profili…'), run: () => openSettingsAt('profiles') },
           { icon: 'coil', label: tx('Confronta i simboli con la libreria personale…'), run: () => checkProjectSymbols(true), title: tx('Simboli del progetto diversi da quelli della libreria personale, o solo nel progetto: scegli quale versione tenere') },
           { icon: 'coil', label: tx('Unifica i simboli doppi della libreria…'), run: openUnifySymbols, title: tx('Simboli della libreria personale con lo stesso disegno o lo stesso nome: se ne tiene uno e i progetti passano a quello') },
+          { icon: 'coil', label: tx('Assegna le funzioni ai simboli…'), run: () => void assignFunctionsAsk(), title: tx('Riconosce cosa fa ogni simbolo della libreria (contatto, magnetotermico, modulo I/O…) dal nome, dalla cartella e dal codice') },
         ] },
         { name: tn('Numerazione'), items: [
           { icon: 'number', label: tx('Rinumera dispositivi…'), run: A.renumberDevices },

@@ -41,6 +41,7 @@ import { allocateChannel, cardByTag, PLC_CARD_TYPES, newCard, cardType, reassign
 import { DEFAULT_SETTINGS, DEVICE_FIELDS, PIN_OWN_FIELDS, AUX_OWN_FIELDS } from './types';
 import { getSymbol, snap, uid, setLibrarySymbols, instanceBounds } from './geometry';
 import { blackBoxFromPart, BUILTIN_SYMBOLS } from './symbols';
+import { guessFunction, type SymbolFunction } from './symbolFunctions';
 import { isDeletedSymbol, deletedCategory, applySymbolChoices, mergeSymbols, remapSymbol, type SymbolDiff, type SymbolChoice } from './symbolSync';
 import { stripOf, sameDeviceIds, terminalLevelIds, mergeTargets, migrateAuxDescriptions, partsIndex } from './devices';
 import { titleBlockTemplates, templateFields } from './titleBlocks';
@@ -335,7 +336,7 @@ export interface State {
    */
   deviceToPart(instId: string, partNr: string): void;
   /** Sostituisce i dati dell'utente (già uniti con mergeUserData) e li salva nell'archivio */
-  applyUserData(d: { library: Part[]; symbols: SymbolDef[]; macros: Macro[]; templates: ProjectTemplate[]; titleBlocks: TitleBlockTemplate[]; favorites: string[]; profiles?: SettingsProfile[] }): void;
+  applyUserData(d: { library: Part[]; symbols: SymbolDef[]; macros: Macro[]; templates: ProjectTemplate[]; titleBlocks: TitleBlockTemplate[]; favorites: string[]; profiles?: SettingsProfile[]; functions?: SymbolFunction[] }): void;
   /** Proprietà copiate da un dispositivo (tutti i dati tranne la sigla), da incollare su altri */
   propClipboard: { tag: string; props: Partial<Pick<SymbolInstance, DeviceField>> } | null;
   /** Copia descrizione, articolo, codici, dati tecnici e proprietà del dispositivo, non la sigla */
@@ -542,6 +543,15 @@ export interface State {
   placeMacro(id: string, at: Pt): void;
   /** Cartigli personali (disponibili in tutti i progetti) */
   tbLibrary: TitleBlockTemplate[];
+  /** Funzioni dei simboli aggiunte dall'utente (le altre sono in symbolFunctions.ts) */
+  userFunctions: SymbolFunction[];
+  /** Aggiunge (o cambia, stesso id) una funzione dell'utente */
+  saveUserFunction(f: SymbolFunction): void;
+  /**
+   * Funzione a tutti i simboli della libreria personale che non l'hanno (o a tutti, sostituendo
+   * quelle già messe); ritorna quanti simboli sono cambiati
+   */
+  assignSymbolFunctions(all: boolean): number;
   /** Cartiglio in modifica nell'editor (stessa vista dell'editor dei simboli) */
   editTitleBlock: TitleBlockTemplate | null;
   openTitleBlockEditor(tpl?: TitleBlockTemplate): void;
@@ -1696,6 +1706,7 @@ export const useStore = create<State>((set, get) => {
       void kvSet('titleBlocks', d.titleBlocks);
       void kvSet('favorites', d.favorites);
       if (d.profiles) { set({ profiles: d.profiles }); void kvSet('profiles', d.profiles); }
+      if (d.functions) { set({ userFunctions: d.functions }); void kvSet('symbolFunctions', d.functions); }
     },
     deviceToPart(instId, partNr) {
       partNr = partNr.trim();
@@ -2746,6 +2757,27 @@ export const useStore = create<State>((set, get) => {
       persistLibrary(library);
       get().logMsg(tx('{0} articoli importati da {1}', parts.length, source));
     },
+    userFunctions: [],
+    saveUserFunction(f) {
+      const userFunctions = [...get().userFunctions.filter(x => x.id !== f.id), f];
+      set({ userFunctions });
+      void kvSet('symbolFunctions', userFunctions);
+    },
+    assignSymbolFunctions(all) {
+      let n = 0;
+      const symbolLibrary = get().symbolLibrary.map(x => {
+        if (x.func && !all) return x;
+        const func = guessFunction(x);
+        if (func === x.func) return x;
+        n++;
+        return { ...x, func };
+      });
+      if (!n) return 0;
+      setLibrarySymbols(symbolLibrary);
+      set({ symbolLibrary });
+      void kvSet('symbols', symbolLibrary);
+      return n;
+    },
     addSymbolsToLibrary(symbols, source) {
       const map = new Map(get().symbolLibrary.map(x => [x.id, x]));
       for (const x of symbols) map.set(x.id, x);
@@ -3143,6 +3175,8 @@ export async function restoreLibrary() {
   if (syms?.length) { setLibrarySymbols(syms); useStore.setState({ symbolLibrary: syms }); }
   const favorites = await kvGet<string[]>('favorites');
   if (favorites?.length) useStore.setState({ favorites });
+  const funcs = await kvGet<SymbolFunction[]>('symbolFunctions');
+  if (funcs?.length) useStore.setState({ userFunctions: funcs });
   const tbs = await kvGet<TitleBlockTemplate[]>('titleBlocks');
   if (tbs?.length) useStore.setState({ tbLibrary: tbs });
 }

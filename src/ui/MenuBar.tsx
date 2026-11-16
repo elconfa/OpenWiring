@@ -18,7 +18,7 @@ import { usePanelStore, canDetach } from './panels';
 import { tx, tn, UI_LANGS, uiLang } from '../i18n/ui';
 import { Icon } from './icons';
 import { startTour } from './Tour';
-import { checkProjectSymbols, openUnifySymbols } from './LibrarySync';
+import { assignFunctionsAsk, checkProjectSymbols, openUnifySymbols } from './LibrarySync';
 import { goView } from './editorDirty';
 import { getSymbol } from '../model/geometry';
 import { canReplace } from '../model/replaceSymbol';
@@ -215,6 +215,7 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
         { label: tx('Cartiglio: personalizza o disegna…'), run: () => st().openTitleBlockEditor(templateFor(s.project)) },
         { label: tx('Confronta i simboli con la libreria personale…'), run: () => checkProjectSymbols(true), title: tx('Simboli del progetto diversi da quelli della libreria personale, o solo nel progetto: scegli quale versione tenere') },
         { label: tx('Unifica i simboli doppi della libreria…'), run: openUnifySymbols, title: tx('Simboli della libreria personale con lo stesso disegno o lo stesso nome: se ne tiene uno e i progetti passano a quello') },
+        { label: tx('Assegna le funzioni ai simboli…'), run: () => void assignFunctionsAsk(), title: tx('Riconosce cosa fa ogni simbolo della libreria (contatto, magnetotermico, modulo I/O…) dal nome, dalla cartella e dal codice') },
         sep,
         { label: tx('Nuovo luogo (quadro, pulsantiera…)…'), run: A.addPlace },
         { label: tx('Nuova rete IP'), run: () => { st().addIpNetwork(); A.showProjectProps(); } },

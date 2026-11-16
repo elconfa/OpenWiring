@@ -9,12 +9,13 @@ import type { Macro } from '../model/clipboard';
 import { primBounds, getSymbol } from '../model/geometry';
 import { SymbolGraphic } from './PageSvg';
 import { askConfirm } from './Ask';
+import { functionById } from '../model/symbolFunctions';
 import { tx } from '../i18n/ui';
 import { chooseSymbolFolder } from './symbolFolderSync';
 import { symbolTree, countOf, categoriesOf, type TreeNode } from '../model/symbolTree';
 import { SymbolTreeView, symbolRowKey, type TreeRoot, type MenuItem } from './SymbolTreeView';
 import { isDeletedSymbol, libraryIndex, symbolPrint, DELETED_CATEGORY } from '../model/symbolSync';
-import { moveSymbolsAsk, deleteSymbolsAsk, openUnifySymbols, checkProjectSymbols, libraryCategories } from './LibrarySync';
+import { assignFunctionsAsk, moveSymbolsAsk, deleteSymbolsAsk, openUnifySymbols, checkProjectSymbols, libraryCategories } from './LibrarySync';
 import { pickBranch } from './BranchPicker';
 
 export function SymbolPreview({ sym, size = 44 }: { sym: SymbolDef; size?: number }) {
@@ -63,6 +64,12 @@ function SymItem({ s, label, title, size = 44, menu }: { s: SymbolDef; label: st
 let lastReveal = 0;
 
 /** Preferenze dell'albero (gruppi aperti, icone piccole o grandi), per questo computer */
+/** Nome della funzione del simbolo, per la ricerca nella libreria */
+const funcText = (x: SymbolDef) => {
+  const f = functionById(x.func, useStore.getState().userFunctions);
+  return f ? `${f.name} ${tx(f.name)}`.toLowerCase() : '';
+};
+
 const PREF = 'elettrocad.symbolTree';
 interface TreePref {
   open: Record<string, boolean>; large?: boolean;
@@ -118,10 +125,10 @@ export function SymbolLibrary() {
   // Simboli di base modificati: la copia personale prende il loro posto
   const overrides = useMemo(() => new Map(symbolLibrary.filter(x => x.replaces).map(x => [x.replaces!, x])), [symbolLibrary]);
   const imported = useMemo(() => symbolTree(symbolLibrary.filter(x => !(x.replaces && BUILTIN_SYMBOLS.some(b => b.id === x.replaces)) && !isDeletedSymbol(x))
-    .filter(x => !ql || `${x.name} ${x.letter} ${x.category}`.toLowerCase().includes(ql))), [symbolLibrary, ql]);
+    .filter(x => !ql || `${x.name} ${x.letter} ${x.category} ${funcText(x)}`.toLowerCase().includes(ql))), [symbolLibrary, ql]);
   // Simboli eliminati (cartella «Eliminare»): si vedono a parte e non si inseriscono
   const deleted = useMemo(() => {
-    const t = symbolTree(symbolLibrary.filter(x => isDeletedSymbol(x) && (!ql || `${x.name} ${x.letter} ${x.category}`.toLowerCase().includes(ql))));
+    const t = symbolTree(symbolLibrary.filter(x => isDeletedSymbol(x) && (!ql || `${x.name} ${x.letter} ${x.category} ${funcText(x)}`.toLowerCase().includes(ql))));
     return { name: '', path: '#tree/del', items: t.flatMap(n => n.items), children: t.flatMap(n => n.children) } as TreeNode;
   }, [symbolLibrary, ql]);
   const findInLibrary = useMemo(() => libraryIndex(symbolLibrary), [symbolLibrary]);
@@ -159,7 +166,7 @@ export function SymbolLibrary() {
   };
   // Preferiti: simboli di base, della libreria personale o copiati nel progetto
   const favorites = useMemo(() => favIds.map(id => getSymbol(id, { customSymbols } as Parameters<typeof getSymbol>[1])).filter((x): x is SymbolDef => !!x)
-    .filter(x => !ql || `${x.name} ${tx(x.name)} ${x.letter} ${x.category}`.toLowerCase().includes(ql)), [favIds, customSymbols, symbolLibrary, ql]);
+    .filter(x => !ql || `${x.name} ${tx(x.name)} ${x.letter} ${x.category} ${funcText(x)}`.toLowerCase().includes(ql)), [favIds, customSymbols, symbolLibrary, ql]);
   // Tutti gli articoli trovati (per «Elimina elencati…»); se ne mostrano i primi 200
   const found = useMemo(() => library.filter(p => !ql ||
     `${p.partNr} ${p.typeNr ?? ''} ${p.descr1 ?? ''} ${p.manufacturer ?? ''}`.toLowerCase().includes(ql)), [library, ql]);
@@ -178,7 +185,7 @@ export function SymbolLibrary() {
       return { s: x, label, title: `${label}${x.letter ? ` (-${x.letter})` : ''}${x !== b ? ` · ${tx('modificato')}` : ''}` };
     };
     const projSyms = customSymbols.filter(x => !x.hidden && !x.id.startsWith('dist:'))
-      .filter(x => !ql || `${x.name} ${x.letter} ${x.category}`.toLowerCase().includes(ql));
+      .filter(x => !ql || `${x.name} ${x.letter} ${x.category} ${funcText(x)}`.toLowerCase().includes(ql));
     const folder = symbolDir ? symbolDir.split(/[\\/]/).filter(Boolean).pop() : undefined;
     return [
       { label: tx('Preferiti'), icon: 'star', node: { name: '', path: '#tree/fav', items: favorites, children: [] } },
@@ -190,6 +197,7 @@ export function SymbolLibrary() {
         actions: [
           ...(symbolDir ? [{ label: tx('Apri la cartella dei simboli'), run: () => void window.elettro?.symlibOpen?.() }, { label: tx('Usa un\'altra cartella…'), run: () => void chooseSymbolFolder() }] : []),
           { label: tx('Unifica i simboli doppi…'), run: openUnifySymbols },
+          { label: tx('Assegna le funzioni ai simboli…'), run: () => void assignFunctionsAsk() },
         ],
         symbolMenu: (x: SymbolDef) => [
           { label: tx('Sposta in un altro ramo…'), run: () => void moveSymbolsAsk([x]) },

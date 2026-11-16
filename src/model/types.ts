@@ -175,6 +175,10 @@ export interface SymbolDef {
   replaces?: string;
   /** Simbolo definito nel formato testo: la riga "simbolodef" che lo descrive */
   textDef?: string;
+  /** Funzione del simbolo (vedi symbolFunctions.ts, es. "contatto-na"): cosa fa, al di là del disegno */
+  func?: string;
+  /** Numero del simbolo nella norma IEC 60617 (es. S00227), se lo è */
+  iec60617?: string;
   /** Id di altri simboli unificati con questo (doppioni): i progetti che li usano passano a questo */
   aliases?: string[];
   /** Simbolo che non compare nell'elenco della libreria (es. i canali dei gruppi I/O PLC) */

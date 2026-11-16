@@ -62,6 +62,7 @@ import { RichTextHost } from './ui/RichTextEditor';
 import { ReplaceSymbolHost } from './ui/ReplaceSymbolDialog';
 import { SymbolSyncHost, UnifySymbolsHost, setSymbolLibraryReady, afterProjectOpen } from './ui/LibrarySync';
 import { BranchPickerHost } from './ui/BranchPicker';
+import { FunctionPickerHost } from './ui/FunctionPicker';
 import { PropsDialog } from './ui/PropsDialog';
 import { pasteImages } from './ui/images';
 import { tx, tn } from './i18n/ui';
@@ -412,6 +413,7 @@ export function App() {
       <SymbolSyncHost />
       <UnifySymbolsHost />
       <BranchPickerHost />
+      <FunctionPickerHost />
       <LabelsDialog />
       <AboutDialog />
       <StartScreen />

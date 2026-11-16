@@ -5,6 +5,7 @@ import { parseCommercialCsv, mergeCommercial } from '../io/commercialCsv';
 import type { Part } from '../model/types';
 import { samePath, useStore, emptyProject } from '../model/store';
 import type { Project } from '../model/types';
+import { withFunctions } from '../model/symbolFunctions';
 import { exampleProject } from '../model/example';
 import { openFiles, openSymbolFolder, saveFile, PROJECT_FILTER, serializeProject, parseProject, safeName, saveFolder, isElectron, openDocument } from '../io/fileio';
 import { importEdz, importFromFiles, importExtracted, toDataUrl, extractArchive, decodeXml, type EdzResult, type EdzOptions } from '../io/edz';
@@ -284,7 +285,7 @@ function addEdzResult(r: EdzResult, name: string, opts: EdzOptions = {}) {
   r.warnings.slice(0, MAX_LINES).forEach(w => st().logMsg(w, 'warn'));
   if (r.warnings.length > MAX_LINES) st().logMsg(tx('{0}: … e altri {1} avvisi', name, r.warnings.length - MAX_LINES), 'warn');
   if (r.symbols.length) {
-    st().addSymbolsToLibrary(r.symbols, '');
+    st().addSymbolsToLibrary(withFunctions(r.symbols), '');
     st().logMsg(tx('{0}: disegno del costruttore letto dalla macro EPLAN ({1} {2}, categoria «{3}»)', name, r.symbols.length, r.symbols.length === 1 ? 'variante' : 'varianti', r.symbols[0].category));
   }
   if (r.unreadMacros.length && !r.symbols.length) st().logMsg(tx('{0}: macro EPLAN in formato binario, non leggibile; verrà generata una scatola nera dal modello funzione', name), 'warn');
@@ -406,7 +407,7 @@ export async function exportUserData() {
   const s = st();
   const data = makeUserData({
     app: typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : undefined,
-    library: await withFullParts(s.library, true), symbols: s.symbolLibrary, macros: s.macros, templates: s.templates, titleBlocks: s.tbLibrary, favorites: s.favorites, profiles: s.profiles,
+    library: await withFullParts(s.library, true), symbols: s.symbolLibrary, macros: s.macros, templates: s.templates, titleBlocks: s.tbLibrary, favorites: s.favorites, profiles: s.profiles, functions: s.userFunctions,
   });
   const day = data.exported.slice(0, 10);
   const p = await saveFile(`OpenWiring_dati_utente_${day}.json`, new TextEncoder().encode(JSON.stringify(data)), [{ name: tx('Dati utente OpenWiring'), extensions: ['json'] }]);
@@ -422,7 +423,7 @@ export async function importUserData() {
   if (!r.data) { st().logMsg(tx(r.error ?? ''), 'error'); return; }
   const s = st();
   // Confronto con gli articoli completi (attributi e foto del database), non con quelli leggeri
-  const cur = { library: await withFullParts(s.library, true), symbols: s.symbolLibrary, macros: s.macros, templates: s.templates, titleBlocks: s.tbLibrary, favorites: s.favorites, profiles: s.profiles };
+  const cur = { library: await withFullParts(s.library, true), symbols: s.symbolLibrary, macros: s.macros, templates: s.templates, titleBlocks: s.tbLibrary, favorites: s.favorites, profiles: s.profiles, functions: s.userFunctions };
   const conflicts = userDataConflicts(cur, r.data);
   let overwrite = false;
   if (conflicts) {
@@ -671,7 +672,7 @@ export async function importSymbols() {
     }
   }
   if (files.length) {
-    if (all.length) st().addSymbolsToLibrary(all, files.map(f => f.name).join(', '));
+    if (all.length) st().addSymbolsToLibrary(withFunctions(all), files.map(f => f.name).join(', '));
     else st().logMsg(tx('Nessun componente trovato nei file scelti'), 'warn');
   }
 }
@@ -687,7 +688,7 @@ export async function importSymbolFolder() {
   for (const e of errors.slice(0, 10)) st().logMsg(e, 'warn');
   if (errors.length > 10) st().logMsg(tx('… altri {0} file non importati', errors.length - 10), 'warn');
   if (!symbols.length) { st().logMsg(tx('Nessun simbolo trovato nella cartella {0} (file .elmt, .qet o .ecsym)', r.name), 'warn'); return; }
-  st().addSymbolsToLibrary(symbols, '');
+  st().addSymbolsToLibrary(withFunctions(symbols), '');
   st().logMsg(tx('{0} simboli importati dalla cartella {1}, in {2} gruppi della libreria', symbols.length, r.name, folders));
 }
 

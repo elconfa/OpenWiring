@@ -7,6 +7,7 @@ import type { Part, SymbolDef, TitleBlockTemplate } from './types';
 import type { Macro } from './clipboard';
 import type { ProjectTemplate } from './templates';
 import type { SettingsProfile } from './settingsProfiles';
+import type { SymbolFunction } from './symbolFunctions';
 import { tn } from '../i18n/ui';
 
 export const USER_DATA_FORMAT = 'elettrocad-dati-utente';
@@ -25,9 +26,11 @@ export interface UserData {
   favorites: string[];
   /** Profili di impostazioni (Impostazioni ▸ Profili); assenti nei file delle versioni prima della 2.1.4 */
   profiles: SettingsProfile[];
+  /** Funzioni dei simboli aggiunte dall'utente */
+  functions?: SymbolFunction[];
 }
 
-export type UserDataKind = 'library' | 'symbols' | 'macros' | 'templates' | 'titleBlocks' | 'profiles';
+export type UserDataKind = 'library' | 'symbols' | 'macros' | 'templates' | 'titleBlocks' | 'profiles' | 'functions';
 export const USER_DATA_KINDS: { key: UserDataKind; name: string }[] = [
   { key: 'library', name: tn('articoli') },
   { key: 'symbols', name: tn('simboli') },
@@ -35,6 +38,7 @@ export const USER_DATA_KINDS: { key: UserDataKind; name: string }[] = [
   { key: 'templates', name: tn('modelli di progetto') },
   { key: 'titleBlocks', name: tn('cartigli') },
   { key: 'profiles', name: tn('profili di impostazioni') },
+  { key: 'functions', name: tn('funzioni dei simboli') },
 ];
 
 export function makeUserData(d: Omit<UserData, 'format' | 'version' | 'exported' | 'profiles'> & { profiles?: SettingsProfile[] }, now = new Date()): UserData {
@@ -59,6 +63,7 @@ export function parseUserData(text: string): { data?: UserData; error?: string }
       templates: list<ProjectTemplate>(o.templates).filter(t => t && typeof t.id === 'string' && t.project),
       titleBlocks: list<TitleBlockTemplate>(o.titleBlocks).filter(t => t && typeof t.id === 'string' && Array.isArray(t.prims)),
       favorites: list<string>(o.favorites).filter(x => typeof x === 'string'),
+      functions: list<SymbolFunction>(o.functions).filter(f => f && typeof f.id === 'string' && typeof f.name === 'string'),
       profiles: list<SettingsProfile>(o.profiles).filter(p => p && typeof p.id === 'string' && Array.isArray(p.parts) && p.settings),
     },
   };
@@ -71,10 +76,11 @@ const keyOf: Record<UserDataKind, (x: never) => string> = {
   templates: (t: ProjectTemplate) => t.id,
   titleBlocks: (t: TitleBlockTemplate) => t.id,
   profiles: (p: SettingsProfile) => p.id,
+  functions: (f: SymbolFunction) => f.id,
 };
 
 export interface MergeCount { added: number; replaced: number; kept: number; same: number }
-type Lists = Omit<Pick<UserData, UserDataKind | 'favorites'>, 'profiles'> & { profiles?: SettingsProfile[] };
+type Lists = Omit<Pick<UserData, UserDataKind | 'favorites'>, 'profiles' | 'functions'> & { profiles?: SettingsProfile[]; functions?: SymbolFunction[] };
 
 /** Elementi del file con la stessa chiave di uno già presente ma contenuto diverso */
 export function userDataConflicts(cur: Lists, add: Lists): number {
