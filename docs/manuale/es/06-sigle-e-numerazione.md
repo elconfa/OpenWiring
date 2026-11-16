@@ -230,8 +230,9 @@ contador los salta aunque estén escritos en otra página.
 
 - **Sección** en mm² (`1,5`, `2,5`, `6`…) y **color** con los códigos IEC 60757: `BK` negro, `BN` marrón,
   `GY` gris, `BU` azul, `DBU` azul oscuro, `RD` rojo, `WH` blanco, `GNYE` verde-amarillo…
-- El **color** elegido en un tramo vale para todo el conductor, también después de un punto de interrupción
-  o de un borne.
+- El **color** vale para el tramo en que se elige: los tramos sin color (*no indicado*) se dibujan e
+  imprimen en negro, aunque otro tramo del mismo conductor tenga color (después de un borne el color puede
+  cambiar). *Aplicar a todo el conductor* copia el color en todos los tramos.
 - Con *Hilos de colores* (propiedades del proyecto) el hilo se dibuja en su color; el PE en verde-amarillo
   discontinuo.
 - La sección puede cambiar a lo largo del conductor (salida de 6 mm², derivación de 1,5 mm²);

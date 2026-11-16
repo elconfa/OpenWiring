@@ -361,15 +361,6 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     }
     return out;
   });
-  // Colore del conduttore: il primo colore scelto su uno dei suoi fili vale per tutti gli altri
-  // (anche sulle altre pagine, tramite i rimandi, e oltre i morsetti di passaggio)
-  const groupColor = new Map<string, string>();
-  for (const n of netlist.nets) for (const w of n.wires) if (w.wire.color && !groupColor.has(n.group)) groupColor.set(n.group, w.wire.color);
-  const conductorColor = new Map<string, string>();
-  for (const n of netlist.nets) {
-    const c = groupColor.get(n.group);
-    if (c) for (const w of n.wires) if (!w.wire.color && !w.wire.bus) conductorColor.set(w.wire.id, c);
-  }
   const textStyles = textStylesOf(settings);
   const bundleWidth = lookOf(settings).w.bundle;
   const pages = new Map<string, PageDerived>();
@@ -383,7 +374,7 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
       if (gap) gaps.set(e.id, gap);
     }
     const wireLabelPos = texts.size ? placeWireLabels(project, pg, texts, designations, deviceLines, netlist.junctions.get(pg.id) ?? [], sizes, gaps) : undefined;
-    const pd: PageDerived = { conductorColor, wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireTicks, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', contactImageText: settingsOf(project).contactImageStyle === 'text', pairLines: pairLines.get(pg.id), terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) };
+    const pd: PageDerived = { wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireTicks, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', contactImageText: settingsOf(project).contactImageStyle === 'text', pairLines: pairLines.get(pg.id), terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) };
     if (pg.type === 'report') Object.defineProperty(pd, 'reportSheet', { get: () => sheets().get(pg.id), enumerable: true, configurable: true });
     if (['cable', 'connector', 'system'].includes(pg.type)) {
       let drawing: ReturnType<typeof drawingData> | undefined, done = false;

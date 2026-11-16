@@ -225,7 +225,9 @@ them even when they are written on another page.
 
 - **Cross-section** in mm² (`1,5`, `2,5`, `6`…) and **colour** with the IEC 60757 codes: `BK` black, `BN`
   brown, `GY` grey, `BU` blue, `DBU` dark blue, `RD` red, `WH` white, `GNYE` green-yellow…
-- The **colour** chosen on one segment applies to the whole conductor, also after an interruption point or a terminal.
+- The **colour** applies to the segment where you choose it: segments without a colour (*not specified*)
+  are drawn and printed in black, even if another segment of the same conductor has a colour (after a
+  terminal the colour may change). *Apply to the whole conductor* copies the colour to all segments.
 - With *Coloured wires* (project properties) the wire is drawn in its colour; PE is dashed green-yellow.
 - The cross-section can change along the conductor (feed at 6 mm², branch at 1.5 mm²);
   *Apply to the whole conductor* copies cross-section and colour to all segments.

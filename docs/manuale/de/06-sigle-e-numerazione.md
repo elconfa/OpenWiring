@@ -232,8 +232,10 @@ Zähler überspringt sie, auch wenn sie auf einer anderen Seite stehen.
 
 - **Querschnitt** in mm² (`1,5`, `2,5`, `6`…) und **Farbe** mit den Kürzeln nach IEC 60757: `BK` schwarz,
   `BN` braun, `GY` grau, `BU` blau, `DBU` dunkelblau, `RD` rot, `WH` weiß, `GNYE` grün-gelb…
-- Die auf einem Abschnitt gewählte **Farbe** gilt für den ganzen Leiter, auch nach einem
-  Unterbrechungspunkt oder einer Klemme.
+- Die **Farbe** gilt für den Abschnitt, auf dem sie gewählt wird: Abschnitte ohne Farbe (*nicht
+  angegeben*) werden schwarz gezeichnet und gedruckt, auch wenn ein anderer Abschnitt desselben Leiters eine
+  Farbe hat (nach einer Klemme kann die Farbe wechseln). *Auf den ganzen Leiter anwenden* kopiert die Farbe
+  auf alle Abschnitte.
 - Mit *Farbige Drähte* (Projekteigenschaften) wird der Draht in seiner Farbe gezeichnet; PE grün-gelb gestrichelt.
 - Der Querschnitt kann sich entlang des Leiters ändern (Einspeisung 6 mm², Abzweig 1,5 mm²);
   *Auf den ganzen Leiter anwenden* kopiert Querschnitt und Farbe auf alle Abschnitte.

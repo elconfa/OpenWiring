@@ -236,8 +236,6 @@ export interface PageDerived {
   wireRefs?: Map<string, { page: string; id: string }[]>;
   /** Fili che entrano in un bus di conduttori: nome del conduttore scritto accanto */
   bundleTaps?: { at: Pt; next: Pt; name: string; size?: number; color?: string }[];
-  /** Colore ereditato dal conduttore per i fili senza colore proprio */
-  conductorColor?: Map<string, string>;
   /** Posizione libera del numero filo (vedi wireLabels.ts) */
   wireLabelPos?: Map<string, WireLabelPos[]>;
   /** Verso dei testi dei morsetti scelto nel progetto */
@@ -1020,7 +1018,7 @@ function PlcOverview({ data, t, S }: { data?: OverviewData; t: (s: string) => st
   const MUTED = '#8a929c';
   const col = { term: x - 10, ch: x + 2, addr: x + w - 2, sym: x + w + 6, comment: x + w + 66, conn: x + w + 166, loc: 372 };
   return (
-    <g fontFamily="inherit">
+    <g>
       <text x={28} y={21} fontSize={S.titleSize} fontWeight={600} fill={look.ink}>{`${t('Scheda PLC')} -${data.tag}`}</text>
       <text x={28} y={21 + Math.max(6, S.titleSize * 1.5)} fontSize={S.titleSize * 0.65} fill={look.ink}>{`${t(data.title)}  ·  ${t('stazione')} ${data.station}`}</text>
       <g fontSize={2} fill={MUTED}>
@@ -1330,8 +1328,9 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
           const no = derived.wireNumbers.get(e.id);
           const pts = e.points.map(p => `${p.x},${p.y}`).join(' ');
           const bus = protocolOf(e.bus);
-          // Colore del filo, o quello del suo conduttore (anche oltre rimandi e morsetti)
-          const color = e.color ?? derived.conductorColor?.get(e.id);
+          // Colore del filo: solo quello scelto su questo tratto; senza colore («non indicato») il filo è
+          // nero, anche se altri tratti dello stesso conduttore hanno un colore (oltre un morsetto può cambiare)
+          const color = e.color;
           const colored = bus ? { hex: bus.color } : derived.drawWireColors && color ? WIRE_COLORS[color.toUpperCase()] : undefined;
           // Spessore scelto sul filo, altrimenti quello predefinito (un po' più largo se colorato); tipo di linea
           // Bus di conduttori: linea spessa

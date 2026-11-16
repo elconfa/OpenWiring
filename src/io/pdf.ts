@@ -20,6 +20,7 @@ import { translator, translateTable, translateFixed } from '../model/i18n';
 export { DEFAULT_PDF_OPTIONS, selectPages, type PdfOptions } from './pdfOptions';
 import { DEFAULT_PDF_OPTIONS, type PdfOptions } from './pdfOptions';
 import { printPlan } from './printPlan';
+import { pdfFontWeights } from './pdfFonts';
 
 export interface PdfResult {
   data: Uint8Array; pages: number; links: number;
@@ -72,7 +73,7 @@ export async function exportPdf(project: Project, tables: Table[], library: Part
           createElement('g', { fontFamily: 'helvetica' },
             createElement(PageContent, { project, page, pageIndex, derived }))),
       );
-      host!.innerHTML = opts.mono ? monoSvg(markup) : markup;
+      host!.innerHTML = pdfFontWeights(opts.mono ? monoSvg(markup) : markup);
       const svg = host!.querySelector('svg')!;
       await doc.svg(svg, { x: 0, y: 0, width: PAGE_W, height: PAGE_H });
       // Rimandi cliccabili: l'area del testo diventa un collegamento alla pagina di destinazione

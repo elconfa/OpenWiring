@@ -264,14 +264,26 @@ describe('sezione e colore dei fili', () => {
 });
 
 describe('colore del conduttore', () => {
-  it('un filo senza colore prende quello del suo conduttore, anche oltre un rimando', async () => {
+  it('sullo schema e nella stampa ogni tratto ha solo il suo colore: senza colore è nero', async () => {
     const { derive } = await import('../src/model/derive');
+    const { createElement } = await import('react');
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { PageContent } = await import('../src/ui/PageSvg');
+    const { WIRE_COLORS } = await import('../src/model/types');
     const q = exampleProject();
+    q.settings = { ...q.settings!, drawWireColors: true };
     const p1 = q.pages[0], p2 = q.pages[1];
-    // Filo che arriva al rimando +24V di pagina 1
+    // Filo che arriva al rimando +24V di pagina 1: blu scuro; la barra di pagina 2 resta «non indicato»
     const w1 = p1.elements.find(e => e.kind === 'wire' && e.points.some(pt => pt.x === 300 && pt.y === 152));
-    if (w1?.kind === 'wire') w1.color = 'RD';
+    if (w1?.kind === 'wire') w1.color = 'DBU';
     const rail = p2.elements.find(e => e.kind === 'wire' && e.points[0].x === 40 && e.points[0].y === 24)!;
-    expect(derive(q).pages.get(p2.id)!.conductorColor?.get(rail.id)).toBe('RD');
+    const svg = (pg: typeof p1) => renderToStaticMarkup(createElement('svg', null,
+      createElement(PageContent, { project: q, page: pg, pageIndex: q.pages.indexOf(pg), derived: derive(q).pages.get(pg.id)! })));
+    const stroke = (s: string, id: string) => new RegExp(`data-id="${id}"[^>]*stroke="([^"]+)"`).exec(s)?.[1];
+    const dbu = WIRE_COLORS.DBU.hex;
+    expect(stroke(svg(p1), w1!.id)).toBe(dbu);
+    expect(stroke(svg(p2), rail.id)).toBeDefined();
+    expect(stroke(svg(p2), rail.id)).not.toBe(dbu);
+    expect(rail.kind === 'wire' && rail.color).toBeFalsy();
   });
 });

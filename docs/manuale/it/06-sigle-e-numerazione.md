@@ -227,7 +227,9 @@ quando sono scritti su un'altra pagina.
 
 - **Sezione** in mm² (`1,5`, `2,5`, `6`…) e **colore** con le sigle IEC 60757: `BK` nero, `BN` marrone,
   `GY` grigio, `BU` blu, `DBU` blu scuro, `RD` rosso, `WH` bianco, `GNYE` giallo-verde…
-- Il **colore** scelto su un tratto vale per tutto il conduttore, anche dopo un rimando o un morsetto.
+- Il **colore** vale per il tratto su cui lo scegli: i tratti senza colore (*non indicato*) sono disegnati e
+  stampati in nero, anche se un altro tratto dello stesso conduttore ha un colore (oltre un morsetto il
+  colore può cambiare). *Applica a tutto il conduttore* copia il colore su tutti i tratti.
 - Con *Fili colorati* (proprietà del progetto) il filo è disegnato nel suo colore; il PE è giallo-verde tratteggiato.
 - La sezione può cambiare lungo il conduttore (partenza da 6 mm², derivazione da 1,5 mm²);
   *Applica a tutto il conduttore* copia sezione e colore su tutti i tratti.

@@ -230,7 +230,9 @@ saute même quand ils sont écrits sur une autre page.
 
 - **Section** en mm² (`1,5`, `2,5`, `6`…) et **couleur** avec les codes CEI 60757 : `BK` noir, `BN` marron,
   `GY` gris, `BU` bleu, `DBU` bleu foncé, `RD` rouge, `WH` blanc, `GNYE` vert-jaune…
-- La **couleur** choisie sur un segment vaut pour tout le conducteur, même après un renvoi ou une borne.
+- La **couleur** vaut pour le segment où on la choisit : les segments sans couleur (*non indiqué*) sont
+  dessinés et imprimés en noir, même si un autre segment du même conducteur a une couleur (après une borne
+  la couleur peut changer). *Appliquer à tout le conducteur* copie la couleur sur tous les segments.
 - Avec *Fils colorés* (propriétés du projet), le fil est dessiné dans sa couleur ; le PE est vert-jaune pointillé.
 - La section peut changer le long du conducteur (départ en 6 mm², dérivation en 1,5 mm²) ;
   *Appliquer à tout le conducteur* copie section et couleur sur tous les segments.
