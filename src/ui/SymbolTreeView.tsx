@@ -61,8 +61,10 @@ function Marked({ text, q }: { text: string; q: string }) {
   return <>{text.slice(0, i)}<mark>{text.slice(i, i + q.length)}</mark>{text.slice(i + q.length)}</>;
 }
 
-export function SymbolTreeView({ roots, q, isOpen, toggle, reveal }: {
+export function SymbolTreeView({ roots, q, filtered, isOpen, toggle, reveal }: {
   roots: TreeRoot[]; q: string;
+  /** Elenco filtrato anche senza testo (es. per funzione): come una ricerca */
+  filtered?: boolean;
   isOpen: (path: string, def: boolean) => boolean; toggle: (path: string, def: boolean) => void;
   /** Riga da mostrare e selezionare (n cambia a ogni richiesta) */
   reveal?: { key: string; n: number };
@@ -79,7 +81,7 @@ export function SymbolTreeView({ roots, q, isOpen, toggle, reveal }: {
   // Righe visibili, in ordine: le cartelle aperte mostrano sottocartelle e simboli
   const rows = useMemo(() => {
     const out: Row[] = [];
-    const searching = !!q.trim();
+    const searching = !!q.trim() || !!filtered;
     let shown = 0, over = 0;
     const walk = (root: TreeRoot, n: TreeNode, depth: number, isRoot: boolean) => {
       if (searching && shown >= MAX_FOUND) { over += countOf(n); return; }
@@ -102,7 +104,7 @@ export function SymbolTreeView({ roots, q, isOpen, toggle, reveal }: {
     for (const r of roots) if (countOf(r.node) || !searching) walk(r, r.node, 0, true);
     if (over) out.push({ kind: 'more', key: 'm:found', depth: 0, n: over });
     return out;
-  }, [roots, isOpen, q]);
+  }, [roots, isOpen, q, filtered]);
 
   // Simbolo da mostrare (es. dal menu di un componente dello schema): selezionato e portato in vista
   useEffect(() => {

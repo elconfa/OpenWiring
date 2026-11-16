@@ -949,6 +949,8 @@ function CoverPage({ project }: { project: Project }) {
         <g key={k}>
           <rect x={FRAME.right - signs.length * 50 + k * 50} y={190} width={46} height={26} fill="none" stroke={look.ink} strokeWidth={0.3} />
           <text x={FRAME.right - signs.length * 50 + 2 + k * 50} y={195} fontSize={2.6} fill="#5b636d">{t(l)}</text>
+          {project.coverSigners?.[k]?.name && <text x={FRAME.right - signs.length * 50 + 2 + k * 50} y={200} fontSize={3} fill={look.ink}>{project.coverSigners[k].name}</text>}
+          {project.coverSigners?.[k]?.date && <text x={FRAME.right - signs.length * 50 + 2 + k * 50} y={214} fontSize={2.6} fill={look.ink}>{project.coverSigners[k].date}</text>}
         </g>
       ))}
     </g>

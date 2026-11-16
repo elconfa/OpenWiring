@@ -13,6 +13,22 @@ import { tn, tx } from '../i18n/ui';
 
 const num = (v: string) => { const n = parseFloat(v.replace(',', '.')); return isFinite(n) && n >= 0 ? n : undefined; };
 
+/**
+ * Valore di una riga della copertina: le righe libere stanno nello stile, le altre si scrivono
+ * nel dato da cui vengono (dati del progetto, indirizzo o campo del cartiglio, proprietà di progetto).
+ */
+function setCoverValue(key: string, v: string) {
+  const st = useStore.getState();
+  if (key === 'address') { st.updateTitleBlock({ address: v.trim() || undefined }); return; }
+  if (key.startsWith('tb:')) {
+    const i = Number(key.slice(3));
+    st.updateTitleBlock({ fields: (st.project.titleBlock?.fields ?? []).map((f, j) => (j === i ? { ...f, value: v } : f)) });
+    return;
+  }
+  if (key.startsWith('up:')) { st.setUserProp({ kind: 'project' }, key.slice(3), v); return; }
+  st.updateInfo({ [key]: v });
+}
+
 /** Numero facoltativo: vuoto = di serie (scritto in grigio) */
 export function Num({ value, def, onCommit }: { value?: number; def: number; onCommit: (v: number | undefined) => void }) {
   return <Field type="number" value={value === undefined ? '' : String(value)} placeholder={String(def)} onCommit={v => onCommit(num(v))} />;
@@ -35,6 +51,17 @@ export function CoverDialog() {
     saveLines(l);
   };
   const logo = s.logo ?? {};
+  const signs = s.signatures ?? D.signatures;
+  const signers = project.coverSigners ?? [];
+  const setSigner = (k: number, patch: { name?: string; date?: string }) => st().commit(p => {
+    const list = [...(p.coverSigners ?? [])];
+    while (list.length <= k) list.push({});
+    const row = { ...list[k], ...patch };
+    for (const key of ['name', 'date'] as const) if (!row[key]) delete row[key];
+    list[k] = row;
+    while (list.length && !list[list.length - 1].name && !list[list.length - 1].date) list.pop();
+    if (list.length) p.coverSigners = list; else delete p.coverSigners;
+  });
   const close = () => st().setDialog(null);
   return (
     <DialogShell className="report-style-dialog" label={tx('Copertina')} onClose={close}>
@@ -68,6 +95,22 @@ export function CoverDialog() {
             </td></tr>
           </tbody>
         </table>
+        {signs.length > 0 && <>
+          <h4>{tx('Firme')}</h4>
+          <table className="grid">
+            <thead><tr><th>{tx('Riquadro')}</th><th>{tx('Nome')}</th><th>{tx('Data')}</th></tr></thead>
+            <tbody>
+              {signs.map((l, k) => (
+                <tr key={k}>
+                  <td>{tx(l)}</td>
+                  <td><Field value={signers[k]?.name ?? ''} placeholder={tx('es. M. Rossi')} onCommit={v => setSigner(k, { name: v.trim() || undefined })} /></td>
+                  <td><Field value={signers[k]?.date ?? ''} placeholder={project.info.date || tx('es. 16/11/2026')} onCommit={v => setSigner(k, { date: v.trim() || undefined })} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="muted small">{tx('Nome e data si stampano nel riquadro; resta lo spazio per la firma a mano.')}</p>
+        </>}
         <h4>{tx('Righe dei dati')}</h4>
         <table className="grid">
           <thead><tr><th>{tx('Visibile')}</th><th>{tx('Nome')}</th><th>{tx('Valore')}</th><th /></tr></thead>
@@ -76,9 +119,8 @@ export function CoverDialog() {
               <tr key={l.key} className={l.hidden ? 'muted' : ''}>
                 <td><input type="checkbox" checked={!l.hidden} onChange={e => change(k, { hidden: !e.target.checked })} /></td>
                 <td><Field value={l.custom || l.free ? l.label : ''} placeholder={tx(l.label)} onCommit={v => change(k, { label: v.trim(), custom: !!v.trim() })} /></td>
-                <td>{l.free
-                  ? <Field value={l.value} onCommit={v => change(k, { value: v })} />
-                  : <span className="muted small" title={tx('Si cambia nei dati del progetto o del cartiglio')}>{l.value || '—'}</span>}</td>
+                <td title={l.free ? undefined : tx('Cambia il dato anche nel progetto e nel cartiglio')}>
+                  <Field value={l.value} placeholder="—" onCommit={v => (l.free ? change(k, { value: v }) : setCoverValue(l.key, v))} /></td>
                 <td className="nowrap">
                   <button className="mini" disabled={k === 0} onClick={() => move(k, -1)} title={tx('Prima')}>↑</button>
                   <button className="mini" disabled={k === lines.length - 1} onClick={() => move(k, 1)} title={tx('Dopo')}>↓</button>

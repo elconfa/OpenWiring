@@ -1346,6 +1346,8 @@ export interface Project {
   dictionary?: Record<string, TranslationEntry>;
   /** Revisioni congelate del progetto, dalla più vecchia */
   revisions?: Revision[];
+  /** Copertina: nome e data scritti in ogni riquadro delle firme (Redatto, Verificato…), nello stesso ordine */
+  coverSigners?: { name?: string; date?: string }[];
   /**
    * Stato del progetto: rilasciato (in sola lettura, l'ultima revisione è emessa) o in revisione
    * (copia di lavoro dopo l'ultima rilasciata); assente = in lavorazione, mai rilasciato

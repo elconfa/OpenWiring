@@ -9,7 +9,7 @@ import type { Macro } from '../model/clipboard';
 import { primBounds, getSymbol } from '../model/geometry';
 import { SymbolGraphic } from './PageSvg';
 import { askConfirm } from './Ask';
-import { functionById } from '../model/symbolFunctions';
+import { FUNCTION_GROUPS, allFunctions, functionById, guessFunction } from '../model/symbolFunctions';
 import { tx } from '../i18n/ui';
 import { chooseSymbolFolder } from './symbolFolderSync';
 import { symbolTree, countOf, categoriesOf, type TreeNode } from '../model/symbolTree';
@@ -70,6 +70,15 @@ const funcText = (x: SymbolDef) => {
   return f ? `${f.name} ${tx(f.name)}`.toLowerCase() : '';
 };
 
+/** Funzione del simbolo: quella assegnata o, se manca, quella proposta dal nome e dalla cartella */
+const guessed = new WeakMap<SymbolDef, string>();
+const symFunc = (x: SymbolDef) => {
+  if (x.func) return x.func;
+  let f = guessed.get(x);
+  if (!f) { f = guessFunction(x); guessed.set(x, f); }
+  return f;
+};
+
 const PREF = 'elettrocad.symbolTree';
 interface TreePref {
   open: Record<string, boolean>; large?: boolean;
@@ -121,26 +130,37 @@ export function SymbolLibrary() {
   // La ricerca segue la scrittura senza bloccarla: l'albero si ridisegna quando c'è tempo
   const dq = useDeferredValue(q);
   const ql = dq.trim().toLowerCase();
-  const syms = BUILTIN_SYMBOLS.filter(s => !s.hidden).filter(s => !ql || `${s.name} ${tx(s.name)} ${s.letter} ${s.category}`.toLowerCase().includes(ql));
+  // Tendina delle funzioni: '' = tutte; lavora insieme alla ricerca
+  const [fn, setFn] = useState('');
+  const filtering = !!ql || !!fn;
+  /** Il simbolo passa la ricerca (testo) e la funzione scelta */
+  const hit = (x: SymbolDef, text: string) => (!ql || text.toLowerCase().includes(ql)) && (!fn || symFunc(x) === fn);
+  // Rami aperti e chiusi durante una ricerca o un filtro (di serie tutti aperti); ripartono a ogni ricerca
+  const [searchOpen, setSearchOpen] = useState<Record<string, boolean>>({});
+  useEffect(() => { setSearchOpen({}); }, [ql, fn]);
+  const userFunctions = useStore(s => s.userFunctions);
+  const syms = BUILTIN_SYMBOLS.filter(s => !s.hidden).filter(s => hit(s, `${s.name} ${tx(s.name)} ${s.letter} ${s.category}`));
   // Simboli di base modificati: la copia personale prende il loro posto
   const overrides = useMemo(() => new Map(symbolLibrary.filter(x => x.replaces).map(x => [x.replaces!, x])), [symbolLibrary]);
   const imported = useMemo(() => symbolTree(symbolLibrary.filter(x => !(x.replaces && BUILTIN_SYMBOLS.some(b => b.id === x.replaces)) && !isDeletedSymbol(x))
-    .filter(x => !ql || `${x.name} ${x.letter} ${x.category} ${funcText(x)}`.toLowerCase().includes(ql))), [symbolLibrary, ql]);
+    .filter(x => hit(x, `${x.name} ${x.letter} ${x.category} ${funcText(x)}`))), [symbolLibrary, ql, fn]);
   // Simboli eliminati (cartella «Eliminare»): si vedono a parte e non si inseriscono
   const deleted = useMemo(() => {
-    const t = symbolTree(symbolLibrary.filter(x => isDeletedSymbol(x) && (!ql || `${x.name} ${x.letter} ${x.category} ${funcText(x)}`.toLowerCase().includes(ql))));
+    const t = symbolTree(symbolLibrary.filter(x => isDeletedSymbol(x) && hit(x, `${x.name} ${x.letter} ${x.category} ${funcText(x)}`)));
     return { name: '', path: '#tree/del', items: t.flatMap(n => n.items), children: t.flatMap(n => n.children) } as TreeNode;
-  }, [symbolLibrary, ql]);
+  }, [symbolLibrary, ql, fn]);
   const findInLibrary = useMemo(() => libraryIndex(symbolLibrary), [symbolLibrary]);
   // Simboli di base: un gruppo con le loro categorie
   const base = useMemo<TreeNode>(() => ({
     name: tx('Simboli di base'), path: '#base', items: [],
     children: SYMBOL_CATEGORIES.map(cat => ({ name: cat, path: `#base/${cat}`, items: syms.filter(x => x.category === cat), children: [] })).filter(n => n.items.length),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [ql]);
-  // Con una ricerca tutti i gruppi sono aperti
-  const isOpen = (path: string, def: boolean) => !!ql || (pref.open[path] ?? (def || path.startsWith('#base/')));
-  const toggle = (path: string, def: boolean) => setPref({ ...pref, open: { ...pref.open, [path]: !(pref.open[path] ?? (def || path.startsWith('#base/'))) } });
+  }), [ql, fn]);
+  // Con una ricerca i gruppi partono aperti, ma si possono chiudere e riaprire
+  const isOpen = (path: string, def: boolean) => filtering ? searchOpen[path] ?? true : (pref.open[path] ?? (def || path.startsWith('#base/')));
+  const toggle = (path: string, def: boolean) => filtering
+    ? setSearchOpen({ ...searchOpen, [path]: !(searchOpen[path] ?? true) })
+    : setPref({ ...pref, open: { ...pref.open, [path]: !(pref.open[path] ?? (def || path.startsWith('#base/'))) } });
   const grid = (items: React.ReactNode) => <div className={pref.large ? 'sym-grid large' : 'sym-grid'}>{items}</div>;
   const removeGroup = async (n: TreeNode) => {
     const cats = categoriesOf(n);
@@ -166,7 +186,7 @@ export function SymbolLibrary() {
   };
   // Preferiti: simboli di base, della libreria personale o copiati nel progetto
   const favorites = useMemo(() => favIds.map(id => getSymbol(id, { customSymbols } as Parameters<typeof getSymbol>[1])).filter((x): x is SymbolDef => !!x)
-    .filter(x => !ql || `${x.name} ${tx(x.name)} ${x.letter} ${x.category} ${funcText(x)}`.toLowerCase().includes(ql)), [favIds, customSymbols, symbolLibrary, ql]);
+    .filter(x => hit(x, `${x.name} ${tx(x.name)} ${x.letter} ${x.category} ${funcText(x)}`)), [favIds, customSymbols, symbolLibrary, ql, fn]);
   // Tutti gli articoli trovati (per «Elimina elencati…»); se ne mostrano i primi 200
   const found = useMemo(() => library.filter(p => !ql ||
     `${p.partNr} ${p.typeNr ?? ''} ${p.descr1 ?? ''} ${p.manufacturer ?? ''}`.toLowerCase().includes(ql)), [library, ql]);
@@ -185,7 +205,7 @@ export function SymbolLibrary() {
       return { s: x, label, title: `${label}${x.letter ? ` (-${x.letter})` : ''}${x !== b ? ` · ${tx('modificato')}` : ''}` };
     };
     const projSyms = customSymbols.filter(x => !x.hidden && !x.id.startsWith('dist:'))
-      .filter(x => !ql || `${x.name} ${x.letter} ${x.category} ${funcText(x)}`.toLowerCase().includes(ql));
+      .filter(x => hit(x, `${x.name} ${x.letter} ${x.category} ${funcText(x)}`));
     const folder = symbolDir ? symbolDir.split(/[\\/]/).filter(Boolean).pop() : undefined;
     return [
       { label: tx('Preferiti'), icon: 'star', node: { name: '', path: '#tree/fav', items: favorites, children: [] } },
@@ -238,7 +258,7 @@ export function SymbolLibrary() {
       }] : []),
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favorites, base, imported, deleted, customSymbols, used, symbolDir, projectName, ql, overrides, findInLibrary]);
+  }, [favorites, base, imported, deleted, customSymbols, used, symbolDir, projectName, ql, fn, overrides, findInLibrary]);
 
   // Simbolo da mostrare (tasto destro su un componente dello schema ▸ Mostra nella libreria)
   const revealReq = useStore(s => s.revealSymbol);
@@ -273,8 +293,30 @@ export function SymbolLibrary() {
     if (proj) return { root: '#tree/proj', folder: path(proj.category), id: proj.id };
     return undefined;
   }
-  const isOpenTree = (path: string, def: boolean) => !!ql || (pref.tree?.[path] ?? def);
-  const toggleTree = (path: string, def: boolean) => setPref({ ...pref, tree: { ...pref.tree, [path]: !(pref.tree?.[path] ?? def) } });
+  const isOpenTree = (path: string, def: boolean) => filtering ? searchOpen[path] ?? true : (pref.tree?.[path] ?? def);
+  const toggleTree = (path: string, def: boolean) => filtering
+    ? setSearchOpen({ ...searchOpen, [path]: !(searchOpen[path] ?? true) })
+    : setPref({ ...pref, tree: { ...pref.tree, [path]: !(pref.tree?.[path] ?? def) } });
+  /** Tutti i rami della vista attuale (le radici dell'albero restano aperte quando si comprime) */
+  const branchKeys = (): [string, boolean][] => treeView
+    ? roots.flatMap(r => [[r.node.path, true] as [string, boolean], ...r.node.children.flatMap(function all(n: TreeNode): [string, boolean][] { return [[`${r.node.path}|${n.path}`, false], ...n.children.flatMap(all)]; })])
+    : [base, ...imported].flatMap(function all(n: TreeNode): [string, boolean][] { return [[n.path, false], ...n.children.flatMap(all)]; });
+  const setBranches = (open: boolean) => {
+    const o = Object.fromEntries(branchKeys().map(([k, root]) => [k, open || root]));
+    if (filtering) setSearchOpen(o);
+    else setPref(treeView ? { ...pref, tree: o } : { ...pref, open: o });
+  };
+  // Funzioni nella tendina: solo quelle che hanno simboli, con quanti sono, divise per gruppo
+  const fnOptions = useMemo(() => {
+    const n = new Map<string, number>();
+    const add = (x: SymbolDef) => n.set(symFunc(x), (n.get(symFunc(x)) ?? 0) + 1);
+    BUILTIN_SYMBOLS.filter(s => !s.hidden && !overrides.has(s.id)).forEach(add);
+    symbolLibrary.filter(x => !isDeletedSymbol(x)).forEach(add);
+    const all = allFunctions(userFunctions).filter(f => n.has(f.id) || f.id === fn);
+    const groups = [...new Set([...FUNCTION_GROUPS, ...all.map(f => f.group)])];
+    return groups.map(g => ({ g, list: all.filter(f => f.group === g).map(f => ({ id: f.id, label: `${tx(f.name)} (${n.get(f.id) ?? 0})` })) })).filter(x => x.list.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbolLibrary, userFunctions, overrides]);
 
   return (
     <div className="library">
@@ -284,6 +326,12 @@ export function SymbolLibrary() {
         <button className={tab === 'parts' ? 'active' : ''} onClick={() => setTab('parts')}>{tx('Articoli (')}{library.length})</button>
       </div>
       <input className="search" placeholder={tx('Cerca…')} value={q} onChange={e => setQ(e.target.value)} />
+      {tab === 'symbols' && (
+        <select className="lib-func" value={fn} onChange={e => setFn(e.target.value)} title={tx('Mostra solo i simboli di una funzione; insieme alla ricerca')}>
+          <option value="">{tx('Funzione: tutte')}</option>
+          {fnOptions.map(({ g, list }) => <optgroup key={g} label={tx(g)}>{list.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}</optgroup>)}
+        </select>
+      )}
       {tab === 'symbols' ? (
         <div className="lib-scroll">
           <div className="lib-import">
@@ -299,11 +347,10 @@ export function SymbolLibrary() {
               <button className={`mini${pref.large ? ' on' : ''}`} onClick={() => setPref({ ...pref, large: true })} title={tx('Icone grandi, due per riga')}>{tx('grandi')}</button>
             </>}
             <span className="tb-spacer" />
-            {treeView
-              ? <button className="mini" onClick={() => setPref({ ...pref, tree: Object.fromEntries(roots.flatMap(r => [[r.node.path, true] as [string, boolean], ...r.node.children.flatMap(function all(n: TreeNode): [string, boolean][] { return [[`${r.node.path}|${n.path}`, false], ...n.children.flatMap(all)]; })])) })} title={tx('Chiudi tutte le cartelle')}>{tx('Comprimi')}</button>
-              : <button className="mini" onClick={() => setPref({ ...pref, open: Object.fromEntries([base, ...imported].flatMap(function all(n: TreeNode): [string, boolean][] { return [[n.path, false], ...n.children.flatMap(all)]; })) })} title={tx('Chiudi tutti i gruppi')}>{tx('Comprimi')}</button>}
+            {filtering && <button className="mini" onClick={() => setBranches(true)} title={tx('Apri tutti i rami trovati')}>{tx('Espandi')}</button>}
+            <button className="mini" onClick={() => setBranches(false)} title={treeView ? tx('Chiudi tutte le cartelle') : tx('Chiudi tutti i gruppi')}>{tx('Comprimi')}</button>
           </div>
-          {treeView && <SymbolTreeView roots={roots} q={dq} isOpen={isOpenTree} toggle={toggleTree} reveal={reveal} />}
+          {treeView && <SymbolTreeView roots={roots} q={dq} filtered={!!fn} isOpen={isOpenTree} toggle={toggleTree} reveal={reveal} />}
           {!treeView && symbolDir && (
             <div className="lib-folder small">
               <span className="muted" title={symbolDir}>{tx('Cartella dei simboli:')} {symbolDir.split(/[\\/]/).slice(-2).join('/')}</span>

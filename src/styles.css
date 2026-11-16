@@ -176,6 +176,7 @@ aside.right { border-left: 1px solid var(--border); background: var(--panel); }
 .lib-tabs button { flex: 1; border-radius: 0; border: none; border-bottom: 2px solid transparent; background: var(--title-bg); padding: 6px; }
 .lib-tabs button.active { border-bottom-color: var(--accent); background: var(--panel); font-weight: 600; }
 .search { margin: 6px; width: calc(100% - 12px); }
+.lib-func { margin: 0 6px 6px; width: calc(100% - 12px); }
 .lib-scroll { overflow-y: auto; overflow-x: hidden; flex: 1; padding: 0 6px 8px; }
 .lib-scroll h4 { margin: 10px 2px 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 .sym-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
