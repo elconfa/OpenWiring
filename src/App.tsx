@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore, restoreLibrary } from './model/store';
 import { startSymbolFolder } from './ui/symbolFolderSync';
+import { startTitleBlockFolder } from './ui/titleBlockFolderSync';
 import { startPartsDb } from './ui/partsDbSync';
 import { derive } from './model/derive';
 import { potentialOf } from './model/netlist';
@@ -196,7 +197,7 @@ export function App() {
 
   // Ripristino libreria articoli e ultimo progetto in lavorazione (anche dopo un arresto del programma)
   useEffect(() => {
-    void startPartsDb().then(() => restoreLibrary()).then(() => startSymbolFolder()).then(() => setSymbolLibraryReady());
+    void startPartsDb().then(() => restoreLibrary()).then(() => startSymbolFolder()).then(() => setSymbolLibraryReady()).then(() => startTitleBlockFolder());
     void Promise.all([kvGet<string>('autosave'), kvGet<RecoveryMeta>('autosaveMeta'), kvGet<RecoveryOther[]>('autosaveOthers')]).then(async ([txt, meta, others]) => {
       const st = useStore.getState();
       // Chiusura normale: niente recupero, si riaprono i progetti salvati che erano aperti

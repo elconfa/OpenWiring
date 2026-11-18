@@ -2,7 +2,7 @@
 // che vengono riempiti con i dati del progetto e della pagina. Alcuni modelli sono inclusi;
 // quelli personalizzati (disegnati nell'editor o importati da DXF) sono salvati nel progetto.
 import type { Prim, Project, Page, TitleBlockTemplate } from './types';
-import { FRAME, TITLE_TOP, PAGE_H } from './types';
+import { FRAME, TITLE_TOP, TB_H } from './types';
 import { pageRevision } from './revisions';
 import { translator, translateFixed } from './i18n';
 import { tn } from '../i18n/ui';
@@ -11,7 +11,7 @@ import { formatUserValue } from './userProps';
 /** Area del cartiglio sotto la cornice, in mm: le coordinate dei modelli partono dal suo angolo in alto a sinistra */
 export const TB_AREA = {
   get x() { return FRAME.left; }, get y() { return TITLE_TOP; },
-  get w() { return FRAME.right - FRAME.left; }, get h() { return PAGE_H - 5 - TITLE_TOP; },
+  get w() { return FRAME.right - FRAME.left; }, get h() { return TB_H; },
 };
 
 /** Segnaposto disponibili nei testi del cartiglio */

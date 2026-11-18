@@ -28,7 +28,10 @@ desktop su **macOS** e **Windows** (Electron) e anche nel browser.
 > Fino alla versione 1.23 il programma si chiamava **ElettroCAD**. I progetti `.ecad`, le librerie e le
 > impostazioni della versione precedente si aprono senza conversioni (vedi [Aggiornare da ElettroCAD](#aggiornare-da-elettrocad)).
 
-![OpenWiring – circuito di comando del progetto di esempio](docs/screenshot.png)
+![OpenWiring in 35 secondi: lo schema che si disegna, rimandi incrociati, libreria dei simboli con le funzioni, PLC, morsettiere, cavi, schema di rete, liste e PDF](docs/demo.gif)
+
+*Il progetto d'esempio in 35 secondi: lo schema si disegna, i rimandi incrociati si aggiornano da soli,
+la libreria si filtra per funzione, poi PLC, morsettiere, cavi, schema di rete, liste e PDF.*
 
 > **Stato:** versione 2.1.6. Schema elettrico, morsettiere, cavi, PLC e layout 2D del quadro sono
 > utilizzabili; il layout 3D e la firma digitale delle app non ci sono ancora: vedi [Roadmap](#roadmap).

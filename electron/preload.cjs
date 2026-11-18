@@ -30,6 +30,12 @@ contextBridge.exposeInMainWorld('elettro', {
   onCloseRequest: cb => { const h = () => cb(); ipcRenderer.on('close-request', h); return () => ipcRenderer.removeListener('close-request', h); },
   confirmClose: () => ipcRenderer.send('close-confirmed'),
   cancelClose: () => ipcRenderer.send('close-cancelled'),
+  // Cartella dei cartigli personali (un file .ectb per cartiglio)
+  tblibRead: () => ipcRenderer.invoke('tblib-read'),
+  tblibWrite: (files, removes) => ipcRenderer.invoke('tblib-write', files, removes),
+  tblibOpen: () => ipcRenderer.invoke('tblib-open'),
+  tblibChoose: () => ipcRenderer.invoke('tblib-choose'),
+  onTblibChanged: cb => { const h = () => cb(); ipcRenderer.on('tblib-changed', h); return () => ipcRenderer.removeListener('tblib-changed', h); },
   onSymlibChanged: cb => { const h = () => cb(); ipcRenderer.on('symlib-changed', h); return () => ipcRenderer.removeListener('symlib-changed', h); },
   // EDZ grandi: estratti su disco da un processo a parte, letti a gruppi
   edzOpen: (archive, opts) => ipcRenderer.invoke('edz-open', archive, opts),

@@ -59,8 +59,16 @@ export interface PinDef {
   label: string;
   /** Bloccato nell'editor dei simboli: non si sposta e non si cancella finché non si sblocca */
   lock?: boolean;
-  /** Tipo del punto: ingresso, uscita o morsetto (assente = connessione generica) */
+  /**
+   * Verso del segnale: ingresso, uscita (assente = ingresso e uscita). «terminal» viene dalle versioni
+   * precedenti (morsetto a vite) e vale come ingresso e uscita
+   */
   kind?: PinKind;
+  /**
+   * Cosa si collega al punto: fili normali o cavi bus (collegamenti di rete, Profinet, Modbus…).
+   * Assente = generico (simboli delle versioni precedenti): accetta tutti e due e la Verifica non lo controlla
+   */
+  medium?: PinMedium;
   /**
    * Posizione della designazione rispetto al punto (alto/basso, sinistra/destra nel disegno del
    * simbolo); assente = automatica secondo la direzione del filo
@@ -71,6 +79,7 @@ export interface PinDef {
 export type PinLabelPos = 'tl' | 'tr' | 'bl' | 'br';
 
 export type PinKind = 'in' | 'out' | 'terminal';
+export type PinMedium = 'wire' | 'bus';
 
 /** Dati del dispositivo che un simbolo può mostrare in un punto scelto nell'editor */
 export type FieldKey = 'description' | 'techData' | 'manufacturer' | 'typeNr' | 'orderNr' | 'partNr' | 'func' | 'loc' | 'note'
@@ -1550,6 +1559,13 @@ export interface SheetSettings {
   left?: number;
   top?: number;
   right?: number;
+  /** Margine sotto il cartiglio in mm (assente = 5) */
+  bottom?: number;
+  /**
+   * Fronte/retro: sulle pagine pari (retro) del PDF e della stampa i margini sinistro e destro si
+   * scambiano, così cornice e cartiglio cadono nello stesso punto del foglio davanti e dietro
+   */
+  duplex?: boolean;
   columns?: number;
   /** Righe A, B, C… sui lati della cornice (assente o 0 = nessuna) */
   rows?: number;
@@ -1557,9 +1573,10 @@ export interface SheetSettings {
   xrefRows?: boolean;
 }
 
-export const SHEET_DEFAULT = { size: 'A3' as SheetSize, left: 20, top: 10, right: 10, columns: 10 };
-/** Altezza della fascia in basso: cartiglio (35 mm) con 5 mm sotto e 5 mm sopra per i numeri di colonna */
-const TB_BAND = 45;
+export const SHEET_DEFAULT = { size: 'A3' as SheetSize, left: 20, top: 10, right: 10, bottom: 5, columns: 10 };
+/** Altezza del cartiglio e fascia sopra di lui per i numeri di colonna */
+export const TB_H = 35;
+const TB_GAP = 5;
 
 /**
  * Misure del foglio in uso, in mm. Sono valori vivi: applySheet le aggiorna con le impostazioni del
@@ -1583,9 +1600,19 @@ export function sheetOf(s: Pick<ProjectSettings, 'sheet'> | undefined) {
   return {
     w, h, size: sh.size ?? SHEET_DEFAULT.size, portrait: !!sh.portrait,
     left: sh.left ?? SHEET_DEFAULT.left, top: sh.top ?? SHEET_DEFAULT.top, right: sh.right ?? SHEET_DEFAULT.right,
+    bottom: sh.bottom ?? SHEET_DEFAULT.bottom, duplex: !!sh.duplex,
     columns: Math.max(1, Math.min(40, Math.round(sh.columns ?? SHEET_DEFAULT.columns))), rows: Math.max(0, Math.min(26, Math.round(sh.rows ?? 0))),
     xrefRows: !!sh.xrefRows && (sh.rows ?? 0) > 0,
   };
+}
+
+/**
+ * Fronte/retro: spostamento della pagina n (1 = la prima del PDF o della stampa) perché sulle pagine
+ * pari i margini sinistro e destro risultino scambiati; undefined = nessuno spostamento
+ */
+export function duplexShift(s: Pick<Project, 'settings'>, n: number): string | undefined {
+  const sh = sheetOf(s.settings);
+  return sh.duplex && n % 2 === 0 && sh.left !== sh.right ? `translate(${sh.right - sh.left} 0)` : undefined;
 }
 
 /** Rende attuale il foglio delle impostazioni indicate (assenti = A3 orizzontale) */
@@ -1593,8 +1620,8 @@ export function applySheet(s: Pick<ProjectSettings, 'sheet'> | undefined): void 
   const sh = sheetOf(s);
   PAGE_W = sh.w; PAGE_H = sh.h;
   COLUMNS = sh.columns; ROWS = sh.rows; XREF_ROWS = sh.xrefRows;
-  FRAME.left = sh.left; FRAME.top = sh.top; FRAME.right = sh.w - sh.right; FRAME.bottom = sh.h - TB_BAND;
-  TITLE_TOP = sh.h - 40;
+  FRAME.left = sh.left; FRAME.top = sh.top; FRAME.right = sh.w - sh.right; FRAME.bottom = sh.h - sh.bottom - TB_H - TB_GAP;
+  TITLE_TOP = sh.h - sh.bottom - TB_H;
 }
 
 export function columnOf(x: number): number {

@@ -3,7 +3,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Part, Project } from '../model/types';
-import { PAGE_W, PAGE_H, sheetOf } from '../model/types';
+import { PAGE_W, PAGE_H, sheetOf, duplexShift } from '../model/types';
 import { PageContent } from '../ui/PageSvg';
 import type { PdfOptions } from './pdfOptions';
 import { printPlan } from './printPlan';
@@ -16,12 +16,12 @@ export function printDocument(project: Project, library: Part[], opts: PdfOption
   // Formato con il nome (A4, A3) che le stampanti riconoscono; gli altri in mm
   const sh = sheetOf(project.settings);
   const pageSize = sh.size === 'A4' || sh.size === 'A3' ? `${sh.size} ${sh.portrait ? 'portrait' : 'landscape'}` : `${PAGE_W}mm ${PAGE_H}mm`;
-  const sheets = pages.map(page => {
+  const sheets = pages.map((page, i) => {
     const pd = d.pages.get(page.id)!;
     const derived = opts.mono ? { ...pd, drawWireColors: false, mono: true } : pd;
     const svg = renderToStaticMarkup(
       createElement('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${PAGE_W} ${PAGE_H}`, width: `${PAGE_W}mm`, height: `${PAGE_H}mm` },
-        createElement('g', { fontFamily: 'Helvetica, Arial, sans-serif' },
+        createElement('g', { fontFamily: 'Helvetica, Arial, sans-serif', transform: duplexShift(project, i + 1) },
           createElement(PageContent, { project, page, pageIndex: project.pages.indexOf(page), derived }))),
     );
     return opts.mono ? monoSvg(svg) : svg;

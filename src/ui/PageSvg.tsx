@@ -1009,6 +1009,18 @@ function PoleTicks({ pts, n, color }: { pts: Pt[]; n: number; color: string }) {
 
 const cut = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
+/**
+ * Panoramiche PLC e schemi delle morsettiere sono disegnati per la cornice di serie (A3, margini
+ * 20/10/10, cartiglio a 5 mm dal bordo): con margini diversi si spostano e, se serve, si
+ * rimpiccioliscono per restare dentro la cornice e sopra il cartiglio. Di serie nessuna trasformazione.
+ */
+function fixedLayoutFit(): string | undefined {
+  const k = Math.min(1, (FRAME.right - FRAME.left) / 390, (FRAME.bottom - FRAME.top) / 242);
+  const dx = FRAME.left - 20 * k, dy = FRAME.top - 10 * k;
+  if (Math.abs(k - 1) < 1e-6 && Math.abs(dx) < 1e-6 && Math.abs(dy) < 1e-6) return undefined;
+  return `translate(${+dx.toFixed(3)} ${+dy.toFixed(3)}) scale(${+k.toFixed(5)})`;
+}
+
 /** Pagina panoramica di una scheda PLC, generata dai dati del progetto */
 function PlcOverview({ data, t, S }: { data?: OverviewData; t: (s: string) => string; S: ResolvedDrawingStyle }) {
   if (!data) {
@@ -1296,8 +1308,8 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
       {!bare && <rect x={0} y={0} width={PAGE_W} height={PAGE_H} fill={lk.c.paper} />}
       {!bare && <Frame project={project} page={page} pageIndex={pageIndex} />}
       {derived.projected && <ProjectedZone project={project} page={page} data={derived.projected} />}
-      {page.type === 'plc' && <PlcOverview data={derived.overview} t={L.t} S={drawingStyleOf(project, 'plc')} />}
-      {page.type === 'strip' && <StripDiagram data={derived.stripSheet} t={L.t} style={stripTextOf(project)} cols={project.settings?.stripStyle} />}
+      {page.type === 'plc' && <g transform={fixedLayoutFit()}><PlcOverview data={derived.overview} t={L.t} S={drawingStyleOf(project, 'plc')} /></g>}
+      {page.type === 'strip' && <g transform={fixedLayoutFit()}><StripDiagram data={derived.stripSheet} t={L.t} style={stripTextOf(project)} cols={project.settings?.stripStyle} /></g>}
       {page.type === 'report' && <ReportPage data={derived.reportSheet} />}
       {derived.drawing && <DrawingPage d={derived.drawing} t={L.t} project={project} />}
       {derived.connFrames?.map((f, i) => (

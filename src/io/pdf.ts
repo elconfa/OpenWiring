@@ -5,7 +5,7 @@ import 'svg2pdf.js';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Project, Part, Page } from '../model/types';
-import { PAGE_W, PAGE_H, FRAME } from '../model/types';
+import { PAGE_W, PAGE_H, FRAME, duplexShift } from '../model/types';
 import { PageContent } from '../ui/PageSvg';
 import { monoSvg, monoPdf } from './mono';
 
@@ -70,7 +70,7 @@ export async function exportPdf(project: Project, tables: Table[], library: Part
       const derived = opts.mono ? { ...pd, drawWireColors: false, mono: true } : pd;
       const markup = renderToStaticMarkup(
         createElement('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${PAGE_W} ${PAGE_H}`, width: PAGE_W, height: PAGE_H },
-          createElement('g', { fontFamily: 'helvetica' },
+          createElement('g', { fontFamily: 'helvetica', transform: duplexShift(project, i + 1 + offset) },
             createElement(PageContent, { project, page, pageIndex, derived }))),
       );
       host!.innerHTML = pdfFontWeights(opts.mono ? monoSvg(markup) : markup);

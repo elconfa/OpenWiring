@@ -357,6 +357,8 @@ ipcMain.handle('save-folder', async (ev, folderName, files) => {
 
 ai.register(ipcMain, net, safeStorage);
 symlib.register(ipcMain, app, dialog, shell, BrowserWindow);
+// Cartella dei cartigli personali (Documenti/OpenWiring/Cartigli, un file .ectb per cartiglio)
+symlib.register(ipcMain, app, dialog, shell, BrowserWindow, { prefix: 'tblib', ext: '.ectb', configKey: 'titleBlockDir', folder: 'Cartigli' });
 
 app.whenReady().then(() => {
   partsdb.register(ipcMain, app, dialog, shell, BrowserWindow, protocol);

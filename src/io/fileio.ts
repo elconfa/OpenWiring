@@ -29,6 +29,11 @@ interface ElettroBridge {
   symlibOpen?(): Promise<void>;
   symlibChoose?(): Promise<string | null>;
   onSymlibChanged?(cb: () => void): () => void;
+  tblibRead?(): Promise<{ dir: string; files: { rel: string; text: string }[] }>;
+  tblibWrite?(files: { rel: string; text: string }[], removes: string[]): Promise<boolean>;
+  tblibOpen?(): Promise<void>;
+  tblibChoose?(): Promise<string | null>;
+  onTblibChanged?(cb: () => void): () => void;
   onCloseRequest?(cb: () => void): () => void;
   confirmClose?(): void;
   cancelClose?(): void;

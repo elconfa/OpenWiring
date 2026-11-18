@@ -2,7 +2,7 @@
 // righe, linee, ordinamento e colonne (ordine, visibili, intestazione, larghezza in mm, allineamento).
 // Il contenuto resta calcolato dallo schema; cambia solo come viene messo sulla pagina.
 import type { Project, ReportStyle } from './types';
-import { REPORT_AREA_H, type Table } from './reports';
+import { reportAreaH, type Table } from './reports';
 import { FRAME } from './types';
 
 export const REPORT_DEFAULTS = {
@@ -59,7 +59,7 @@ export const breakKeyOf = (t: Pick<Table, 'breakKey'>, s: ReportStyle) => s.brea
  */
 export function sheetRanges(t: Table, s: ReportStyle): { first: number; n: number }[] {
   // Un'intestazione più alta di quella di serie toglie spazio alle righe
-  const per = Math.max(1, Math.floor((REPORT_AREA_H - Math.max(0, styledHeadH(s) - REPORT_DEFAULTS.headH)) / styledRowH(t, s)));
+  const per = Math.max(1, Math.floor((reportAreaH() - Math.max(0, styledHeadH(s) - REPORT_DEFAULTS.headH)) / styledRowH(t, s)));
   const col = columnKeys(t.columns).indexOf(breakKeyOf(t, s));
   const rows = sortedTable(t, s).rows;
   const out: { first: number; n: number }[] = [];

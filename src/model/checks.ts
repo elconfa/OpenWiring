@@ -4,10 +4,10 @@ import { deviceLetter } from './letterCodes';
 import { pairRepresentations } from './pairs';
 import { projectionSource } from './projection';
 import { bundleTaps, type BundleTap } from './bundles';
-import type { Project, Part, Wire, FunctionTemplate, Pt } from './types';
+import type { Project, Part, Wire, FunctionTemplate, Pt, PinDef } from './types';
 import { columnOf, FRAME, PAGE_W, PAGE_H } from './types';
 import { distSlots } from './distributors';
-import { computeNetlist, withNetlistCache, type Net } from './netlist';
+import { computeNetlist, withNetlistCache, type Net, type NetPin } from './netlist';
 import { getSymbol, instanceBounds } from './geometry';
 import { buildDevices, allPlaced, locationOf, partsIndex, deviceInfo, type PlacedElement } from './devices';
 import { allowedRots } from './rotations';
@@ -497,6 +497,7 @@ export function schemaProblems(project: Project, nl = computeNetlist(project), p
     // Fili che non collegano nessun dispositivo
     if (n.wires.length && !n.pins.length && !n.potentials?.length && !n.links?.length) out.push({ level: 'warn', kind: tx('Orfani'), msg: tx('Filo isolato: non collega nessun punto di connessione'), ...where });
   }
+  out.push(...pinTypeProblems(project, nl, singleline));
   // Numeri filo scritti a mano ripetuti su conduttori diversi
   const byNo = new Map<string, Net[]>();
   for (const n of nl.nets) if (n.wireNo && !n.named && !n.wires.some(w => w.wire.bus)) byNo.set(n.wireNo, [...(byNo.get(n.wireNo) ?? []), n]);
@@ -644,5 +645,33 @@ export function partRefs(project: Project, devices = buildDevices(project)): Map
   for (const [conn, d] of Object.entries(project.connectors ?? {})) walk(d, `-${conn}`);
   // Schede con il dispositivo nello schema: come in distinta vale l'articolo del dispositivo
   for (const c of project.plc.cards) if (!cardDevice(project, c, devices)) walk(c, `-${c.tag}`);
+  return out;
+}
+
+/**
+ * Punti di connessione con il tipo scelto nel simbolo: punti per bus collegati a fili normali (e il
+ * contrario), due uscite sullo stesso conduttore, conduttori con soli ingressi. I punti generici dei
+ * simboli delle versioni precedenti non si controllano.
+ */
+export function pinTypeProblems(project: Project, nl = computeNetlist(project), skipPages = new Set<string>()): Issue[] {
+  const out: Issue[] = [];
+  const def = (p: NetPin) => p.el.sym.pins.find(q => q.id === p.pinId);
+  const name = (p: NetPin) => `${p.el.inst.tag ? `-${p.el.inst.tag}` : p.el.sym.name}:${p.label || p.pinId}`;
+  const at = (p: NetPin) => ({ pageId: p.el.page.id, elementId: p.el.inst.id, loc: `${p.el.page.name}.${columnOf(p.pos.x)}` });
+  for (const n of nl.nets) {
+    if (n.wires.length && n.wires.every(w => skipPages.has(w.pageId))) continue;
+    const pins = n.pins.map(p => ({ p, d: def(p) })).filter((x): x is { p: NetPin; d: PinDef } => !!x.d);
+    const busWire = n.wires.some(w => w.wire.bus), plainWire = n.wires.some(w => !w.wire.bus);
+    for (const { p, d } of pins) {
+      if (d.medium === 'bus' && plainWire) out.push({ level: 'warn', kind: tx('Punti di connessione'), msg: tx('{0}: punto per cavi bus collegato a un filo normale', name(p)), ...at(p) });
+      if (d.medium === 'wire' && busWire) out.push({ level: 'warn', kind: tx('Punti di connessione'), msg: tx('{0}: punto per fili collegato a un cavo bus', name(p)), ...at(p) });
+    }
+    const outs = pins.filter(x => x.d.kind === 'out');
+    if (outs.length > 1) out.push({ level: 'warn', kind: tx('Punti di connessione'), msg: tx('Uscite collegate tra loro sullo stesso conduttore: {0}', outs.map(x => name(x.p)).join(', ')), ...at(outs[1].p) });
+    // Solo ingressi e nessun potenziale o rimando che porti il segnale da fuori
+    if (pins.length > 1 && pins.length === n.pins.length && pins.every(x => x.d.kind === 'in') && !n.potentials?.length && !n.links?.length) {
+      out.push({ level: 'info', kind: tx('Punti di connessione'), msg: tx('Conduttore con soli ingressi, nessuna uscita lo alimenta: {0}', pins.map(x => name(x.p)).join(', ')), ...at(pins[0].p) });
+    }
+  }
   return out;
 }

@@ -1,6 +1,6 @@
 // Liste di progetto: distinta materiali, lista dispositivi, morsetti, connessioni.
 import { SEQ_MODE_NAMES } from './wiringOrder';
-import type { Project, Part, SymbolDef, Cable, Jumper } from './types';
+import { FRAME, type Project, type Part, type SymbolDef, type Cable, type Jumper } from './types';
 import { buildDevices, deviceInfo, designation, partsIndex, locationOf, allPlaced as placedSymbols, type DeviceInfo } from './devices';
 import { terminalBomItems, terminalConnections, allStrips, stripData, stripAccessories } from './terminals';
 import { cableInfos, cableSection, conductorEnds, cableByPiece } from './cables';
@@ -37,8 +37,13 @@ export interface Table {
 }
 
 /** Altezza delle righe in mm e righe per foglio delle pagine di lista (40 righe da 5 mm) */
-export const REPORT_AREA_H = 200;
-export const sheetRows = (t: Pick<Table, 'rowH'>) => Math.floor(REPORT_AREA_H / (t.rowH ?? 5));
+/**
+ * Altezza per le righe delle liste: 200 mm sul foglio di serie, meno se i margini (o il formato)
+ * lasciano meno spazio tra il titolo e la fascia del cartiglio
+ */
+export const reportAreaH = () => Math.max(20, Math.min(200, FRAME.bottom - (FRAME.top + 14) - REPORT_HEAD_H));
+const REPORT_HEAD_H = 5;
+export const sheetRows = (t: Pick<Table, 'rowH'>) => Math.floor(reportAreaH() / (t.rowH ?? 5));
 
 export const LEGEND_TITLE = 'Legenda simboli';
 

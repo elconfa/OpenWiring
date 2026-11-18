@@ -24,7 +24,8 @@ import type { Lang, TerminalTextDir, ExtraPart, Part, UserPropAssign, RailSettin
 import { railOf, PLC_ROW_DEFAULT } from '../model/fixedPos';
 import { activeDefs } from '../model/userProps';
 import { pinCount, connectorRows } from '../model/connectors';
-import { compareWithFile, newFromTemplate, saveAsTemplate, addPlace, renumberDevices, renumberWires, changeLetterCodes } from './actions';
+import { compareWithFile, newFromTemplate, saveAsTemplate, addPlace, renumberDevices, renumberWires, changeLetterCodes, importTitleBlocks, exportTitleBlock } from './actions';
+import { chooseTitleBlockFolder, openTitleBlockFolder } from './titleBlockFolderSync';
 import { openFiles } from '../io/fileio';
 import { wirePasses, defaultWirePass, computeNetlist } from '../model/netlist';
 import { titleBlockTemplates, templateFor } from '../model/titleBlocks';
@@ -1779,6 +1780,7 @@ export function ProjectUserPropsSection() {
 
 export function TitleBlockSection() {
   const tbLibrary = useStore(s => s.tbLibrary);
+  const tbDir = useStore(s => s.tbDir);
   const project = useStore(s => s.project);
   const st = useStore.getState;
   return (
@@ -1796,6 +1798,12 @@ export function TitleBlockSection() {
           const t = templateFor(project);
           if (await askConfirm(tx('Conferma'), tx('Eliminare il cartiglio "{0}" dal progetto e dalla libreria personale?', t.name), tx('Elimina'))) st().deleteTitleBlock(t.id);
         }}>{tx('Elimina')}</button>}
+      </Row>
+      <Row label="">
+        <button onClick={() => void importTitleBlocks()} title={tx('Cartigli da file .ectb, o i cartigli personalizzati di un progetto .ecad: vanno nella libreria personale')}>{tx('Importa…')}</button>{' '}
+        <button onClick={() => void exportTitleBlock(templateFor(project))} title={tx('Salva il cartiglio scelto in un file .ectb, da copiare su un altro computer o dare a un collega')}>{tx('Esporta…')}</button>{' '}
+        {tbDir && <button onClick={openTitleBlockFolder} title={tx('Cartella dei cartigli personali: {0}. Un file .ectb per cartiglio; quelli copiati qui compaiono da soli nel programma', tbDir)}>{tx('Cartella')}</button>}
+        {tbDir && <button className="mini" onClick={() => void chooseTitleBlockFolder()} title={tx('Usa un\'altra cartella per i cartigli (es. condivisa in rete tra più installazioni)')}>…</button>}
       </Row>
       <Row label={tx('Logo')}>
         {project.titleBlock?.logo && <img src={project.titleBlock.logo} alt="logo" className="tb-logo" />}
@@ -2121,7 +2129,7 @@ export function SheetSection() {
     for (const k of Object.keys(next) as (keyof SheetSettings)[]) if (next[k] === undefined) delete next[k];
     st().updateSettings({ sheet: Object.keys(next).length ? next : undefined });
   };
-  const num = (k: 'left' | 'top' | 'right' | 'columns' | 'rows', min: number, max: number, def: number) => (
+  const num = (k: 'left' | 'top' | 'right' | 'bottom' | 'columns' | 'rows', min: number, max: number, def: number) => (
     <Field type="number" value={String(cur[k] ?? def)} onCommit={v => {
       const n = parseFloat(v.replace(',', '.'));
       if (!isFinite(n) || n < min || n > max) return false;
@@ -2148,6 +2156,12 @@ export function SheetSection() {
       <Row label={tx('Margine sinistro (rilegatura)')}><span className="color-row">{num('left', 5, 60, SHEET_DEFAULT.left)}<span className="muted small">mm</span></span></Row>
       <Row label={tx('Margine in alto')}><span className="color-row">{num('top', 6, 60, SHEET_DEFAULT.top)}<span className="muted small">mm</span></span></Row>
       <Row label={tx('Margine destro')}><span className="color-row">{num('right', 5, 60, SHEET_DEFAULT.right)}<span className="muted small">mm</span></span></Row>
+      <Row label={tx('Margine in basso (sotto il cartiglio)')}><span className="color-row">{num('bottom', 3, 60, SHEET_DEFAULT.bottom)}<span className="muted small">mm</span></span></Row>
+      <Row label={tx('Fronte/retro')}>
+        <label className="row" title={tx('Nel PDF e nella stampa le pagine pari (retro) hanno i margini sinistro e destro scambiati: cornice e cartiglio cadono nello stesso punto davanti e dietro e la rilegatura resta libera')}>
+          <input type="checkbox" checked={sh.duplex} onChange={e => set({ duplex: e.target.checked || undefined })} /> {tx('margini speculari sulle pagine pari')}
+        </label>
+      </Row>
       <Row label={tx('Colonne')}>{num('columns', 1, 40, SHEET_DEFAULT.columns)}</Row>
       <Row label={tx('Righe (A, B, C…)')}>
         <span className="color-row">{num('rows', 0, 26, 0)}<span className="muted small">{tx('0 = nessuna')}</span></span>
@@ -2157,7 +2171,7 @@ export function SheetSection() {
           title={tx('Riferimenti incrociati con colonna e riga, es. 200.3B (servono le righe)')} />
       </Row>
       <Row label={tx('Area di disegno')}>
-        <span className="small muted">{tx('x {0}…{1}, y {2}…{3} mm; il cartiglio sta in basso a destra, rimpicciolito se è più largo della cornice', sh.left, sh.w - sh.right, sh.top, sh.h - 45)}</span>
+        <span className="small muted">{tx('x {0}…{1}, y {2}…{3} mm; il cartiglio sta in basso a destra, rimpicciolito se è più largo della cornice', sh.left, sh.w - sh.right, sh.top, sh.h - sh.bottom - 40)}</span>
       </Row>
     </Group>
   );

@@ -1,4 +1,5 @@
 // Cartella della libreria dei simboli: un file .ecsym per simbolo, sottocartelle = categorie.
+// Lo stesso codice gestisce la cartella dei cartigli (un file .ectb per cartiglio): vedi le opzioni di register.
 // Il processo principale legge, scrive ed elimina i file e avvisa l'interfaccia quando la cartella
 // cambia dall'esterno (Finder, Esplora risorse, copia da un'altra installazione).
 const path = require('node:path');
@@ -6,16 +7,19 @@ const { docsDir } = require('./paths.cjs');
 const fs = require('node:fs/promises');
 const { watch } = require('node:fs');
 
-const EXT = '.ecsym';
-
-function register(ipcMain, app, dialog, shell, BrowserWindow) {
+/**
+ * opts: prefix dei canali ('symlib' → symlib-read…), estensione dei file, chiave della cartella scelta
+ * in config.json e nome della cartella di serie dentro Documenti/OpenWiring
+ */
+function register(ipcMain, app, dialog, shell, BrowserWindow, opts = {}) {
+  const { prefix = 'symlib', ext: EXT = '.ecsym', configKey = 'symbolDir', folder = 'Simboli' } = opts;
   const configFile = () => path.join(app.getPath('userData'), 'config.json');
   const readConfig = async () => { try { return JSON.parse(await fs.readFile(configFile(), 'utf8')); } catch { return {}; } };
-  const defaultDir = () => path.join(docsDir(app), 'Simboli');
+  const defaultDir = () => path.join(docsDir(app), folder);
   let dir;
   let watcher;
   const getDir = async () => {
-    if (!dir) dir = (await readConfig()).symbolDir || defaultDir();
+    if (!dir) dir = (await readConfig())[configKey] || defaultDir();
     await fs.mkdir(dir, { recursive: true });
     return dir;
   };
@@ -65,13 +69,13 @@ function register(ipcMain, app, dialog, shell, BrowserWindow) {
           const sig = await signature(root);
           if (sig === known || sender.isDestroyed()) return;
           known = sig;
-          sender.send('symlib-changed');
+          sender.send(`${prefix}-changed`);
         }, 400);
       });
     } catch { watcher = undefined; }
   };
 
-  ipcMain.handle('symlib-read', async ev => {
+  ipcMain.handle(`${prefix}-read`, async ev => {
     const root = await getDir();
     startWatch(root, ev.sender);
     known = await signature(root);
@@ -94,7 +98,7 @@ function register(ipcMain, app, dialog, shell, BrowserWindow) {
       return job();
     }
   };
-  ipcMain.handle('symlib-write', async (ev, files, removes) => {
+  ipcMain.handle(`${prefix}-write`, async (ev, files, removes) => {
     const root = await getDir();
     for (const f of files ?? []) {
       const p = inside(root, f.rel);
@@ -115,14 +119,14 @@ function register(ipcMain, app, dialog, shell, BrowserWindow) {
     known = await signature(root);
     return true;
   });
-  ipcMain.handle('symlib-open', async () => { await shell.openPath(await getDir()); });
-  ipcMain.handle('symlib-choose', async ev => {
+  ipcMain.handle(`${prefix}-open`, async () => { await shell.openPath(await getDir()); });
+  ipcMain.handle(`${prefix}-choose`, async ev => {
     const win = BrowserWindow.fromWebContents(ev.sender);
     const r = await dialog.showOpenDialog(win, { defaultPath: await getDir(), properties: ['openDirectory', 'createDirectory'] });
     if (r.canceled || !r.filePaths[0]) return null;
     dir = r.filePaths[0];
     await fs.mkdir(path.dirname(configFile()), { recursive: true });
-    await fs.writeFile(configFile(), JSON.stringify({ ...(await readConfig()), symbolDir: dir }, null, 1));
+    await fs.writeFile(configFile(), JSON.stringify({ ...(await readConfig()), [configKey]: dir }, null, 1));
     return dir;
   });
 }

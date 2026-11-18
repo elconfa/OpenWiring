@@ -4,7 +4,7 @@
 // nella libreria. Lo stesso editor modifica i cartigli: grafica, testi con segnaposto e area del logo.
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../model/store';
-import type { FieldKey, IoKind, Prim, PinDef, PinDir, PinKind, Pt, SymbolDef, SymField, SymbolRole, TitleBlockTemplate, WireLineType, PinLabelPos, TextMoveKey, TextPlace } from '../model/types';
+import type { FieldKey, IoKind, Prim, PinDef, PinDir, PinKind, PinMedium, Pt, SymbolDef, SymField, SymbolRole, TitleBlockTemplate, WireLineType, PinLabelPos, TextMoveKey, TextPlace } from '../model/types';
 import { WIRE_LINE_TYPES, WIRE_WIDTHS, WIRE_WIDTH_DEFAULT, primLineType, textsUnderTag } from '../model/types';
 import { DEVICE_LINE_KEYS } from '../model/visibility';
 import { PrimSvg } from './PageSvg';
@@ -54,7 +54,7 @@ function FunctionField({ sym, update }: { sym: SymbolDef; update: (p: Partial<Sy
 }
 import { ROTS, allowedRots, type Rot } from '../model/rotations';
 
-type PinTool = 'pin' | 'pin-in' | 'pin-out' | 'pin-term';
+type PinTool = 'pin' | 'pin-in' | 'pin-out' | 'pin-bus' | 'pin-bus-in' | 'pin-bus-out';
 type ETool = 'select' | PinTool | 'tag' | 'logo' | `field:${FieldKey}` | CadTool;
 /** Comandi di modifica del CAD dei simboli (src/symcad) */
 type CadTool = 'trim' | 'extend' | 'offset' | 'measure';
@@ -93,12 +93,15 @@ const FIELDS: [FieldKey, string][] = [
 const fieldsFor = (role: SymbolRole) => FIELDS.filter(([f]) => role === 'plc' || !f.startsWith('plc'));
 const fieldName = (f: FieldKey) => tx(FIELDS.find(x => x[0] === f)?.[1] ?? f);
 
-const PIN_KINDS: [PinTool, PinKind | undefined, string, string][] = [
-  ['pin', undefined, '⊙', tn('Connessione')], ['pin-in', 'in', '⇥', tn('Ingresso')],
-  ['pin-out', 'out', '↦', tn('Uscita')], ['pin-term', 'terminal', '⊘', tn('Morsetto')],
+/** Strumenti dei punti di connessione: per fili o per cavi bus, ognuno ingresso, uscita o tutti e due */
+const PIN_KINDS: [PinTool, PinMedium, PinKind | undefined, string, string][] = [
+  ['pin', 'wire', undefined, '⊙', tn('Filo: ingresso/uscita')], ['pin-in', 'wire', 'in', '⇥', tn('Filo: ingresso')],
+  ['pin-out', 'wire', 'out', '↦', tn('Filo: uscita')],
+  ['pin-bus', 'bus', undefined, '◈', tn('Bus: ingresso/uscita')], ['pin-bus-in', 'bus', 'in', '⇥◇', tn('Bus: ingresso')],
+  ['pin-bus-out', 'bus', 'out', '◇↦', tn('Bus: uscita')],
 ];
-const pinKindName = (k: PinKind | undefined) => tx(PIN_KINDS.find(x => x[1] === k)?.[3] ?? 'Connessione');
-const PIN_COLOR: Record<string, string> = { generic: '#2da44e', in: '#0969da', out: '#bc4c00', terminal: '#8250df' };
+/** Colore del punto secondo il verso (ingresso blu, uscita arancione, tutti e due verde) */
+const PIN_COLOR: Record<string, string> = { generic: '#2da44e', in: '#0969da', out: '#bc4c00', terminal: '#2da44e' };
 
 /** Disegno: pulsante → comando, con l'abbreviazione da scrivere nella riga di comando */
 const GRAPHIC_TOOLS: [CmdId, string, string, string][] = [
@@ -199,9 +202,13 @@ function PinMark({ q, x, y, selected }: { q: PinDef; x: number; y: number; selec
   return (
     <g>
       <line x1={x} y1={y} x2={tip.x} y2={tip.y} stroke={c} strokeWidth={0.25} />
-      {q.kind === 'terminal'
-        ? <circle cx={x} cy={y} r={0.75} fill="#fff" stroke={c} strokeWidth={0.25} />
-        : <circle cx={x} cy={y} r={0.6} fill={c} />}
+      {q.medium === 'bus'
+        // Punto per cavi bus: rombo vuoto
+        ? <polygon points={`${x},${y - 0.9} ${x + 0.9},${y} ${x},${y + 0.9} ${x - 0.9},${y}`} fill="#fff" stroke={c} strokeWidth={0.3} />
+        : q.kind === 'terminal' || !q.medium
+          // Punto generico (simboli delle versioni precedenti): cerchio vuoto
+          ? <circle cx={x} cy={y} r={0.75} fill="#fff" stroke={c} strokeWidth={0.25} />
+          : <circle cx={x} cy={y} r={0.6} fill={c} />}
       {q.kind === 'in' && arrow(tip, { x, y })}
       {q.kind === 'out' && arrow({ x, y }, tip)}
       {(() => {
@@ -933,7 +940,7 @@ export function SymbolEditor() {
     if (pk) {
       const g = { x: round(raw.x, pinGrid), y: round(raw.y, pinGrid) };
       const id = String(Math.max(0, ...sym.pins.map(x => parseInt(x.id, 10) || 0)) + 1);
-      update({ pins: [...sym.pins, { id, x: g.x, y: g.y, dir: pinDir ?? guessDir(g, sym.prims), label: '', ...(pk[1] ? { kind: pk[1] } : {}) }] });
+      update({ pins: [...sym.pins, { id, x: g.x, y: g.y, dir: pinDir ?? guessDir(g, sym.prims), label: '', medium: pk[1], ...(pk[2] ? { kind: pk[2] } : {}) }] });
       setSel([{ kind: 'pin', i: sym.pins.length }]);
       return;
     }
@@ -1295,8 +1302,10 @@ export function SymbolEditor() {
             <button className="small" onClick={() => void addLayer()}>{tx('+ Livello')}</button>
           </div>}
           {!isTb && <>
-            <div className="palette-group">{tx('Punti di connessione')}</div>
-            {PIN_KINDS.map(([t, k, icon, label]) => toolBtn(t, icon, label, undefined, sym.pins.some(p => p.kind === k)))}
+            <div className="palette-group">{tx('Punti per fili')}</div>
+            {PIN_KINDS.filter(x => x[1] === 'wire').map(([t, m, k, icon, label]) => toolBtn(t, icon, label, undefined, sym.pins.some(p => p.medium === m && p.kind === k)))}
+            <div className="palette-group">{tx('Punti per cavi bus')}</div>
+            {PIN_KINDS.filter(x => x[1] === 'bus').map(([t, m, k, icon, label]) => toolBtn(t, icon, label, tn('Per collegamenti di rete e bus (Profinet, Modbus, CAN…): la Verifica avvisa se ci arriva un filo normale'), sym.pins.some(p => p.medium === m && p.kind === k)))}
             <div className="palette-group">{tx('Testi del componente')}</div>
             {toolBtn('tag', '-K', tn('Sigla'), tn('Posizione della sigla'), !!sym.tagPos)}
             {fieldsFor(sym.role).map(([f, label]) => toolBtn(`field:${f}`, '‹›', label, undefined, fields.some(x => x.f === f)))}
@@ -1648,9 +1657,20 @@ export function SymbolEditor() {
               {selPin && one?.kind === 'pin' && (
                 <>
                   <tr className="prop-group"><td colSpan={2}>{tx('Punto di connessione')} {selPin.id}</td></tr>
-                  <tr><td className="prop-name">{tx('Tipo')}</td><td className="prop-value">
-                    <select value={selPin.kind ?? ''} onChange={e => setPin(one.i, { ...selPin, kind: (e.target.value || undefined) as PinKind | undefined })}>
-                      {PIN_KINDS.map(([, k]) => <option key={k ?? ''} value={k ?? ''}>{pinKindName(k)}</option>)}
+                  <tr><td className="prop-name">{tx('Collega')}</td><td className="prop-value">
+                    <select value={selPin.medium ?? ''} onChange={e => setPin(one.i, { ...selPin, medium: (e.target.value || undefined) as PinMedium | undefined })}
+                      title={tx('Fili normali o cavi bus: la Verifica avvisa se al punto arriva l\'altro tipo')}>
+                      <option value="wire">{tx('fili')}</option>
+                      <option value="bus">{tx('cavi bus')}</option>
+                      {!selPin.medium && <option value="">{tx('fili e bus (generico, non controllato)')}</option>}
+                    </select>
+                  </td></tr>
+                  <tr><td className="prop-name">{tx('Verso')}</td><td className="prop-value">
+                    <select value={selPin.kind === 'terminal' ? '' : selPin.kind ?? ''} onChange={e => setPin(one.i, { ...selPin, kind: (e.target.value || undefined) as PinKind | undefined })}
+                      title={tx('La Verifica avvisa se due uscite sono collegate tra loro o se un conduttore ha solo ingressi')}>
+                      <option value="">{tx('ingresso e uscita')}</option>
+                      <option value="in">{tx('ingresso')}</option>
+                      <option value="out">{tx('uscita')}</option>
                     </select>
                   </td></tr>
                   <tr><td className="prop-name">{tx('Designazione')}</td><td className="prop-value"><input value={selPin.label} placeholder={tx('es. A1, 13, U1')} onChange={e => setPin(one.i, { ...selPin, label: e.target.value })} /></td></tr>

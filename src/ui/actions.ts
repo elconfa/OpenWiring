@@ -12,7 +12,7 @@ import { importEdz, importFromFiles, importExtracted, toDataUrl, extractArchive,
 import { edzPrefs } from './edzPrefs';
 import { parseQetXml } from '../io/qet';
 import { symbolsFromFolder, symbolsFromFolderAsync, isSymbolFile } from '../io/symbolImport';
-import type { SymbolDef } from '../model/types';
+import type { SymbolDef, TitleBlockTemplate } from '../model/types';
 import { parsePartsXml, exportPartsXml } from '../io/eplanXml';
 import { pageToDxf } from '../io/dxf';
 import type { PdfOptions } from '../io/pdfOptions';
@@ -989,4 +989,41 @@ export async function closeActiveProject() {
   if (!st().others.length) { st().logMsg(tx('È l\'unico progetto aperto'), 'warn'); return; }
   if (!(await confirmDiscard())) return;
   st().closeActive();
+}
+
+// ---------------------------------------------------------------------------
+// Cartigli personali come file .ectb (Documenti/OpenWiring/Cartigli)
+// ---------------------------------------------------------------------------
+
+/**
+ * Importa cartigli nella libreria personale: file .ectb, oppure i cartigli personalizzati contenuti in
+ * un progetto .ecad. Restano disponibili in tutti i progetti (e nella cartella dei cartigli).
+ */
+export async function importTitleBlocks() {
+  const files = await openFiles([{ name: tx('Cartigli OpenWiring o progetti'), extensions: ['ectb', 'ecad'] }], true);
+  if (!files.length) return;
+  const { titleBlockFromText } = await import('../io/titleBlockFolder');
+  const found: TitleBlockTemplate[] = [];
+  const bad: string[] = [];
+  for (const f of files) {
+    const text = new TextDecoder().decode(f.data);
+    try {
+      if (/\.ecad$/i.test(f.name)) found.push(...(parseProject(text).titleBlockTemplates ?? []));
+      else found.push(titleBlockFromText(text, f.name));
+    } catch { bad.push(f.name); }
+  }
+  if (bad.length) st().logMsg(tx('Non sono cartigli OpenWiring: {0}', bad.join(', ')), 'warn');
+  if (!found.length) { if (!bad.length) st().logMsg(tx('Nessun cartiglio personalizzato nei file scelti'), 'warn'); return; }
+  const had = new Set(st().tbLibrary.map(t => t.id));
+  st().addTitleBlocksToLibrary(found);
+  const replaced = found.filter(t => had.has(t.id)).length;
+  st().logMsg(tx('{0} cartigli importati nella libreria personale ({1} sostituiti): sceglili in Proprietà ▸ Cartiglio ▸ Modello', found.length, replaced));
+}
+
+/** Esporta un cartiglio (anche uno incluso, come copia personale) in un file .ectb da dare ad altri */
+export async function exportTitleBlock(t: TitleBlockTemplate) {
+  const { titleBlockFileText } = await import('../io/titleBlockFolder');
+  const name = t.builtin ? tx(t.name) : t.name;
+  const path = await saveFile(`${safeName(name)}.ectb`, titleBlockFileText({ ...t, name }), [{ name: tx('Cartiglio OpenWiring'), extensions: ['ectb'] }]);
+  if (path) st().logMsg(tx('Cartiglio «{0}» esportato in {1}', name, path));
 }

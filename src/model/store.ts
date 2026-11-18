@@ -545,6 +545,10 @@ export interface State {
   placeMacro(id: string, at: Pt): void;
   /** Cartigli personali (disponibili in tutti i progetti) */
   tbLibrary: TitleBlockTemplate[];
+  /** Cartella dei cartigli personali (app desktop); vuota nel browser */
+  tbDir: string;
+  /** Aggiunge cartigli alla libreria personale (importati da file): quelli con lo stesso id si sostituiscono */
+  addTitleBlocksToLibrary(list: TitleBlockTemplate[]): void;
   /** Funzioni dei simboli aggiunte dall'utente (le altre sono in symbolFunctions.ts) */
   userFunctions: SymbolFunction[];
   /** Aggiunge (o cambia, stesso id) una funzione dell'utente */
@@ -2505,6 +2509,14 @@ export const useStore = create<State>((set, get) => {
       if (r.newCards.length) get().logMsg(tx('Create le schede PLC {0}', r.newCards.join(', ')));
     },
     tbLibrary: [],
+    tbDir: '',
+    addTitleBlocksToLibrary(list) {
+      const add = list.map(t => { const c = structuredClone(t); delete c.builtin; return c; });
+      const ids = new Set(add.map(t => t.id));
+      const tbLibrary = [...get().tbLibrary.filter(t => !ids.has(t.id)), ...add];
+      set({ tbLibrary });
+      void kvSet('titleBlocks', tbLibrary);
+    },
     editTitleBlock: null,
     openTitleBlockEditor(tpl) {
       const draft: TitleBlockTemplate = tpl ? structuredClone(tpl) : { id: '', name: 'Nuovo cartiglio', prims: [] };
