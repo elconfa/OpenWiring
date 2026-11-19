@@ -1,7 +1,7 @@
 // Gestione articoli: libreria importata dai produttori (EDZ/XML) e articoli del progetto.
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useStore } from '../model/store';
-import type { Part, PartCable, PartDoc } from '../model/types';
+import type { DocKind, Part, PartCable, PartDoc } from '../model/types';
 import { conductorsFor, isPeName } from '../model/cables';
 import { ConductorSwatch } from './CablesView';
 import { blackBoxFromPart, BUILTIN_SYMBOLS } from '../model/symbols';
@@ -11,7 +11,7 @@ import * as A from './actions';
 import { ask, askConfirm } from './Ask';
 import { useGrid, Th, gridProps } from './grid';
 import { ColSplitter } from './split';
-import { edzDocs, fileName, isAbsPath, isWebDoc, relToFolder } from '../model/partDocs';
+import { DOC_KINDS, docKind, docKindInfo, edzDocs, fileName, isAbsPath, isWebDoc, kindFromName, relToFolder } from '../model/partDocs';
 import { openDocument } from '../io/fileio';
 import { PartSearchDialog } from './PartSearchDialog';
 import { tx, tn } from '../i18n/ui';
@@ -281,6 +281,9 @@ function PartDetail({ part: shown, known }: { part: Part & { inLibrary: boolean 
  * il nome da mostrare; sotto quelli arrivati con i dati EPLAN. Nell'«Elenco documenti allegati» del
  * progetto e, a scelta, allegati in fondo al PDF dello schema.
  */
+// Nomi dei tipi di documento (DOC_KINDS in partDocs.ts), per le traduzioni
+void [tn('Scheda tecnica'), tn('Dichiarazione CE'), tn('Dichiarazione UL'), tn('Altra dichiarazione'), tn('Manuale'), tn('Altro documento')];
+
 function PartDocsEditor({ part }: { part: Part }) {
   const st = useStore.getState;
   const own = part.docs ?? [];
@@ -289,8 +292,11 @@ function PartDocsEditor({ part }: { part: Part }) {
   const open = (path: string) => { openDocument(path).catch(e => st().logMsg(tx('Impossibile aprire {0}: {1}', path, (e as Error).message), 'warn')); };
   const [folder, setFolder] = useState<string>();
   useEffect(() => { void window.elettro?.partDocsDir?.().then(setFolder, () => undefined); }, []);
-  /** Copia i file nella cartella Documenti e restituisce i percorsi relativi (null = rimasto fuori) */
-  const copyIn = async (paths: string[]) => (await window.elettro?.partDocsCopy?.(paths).catch(e => { st().logMsg(tx('Copia non riuscita: {0}', (e as Error).message), 'warn'); return null; })) ?? paths.map(() => null);
+  /**
+   * Copia i file nella cartella Documenti, nella sottocartella del loro tipo (Data Sheet, Dichiarazioni/CE…),
+   * e restituisce i percorsi relativi (null = rimasto fuori)
+   */
+  const copyIn = async (paths: string[], kinds: DocKind[]) => (await window.elettro?.partDocsCopy?.(paths, kinds.map(k => docKindInfo(k).folder)).catch(e => { st().logMsg(tx('Copia non riuscita: {0}', (e as Error).message), 'warn'); return null; })) ?? paths.map(() => null);
   const addFiles = async () => {
     const paths = await window.elettro?.choosePaths?.([{ name: 'PDF', extensions: ['pdf'] }]) ?? [];
     if (!paths.length) return;
@@ -298,8 +304,8 @@ function PartDocsEditor({ part }: { part: Part }) {
     let picked = paths.map(p => (folder && relToFolder(folder, p)) || p);
     const outside = picked.filter(isAbsPath);
     if (outside.length && folder && window.elettro?.partDocsCopy
-      && await askConfirm(tx('Schede tecniche'), tx('{0} file sono fuori dalla cartella Documenti ({1}). Copiarli nella cartella? Così il progetto li ritrova anche su un altro computer. Con Annulla restano collegati dove sono.', outside.length, folder), tx('Copia nella cartella'))) {
-      const rels = await copyIn(outside);
+      && await askConfirm(tx('Documenti degli articoli'), tx('{0} file sono fuori dalla cartella Documenti ({1}). Copiarli nella sottocartella del loro tipo (Data Sheet, Dichiarazioni, Manuali)? Così il progetto li ritrova anche su un altro computer. Con Annulla restano collegati dove sono.', outside.length, folder), tx('Copia nella cartella'))) {
+      const rels = await copyIn(outside, outside.map(p => kindFromName(fileName(p)) ?? 'datasheet'));
       picked = picked.map(p => { const i = outside.indexOf(p); return i >= 0 && rels[i] ? rels[i]! : p; });
     }
     save([...own, ...picked.filter(p => !own.some(o => o.path === p)).map(p => ({ name: fileName(p).replace(/\.pdf$/i, ''), path: p }))]);
@@ -307,7 +313,7 @@ function PartDocsEditor({ part }: { part: Part }) {
   /** Documento collegato con percorso assoluto: si porta nella cartella (dentro = solo il percorso, fuori = copia) */
   const toFolder = async (i: number) => {
     const d = own[i];
-    const rel = (folder && relToFolder(folder, d.path)) || (await copyIn([d.path]))[0];
+    const rel = (folder && relToFolder(folder, d.path)) || (await copyIn([d.path], [docKind(d)]))[0];
     if (rel) save(own.map((x, k) => (k === i ? { ...x, path: rel } : x)));
   };
   const addUrl = async () => {
@@ -319,11 +325,17 @@ function PartDocsEditor({ part }: { part: Part }) {
   };
   return (
     <>
-      <h4>{tx('Schede tecniche e documenti')}</h4>
+      <h4>{tx('Schede tecniche, dichiarazioni e manuali')}</h4>
       <table className="grid part-docs">
         <tbody>
           {own.map((d, i) => (
             <tr key={d.path}>
+              <td>
+                <select value={docKind(d)} onChange={e => { const k = e.target.value as DocKind; save(own.map((x, j) => (j === i ? { ...x, kind: docKind({ ...x, kind: undefined }) === k ? undefined : k } : x))); }}
+                  title={tx('Tipo di documento: di serie dalla sottocartella di Documenti (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o dal nome del file')}>
+                  {DOC_KINDS.map(k => <option key={k.kind} value={k.kind}>{tx(k.label)}</option>)}
+                </select>
+              </td>
               <td><input key={`${part.partNr}-${d.path}`} defaultValue={d.name} onBlur={e => { const v = e.target.value.trim(); if (v && v !== d.name) save(own.map((x, k) => (k === i ? { ...x, name: v } : x))); }} /></td>
               <td className="small" title={isAbsPath(d.path) ? tx('{0}\nFuori dalla cartella Documenti: su un altro computer il file non si trova', d.path) : d.path}>
                 {isWebDoc(d.path) ? d.path : isAbsPath(d.path) ? <>⚠ {fileName(d.path)}</> : d.path}
@@ -337,11 +349,11 @@ function PartDocsEditor({ part }: { part: Part }) {
           ))}
           {edz.map(d => (
             <tr key={d.path} className="muted">
-              <td>{tx(d.name)}</td><td className="small" title={d.path}>{d.path.length > 60 ? `${d.path.slice(0, 57)}…` : d.path}</td>
+              <td>{tx(docKindInfo(docKind(d)).label)}</td><td>{tx(d.name)}</td><td className="small" title={d.path}>{d.path.length > 60 ? `${d.path.slice(0, 57)}…` : d.path}</td>
               <td><button className="mini" onClick={() => open(d.path)}>{tx('Apri')}</button></td>
             </tr>
           ))}
-          {!own.length && !edz.length && <tr><td colSpan={3} className="muted">{tx('Nessun documento.')}</td></tr>}
+          {!own.length && !edz.length && <tr><td colSpan={4} className="muted">{tx('Nessun documento.')}</td></tr>}
         </tbody>
       </table>
       <div className="row-buttons">

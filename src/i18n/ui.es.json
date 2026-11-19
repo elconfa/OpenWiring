@@ -3801,5 +3801,17 @@
   "In cartella": "A la carpeta",
   "Porta il file nella cartella Documenti (lo copia se sta fuori) e salva il percorso relativo": "Llevar el archivo a la carpeta Documentos (se copia si está fuera) y guardar la ruta relativa",
   "Schede tecniche": "Fichas técnicas",
-  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Usar otra carpeta para las fichas técnicas (p. ej. compartida en red entre varias instalaciones)"
+  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Usar otra carpeta para las fichas técnicas (p. ej. compartida en red entre varias instalaciones)",
+  "{0} file sono fuori dalla cartella Documenti ({1}). Copiarli nella sottocartella del loro tipo (Data Sheet, Dichiarazioni, Manuali)? Così il progetto li ritrova anche su un altro computer. Con Annulla restano collegati dove sono.": "{0} archivos están fuera de la carpeta Documentos ({1}). ¿Copiarlos en la subcarpeta de su tipo (Data Sheet, Dichiarazioni, Manuali)? Así el proyecto los encontrará también en otro ordenador. Con Cancelar quedan vinculados donde están.",
+  "Allegati {0} documenti degli articoli in fondo al PDF": "{0} documentos de los artículos adjuntos al final del PDF",
+  "Altra dichiarazione": "Otra declaración",
+  "Altro documento": "Otro documento",
+  "Dichiarazione CE": "Declaración CE",
+  "Dichiarazione UL": "Declaración UL",
+  "Documenti degli articoli": "Documentos de los artículos",
+  "Documenti degli articoli allegati in fondo": "Documentos de los artículos adjuntos al final",
+  "Documenti non allegati (file non trovato o non PDF): {0}": "Documentos no adjuntos (archivo no encontrado o no PDF): {0}",
+  "I file PDF collegati agli articoli usati (schede tecniche, dichiarazioni CE e UL, manuali…), con una pagina di elenco; si scelgono i tipi da allegare, per esempio solo le dichiarazioni per il fascicolo tecnico; solo nell'app desktop": "Los archivos PDF vinculados a los artículos usados (fichas técnicas, declaraciones CE y UL, manuales…), con una página de lista; se eligen los tipos a adjuntar, por ejemplo solo las declaraciones para el expediente técnico; solo en la app de escritorio",
+  "Schede tecniche, dichiarazioni e manuali": "Fichas técnicas, declaraciones y manuales",
+  "Tipo di documento: di serie dalla sottocartella di Documenti (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o dal nome del file": "Tipo de documento: por defecto según la subcarpeta de Documentos (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o el nombre del archivo"
 }

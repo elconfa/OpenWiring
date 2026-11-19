@@ -3801,5 +3801,17 @@
   "In cartella": "Into folder",
   "Porta il file nella cartella Documenti (lo copia se sta fuori) e salva il percorso relativo": "Move the file into the Documents folder (copied if outside) and save the relative path",
   "Schede tecniche": "Datasheets",
-  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Use another folder for datasheets (e.g. shared on the network between installations)"
+  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Use another folder for datasheets (e.g. shared on the network between installations)",
+  "{0} file sono fuori dalla cartella Documenti ({1}). Copiarli nella sottocartella del loro tipo (Data Sheet, Dichiarazioni, Manuali)? Così il progetto li ritrova anche su un altro computer. Con Annulla restano collegati dove sono.": "{0} files are outside the Documents folder ({1}). Copy them into the subfolder of their type (Data Sheet, Dichiarazioni, Manuali)? The project will then find them on another computer too. With Cancel they stay linked where they are.",
+  "Allegati {0} documenti degli articoli in fondo al PDF": "{0} part documents appended at the end of the PDF",
+  "Altra dichiarazione": "Other declaration",
+  "Altro documento": "Other document",
+  "Dichiarazione CE": "CE declaration",
+  "Dichiarazione UL": "UL declaration",
+  "Documenti degli articoli": "Part documents",
+  "Documenti degli articoli allegati in fondo": "Part documents appended at the end",
+  "Documenti non allegati (file non trovato o non PDF): {0}": "Documents not attached (file not found or not a PDF): {0}",
+  "I file PDF collegati agli articoli usati (schede tecniche, dichiarazioni CE e UL, manuali…), con una pagina di elenco; si scelgono i tipi da allegare, per esempio solo le dichiarazioni per il fascicolo tecnico; solo nell'app desktop": "The PDF files linked to the parts used (datasheets, CE and UL declarations, manuals…), with a list page; choose the types to attach, e.g. only the declarations for the technical file; desktop app only",
+  "Schede tecniche, dichiarazioni e manuali": "Datasheets, declarations and manuals",
+  "Tipo di documento: di serie dalla sottocartella di Documenti (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o dal nome del file": "Document type: by default from the subfolder of Documents (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) or from the file name"
 }

@@ -3801,5 +3801,17 @@
   "In cartella": "In den Ordner",
   "Porta il file nella cartella Documenti (lo copia se sta fuori) e salva il percorso relativo": "Datei in den Ordner Dokumente bringen (wird kopiert, wenn sie außerhalb liegt) und relativen Pfad speichern",
   "Schede tecniche": "Datenblätter",
-  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Anderen Ordner für Datenblätter verwenden (z. B. im Netzwerk zwischen mehreren Installationen geteilt)"
+  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Anderen Ordner für Datenblätter verwenden (z. B. im Netzwerk zwischen mehreren Installationen geteilt)",
+  "{0} file sono fuori dalla cartella Documenti ({1}). Copiarli nella sottocartella del loro tipo (Data Sheet, Dichiarazioni, Manuali)? Così il progetto li ritrova anche su un altro computer. Con Annulla restano collegati dove sono.": "{0} Dateien liegen außerhalb des Ordners Dokumente ({1}). In den Unterordner ihres Typs kopieren (Data Sheet, Dichiarazioni, Manuali)? Dann findet das Projekt sie auch auf einem anderen Computer. Mit Abbrechen bleiben sie dort verknüpft, wo sie sind.",
+  "Allegati {0} documenti degli articoli in fondo al PDF": "{0} Artikeldokumente am Ende des PDF angehängt",
+  "Altra dichiarazione": "Sonstige Erklärung",
+  "Altro documento": "Sonstiges Dokument",
+  "Dichiarazione CE": "CE-Erklärung",
+  "Dichiarazione UL": "UL-Erklärung",
+  "Documenti degli articoli": "Artikeldokumente",
+  "Documenti degli articoli allegati in fondo": "Artikeldokumente am Ende anhängen",
+  "Documenti non allegati (file non trovato o non PDF): {0}": "Dokumente nicht angehängt (Datei nicht gefunden oder kein PDF): {0}",
+  "I file PDF collegati agli articoli usati (schede tecniche, dichiarazioni CE e UL, manuali…), con una pagina di elenco; si scelgono i tipi da allegare, per esempio solo le dichiarazioni per il fascicolo tecnico; solo nell'app desktop": "Die mit den verwendeten Artikeln verknüpften PDF-Dateien (Datenblätter, CE- und UL-Erklärungen, Handbücher…) mit einer Verzeichnisseite; die anzuhängenden Typen sind wählbar, z. B. nur die Erklärungen für die technische Dokumentation; nur in der Desktop-App",
+  "Schede tecniche, dichiarazioni e manuali": "Datenblätter, Erklärungen und Handbücher",
+  "Tipo di documento: di serie dalla sottocartella di Documenti (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o dal nome del file": "Dokumenttyp: standardmäßig aus dem Unterordner von Dokumente (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) oder aus dem Dateinamen"
 }

@@ -8,7 +8,10 @@ import { projectReports, tableToCsv } from '../model/reports';
 import { revisionChanges, statusCounts, type PageStatus } from '../model/revisionChanges';
 import { unpackProject } from '../model/revisions';
 import { parseProject, readDocument, safeName, serializeProject } from './fileio';
-import { isPdfDoc, usedDocuments } from '../model/partDocs';
+import { isPdfDoc, usedDocuments, type UsedDoc } from '../model/partDocs';
+
+/** Inizio del nome dei documenti degli articoli nel pacchetto, per tipo (si ordinano insieme) */
+const DOC_PREFIX: Record<UsedDoc['kind'], string> = { datasheet: 'Scheda', ce: 'Dichiarazione_CE', ul: 'Dichiarazione_UL', decl: 'Dichiarazione', manual: 'Manuale', other: 'Documento' };
 import { exportPdf, DEFAULT_PDF_OPTIONS } from './pdf';
 
 declare const __APP_VERSION__: string | undefined;
@@ -116,8 +119,9 @@ export async function buildReleasePackage(project: Project, revId: string, libra
     seen.add(u.doc.path);
     const data = await readDocument(u.doc.path);
     if (!data) continue;
-    let name = `Scheda_${safeName(u.partNr)}_${safeName(u.doc.name)}.pdf`;
-    for (let k = 2; files.some(f => f.name === name); k++) name = `Scheda_${safeName(u.partNr)}_${safeName(u.doc.name)}_${k}.pdf`;
+    const pre = `${DOC_PREFIX[u.kind]}_${safeName(u.partNr)}_${safeName(u.doc.name)}`;
+    let name = `${pre}.pdf`;
+    for (let k = 2; files.some(f => f.name === name); k++) name = `${pre}_${k}.pdf`;
     files.push({ name, data });
   }
   const listed = await Promise.all(files.map(async f => ({ nome: f.name, byte: f.data.length, sha256: await sha256(f.data) })));

@@ -3801,5 +3801,17 @@
   "In cartella": "В папку",
   "Porta il file nella cartella Documenti (lo copia se sta fuori) e salva il percorso relativo": "Перенести файл в папку «Документы» (копируется, если он снаружи) и сохранить относительный путь",
   "Schede tecniche": "Технические паспорта",
-  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Использовать другую папку для технических паспортов (например, общую в сети для нескольких установок)"
+  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Использовать другую папку для технических паспортов (например, общую в сети для нескольких установок)",
+  "{0} file sono fuori dalla cartella Documenti ({1}). Copiarli nella sottocartella del loro tipo (Data Sheet, Dichiarazioni, Manuali)? Così il progetto li ritrova anche su un altro computer. Con Annulla restano collegati dove sono.": "{0} файлов находятся вне папки «Документы» ({1}). Скопировать их в подпапку их типа (Data Sheet, Dichiarazioni, Manuali)? Тогда проект найдёт их и на другом компьютере. При «Отмена» они остаются связанными там, где есть.",
+  "Allegati {0} documenti degli articoli in fondo al PDF": "{0} документов изделий приложено в конце PDF",
+  "Altra dichiarazione": "Другая декларация",
+  "Altro documento": "Другой документ",
+  "Dichiarazione CE": "Декларация CE",
+  "Dichiarazione UL": "Декларация UL",
+  "Documenti degli articoli": "Документы изделий",
+  "Documenti degli articoli allegati in fondo": "Документы изделий в конце",
+  "Documenti non allegati (file non trovato o non PDF): {0}": "Документы не приложены (файл не найден или не PDF): {0}",
+  "I file PDF collegati agli articoli usati (schede tecniche, dichiarazioni CE e UL, manuali…), con una pagina di elenco; si scelgono i tipi da allegare, per esempio solo le dichiarazioni per il fascicolo tecnico; solo nell'app desktop": "PDF-файлы, связанные с используемыми изделиями (технические паспорта, декларации CE и UL, руководства…), со страницей перечня; выбираются типы для вложения, например только декларации для технического файла; только в настольном приложении",
+  "Schede tecniche, dichiarazioni e manuali": "Технические паспорта, декларации и руководства",
+  "Tipo di documento: di serie dalla sottocartella di Documenti (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o dal nome del file": "Тип документа: по умолчанию по подпапке «Документы» (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) или по имени файла"
 }

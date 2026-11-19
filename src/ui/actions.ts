@@ -538,8 +538,8 @@ export async function runPdfExport(opts: PdfOptions) {
     const r = await exportPdf(project, allReports(), library, { ...opts, currentPageId: opts.currentPageId ?? pageId });
     const p = await saveFile(`${safeName(project.info.name)}.pdf`, r.data, [{ name: 'PDF', extensions: ['pdf'] }]);
     if (p) st().logMsg(tx('PDF esportato: {0} ({1} pagine, {2} collegamenti cliccabili)', p, r.pages, r.links));
-    if (r.attached) st().logMsg(tx('Allegate {0} schede tecniche in fondo al PDF', r.attached));
-    if (r.missing?.length) st().logMsg(tx('Schede tecniche non allegate (file non trovato o non PDF): {0}', r.missing.join(', ')), 'warn');
+    if (r.attached) st().logMsg(tx('Allegati {0} documenti degli articoli in fondo al PDF', r.attached));
+    if (r.missing?.length) st().logMsg(tx('Documenti non allegati (file non trovato o non PDF): {0}', r.missing.join(', ')), 'warn');
   } catch (e) {
     st().logMsg(tx('Errore export PDF: {0}', (e as Error).message), 'error');
   }

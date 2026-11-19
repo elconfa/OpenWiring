@@ -893,7 +893,12 @@ export interface PartDoc {
   name: string;
   /** Percorso del file sul disco (PDF) oppure indirizzo http(s) */
   path: string;
+  /** Tipo scelto a mano; se manca vale la sottocartella di Documenti o il nome del file (docKind) */
+  kind?: DocKind;
 }
+
+/** Tipo di documento di un articolo: scheda tecnica, dichiarazioni (CE, UL, altre), manuale, altro */
+export type DocKind = 'datasheet' | 'ce' | 'ul' | 'decl' | 'manual' | 'other';
 
 /** Calcolo termico di un quadro (IEC/TR 60890, superficie efficace) */
 export interface ThermalCalc {

@@ -31,7 +31,7 @@ describe('schede tecniche degli articoli', () => {
     const part = p.parts.find(x => x.docs)!;
     expect(partDocuments(part).map(d => d.path)).toEqual(['/dati/scheda.pdf', 'https://example.com/m.pdf', 'https://example.com/edz.pdf']);
     const t = documentsReport(p);
-    expect(t.rows[0]).toEqual([part.partNr, expect.any(String), 'Scheda tecnica', 'scheda.pdf', expect.any(String)]);
+    expect(t.rows[0]).toEqual(['Scheda tecnica', part.partNr, expect.any(String), 'Scheda tecnica', 'scheda.pdf', expect.any(String)]);
     expect(projectReports(p).some(x => x.title === DOCS_TITLE)).toBe(true);
   });
   it('PDF: pagina di elenco e pagine della scheda in coda; i file mancanti si segnalano', async () => {

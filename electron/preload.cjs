@@ -19,7 +19,7 @@ contextBridge.exposeInMainWorld('elettro', {
   partDocsDir: () => ipcRenderer.invoke('partdocs-dir'),
   partDocsOpen: () => ipcRenderer.invoke('partdocs-open'),
   partDocsChoose: () => ipcRenderer.invoke('partdocs-choose'),
-  partDocsCopy: files => ipcRenderer.invoke('partdocs-copy', files),
+  partDocsCopy: (files, subs) => ipcRenderer.invoke('partdocs-copy', files, subs),
   // Cartelle dei dialoghi: predefinite (impostazioni) e ultime usate
   foldersGet: () => ipcRenderer.invoke('folders-get'),
   foldersSet: (kind, dir) => ipcRenderer.invoke('folders-set', kind, dir),

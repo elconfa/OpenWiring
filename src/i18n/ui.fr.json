@@ -3801,5 +3801,17 @@
   "In cartella": "Dans le dossier",
   "Porta il file nella cartella Documenti (lo copia se sta fuori) e salva il percorso relativo": "Placer le fichier dans le dossier Documents (copié s'il est à l'extérieur) et enregistrer le chemin relatif",
   "Schede tecniche": "Fiches techniques",
-  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Utiliser un autre dossier pour les fiches techniques (ex. partagé en réseau entre plusieurs installations)"
+  "Usa un'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)": "Utiliser un autre dossier pour les fiches techniques (ex. partagé en réseau entre plusieurs installations)",
+  "{0} file sono fuori dalla cartella Documenti ({1}). Copiarli nella sottocartella del loro tipo (Data Sheet, Dichiarazioni, Manuali)? Così il progetto li ritrova anche su un altro computer. Con Annulla restano collegati dove sono.": "{0} fichiers sont hors du dossier Documents ({1}). Les copier dans le sous-dossier de leur type (Data Sheet, Dichiarazioni, Manuali) ? Le projet les retrouvera aussi sur un autre ordinateur. Avec Annuler ils restent liés là où ils sont.",
+  "Allegati {0} documenti degli articoli in fondo al PDF": "{0} documents des articles joints à la fin du PDF",
+  "Altra dichiarazione": "Autre déclaration",
+  "Altro documento": "Autre document",
+  "Dichiarazione CE": "Déclaration CE",
+  "Dichiarazione UL": "Déclaration UL",
+  "Documenti degli articoli": "Documents des articles",
+  "Documenti degli articoli allegati in fondo": "Documents des articles joints à la fin",
+  "Documenti non allegati (file non trovato o non PDF): {0}": "Documents non joints (fichier introuvable ou pas un PDF) : {0}",
+  "I file PDF collegati agli articoli usati (schede tecniche, dichiarazioni CE e UL, manuali…), con una pagina di elenco; si scelgono i tipi da allegare, per esempio solo le dichiarazioni per il fascicolo tecnico; solo nell'app desktop": "Les fichiers PDF liés aux articles utilisés (fiches techniques, déclarations CE et UL, manuels…), avec une page de liste ; on choisit les types à joindre, par exemple seulement les déclarations pour le dossier technique ; application de bureau seulement",
+  "Schede tecniche, dichiarazioni e manuali": "Fiches techniques, déclarations et manuels",
+  "Tipo di documento: di serie dalla sottocartella di Documenti (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o dal nome del file": "Type de document : par défaut d'après le sous-dossier de Documents (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) ou le nom du fichier"
 }

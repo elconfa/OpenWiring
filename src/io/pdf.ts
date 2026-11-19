@@ -13,7 +13,7 @@ import { monoSvg, monoPdf } from './mono';
 const sheetOrientation = () => (PAGE_W >= PAGE_H ? 'landscape' : 'portrait');
 import { INDEX_TITLE, type Table } from '../model/reports';
 import { PDFDocument } from 'pdf-lib';
-import { DOCS_TITLE, isPdfDoc, usedDocuments, type UsedDoc } from '../model/partDocs';
+import { DOCS_TITLE, docKindInfo, isPdfDoc, usedDocuments, type UsedDoc } from '../model/partDocs';
 import { readDocument } from './fileio';
 import { translator, translateTable, translateFixed } from '../model/i18n';
 
@@ -103,7 +103,7 @@ export async function exportPdf(project: Project, tables: Table[], library: Part
   const missing: string[] = [];
   if (opts.attachDocs) {
     const seen = new Set<string>();
-    for (const u of usedDocuments(project, library)) {
+    for (const u of usedDocuments(project, library, opts.attachKinds)) {
       if (!isPdfDoc(u.doc.path) || seen.has(u.doc.path)) continue;
       seen.add(u.doc.path);
       const bytes = await readDocument(u.doc.path);
@@ -146,16 +146,16 @@ function drawDocsList(doc: jsPDF, project: Project, list: (UsedDoc & { pages: nu
   doc.addPage([PAGE_W, PAGE_H], sheetOrientation());
   frame(doc, translateFixed(project, DOCS_TITLE), project.info.name);
   let page = doc.getNumberOfPages() + 1, y = FRAME.top + 16;
-  const cols = [FRAME.left, FRAME.left + 50, FRAME.left + 170, FRAME.left + 280, FRAME.right - 30];
+  const cols = [FRAME.left, FRAME.left + 38, FRAME.left + 85, FRAME.left + 190, FRAME.left + 290, FRAME.right - 30];
   doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
-  ['Articolo', 'Descrizione', 'Documento', 'Sigle', 'Pagina'].forEach((h, i) => doc.text(translateFixed(project, h), cols[i] + 1.5, y + 4.2));
+  ['Tipo', 'Articolo', 'Descrizione', 'Documento', 'Sigle', 'Pagina'].forEach((h, i) => doc.text(translateFixed(project, h), cols[i] + 1.5, y + 4.2));
   doc.setFont('helvetica', 'normal');
   for (const d of list) {
     y += 6;
     if (y > FRAME.bottom - 8) break;
     const cell = (s: string, i: number) => doc.text((doc.splitTextToSize(s, (cols[i + 1] ?? FRAME.right) - cols[i] - 3)[0] as string) ?? '', cols[i] + 1.5, y + 4.2);
-    cell(d.partNr, 0); cell(d.descr, 1); cell(d.doc.name, 2); cell(d.tags, 3);
-    doc.text(String(page), cols[4] + 1.5, y + 4.2);
+    cell(translateFixed(project, docKindInfo(d.kind).label), 0); cell(d.partNr, 1); cell(d.descr, 2); cell(d.doc.name, 3); cell(d.tags, 4);
+    doc.text(String(page), cols[5] + 1.5, y + 4.2);
     doc.setLineWidth(0.1); doc.line(FRAME.left, y + 6, FRAME.right, y + 6);
     page += d.pages;
   }

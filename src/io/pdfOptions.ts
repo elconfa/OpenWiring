@@ -1,5 +1,5 @@
 // Opzioni dell'export PDF e selezione delle pagine (senza dipendenze pesanti).
-import type { Project, Page, Lang } from '../model/types';
+import type { Project, Page, Lang, DocKind } from '../model/types';
 import { pageGroup, SCHEMA_GROUP } from '../model/pageOrder';
 import { panelOfStripName } from '../model/panelScope';
 import { foreignDevices } from '../model/network';
@@ -16,6 +16,8 @@ export interface PdfOptions {
   mono: boolean;
   /** Schede tecniche (PDF sul disco) degli articoli usati, allegate in fondo con la loro pagina di elenco */
   attachDocs?: boolean;
+  /** Tipi di documento allegati (schede tecniche, dichiarazioni CE, UL…); se manca, tutti */
+  attachKinds?: DocKind[];
   /** Lingua del PDF (se manca vale quella del progetto) e seconda lingua opzionale */
   lang?: Lang;
   second?: Lang | '';

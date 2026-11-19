@@ -7,6 +7,8 @@ const fs = require('node:fs/promises');
 const { docsDir } = require('./paths.cjs');
 
 const CONFIG_KEY = 'partDocsDir';
+/** Sottocartelle per tipo di documento (come DOC_KINDS in src/model/partDocs.ts) */
+const SUBFOLDERS = ['Data Sheet', 'Dichiarazioni/CE', 'Dichiarazioni/UL', 'Dichiarazioni/Altre', 'Manuali'];
 const isWeb = p => /^https?:\/\//i.test(p);
 /** Percorso assoluto su Mac, Linux o Windows (anche se il programma gira su un altro sistema) */
 const isAbs = p => path.isAbsolute(p) || /^[A-Za-z]:[\\/]/.test(p) || /^\\\\/.test(p);
@@ -18,6 +20,7 @@ function register(ipcMain, app, dialog, shell, BrowserWindow) {
   const getDir = async () => {
     if (!dir) dir = (await readConfig())[CONFIG_KEY] || path.join(docsDir(app), 'Articoli', 'Documenti');
     await fs.mkdir(dir, { recursive: true });
+    for (const sub of SUBFOLDERS) await fs.mkdir(path.join(dir, ...sub.split('/')), { recursive: true }).catch(() => {});
     return dir;
   };
   /** Percorso sul disco di un documento: i relativi dentro la cartella (mai fuori) */
@@ -41,20 +44,22 @@ function register(ipcMain, app, dialog, shell, BrowserWindow) {
     return dir;
   });
   /**
-   * Copia nella cartella i PDF scelti da fuori; restituisce per ognuno il percorso relativo. Un file
+   * Copia nella cartella (nella sottocartella del tipo, subs) i PDF scelti da fuori; restituisce per ognuno il percorso relativo. Un file
    * con lo stesso nome e lo stesso contenuto si riusa, con contenuto diverso prende un numero (_2, _3…).
    */
-  ipcMain.handle('partdocs-copy', async (ev, files) => {
+  ipcMain.handle('partdocs-copy', async (ev, files, subs) => {
     const root = await getDir();
     const out = [];
-    for (const src of files ?? []) {
+    for (const [i, src] of (files ?? []).entries()) {
       if (typeof src !== 'string' || !/\.pdf$/i.test(src)) { out.push(null); continue; }
+      // Sottocartella del tipo (solo quelle note); se manca, la cartella Documenti
+      const sub = SUBFOLDERS.includes(subs?.[i]) ? subs[i] : '';
       const data = await fs.readFile(src);
       const ext = path.extname(src), base = path.basename(src, ext);
       let rel = null;
       for (let k = 1; !rel; k++) {
-        const name = k === 1 ? `${base}${ext}` : `${base}_${k}${ext}`;
-        const dest = path.join(root, name);
+        const name = `${sub ? `${sub}/` : ''}${k === 1 ? `${base}${ext}` : `${base}_${k}${ext}`}`;
+        const dest = path.join(root, ...name.split('/'));
         let old;
         try { old = await fs.readFile(dest); } catch { await fs.writeFile(dest, data); rel = name; break; }
         if (old.equals(data)) rel = name;

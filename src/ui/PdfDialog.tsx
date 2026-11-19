@@ -17,6 +17,7 @@ import { panelLabel } from '../model/network';
 import { devicesPerLocation, scopeLocations } from '../model/panelScope';
 import { LANGS } from '../model/i18n';
 import type { Lang } from '../model/types';
+import { DOC_KINDS } from '../model/partDocs';
 import { tx } from '../i18n/ui';
 
 const KEY = 'elettrocad.pdf';
@@ -192,7 +193,17 @@ export function PdfDialog() {
           <legend>{tx('Contenuto')}</legend>
           {!print && <>
           <label><input type="checkbox" checked={o.index} onChange={e => setO({ ...o, index: e.target.checked })} /> {tx('Pagina indice iniziale (cliccabile)')}</label>
-          <label title={tx('I file PDF collegati agli articoli usati (Articoli ▸ Schede tecniche e documenti), con una pagina di elenco; solo nell\'app desktop')}><input type="checkbox" checked={!!o.attachDocs} onChange={e => setO({ ...o, attachDocs: e.target.checked })} /> {tx('Schede tecniche degli articoli allegate in fondo')}</label>
+          <label title={tx('I file PDF collegati agli articoli usati (schede tecniche, dichiarazioni CE e UL, manuali…), con una pagina di elenco; si scelgono i tipi da allegare, per esempio solo le dichiarazioni per il fascicolo tecnico; solo nell\'app desktop')}><input type="checkbox" checked={!!o.attachDocs} onChange={e => setO({ ...o, attachDocs: e.target.checked })} /> {tx('Documenti degli articoli allegati in fondo')}</label>
+          {o.attachDocs && <div style={{ paddingLeft: 22 }}>
+            {DOC_KINDS.map(k => {
+              const on = !o.attachKinds || o.attachKinds.includes(k.kind);
+              const toggle = (v: boolean) => {
+                const next = DOC_KINDS.map(d => d.kind).filter(d => (d === k.kind ? v : !o.attachKinds || o.attachKinds.includes(d)));
+                setO({ ...o, attachKinds: next.length === DOC_KINDS.length ? undefined : next });
+              };
+              return <label key={k.kind}><input type="checkbox" checked={on} onChange={e => toggle(e.target.checked)} /> {tx(k.label)}</label>;
+            })}
+          </div>}
           </>}
           <label><input type="checkbox" checked={o.mono} onChange={e => setO({ ...o, mono: e.target.checked })} /> {tx('Bianco e nero')}{print ? '' : tx(' per la stampa')}</label>
           {!print && <label title={tx('Comprime il contenuto delle pagine e arrotonda le coordinate: il file è molto più piccolo, il disegno è lo stesso e rimandi, indice e segnalibri restano cliccabili')}><input type="checkbox" checked={o.compact !== false} onChange={e => setO({ ...o, compact: e.target.checked })} /> {tx('File compatto (più piccolo)')}</label>}
