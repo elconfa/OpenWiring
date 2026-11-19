@@ -2,6 +2,7 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu, shell, protocol, net, safeStorage, utilityProcess } = require('electron');
 const ai = require('./ai.cjs');
 const symlib = require('./symlib.cjs');
+const partdocs = require('./partdocs.cjs');
 const partsdb = require('./partsdb.cjs');
 const edzbig = require('./edzbig.cjs');
 const { migrateUserData } = require('./paths.cjs');
@@ -333,11 +334,11 @@ ipcMain.handle('open-path', async (ev, target) => {
   if (/^https?:\/\//i.test(target)) { await shell.openExternal(target); return ''; }
   // Solo documenti: un percorso a un programma non viene eseguito
   if (!/\.(pdf|docx?|xlsx?|od[ts]|txt|rtf|png|jpe?g|dxf|dwg|stp|step|zip|html?)$/i.test(target)) return 'tipo di file non ammesso';
-  return shell.openPath(target);
+  return shell.openPath(await docsFolder.resolve(target));
 });
 ipcMain.handle('read-doc', async (ev, file) => {
   if (!/\.pdf$/i.test(file)) throw new Error('solo file PDF');
-  try { return new Uint8Array(await fs.readFile(file)); } catch { return undefined; }
+  try { return new Uint8Array(await fs.readFile(await docsFolder.resolve(file))); } catch { return undefined; }
 });
 
 // Cartella di file (es. pacchetto di rilascio «Rilascio_B»): si sceglie dove crearla, se esiste già
@@ -358,6 +359,8 @@ ipcMain.handle('save-folder', async (ev, folderName, files) => {
 ai.register(ipcMain, net, safeStorage);
 symlib.register(ipcMain, app, dialog, shell, BrowserWindow);
 // Cartella dei cartigli personali (Documenti/OpenWiring/Cartigli, un file .ectb per cartiglio)
+// Schede tecniche degli articoli: i percorsi relativi si risolvono in questa cartella (open-path, read-doc)
+const docsFolder = partdocs.register(ipcMain, app, dialog, shell, BrowserWindow);
 symlib.register(ipcMain, app, dialog, shell, BrowserWindow, { prefix: 'tblib', ext: '.ectb', configKey: 'titleBlockDir', folder: 'Cartigli' });
 
 app.whenReady().then(() => {

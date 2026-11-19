@@ -15,6 +15,11 @@ contextBridge.exposeInMainWorld('elettro', {
   choosePaths: filters => ipcRenderer.invoke('choose-paths', filters),
   openPath: target => ipcRenderer.invoke('open-path', target),
   readDoc: file => ipcRenderer.invoke('read-doc', file),
+  // Cartella delle schede tecniche degli articoli (percorsi relativi)
+  partDocsDir: () => ipcRenderer.invoke('partdocs-dir'),
+  partDocsOpen: () => ipcRenderer.invoke('partdocs-open'),
+  partDocsChoose: () => ipcRenderer.invoke('partdocs-choose'),
+  partDocsCopy: files => ipcRenderer.invoke('partdocs-copy', files),
   // Cartelle dei dialoghi: predefinite (impostazioni) e ultime usate
   foldersGet: () => ipcRenderer.invoke('folders-get'),
   foldersSet: (kind, dir) => ipcRenderer.invoke('folders-set', kind, dir),

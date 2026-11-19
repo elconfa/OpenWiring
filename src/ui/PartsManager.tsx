@@ -8,10 +8,10 @@ import { blackBoxFromPart, BUILTIN_SYMBOLS } from '../model/symbols';
 import { getSymbol } from '../model/geometry';
 import { SymbolPreview } from './SymbolLibrary';
 import * as A from './actions';
-import { ask } from './Ask';
+import { ask, askConfirm } from './Ask';
 import { useGrid, Th, gridProps } from './grid';
 import { ColSplitter } from './split';
-import { edzDocs, fileName, isWebDoc } from '../model/partDocs';
+import { edzDocs, fileName, isAbsPath, isWebDoc, relToFolder } from '../model/partDocs';
 import { openDocument } from '../io/fileio';
 import { PartSearchDialog } from './PartSearchDialog';
 import { tx, tn } from '../i18n/ui';
@@ -287,9 +287,28 @@ function PartDocsEditor({ part }: { part: Part }) {
   const edz = edzDocs(part).filter(d => !own.some(o => o.path === d.path));
   const save = (docs: PartDoc[]) => st().updatePart(part.partNr, { docs: docs.length ? docs : undefined });
   const open = (path: string) => { openDocument(path).catch(e => st().logMsg(tx('Impossibile aprire {0}: {1}', path, (e as Error).message), 'warn')); };
+  const [folder, setFolder] = useState<string>();
+  useEffect(() => { void window.elettro?.partDocsDir?.().then(setFolder, () => undefined); }, []);
+  /** Copia i file nella cartella Documenti e restituisce i percorsi relativi (null = rimasto fuori) */
+  const copyIn = async (paths: string[]) => (await window.elettro?.partDocsCopy?.(paths).catch(e => { st().logMsg(tx('Copia non riuscita: {0}', (e as Error).message), 'warn'); return null; })) ?? paths.map(() => null);
   const addFiles = async () => {
     const paths = await window.elettro?.choosePaths?.([{ name: 'PDF', extensions: ['pdf'] }]) ?? [];
-    if (paths.length) save([...own, ...paths.filter(p => !own.some(o => o.path === p)).map(p => ({ name: fileName(p).replace(/\.pdf$/i, ''), path: p }))]);
+    if (!paths.length) return;
+    // I file nella cartella Documenti si salvano con il percorso relativo; quelli fuori si possono copiare dentro
+    let picked = paths.map(p => (folder && relToFolder(folder, p)) || p);
+    const outside = picked.filter(isAbsPath);
+    if (outside.length && folder && window.elettro?.partDocsCopy
+      && await askConfirm(tx('Schede tecniche'), tx('{0} file sono fuori dalla cartella Documenti ({1}). Copiarli nella cartella? Così il progetto li ritrova anche su un altro computer. Con Annulla restano collegati dove sono.', outside.length, folder), tx('Copia nella cartella'))) {
+      const rels = await copyIn(outside);
+      picked = picked.map(p => { const i = outside.indexOf(p); return i >= 0 && rels[i] ? rels[i]! : p; });
+    }
+    save([...own, ...picked.filter(p => !own.some(o => o.path === p)).map(p => ({ name: fileName(p).replace(/\.pdf$/i, ''), path: p }))]);
+  };
+  /** Documento collegato con percorso assoluto: si porta nella cartella (dentro = solo il percorso, fuori = copia) */
+  const toFolder = async (i: number) => {
+    const d = own[i];
+    const rel = (folder && relToFolder(folder, d.path)) || (await copyIn([d.path]))[0];
+    if (rel) save(own.map((x, k) => (k === i ? { ...x, path: rel } : x)));
   };
   const addUrl = async () => {
     const r = await ask(tx('Documento da indirizzo web'), [{ label: tx('Nome'), value: tx('Scheda tecnica') }, { label: tx('Indirizzo'), placeholder: 'https://…' }]);
@@ -306,9 +325,12 @@ function PartDocsEditor({ part }: { part: Part }) {
           {own.map((d, i) => (
             <tr key={d.path}>
               <td><input key={`${part.partNr}-${d.path}`} defaultValue={d.name} onBlur={e => { const v = e.target.value.trim(); if (v && v !== d.name) save(own.map((x, k) => (k === i ? { ...x, name: v } : x))); }} /></td>
-              <td className="small" title={d.path}>{isWebDoc(d.path) ? d.path : fileName(d.path)}</td>
+              <td className="small" title={isAbsPath(d.path) ? tx('{0}\nFuori dalla cartella Documenti: su un altro computer il file non si trova', d.path) : d.path}>
+                {isWebDoc(d.path) ? d.path : isAbsPath(d.path) ? <>⚠ {fileName(d.path)}</> : d.path}
+              </td>
               <td className="nowrap">
                 <button className="mini" onClick={() => open(d.path)}>{tx('Apri')}</button>
+                {isAbsPath(d.path) && folder && <button className="mini" onClick={() => void toFolder(i)} title={tx('Porta il file nella cartella Documenti (lo copia se sta fuori) e salva il percorso relativo')}>{tx('In cartella')}</button>}
                 <button className="mini" title={tx('Togli il documento dall\'articolo (il file resta dov\'è)')} onClick={() => save(own.filter((_, k) => k !== i))}>✕</button>
               </td>
             </tr>
@@ -323,8 +345,10 @@ function PartDocsEditor({ part }: { part: Part }) {
         </tbody>
       </table>
       <div className="row-buttons">
-        <button disabled={!window.elettro?.choosePaths} onClick={() => void addFiles()} title={window.elettro?.choosePaths ? tx('Collega uno o più file PDF (il file resta nella sua cartella: si allega al PDF dello schema)') : tx('I file sul disco si collegano dall\'app desktop')}>{tx('Aggiungi PDF…')}</button>
+        <button disabled={!window.elettro?.choosePaths} onClick={() => void addFiles()} title={window.elettro?.choosePaths ? tx('Collega uno o più file PDF: quelli nella cartella Documenti si salvano con il percorso relativo; si allegano al PDF dello schema') : tx('I file sul disco si collegano dall\'app desktop')}>{tx('Aggiungi PDF…')}</button>
         <button onClick={() => void addUrl()}>{tx('Aggiungi indirizzo web…')}</button>
+        {folder && <button onClick={() => void window.elettro?.partDocsOpen?.()} title={tx('Cartella delle schede tecniche: {0}. I PDF che stanno qui si salvano con il percorso relativo e si ritrovano su ogni computer con la stessa cartella', folder)}>{tx('Cartella')}</button>}
+        {folder && <button className="mini" onClick={() => void window.elettro?.partDocsChoose?.().then(d => { if (d) setFolder(d); })} title={tx('Usa un\'altra cartella per le schede tecniche (es. condivisa in rete tra più installazioni)')}>…</button>}
       </div>
     </>
   );

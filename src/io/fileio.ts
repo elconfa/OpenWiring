@@ -19,6 +19,10 @@ interface ElettroBridge {
   choosePaths?(filters: Filter[]): Promise<string[]>;
   openPath?(target: string): Promise<string>;
   readDoc?(file: string): Promise<Uint8Array | undefined>;
+  partDocsDir?(): Promise<string>;
+  partDocsOpen?(): Promise<void>;
+  partDocsChoose?(): Promise<string | null>;
+  partDocsCopy?(files: string[]): Promise<(string | null)[]>;
   readMacro?(from: string, ref: string): Promise<{ name: string; data: Uint8Array } | null>;
   foldersGet?(): Promise<{ defaults: Partial<Record<FolderKind, string>>; last: Partial<Record<FolderKind, string>>; documents: string }>;
   foldersSet?(kind: FolderKind, dir: string | null): Promise<boolean>;

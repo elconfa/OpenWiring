@@ -11,6 +11,23 @@ export const DOCS_TITLE = 'Elenco documenti allegati';
 export const isWebDoc = (path: string) => /^https?:\/\//i.test(path);
 export const isPdfDoc = (path: string) => !isWebDoc(path) && /\.pdf$/i.test(path);
 
+/** Percorso assoluto (Mac, Linux, Windows o cartella di rete); gli altri sono relativi alla cartella Documenti */
+export const isAbsPath = (path: string) => /^(\/|[A-Za-z]:[\\/]|\\\\)/.test(path);
+/** Documento sul disco con percorso relativo alla cartella Documenti degli articoli */
+export const isRelDoc = (path: string) => !!path && !isWebDoc(path) && !isAbsPath(path);
+
+/**
+ * Percorso relativo alla cartella (con le barre "/") se il file sta dentro, altrimenti null.
+ * Su Windows le lettere maiuscole e minuscole dei percorsi non contano.
+ */
+export function relToFolder(folder: string, file: string): string | null {
+  const norm = (p: string) => p.replace(/\\/g, '/').replace(/\/+$/, '');
+  const win = /^[A-Za-z]:|^\\\\/.test(folder);
+  const f = norm(folder), p = norm(file);
+  const same = win ? p.toLowerCase().startsWith(`${f.toLowerCase()}/`) : p.startsWith(`${f}/`);
+  return same ? p.slice(f.length + 1) : null;
+}
+
 /** Nome del file di un percorso (con / o \) */
 export const fileName = (path: string) => path.split(/[\\/]/).pop() ?? path;
 
