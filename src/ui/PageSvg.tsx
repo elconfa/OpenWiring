@@ -1056,7 +1056,7 @@ function PlcOverview({ data, t, S }: { data?: OverviewData; t: (s: string) => st
             <line x1={x - 8} y1={y} x2={x} y2={y} stroke={look.ink} strokeWidth={0.35} />
             <circle cx={x - 8} cy={y} r={0.8} fill="#fff" stroke={look.ink} strokeWidth={0.3} />
             <g fontSize={Math.min(S.textSize, h * 0.42)} fill={c}>
-              {r.terminal !== r.channel && S.show('terminal') && <text x={col.term} y={y + 0.7} textAnchor="end">{r.terminal}</text>}
+              {r.pins.length > 0 && S.show('terminal') && <text x={col.term} y={y + 0.7} textAnchor="end">{r.pins.join(' / ')}</text>}
               <text x={col.ch} y={y + 0.7}>{r.channel}</text>
               <text x={col.addr} y={y + 0.7} textAnchor="end" fontWeight={600}>{r.address}</text>
               {(used || !r.symbolIsDefault) && S.show('symbol') && <text x={col.sym} y={y + 0.7}>{cut(r.symbol, 30)}</text>}

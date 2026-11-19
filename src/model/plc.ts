@@ -110,6 +110,21 @@ export function parseChannel(ch: string | undefined): { kind: IoKind; index: num
 /** Morsetto della scheda per un canale (dall'articolo), altrimenti il nome del canale */
 export const terminalOf = (card: PlcCard, channel: string) => card.custom?.terminals?.[channel] ?? channel;
 
+/**
+ * Pin della scheda di un canale (fino a 2): quelli scritti sul canale; per i progetti delle versioni
+ * precedenti quelli scritti sul gruppo I/O dello schema (inst); poi il morsetto dell'articolo
+ */
+export function channelPins(card: PlcCard, channel: string, inst?: SymbolInstance): string[] {
+  const own = card.io?.[channel]?.pins?.filter(Boolean);
+  if (own?.length) return own.slice(0, 2);
+  if (inst?.plcGroup) {
+    const fromGroup = Object.keys(inst.pinLabels).sort().map(k => inst.pinLabels[k]?.trim()).filter(Boolean) as string[];
+    if (fromGroup.length) return fromGroup.slice(0, 2);
+  }
+  const t = card.custom?.terminals?.[channel];
+  return t ? [t] : [];
+}
+
 /** Indirizzo di un canale nel formato indicato, es. I0.3, %QX1.2, IW66, 100.05 */
 export function channelAddress(card: PlcCard, channel: string, format: PlcAddressFormat): string {
   const ch = parseChannel(channel);
@@ -326,6 +341,8 @@ export interface IoRow {
   address: string;
   /** Morsetto della scheda (dall'articolo) o nome del canale */
   terminal: string;
+  /** Pin della scheda del canale (0, 1 o 2), dove si cablano i fili */
+  pins: string[];
   /** Nome simbolico effettivo (quello scritto, importato o generato) */
   symbol: string;
   symbolIsDefault: boolean;
@@ -373,6 +390,7 @@ export function ioAssignments(project: Project, library: Part[] = [], includeFre
         card, channel: ch.id, kind: ch.kind,
         address: channelAddress(card, ch.id, cardFormat(project, card)),
         terminal: terminalOf(card, ch.id),
+        pins: channelPins(card, ch.id, el?.inst),
         symbol: own || defaultSymbol(card.tag, ch.id),
         symbolIsDefault: !own,
         comment, ownComment, connected,

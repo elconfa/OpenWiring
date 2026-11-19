@@ -3774,5 +3774,22 @@
   "Punti per fili": "Wire points",
   "uscita": "output",
   "Uscite collegate tra loro sullo stesso conduttore: {0}": "Outputs connected together on the same conductor: {0}",
-  "Verso": "Direction"
+  "Verso": "Direction",
+  "Fili o cavi bus, ingresso, uscita o tutti e due: per tutti i punti selezionati": "Wires or bus cables, input, output or both: for all selected points",
+  "Morsetto 1": "Terminal 1",
+  "Morsetto 2": "Terminal 2",
+  "Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O": "Card pin where the channel wire is connected: also used in the schematic, the overviews and the I/O list",
+  "Allineamento del testo": "Text alignment",
+  "Clic: scegli il testo; Maiusc+clic: aggiungi o togli dalla selezione": "Click: choose the text; Shift+click: add to or remove from the selection",
+  "Deseleziona": "Deselect",
+  "Distribuisci": "Distribute",
+  "Distribuisci in orizzontale": "Distribute horizontally",
+  "Distribuisci in verticale": "Distribute vertically",
+  "I testi selezionati tornano nella posizione automatica (Canc)": "The selected texts go back to the automatic position (Del)",
+  "il primo e l'ultimo restano fermi, gli altri a distanze uguali (servono almeno 3 testi)": "the first and last stay put, the others at equal distances (at least 3 texts needed)",
+  "il primo e l'ultimo restano fermi, gli altri a distanze uguali; un gruppo conta come un elemento solo (servono almeno 3 elementi)": "the first and last stay put, the others at equal distances; a group counts as a single element (at least 3 elements needed)",
+  "Orientamento di tutti i testi selezionati (R)": "Orientation of all selected texts (R)",
+  "Posizione automatica": "Automatic position",
+  "Testi selezionati ({0})": "Selected texts ({0})",
+  "TESTI SULLO SCHEMA A {0}°: clic su un testo per sceglierlo, Maiusc+clic o riquadro per sceglierne più di uno (⌘A tutti); trascinali o spostali con le frecce, R li ruota, nel pannello si allineano e distribuiscono (in blu quelli messi a mano; Canc o ↺: posizione automatica). Qui grafica e punti di connessione non si modificano: «Disegno», Esc, uno strumento o un comando tornano al disegno": "TEXTS ON THE SCHEMATIC AT {0}°: click a text to choose it, Shift+click or a box to choose several (⌘A all); drag them or move them with the arrows, R rotates them, in the panel they can be aligned and distributed (in blue those placed by hand; Del or ↺: automatic position). Graphics and connection points cannot be changed here: «Drawing», Esc, a tool or a command go back to the drawing"
 }

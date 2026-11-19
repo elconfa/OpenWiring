@@ -17,14 +17,14 @@ import { dxfToPrims, dxfSymbolInfo, dxfSymbolPrims } from '../io/dxfImport';
 import { openFiles } from '../io/fileio';
 import { setEditorDirty } from './editorDirty';
 import { ask, askText, askChoice, askConfirm } from './Ask';
-import { ALIGN_MODES } from '../model/align';
+import { ALIGN_MODES, DISTRIBUTE_MODES, alignDeltas, distributeDeltas, type AlignBox, type AlignMode, type DistributeAxis } from '../model/align';
 import { snapPoints, nearestSnap, type SnapPt } from '../symcad/geom';
 import { trimAt, extendAt, offsetPrim, measure } from '../symcad/edit';
 import { parsePoint, parseNumber, constrain, arcThrough, transformItems, cadAngle, cadCoord, CMD_ALIASES, type CmdId } from '../symcad/cad';
 import { symbolToDxf } from '../symcad/dxf';
 import { saveFile } from '../io/fileio';
 import type { SymLayer } from '../model/types';
-import { type Item, type Clip, withGroups, groupItems, explodeItems, lockItems, lockedItems, isLocked, alignItems, mirrorItems, sameItem, itemsBounds, itemsInBox, moveItems, rotateItems, scaleItems, deleteItems, copyItems, clipOrigin, rotateClip, pasteClip, symbolAsGraphic, gripsOf, moveGrip, rotateDir, midGripsOf, insertVertex, removeVertex, nearestSide } from '../model/symbolEdit';
+import { type Item, type Clip, withGroups, groupItems, explodeItems, lockItems, lockedItems, isLocked, alignItems, distributeItems, alignUnitCount, mirrorItems, sameItem, itemsBounds, itemsInBox, moveItems, rotateItems, scaleItems, deleteItems, copyItems, clipOrigin, rotateClip, pasteClip, symbolAsGraphic, gripsOf, moveGrip, rotateDir, midGripsOf, insertVertex, removeVertex, nearestSide } from '../model/symbolEdit';
 import { tx, tn } from '../i18n/ui';
 import { functionById, guessFunction } from '../model/symbolFunctions';
 import { pickFunction } from './FunctionPicker';
@@ -269,8 +269,12 @@ export function SymbolEditor() {
   const [withData, setWithData] = useState(false);
   /** Testi sullo schema: rotazione mostrata (null = disegno del simbolo), testo trascinato e scelto */
   const [orient, setOrient] = useState<Rot | null>(null);
-  const [textDrag, setTextDrag] = useState<{ key: TextMoveKey; place: TextPlace; grab: Pt; from: Pt } | null>(null);
-  const [orientSel, setOrientSel] = useState<TextMoveKey | null>(null);
+  /** Testi trascinati insieme: posizioni di partenza e spostamento (già sulla griglia) */
+  const [textDrag, setTextDrag] = useState<{ keys: TextMoveKey[]; places: Partial<Record<TextMoveKey, TextPlace>>; from: Pt; d: Pt } | null>(null);
+  /** Testi selezionati nella vista dei testi sullo schema (Maiusc+clic o riquadro per più testi) */
+  const [orientSel, setOrientSel] = useState<TextMoveKey[]>([]);
+  /** Riquadro di selezione dei testi */
+  const [orientBox, setOrientBox] = useState<{ a: Pt; b: Pt } | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const textInput = useRef<HTMLInputElement>(null);
   /** Annulla e ripeti dentro l'editor */
@@ -333,20 +337,21 @@ export function SymbolEditor() {
         return;
       }
       if (mod && k === 'z') { done(); if (e.shiftKey) redo(); else undo(); return; }
-      // Vista dei testi sullo schema: le frecce spostano il testo scelto, Canc lo rimette in automatico
+      // Vista dei testi sullo schema: ⌘A li sceglie tutti, le frecce spostano quelli scelti, Canc li rimette in automatico
+      if (orient !== null && mod && k === 'a') { e.preventDefault(); setOrientSel(orientKeys); return; }
       if (orient !== null && !mod && !buf) {
-        if (orientSel && e.key.startsWith('Arrow')) {
+        if (orientSel.length && e.key.startsWith('Arrow')) {
           done();
-          const p = placeOf(orientSel), d = e.shiftKey ? 2 : fine;
-          if (p) setOwnPlace(orientSel, { ...p, rot: ownRot(orientSel), x: r2(p.x + (e.key === 'ArrowLeft' ? -d : e.key === 'ArrowRight' ? d : 0)), y: r2(p.y + (e.key === 'ArrowUp' ? -d : e.key === 'ArrowDown' ? d : 0)) });
+          const d = e.shiftKey ? 2 : fine;
+          moveTexts(orientSel, e.key === 'ArrowLeft' ? -d : e.key === 'ArrowRight' ? d : 0, e.key === 'ArrowUp' ? -d : e.key === 'ArrowDown' ? d : 0);
           return;
         }
-        if (orientSel && (e.key === 'Delete' || e.key === 'Backspace')) { done(); setOwnPlace(orientSel, undefined); return; }
-        // R gira il testo scelto: orizzontale, verticale dal basso, verticale dall'alto
-        if (orientSel && k === 'r') {
+        if (orientSel.length && (e.key === 'Delete' || e.key === 'Backspace')) { done(); setOwnPlaces(orientSel.map(x => [x, undefined])); return; }
+        // R gira i testi scelti: orizzontale, verticale dal basso, verticale dall'alto (tutti come il primo)
+        if (orientSel.length && k === 'r') {
           done();
-          const p = placeOf(orientSel);
-          if (p) { const order = TEXT_ROTS.map(x => Number(x[0])), i = order.indexOf(p.rot ?? 0); setOwnPlace(orientSel, { ...p, rot: order[(i + 1) % order.length] }); }
+          const p = placeOf(orientSel[0]);
+          if (p) { const order = TEXT_ROTS.map(x => Number(x[0])), i = order.indexOf(p.rot ?? 0); rotateTexts(orientSel, order[(i + 1) % order.length]); }
           return;
         }
         if (e.key === 'Delete' || e.key === 'Backspace' || e.key.startsWith('Arrow')) { done(); return; }
@@ -513,10 +518,10 @@ export function SymbolEditor() {
     if (prims.length > 400) st().logMsg(tx('Il disegno ha molti elementi: per un simbolo di schema conviene tenere solo il contorno.'), 'warn');
   };
   /** Vista dei testi sullo schema per la rotazione r, o il disegno (null) */
-  const showOrient = (r: Rot | null) => { setOrient(r); setOrientSel(null); setTextDrag(null); setSel([]); setCmd(null); setBuf(''); setWindowFrom(null); setGhost(null); };
+  const showOrient = (r: Rot | null) => { setOrient(r); setOrientSel([]); setOrientBox(null); setTextDrag(null); setSel([]); setCmd(null); setBuf(''); setWindowFrom(null); setGhost(null); };
   const pick = (t: ETool) => {
     // Uno strumento di disegno riporta al disegno
-    setOrient(null); setOrientSel(null); setTextDrag(null);
+    setOrient(null); setOrientSel([]); setOrientBox(null); setTextDrag(null);
     setTool(t); setCmd(null); setBuf(''); setWindowFrom(null); setGhost(null); setMeas(null); setOffsetSrc(null);
     if (t !== 'select') setSel([]);
     if (!t.startsWith('pin')) setPinDir(null);
@@ -668,7 +673,7 @@ export function SymbolEditor() {
   const dist = (a: Pt, b: Pt) => r2(Math.hypot(b.x - a.x, b.y - a.y));
   const startCmd = (id: CmdId) => {
     // Un comando riporta al disegno
-    setOrient(null); setOrientSel(null); setTextDrag(null);
+    setOrient(null); setOrientSel([]); setOrientBox(null); setTextDrag(null);
     setBuf(''); setWindowFrom(null); setGhost(null); setMeas(null); setOffsetSrc(null); setPress(null); setPinDir(null);
     if (id !== 'undo' && id !== 'redo' && id !== 'zoom') lastCmd.current = id;
     switch (id) {
@@ -856,27 +861,70 @@ export function SymbolEditor() {
   const orientKeys = orient !== null ? placeableTexts(sym) : [];
   const ownPlaces: Partial<Record<TextMoveKey, TextPlace>> = orient !== null ? sym.orientTexts?.[orient] ?? {} : {};
   // Anteprima con l'orientamento dei testi dei morsetti scelto nelle impostazioni del progetto
-  const placeOf = (k: TextMoveKey): TextPlace | undefined => (textDrag?.key === k ? textDrag.place : textPlace(inst0, sym, k, { termDir: project.settings.terminalText }));
+  const autoPlace = (k: TextMoveKey): TextPlace | undefined => textPlace(inst0, sym, k, { termDir: project.settings.terminalText });
+  const placeOf = (k: TextMoveKey): TextPlace | undefined => {
+    const from = textDrag?.places[k];
+    return from ? { ...from, x: from.x + textDrag!.d.x, y: from.y + textDrag!.d.y } : autoPlace(k);
+  };
   /** Orientamento scelto nell'editor (undefined: segue quello automatico o delle impostazioni) */
   const ownRot = (k: TextMoveKey) => ownPlaces[k]?.rot;
   /** Le righe sotto la sigla cominciano una riga più in basso del loro punto */
   const shownY = (k: TextMoveKey, p: TextPlace) => (k === 'lines' ? p.y + 2.6 : p.y);
-  const setOwnPlace = (k: TextMoveKey, p: TextPlace | undefined) => {
-    if (orient === null) return;
+  /** Posizioni scelte a mano di più testi in una volta (undefined = di nuovo automatica) */
+  const setOwnPlaces = (list: [TextMoveKey, TextPlace | undefined][]) => {
+    if (orient === null || !list.length) return;
     const cur = { ...(sym.orientTexts?.[orient] ?? {}) };
-    if (p) cur[k] = { x: r2(p.x), y: r2(p.y), ...(p.anchor ? { anchor: p.anchor } : {}), ...(p.rot !== undefined ? { rot: p.rot } : {}) }; else delete cur[k];
+    for (const [k, p] of list) {
+      if (p) cur[k] = { x: r2(p.x), y: r2(p.y), ...(p.anchor ? { anchor: p.anchor } : {}), ...(p.rot !== undefined ? { rot: p.rot } : {}) }; else delete cur[k];
+    }
     const all = { ...(sym.orientTexts ?? {}) };
     if (Object.keys(cur).length) all[orient] = cur; else delete all[orient];
     update({ orientTexts: Object.keys(all).length ? all : undefined });
   };
+  const setOwnPlace = (k: TextMoveKey, p: TextPlace | undefined) => setOwnPlaces([[k, p]]);
+  /** Sposta i testi (la posizione diventa scelta a mano, l'orientamento resta quello scelto) */
+  const moveTexts = (keys: TextMoveKey[], dx: number, dy: number) =>
+    setOwnPlaces(keys.flatMap(k => { const p = autoPlace(k); return p ? [[k, { ...p, rot: ownRot(k), x: p.x + dx, y: p.y + dy }] as [TextMoveKey, TextPlace]] : []; }));
+  const rotateTexts = (keys: TextMoveKey[], rot: number | undefined) =>
+    setOwnPlaces(keys.flatMap(k => { const p = autoPlace(k); return p ? [[k, { ...p, rot }] as [TextMoveKey, TextPlace]] : []; }));
+  const anchorTexts = (keys: TextMoveKey[], anchor: TextPlace['anchor']) =>
+    setOwnPlaces(keys.flatMap(k => { const p = autoPlace(k); return p ? [[k, { ...p, rot: ownRot(k), anchor }] as [TextMoveKey, TextPlace]] : []; }));
+  /** Ingombro e punto di riferimento (il punto del testo) per allineare e distribuire */
+  const textAlignBox = (k: TextMoveKey): AlignBox | undefined => {
+    const p = autoPlace(k);
+    if (!p) return undefined;
+    const y = shownY(k, p);
+    return { ...textBox(p.x, y, sampleText(k), sampleSize(k), p.anchor ?? 'start', p.rot), ref: { x: p.x, y } };
+  };
+  const arrangeTexts = (keys: TextMoveKey[], how: { align: AlignMode } | { distribute: DistributeAxis }) => {
+    const ks = keys.filter(k => textAlignBox(k));
+    const boxes = ks.map(k => textAlignBox(k)!);
+    const d = 'align' in how ? alignDeltas(boxes, how.align) : distributeDeltas(boxes, how.distribute);
+    moveTextsBy(ks.map((k, i) => [k, d[i]]));
+  };
+  const moveTextsBy = (list: [TextMoveKey, Pt][]) =>
+    setOwnPlaces(list.flatMap(([k, d]) => { const p = autoPlace(k); return p && (d.x || d.y) ? [[k, { ...p, rot: ownRot(k), x: p.x + d.x, y: p.y + d.y }] as [TextMoveKey, TextPlace]] : []; }));
   const orientHit = (raw: Pt): TextMoveKey | undefined => [...orientKeys].reverse().find(k => {
     const p = placeOf(k);
     return p && inBox(raw, textBox(p.x, shownY(k, p), sampleText(k), sampleSize(k), p.anchor ?? 'start', p.rot), upp() * 6);
   });
+  /** Spostamento del trascinamento dei testi, sulla griglia fine (o libero senza griglia) */
+  const textDelta = (raw: Pt, from: Pt): Pt => { const step = gridSnap ? fine : 0.01; return { x: round(raw.x - from.x, step), y: round(raw.y - from.y, step) }; };
   const dropText = (raw: Pt) => {
     if (!textDrag) return;
-    const step = gridSnap ? fine : 0.01;
-    setOwnPlace(textDrag.key, { ...textDrag.place, rot: ownRot(textDrag.key), x: round(raw.x - textDrag.grab.x, step), y: round(raw.y - textDrag.grab.y, step) });
+    const d = textDelta(raw, textDrag.from);
+    moveTextsBy(textDrag.keys.map(k => [k, d]));
+  };
+  /** Testi dentro il riquadro (o toccati, se tracciato da destra verso sinistra, come nel disegno) */
+  const textsInBox = (a: Pt, b: Pt): TextMoveKey[] => {
+    const box = { x0: Math.min(a.x, b.x), y0: Math.min(a.y, b.y), x1: Math.max(a.x, b.x), y1: Math.max(a.y, b.y) };
+    const crossing = b.x < a.x;
+    return orientKeys.filter(k => {
+      const t = textAlignBox(k);
+      if (!t) return false;
+      return crossing ? t.x1 >= box.x0 && t.x0 <= box.x1 && t.y1 >= box.y0 && t.y0 <= box.y1
+        : t.x0 >= box.x0 && t.x1 <= box.x1 && t.y0 >= box.y0 && t.y1 <= box.y1;
+    });
   };
 
   const onDown = (ev: React.PointerEvent) => {
@@ -885,8 +933,13 @@ export function SymbolEditor() {
     const raw = toLocal(ev);
     if (orient !== null) {
       const k = orientHit(raw);
-      setOrientSel(k ?? null);
-      if (k) { const p = placeOf(k)!; setTextDrag({ key: k, place: p, grab: { x: raw.x - p.x, y: raw.y - p.y }, from: raw }); }
+      const add = ev.shiftKey || ev.metaKey || ev.ctrlKey;
+      if (!k) { if (!add) setOrientSel([]); setOrientBox({ a: raw, b: raw }); return; }
+      // Maiusc (o ⌘/Ctrl) aggiunge o toglie il testo; un clic su un testo già scelto li trascina tutti
+      if (add) { setOrientSel(cur => (cur.includes(k) ? cur.filter(x => x !== k) : [...cur, k])); return; }
+      const keys = orientSel.includes(k) ? orientSel : [k];
+      setOrientSel(keys);
+      setTextDrag({ keys, places: Object.fromEntries(keys.flatMap(x => { const p = autoPlace(x); return p ? [[x, p]] : []; })), from: raw, d: { x: 0, y: 0 } });
       return;
     }
     const p = pointAt(raw, ev.shiftKey);
@@ -965,7 +1018,8 @@ export function SymbolEditor() {
     const raw = toLocal(ev);
     setHover(raw);
     shift.current = ev.shiftKey;
-    if (textDrag) { const step = gridSnap ? fine : 0.01; setTextDrag({ ...textDrag, place: { ...textDrag.place, x: round(raw.x - textDrag.grab.x, step), y: round(raw.y - textDrag.grab.y, step) } }); return; }
+    if (textDrag) { setTextDrag({ ...textDrag, d: textDelta(raw, textDrag.from) }); return; }
+    if (orientBox) { setOrientBox({ ...orientBox, b: raw }); return; }
     // Pulsante premuto e mouse mosso di qualche pixel: diventa un trascinamento
     if (press && !press.cmdDrag && Math.hypot(ev.clientX - press.sx, ev.clientY - press.sy) > 4) {
       setPress(null);
@@ -987,6 +1041,15 @@ export function SymbolEditor() {
   const onUp = (ev: React.PointerEvent) => {
     const raw = toLocal(ev);
     if (textDrag) { if (Math.hypot(raw.x - textDrag.from.x, raw.y - textDrag.from.y) > upp() * 3) dropText(raw); setTextDrag(null); return; }
+    if (orientBox) {
+      const { a } = orientBox;
+      if (Math.hypot(raw.x - a.x, raw.y - a.y) > upp() * 3) {
+        const found = textsInBox(a, raw);
+        setOrientSel(cur => [...cur, ...found.filter(k => !cur.includes(k))]);
+      }
+      setOrientBox(null);
+      return;
+    }
     if (press) {
       // (anche un trascinamento appena cominciato e non ancora visto da questo disegno si chiude qui)
       setPress(null); setDrag(null);
@@ -1206,7 +1269,7 @@ export function SymbolEditor() {
       <span className="palette-icon">{icon}</span><span>{tx(label)}</span>{done && <span className="palette-done">✓</span>}
     </button>
   );
-  const hint = orient !== null ? tx('TESTI SULLO SCHEMA A {0}°: trascina i testi o spostali con le frecce (in blu quelli messi a mano; Canc o ↺ nel pannello: posizione automatica). Qui grafica e punti di connessione non si modificano: «Disegno», Esc, uno strumento o un comando tornano al disegno', orient)
+  const hint = orient !== null ? tx('TESTI SULLO SCHEMA A {0}°: clic su un testo per sceglierlo, Maiusc+clic o riquadro per sceglierne più di uno (⌘A tutti); trascinali o spostali con le frecce, R li ruota, nel pannello si allineano e distribuiscono (in blu quelli messi a mano; Canc o ↺: posizione automatica). Qui grafica e punti di connessione non si modificano: «Disegno», Esc, uno strumento o un comando tornano al disegno', orient)
     : ghost ? tx('Clic per incollare, R per ruotare, Esc per annullare')
     : cmd ? tx('Coordinate: x,y assolute · @dx,dy relative · @distanza<angolo · un numero = distanza verso il mouse (y verso l\'alto, decimali col punto) · Maiusc: orto')
     : tool === 'select' ? (grips.length
@@ -1238,6 +1301,8 @@ export function SymbolEditor() {
         <button disabled={!sel.length} onClick={() => mirror('h')} title={tx('Specchia da sinistra a destra')}>⇋</button>
         <button disabled={!sel.length} onClick={() => mirror('v')} title={tx('Specchia dall\'alto in basso')}>⇵</button>
         {ALIGN_MODES.map(m => <button key={m.id} disabled={sel.length < 2} onClick={() => apply(alignItems(sym, sel, m.id))} title={`${tx(m.name)} · ${tx('un gruppo si allinea come un elemento solo')}`}>{m.icon}</button>)}
+        {DISTRIBUTE_MODES.map(m => <button key={m.id} disabled={sel.length < 3 || alignUnitCount(sym, sel) < 3} onClick={() => apply(distributeItems(sym, sel, m.id))}
+          title={`${tx(m.name)} · ${tx('il primo e l\'ultimo restano fermi, gli altri a distanze uguali; un gruppo conta come un elemento solo (servono almeno 3 elementi)')}`}>{m.icon}</button>)}
         <button disabled={!canGroup} onClick={group} title={tx('Raggruppa: gli elementi si selezionano e si spostano insieme e restano come sono finché non si esplodono (⌘G, comando G)')}>{tx('Raggruppa')}</button>
         <button disabled={!canExplode} onClick={explode} title={tx('Esplodi il gruppo: gli elementi tornano singoli (⇧⌘G, comando X)')}>{tx('Esplodi')}</button>
         <button disabled={!canLock} onClick={lock} title={tx('Blocca: non si spostano, non si modificano e non si cancellano; il riquadro di selezione li salta (⌘L)')}>{tx('Blocca')}</button>
@@ -1363,11 +1428,16 @@ export function SymbolEditor() {
               {orientKeys.map(k => {
                 const p = placeOf(k);
                 if (!p) return null;
-                const y = shownY(k, p), on = orientSel === k || textDrag?.key === k;
+                const y = shownY(k, p), on = orientSel.includes(k);
                 // Le righe sotto la sigla girano attorno al loro punto, come sullo schema
                 return <text key={k} x={p.x} y={y} fontSize={sampleSize(k)} textAnchor={p.anchor ?? 'start'} fill={on ? '#cf222e' : ownPlaces[k] ? '#1f6feb' : '#8250df'}
                   transform={p.rot ? `rotate(${p.rot} ${p.x} ${p.y})` : undefined} fontStyle={k === 'lines' || (!k.startsWith('pin:') && !['tag', 'termNum', 'termStrip'].includes(k)) ? 'italic' : undefined}>{sampleText(k)}</text>;
               })}
+              {orientBox && (() => {
+                const { a, b } = orientBox, cross = b.x < a.x, z = upp();
+                return <rect x={Math.min(a.x, b.x)} y={Math.min(a.y, b.y)} width={Math.abs(b.x - a.x)} height={Math.abs(b.y - a.y)}
+                  fill={cross ? 'rgba(45,164,78,.08)' : 'rgba(31,111,235,.08)'} stroke={cross ? '#2da44e' : '#1f6feb'} strokeWidth={z} strokeDasharray={cross ? `${z * 4} ${z * 3}` : undefined} pointerEvents="none" />;
+              })()}
             </g>
           ) : <>
           <g stroke="#1b1f24" color="#1b1f24" strokeWidth={0.35} fill="none" strokeLinecap="round">
@@ -1496,12 +1566,49 @@ export function SymbolEditor() {
           <table className="prop-table">
             <tbody>
               {orient !== null && <>
+                {orientSel.length > 0 && <>
+                  <tr className="prop-group"><td colSpan={2}>{tx('Testi selezionati ({0})', orientSel.length)}</td></tr>
+                  <tr><td className="prop-name">{tx('Allinea')}</td><td className="prop-value nowrap">
+                    {ALIGN_MODES.map(m => <button key={m.id} className="mini" disabled={orientSel.length < 2} title={tx(m.name)} onClick={() => arrangeTexts(orientSel, { align: m.id })}>{m.icon}</button>)}
+                  </td></tr>
+                  <tr><td className="prop-name">{tx('Distribuisci')}</td><td className="prop-value nowrap">
+                    {DISTRIBUTE_MODES.map(m => <button key={m.id} className="mini" disabled={orientSel.length < 3} title={`${tx(m.name)} · ${tx('il primo e l\'ultimo restano fermi, gli altri a distanze uguali (servono almeno 3 testi)')}`} onClick={() => arrangeTexts(orientSel, { distribute: m.id })}>{m.icon}</button>)}
+                  </td></tr>
+                  <tr><td className="prop-name">{tx('Orientamento')}</td><td className="prop-value">
+                    {(() => {
+                      const vals = new Set(orientSel.map(k => (ownRot(k) === undefined ? '' : String(ownRot(k)))));
+                      return (
+                        <select value={vals.size === 1 ? [...vals][0] : '*'} title={tx('Orientamento di tutti i testi selezionati (R)')} onChange={e => rotateTexts(orientSel, e.target.value === '' ? undefined : Number(e.target.value))}>
+                          {vals.size > 1 && <option value="*" disabled>{tx('valori diversi')}</option>}
+                          <option value="">{tx('automatico')}</option>
+                          {TEXT_ROTS.map(([v, l]) => <option key={v} value={v}>{tx(l)}</option>)}
+                        </select>
+                      );
+                    })()}
+                  </td></tr>
+                  <tr><td className="prop-name">{tx('Allineamento del testo')}</td><td className="prop-value">
+                    {(() => {
+                      const vals = new Set(orientSel.map(k => placeOf(k)?.anchor ?? 'start'));
+                      return (
+                        <select value={vals.size === 1 ? [...vals][0] : '*'} onChange={e => anchorTexts(orientSel, e.target.value as TextPlace['anchor'])}>
+                          {vals.size > 1 && <option value="*" disabled>{tx('valori diversi')}</option>}
+                          <option value="start">{tx('a sinistra')}</option><option value="middle">{tx('al centro')}</option><option value="end">{tx('a destra')}</option>
+                        </select>
+                      );
+                    })()}
+                  </td></tr>
+                  <tr><td colSpan={2} className="pad-x">
+                    <button className="small" onClick={() => setOwnPlaces(orientSel.map(k => [k, undefined]))} title={tx('I testi selezionati tornano nella posizione automatica (Canc)')}>{tx('Posizione automatica')}</button>{' '}
+                    <button className="small" onClick={() => setOrientSel([])}>{tx('Deseleziona')}</button>
+                  </td></tr>
+                </>}
                 <tr className="prop-group"><td colSpan={2}>{tx('Testi sullo schema a {0}°', orient)}</td></tr>
                 {orientKeys.map(k => {
                   const p = placeOf(k)!;
                   return (
-                    <tr key={k} className={orientSel === k ? 'row-sel' : undefined}>
-                      <td className="prop-name" onClick={() => setOrientSel(k)}>{keyName(k)}{ownPlaces[k] ? ' •' : ''}</td>
+                    <tr key={k} className={orientSel.includes(k) ? 'row-sel' : undefined}>
+                      <td className="prop-name" title={tx('Clic: scegli il testo; Maiusc+clic: aggiungi o togli dalla selezione')}
+                        onClick={e => setOrientSel(cur => (e.shiftKey || e.metaKey || e.ctrlKey ? (cur.includes(k) ? cur.filter(x => x !== k) : [...cur, k]) : [k]))}>{keyName(k)}{ownPlaces[k] ? ' •' : ''}</td>
                       <td className="prop-value nowrap">
                         <select value={p.anchor ?? 'start'} title={tx('Allineamento')} onChange={e => setOwnPlace(k, { ...p, rot: ownRot(k), anchor: e.target.value as TextPlace['anchor'] })}>
                           <option value="start">{tx('a sinistra')}</option><option value="middle">{tx('al centro')}</option><option value="end">{tx('a destra')}</option>
@@ -1640,6 +1747,8 @@ export function SymbolEditor() {
                 // Più punti di connessione selezionati: la posizione della designazione per tutti
                 const ids = sel.flatMap(it => (it.kind === 'pin' ? [it.i] : []));
                 const vals = new Set(ids.map(i => sym.pins[i].labelPos ?? ''));
+                // Tipo di ogni punto come «collega|verso» (il vecchio «morsetto» vale come ingresso e uscita)
+                const types = new Set(ids.map(i => `${sym.pins[i].medium ?? ''}|${sym.pins[i].kind === 'terminal' ? '' : sym.pins[i].kind ?? ''}`));
                 return (
                   <>
                     <tr className="prop-group"><td colSpan={2}>{tx('Punti di connessione selezionati ({0})', ids.length)}</td></tr>
@@ -1649,6 +1758,17 @@ export function SymbolEditor() {
                         <option value="">{tx('automatica (secondo il filo)')}</option>
                         <option value="tl">{tx('in alto a sinistra')}</option><option value="tr">{tx('in alto a destra')}</option>
                         <option value="bl">{tx('in basso a sinistra')}</option><option value="br">{tx('in basso a destra')}</option>
+                      </select>
+                    </td></tr>
+                    <tr><td className="prop-name">{tx('Tipo')}</td><td className="prop-value">
+                      <select value={types.size === 1 ? [...types][0] : '*'} title={tx('Fili o cavi bus, ingresso, uscita o tutti e due: per tutti i punti selezionati')}
+                        onChange={e => {
+                          const [m, k] = e.target.value.split('|');
+                          update({ pins: sym.pins.map((q, i) => (ids.includes(i) ? { ...q, medium: (m || undefined) as PinMedium | undefined, kind: (k || undefined) as PinKind | undefined } : q)) });
+                        }}>
+                        {types.size > 1 && <option value="*" disabled>{tx('valori diversi')}</option>}
+                        {PIN_KINDS.map(([t, m, k, , label]) => <option key={t} value={`${m}|${k ?? ''}`}>{tx(label)}</option>)}
+                        {types.has('|') && <option value="|">{tx('fili e bus (generico, non controllato)')}</option>}
                       </select>
                     </td></tr>
                   </>

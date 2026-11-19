@@ -1372,9 +1372,13 @@ function PlcGroupProps({ gid }: { gid: string }) {
               </Row>
               <Row label={tx('Pin della scheda')}>
                 <span className="panel-row">
-                  {Object.keys(m.pinLabels).sort().map(pid => (
+                  {Object.keys(m.pinLabels).sort().map((pid, k, ids) => (
                     <Field key={pid} value={m.pinLabels[pid] ?? ''} placeholder={pid}
-                      onCommit={v => upd(m.id, { pinLabels: { ...m.pinLabels, [pid]: v.trim() } })} />
+                      onCommit={v => {
+                        // Sul canale della scheda: li vedono anche vista PLC, panoramiche e Lista I/O
+                        if (card && m.plcChannel) st().setChannelPins(card.id, m.plcChannel, ids.map((id, j) => (j === k ? v : m.pinLabels[id] ?? '')));
+                        else upd(m.id, { pinLabels: { ...m.pinLabels, [pid]: v.trim() } });
+                      }} />
                   ))}
                 </span>
               </Row>

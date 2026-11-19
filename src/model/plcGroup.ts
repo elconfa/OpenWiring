@@ -50,6 +50,9 @@ export function groupConfig(page: Page, gid: string): PlcGroupCfg | undefined {
  * in sequenza (1 morsetto: 1, 2, 3…; 2 morsetti: 1-2, 3-4…)
  */
 export function defaultGroupPins(card: PlcCard | undefined, kind: IoKind, index: number, terms: 1 | 2): Record<string, string> {
+  // Pin già scritti sul canale (vista PLC o un altro gruppo): si usano quelli
+  const own = card?.io?.[`${kind}${index}`]?.pins?.filter(Boolean);
+  if (own?.length) return terms === 1 ? { 1: own[0] } : { 1: own[0], 2: own[1] ?? '' };
   const fromPart = card?.custom?.terminals?.[`${kind}${index}`];
   if (terms === 1) return { 1: fromPart ?? String(index + 1) };
   return fromPart ? { 1: fromPart, 2: '' } : { 1: String(2 * index + 1), 2: String(2 * index + 2) };

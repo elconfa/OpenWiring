@@ -3774,5 +3774,22 @@
   "Punti per fili": "Points pour fils",
   "uscita": "sortie",
   "Uscite collegate tra loro sullo stesso conduttore: {0}": "Sorties reliées entre elles sur le même conducteur : {0}",
-  "Verso": "Sens"
+  "Verso": "Sens",
+  "Fili o cavi bus, ingresso, uscita o tutti e due: per tutti i punti selezionati": "Fils ou câbles bus, entrée, sortie ou les deux : pour tous les points sélectionnés",
+  "Morsetto 1": "Borne 1",
+  "Morsetto 2": "Borne 2",
+  "Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O": "Broche de la carte où se câble le fil du canal : valable aussi dans le schéma, les vues d’ensemble et la liste E/S",
+  "Allineamento del testo": "Alignement du texte",
+  "Clic: scegli il testo; Maiusc+clic: aggiungi o togli dalla selezione": "Clic : choisir le texte ; Maj+clic : ajouter ou retirer de la sélection",
+  "Deseleziona": "Désélectionner",
+  "Distribuisci": "Répartir",
+  "Distribuisci in orizzontale": "Répartir horizontalement",
+  "Distribuisci in verticale": "Répartir verticalement",
+  "I testi selezionati tornano nella posizione automatica (Canc)": "Les textes sélectionnés reviennent à la position automatique (Suppr)",
+  "il primo e l'ultimo restano fermi, gli altri a distanze uguali (servono almeno 3 testi)": "le premier et le dernier restent fixes, les autres à distances égales (au moins 3 textes)",
+  "il primo e l'ultimo restano fermi, gli altri a distanze uguali; un gruppo conta come un elemento solo (servono almeno 3 elementi)": "le premier et le dernier restent fixes, les autres à distances égales ; un groupe compte comme un seul élément (au moins 3 éléments)",
+  "Orientamento di tutti i testi selezionati (R)": "Orientation de tous les textes sélectionnés (R)",
+  "Posizione automatica": "Position automatique",
+  "Testi selezionati ({0})": "Textes sélectionnés ({0})",
+  "TESTI SULLO SCHEMA A {0}°: clic su un testo per sceglierlo, Maiusc+clic o riquadro per sceglierne più di uno (⌘A tutti); trascinali o spostali con le frecce, R li ruota, nel pannello si allineano e distribuiscono (in blu quelli messi a mano; Canc o ↺: posizione automatica). Qui grafica e punti di connessione non si modificano: «Disegno», Esc, uno strumento o un comando tornano al disegno": "TEXTES SUR LE SCHÉMA À {0}° : clic sur un texte pour le choisir, Maj+clic ou cadre pour en choisir plusieurs (⌘A tous) ; faites-les glisser ou déplacez-les avec les flèches, R les fait tourner, dans le panneau on les aligne et les répartit (en bleu ceux placés à la main ; Suppr ou ↺ : position automatique). Ici le dessin et les points de connexion ne se modifient pas : « Dessin », Échap, un outil ou une commande reviennent au dessin"
 }

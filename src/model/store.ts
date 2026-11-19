@@ -368,6 +368,11 @@ export interface State {
   /** Nuova scheda; con tag la scheda prende quella sigla (es. di un componente già nello schema) */
   addPlcCard(typeId: string, station?: string, tag?: string): PlcCard;
   updatePlcCard(id: string, patch: Partial<PlcCard>): void;
+  /**
+   * Pin della scheda di un canale (fino a 2): si scrivono sul canale e sui canali dei gruppi I/O
+   * disegnati nello schema, così vista PLC, schema, panoramiche e liste mostrano gli stessi
+   */
+  setChannelPins(cardId: string, channel: string, pins: string[]): void;
   deletePlcCard(id: string): void;
   movePlcCard(id: string, delta: number): void;
   reassignPlcAddresses(): void;
@@ -1619,6 +1624,25 @@ export const useStore = create<State>((set, get) => {
       get().commit(p => { p.plc.cards.push(card); });
       get().logMsg(tx('Aggiunta la scheda PLC -{0} ({1})', card.tag, cardType(card).name));
       return card;
+    },
+    setChannelPins(cardId, channel, pins) {
+      get().commit(p => {
+        const c = p.plc.cards.find(x => x.id === cardId);
+        if (!c) return;
+        const list = pins.map(x => x.trim()).slice(0, 2);
+        while (list.length && !list[list.length - 1]) list.pop();
+        const cur = { ...(c.io?.[channel] ?? {}) };
+        if (list.length) cur.pins = list; else delete cur.pins;
+        const io = { ...(c.io ?? {}) };
+        if (Object.keys(cur).length) io[channel] = cur; else delete io[channel];
+        if (Object.keys(io).length) c.io = io; else delete c.io;
+        // I canali dei gruppi I/O nello schema mostrano gli stessi pin
+        for (const pg of p.pages) for (const e of pg.elements) {
+          if (e.kind !== 'symbol' || !e.plcGroup || e.tag !== c.tag || e.plcChannel !== channel) continue;
+          const ids = Object.keys(e.pinLabels).sort();
+          e.pinLabels = Object.fromEntries(ids.map((id, k) => [id, list[k] ?? '']));
+        }
+      });
     },
     updatePlcCard(id, patch) {
       get().commit(p => {

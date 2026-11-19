@@ -40,3 +40,27 @@ export function alignDeltas(boxes: AlignBox[], mode: AlignMode): Pt[] {
     }
   });
 }
+
+export type DistributeAxis = 'h' | 'v';
+export const DISTRIBUTE_MODES: { id: DistributeAxis; name: string; icon: string }[] = [
+  { id: 'h', name: tn('Distribuisci in orizzontale'), icon: '⇹' },
+  { id: 'v', name: tn('Distribuisci in verticale'), icon: '⇳' },
+];
+
+/**
+ * Distribuzione a passo uguale: il primo e l'ultimo elemento (nella direzione scelta) restano
+ * fermi, quelli in mezzo si spostano perché i punti di riferimento siano equidistanti
+ */
+export function distributeDeltas(boxes: AlignBox[], axis: DistributeAxis): Pt[] {
+  const out = boxes.map(() => ({ x: 0, y: 0 }));
+  if (boxes.length < 3) return out;
+  const v = (b: AlignBox) => (axis === 'h' ? b.ref.x : b.ref.y);
+  const order = boxes.map((b, i) => i).sort((a, b) => v(boxes[a]) - v(boxes[b]));
+  const a = v(boxes[order[0]]), z = v(boxes[order[order.length - 1]]);
+  const step = (z - a) / (order.length - 1);
+  order.forEach((i, k) => {
+    const d = a + step * k - v(boxes[i]);
+    out[i] = axis === 'h' ? { x: d, y: 0 } : { x: 0, y: d };
+  });
+  return out;
+}

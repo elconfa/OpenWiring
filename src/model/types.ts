@@ -1246,7 +1246,14 @@ export interface PlcCard {
   /** Scheda creata da un articolo: numero di canali e morsetti propri al posto del tipo generico */
   custom?: { name: string; channels: Partial<Record<IoKind, number>>; terminals?: Record<string, string> };
   /** Nomi e commenti dei canali (anche non disegnati), es. da import della tabella variabili */
-  io?: Record<string, { symbol?: string; comment?: string }>;
+  io?: Record<string, {
+    symbol?: string; comment?: string;
+    /**
+     * Pin della scheda del canale (fino a 2, es. ["3", "4"] o ["I0.0"]): dove si cablano i fili.
+     * Si scrivono nella vista PLC o nel gruppo I/O dello schema e valgono per tutti e due
+     */
+    pins?: string[];
+  }>;
   /** Posizione nella stazione: rack (telaio) e posto scheda (slot) */
   rack?: number;
   slot?: number;

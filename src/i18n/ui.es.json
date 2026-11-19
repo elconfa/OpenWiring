@@ -3774,5 +3774,22 @@
   "Punti per fili": "Puntos para hilos",
   "uscita": "salida",
   "Uscite collegate tra loro sullo stesso conduttore: {0}": "Salidas conectadas entre sí en el mismo conductor: {0}",
-  "Verso": "Sentido"
+  "Verso": "Sentido",
+  "Fili o cavi bus, ingresso, uscita o tutti e due: per tutti i punti selezionati": "Hilos o cables bus, entrada, salida o ambos: para todos los puntos seleccionados",
+  "Morsetto 1": "Borne 1",
+  "Morsetto 2": "Borne 2",
+  "Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O": "Pin de la tarjeta donde se cablea el hilo del canal: vale también en el esquema, las vistas generales y la lista de E/S",
+  "Allineamento del testo": "Alineación del texto",
+  "Clic: scegli il testo; Maiusc+clic: aggiungi o togli dalla selezione": "Clic: elegir el texto; Mayús+clic: añadir o quitar de la selección",
+  "Deseleziona": "Deseleccionar",
+  "Distribuisci": "Distribuir",
+  "Distribuisci in orizzontale": "Distribuir en horizontal",
+  "Distribuisci in verticale": "Distribuir en vertical",
+  "I testi selezionati tornano nella posizione automatica (Canc)": "Los textos seleccionados vuelven a la posición automática (Supr)",
+  "il primo e l'ultimo restano fermi, gli altri a distanze uguali (servono almeno 3 testi)": "el primero y el último quedan fijos, los demás a distancias iguales (al menos 3 textos)",
+  "il primo e l'ultimo restano fermi, gli altri a distanze uguali; un gruppo conta come un elemento solo (servono almeno 3 elementi)": "el primero y el último quedan fijos, los demás a distancias iguales; un grupo cuenta como un solo elemento (al menos 3 elementos)",
+  "Orientamento di tutti i testi selezionati (R)": "Orientación de todos los textos seleccionados (R)",
+  "Posizione automatica": "Posición automática",
+  "Testi selezionati ({0})": "Textos seleccionados ({0})",
+  "TESTI SULLO SCHEMA A {0}°: clic su un testo per sceglierlo, Maiusc+clic o riquadro per sceglierne più di uno (⌘A tutti); trascinali o spostali con le frecce, R li ruota, nel pannello si allineano e distribuiscono (in blu quelli messi a mano; Canc o ↺: posizione automatica). Qui grafica e punti di connessione non si modificano: «Disegno», Esc, uno strumento o un comando tornano al disegno": "TEXTOS EN EL ESQUEMA A {0}°: clic en un texto para elegirlo, Mayús+clic o recuadro para elegir varios (⌘A todos); arrástralos o muévelos con las flechas, R los gira, en el panel se alinean y distribuyen (en azul los colocados a mano; Supr o ↺: posición automática). Aquí el dibujo y los puntos de conexión no se modifican: «Dibujo», Esc, una herramienta o un comando vuelven al dibujo"
 }

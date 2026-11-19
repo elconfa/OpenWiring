@@ -74,7 +74,7 @@ export function PlcView() {
   });
   type IoRow = typeof shown[number];
   const ig = useGrid<IoRow>('plc-io', shown, {
-    card: r => r.card.tag, channel: r => r.channel, terminal: r => r.terminal, address: r => r.address, symbol: r => r.symbol,
+    card: r => r.card.tag, channel: r => r.channel, pin1: r => r.pins[0] ?? '', pin2: r => r.pins[1] ?? '', address: r => r.address, symbol: r => r.symbol,
     comment: r => r.comment, connected: r => r.connected, pos: r => r.location,
   });
 
@@ -255,7 +255,7 @@ export function PlcView() {
       <div className="table-wrap">
         <table {...gridProps(ig)}>
           <thead><tr>
-            <Th g={ig} k="card">{tx('Scheda')}</Th><Th g={ig} k="channel">{tx('Canale')}</Th><Th g={ig} k="terminal">{tx('Morsetto')}</Th><Th g={ig} k="address">{tx('Indirizzo')}</Th>
+            <Th g={ig} k="card">{tx('Scheda')}</Th><Th g={ig} k="channel">{tx('Canale')}</Th><Th g={ig} k="pin1">{tx('Morsetto 1')}</Th><Th g={ig} k="pin2">{tx('Morsetto 2')}</Th><Th g={ig} k="address">{tx('Indirizzo')}</Th>
             <Th g={ig} k="symbol">{tx('Nome simbolico')}</Th><Th g={ig} k="comment">{tx('Commento')}</Th><Th g={ig} k="connected">{tx('Collegato a')}</Th><Th g={ig} k="pos">{tx('Posizione')}</Th>
           </tr></thead>
           <tbody>
@@ -275,7 +275,12 @@ export function PlcView() {
                 <tr key={`${r.card.id}|${r.channel}`} className={r.inst ? '' : 'free'}>
                   <td>-{r.card.tag}</td>
                   <td>{r.channel}</td>
-                  <td>{r.terminal !== r.channel ? r.terminal : ''}</td>
+                  {[0, 1].map(k => (
+                    <td key={`pin${k}`} title={tx('Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O')}>
+                      <Cell value={r.pins[k] ?? ''} width={56} placeholder={k === 0 ? '—' : ''}
+                        onCommit={v => st().setChannelPins(r.card.id, r.channel, k === 0 ? [v, r.pins[1] ?? ''] : [r.pins[0] ?? '', v])} />
+                    </td>
+                  ))}
                   <td className="mono">{r.address}</td>
                   <td><Cell value={r.symbolIsDefault ? '' : r.symbol} placeholder={r.inst ? r.symbol : 'libero'} onCommit={setSym} /></td>
                   <td><Cell value={r.ownComment} placeholder={r.inst ? r.comment : ''} onCommit={setComment} /></td>

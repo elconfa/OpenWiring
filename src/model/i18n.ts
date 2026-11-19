@@ -93,6 +93,8 @@ const BUILTIN: Record<string, [string, string]> = {
   'maschera': ['Subnet mask', 'Subnetzmaske'],
   'morsettiera': ['Terminal strip', 'Klemmleiste'],
   'morsetto': ['Terminal', 'Klemme'],
+  'morsetto 1': ['Terminal 1', 'Klemme 1'],
+  'morsetto 2': ['Terminal 2', 'Klemme 2'],
   'n.': ['No.', 'Nr.'],
   'n. filo': ['Wire no.', 'Drahtnr.'],
   'nome dispositivo': ['Device name', 'Gerätename'],

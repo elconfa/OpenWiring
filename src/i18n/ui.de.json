@@ -3774,5 +3774,22 @@
   "Punti per fili": "Drahtanschlüsse",
   "uscita": "Ausgang",
   "Uscite collegate tra loro sullo stesso conduttore: {0}": "Ausgänge auf demselben Leiter miteinander verbunden: {0}",
-  "Verso": "Richtung"
+  "Verso": "Richtung",
+  "Fili o cavi bus, ingresso, uscita o tutti e due: per tutti i punti selezionati": "Drähte oder Buskabel, Eingang, Ausgang oder beides: für alle ausgewählten Anschlüsse",
+  "Morsetto 1": "Klemme 1",
+  "Morsetto 2": "Klemme 2",
+  "Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O": "Pin der Karte, an dem der Draht des Kanals angeschlossen wird: gilt auch im Schaltplan, in den Übersichten und in der E/A-Liste",
+  "Allineamento del testo": "Textausrichtung",
+  "Clic: scegli il testo; Maiusc+clic: aggiungi o togli dalla selezione": "Klick: Text wählen; Umschalt+Klick: zur Auswahl hinzufügen oder entfernen",
+  "Deseleziona": "Auswahl aufheben",
+  "Distribuisci": "Verteilen",
+  "Distribuisci in orizzontale": "Horizontal verteilen",
+  "Distribuisci in verticale": "Vertikal verteilen",
+  "I testi selezionati tornano nella posizione automatica (Canc)": "Die ausgewählten Texte kehren in die automatische Position zurück (Entf)",
+  "il primo e l'ultimo restano fermi, gli altri a distanze uguali (servono almeno 3 testi)": "der erste und der letzte bleiben stehen, die anderen in gleichen Abständen (mindestens 3 Texte)",
+  "il primo e l'ultimo restano fermi, gli altri a distanze uguali; un gruppo conta come un elemento solo (servono almeno 3 elementi)": "der erste und der letzte bleiben stehen, die anderen in gleichen Abständen; eine Gruppe zählt als ein Element (mindestens 3 Elemente)",
+  "Orientamento di tutti i testi selezionati (R)": "Ausrichtung aller ausgewählten Texte (R)",
+  "Posizione automatica": "Automatische Position",
+  "Testi selezionati ({0})": "Ausgewählte Texte ({0})",
+  "TESTI SULLO SCHEMA A {0}°: clic su un testo per sceglierlo, Maiusc+clic o riquadro per sceglierne più di uno (⌘A tutti); trascinali o spostali con le frecce, R li ruota, nel pannello si allineano e distribuiscono (in blu quelli messi a mano; Canc o ↺: posizione automatica). Qui grafica e punti di connessione non si modificano: «Disegno», Esc, uno strumento o un comando tornano al disegno": "TEXTE IM SCHALTPLAN BEI {0}°: Klick auf einen Text wählt ihn, Umschalt+Klick oder Rahmen wählt mehrere (⌘A alle); ziehen oder mit den Pfeilen verschieben, R dreht sie, im Bereich werden sie ausgerichtet und verteilt (blau: von Hand gesetzt; Entf oder ↺: automatische Position). Grafik und Anschlüsse werden hier nicht geändert: «Zeichnung», Esc, ein Werkzeug oder ein Befehl kehren zur Zeichnung zurück"
 }

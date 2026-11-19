@@ -3,7 +3,7 @@
 // Lavorano su una copia del simbolo e ne restituiscono una nuova.
 import type { Prim, PinDef, PinDir, Pt, SymbolDef } from './types';
 import { primBounds, segmentTouchesBox, polylineTouchesBox } from './geometry';
-import { alignDeltas, type AlignBox, type AlignMode } from './align';
+import { alignDeltas, distributeDeltas, type AlignBox, type AlignMode, type DistributeAxis } from './align';
 
 export type Item = { kind: 'prim' | 'pin' | 'field'; i: number } | { kind: 'tag' };
 
@@ -183,7 +183,27 @@ function transform(sym: SymbolDef, items: Item[], fp: (p: Prim) => Prim, fq: (q:
  * primo selezionato; per testi e punti di connessione il riferimento è il punto di inserimento
  */
 export function alignItems(sym: SymbolDef, items: Item[], mode: AlignMode): SymbolDef {
-  items = editable(sym, items);
+  const { units, boxes } = alignUnits(sym, editable(sym, items));
+  return moveUnits(sym, units, alignDeltas(boxes, mode));
+}
+
+/** Distribuisce a passo uguale tra il primo e l'ultimo; un gruppo conta come un elemento solo */
+export function distributeItems(sym: SymbolDef, items: Item[], axis: DistributeAxis): SymbolDef {
+  const { units, boxes } = alignUnits(sym, editable(sym, items));
+  return moveUnits(sym, units, distributeDeltas(boxes, axis));
+}
+
+/** Numero di elementi da allineare o distribuire (un gruppo vale uno) */
+export const alignUnitCount = (sym: SymbolDef, items: Item[]) => alignUnits(sym, editable(sym, items)).units.length;
+
+function moveUnits(sym: SymbolDef, units: Item[][], d: Pt[]): SymbolDef {
+  let out = sym;
+  units.forEach((u, i) => { if (d[i].x || d[i].y) out = moveItems(out, u, Math.round(d[i].x * 100) / 100, Math.round(d[i].y * 100) / 100); });
+  return out;
+}
+
+/** Elementi raggruppati per gruppo, con ingombro e punto di riferimento di ognuno */
+function alignUnits(sym: SymbolDef, items: Item[]): { units: Item[][]; boxes: AlignBox[] } {
   // Un gruppo si allinea come un elemento solo: il suo ingombro, il centro come riferimento
   const units: Item[][] = [];
   const byGroup = new Map<string, Item[]>();
@@ -204,10 +224,7 @@ export function alignItems(sym: SymbolDef, items: Item[], mode: AlignMode): Symb
     else { const q = sym.prims[it.i]; if (q.t === 'text') ref = { x: q.x, y: q.y }; }
     return { ...b, ref };
   });
-  const d = alignDeltas(boxes, mode);
-  let out = sym;
-  units.forEach((u, i) => { if (d[i].x || d[i].y) out = moveItems(out, u, Math.round(d[i].x * 100) / 100, Math.round(d[i].y * 100) / 100); });
-  return out;
+  return { units, boxes };
 }
 
 const withRot = <T extends { rot?: number }>(x: T, rot: number | undefined): T => {
