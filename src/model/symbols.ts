@@ -29,6 +29,10 @@ const pins2 = (a: string, b: string, len = 16): PinDef[] => [P('1', 0, 0, a), P(
  * successivo c'è posto per 10 fili sulla griglia di 4 mm (componenti, fotocellule e sigle)
  */
 export const PLC_GROUP_STEP = 40, PLC_GROUP_H = 28;
+/** Morsetti per canale dei gruppi I/O PLC: 1, 2, oppure 4 (prese M12 delle stazioni I/O) */
+export type PlcTerms = 1 | 2 | 4;
+/** Passo dei canali secondo i morsetti: con 4 morsetti (uno ogni 16 mm) il canale è largo 64 mm */
+export const plcGroupStep = (n: PlcTerms) => (n === 4 ? 64 : PLC_GROUP_STEP);
 
 const shiftPrim = (p: Prim, dx: number): Prim => {
   switch (p.t) {
@@ -44,14 +48,14 @@ const shiftPrim = (p: Prim, dx: number): Prim => {
  * (in basso per le uscite) a x 0 e, con due morsetti, 16; nel riquadro indirizzo, variabile e
  * commento uno sotto l'altro, che vanno a capo da soli (textBox)
  */
-function plcSlice(id: string, io: 'DI' | 'DO', n: 1 | 2): SymbolDef {
-  const H = PLC_GROUP_H, x0 = -4, x1 = PLC_GROUP_STEP - 4;
+function plcSlice(id: string, io: 'DI' | 'DO', n: PlcTerms): SymbolDef {
+  const H = PLC_GROUP_H, x0 = -4, x1 = plcGroupStep(n) - 4;
   // I morsetti restano dove erano con il riquadro alto 14 mm (uscite a y 18): il riquadro più alto
   // cresce verso il basso per gli ingressi e verso l'alto per le uscite, e i fili non si staccano
   const top = io === 'DI' ? 4 : 14 - H, bottom = top + H;
   const pinY = io === 'DI' ? 0 : bottom + 4, stub = io === 'DI' ? [0, 4] : [bottom, bottom + 4];
-  // Con due morsetti per canale il secondo sta 16 mm a destra del primo
-  const xs = n === 1 ? [0] : [0, 16];
+  // Con più morsetti per canale uno ogni 16 mm a destra del primo
+  const xs = Array.from({ length: n }, (_, i) => i * 16);
   // Posizioni indicative (per l'editor dei simboli): sullo schema i testi seguono il riquadro textBox
   const row = (f: 'plcAddress' | 'plcSymbol' | 'plcComment', y: number) => ({ f, x: x0 + 1.2, y: top + y, size: 2.5, anchor: 'start' as const });
   return {
@@ -503,13 +507,15 @@ export const BUILTIN_SYMBOLS: SymbolDef[] = [
   // Gruppi I/O: canali uno accanto all'altro (passo 8 mm) in un riquadro unico; sotto ogni canale
   // indirizzo, variabile e commento scritti dal basso verso l'alto. I canali sono simboli nascosti:
   // si inseriscono con i gruppi
-  ...([['di', 'DI', 1], ['di', 'DI', 2], ['do', 'DO', 1], ['do', 'DO', 2]] as const).flatMap(([k, io, n]) => {
+  // Con 4 morsetti per canale (prese M12: +24 V, segnale, 0 V, secondo segnale) il gruppo ha 4 canali
+  ...([['di', 'DI', 1], ['di', 'DI', 2], ['di', 'DI', 4], ['do', 'DO', 1], ['do', 'DO', 2], ['do', 'DO', 4]] as const).flatMap(([k, io, n]) => {
     const slice = plcSlice(`plc_ch_${k}${n}`, io, n);
     const what = io === 'DI' ? 'ingressi' : 'uscite';
+    const count = n === 4 ? 4 : 8;
     const group: SymbolDef = {
-      id: `plc_grp_${k}${n}`, name: `Gruppo 8 ${what} PLC (${n} ${n === 1 ? 'morsetto' : 'morsetti'} per canale)`, category: 'PLC', letter: 'A', role: 'plc', io,
-      prims: Array.from({ length: 8 }, (_, i) => slice.prims.map(p => shiftPrim(p, i * PLC_GROUP_STEP))).flat(),
-      pins: [], tagPos: slice.tagPos, plcGroup: { slice: slice.id, count: 8 },
+      id: `plc_grp_${k}${n}`, name: `Gruppo ${count} ${what} PLC (${n} ${n === 1 ? 'morsetto' : 'morsetti'} per canale)`, category: 'PLC', letter: 'A', role: 'plc', io,
+      prims: Array.from({ length: count }, (_, i) => slice.prims.map(p => shiftPrim(p, i * plcGroupStep(n)))).flat(),
+      pins: [], tagPos: slice.tagPos, plcGroup: { slice: slice.id, count },
       description: 'Si sceglie la scheda e il primo canale; indirizzi automatici, pin, variabili e commenti modificabili per ogni canale',
     };
     return [slice, group];

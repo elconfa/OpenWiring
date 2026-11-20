@@ -108,4 +108,31 @@ describe('tipi di scheda', () => {
     expect(channelsOf(ca).length).toBe(8);
     expect(st().project.plc.cards.find(c => c.id === b.id)!.start.DI).toBe(1);
   });
+  it('gruppi a 4 morsetti per canale (prese M12): un morsetto ogni 16 mm, canali ogni 64 mm, 4 pin', async () => {
+    const st = await store();
+    const { getSymbol } = await import('../src/model/geometry');
+    expect(getSymbol('plc_ch_di4')!.pins.map(p => p.x)).toEqual([0, 16, 32, 48]);
+    expect(getSymbol('plc_ch_do4')!.pins.map(p => p.x)).toEqual([0, 16, 32, 48]);
+    const first = st().placeSymbol('plc_grp_di4', { x: 40, y: 40 }, 0)!;
+    const gid = first.plcGroup!.id;
+    const page = () => st().project.pages[0];
+    let m = groupMembers(page(), gid);
+    expect(m.map(e => e.plcChannel)).toEqual(['DI0', 'DI1', 'DI2', 'DI3']);
+    expect(m.map(e => e.x)).toEqual([40, 104, 168, 232]);
+    expect(m[1].pinLabels).toEqual({ 1: '5', 2: '6', 3: '7', 4: '8' });
+    // Pin scritti dalla scheda: tutti e 4 restano
+    const card = st().project.plc.cards.find(c => c.tag === m[0].tag)!;
+    st().setChannelPins(card.id, 'DI0', ['X10.1', 'X10.4', 'X10.3', 'X10.2']);
+    m = groupMembers(page(), gid);
+    expect(m[0].pinLabels).toEqual({ 1: 'X10.1', 2: 'X10.4', 3: 'X10.3', 4: 'X10.2' });
+    expect(ioAssignments(st().project).find(r => r.channel === 'DI0')!.pins).toEqual(['X10.1', 'X10.4', 'X10.3', 'X10.2']);
+    // Da 4 a 2 morsetti e ritorno: il gruppo resta dov'è con il passo giusto
+    st().updatePlcGroup(gid, { terms: 2 });
+    m = groupMembers(page(), gid);
+    expect(m.map(e => e.x)).toEqual([40, 80, 120, 160]);
+    st().updatePlcGroup(gid, { terms: 4, count: 6 });
+    m = groupMembers(page(), gid);
+    expect(m.map(e => e.x)).toEqual([40, 104, 168, 232, 296, 360]);
+    expect(groupConfig(page(), gid)).toMatchObject({ terms: 4, count: 6 });
+  });
 });

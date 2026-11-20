@@ -137,7 +137,7 @@ export function pasteElements(project: Project, pageId: string, clip: ClipData, 
         groupMap.set(c.plcGroup.id, gid);
         c.plcGroup = { id: gid, index: c.plcGroup.index, count: c.plcGroup.count };
         const ch = parseChannel(alloc.channel)!;
-        c.pinLabels = defaultGroupPins(alloc.card, ch.kind, ch.index, sym.pins.length > 1 ? 2 : 1);
+        c.pinLabels = defaultGroupPins(alloc.card, ch.kind, ch.index, sym.pins.length >= 4 ? 4 : sym.pins.length > 1 ? 2 : 1);
       }
     }
     add(c);

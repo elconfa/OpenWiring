@@ -1355,8 +1355,9 @@ function PlcGroupProps({ gid }: { gid: string }) {
           </select>
         </Row>
         <Row label={tx('Morsetti per canale')}>
-          <select value={cfg.terms} onChange={e => st().updatePlcGroup(gid, { terms: e.target.value === '2' ? 2 : 1 })}>
+          <select value={cfg.terms} onChange={e => st().updatePlcGroup(gid, { terms: e.target.value === '4' ? 4 : e.target.value === '2' ? 2 : 1 })}>
             <option value={1}>1</option><option value={2}>{tx('2 (es. schede safety, alimentazione del sensore)')}</option>
+            <option value={4}>{tx('4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)')}</option>
           </select>
         </Row>
         <Row label={tx('Numeri dei pin')} vis={vis('pins')} />

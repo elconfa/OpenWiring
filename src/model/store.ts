@@ -49,7 +49,7 @@ import { titleBlockTemplates, templateFields } from './titleBlocks';
 import { linkPartners, pairLinks } from './links';
 import { nameTapsInOrder } from './bundles';
 import { withShow, type WireVisKey, type SymVisKey } from './visibility';
-import { buildPlcGroup, firstFreeChannel, groupConfig, groupMembers, newGroupId, type PlcGroupCfg } from './plcGroup';
+import { buildPlcGroup, firstFreeChannel, groupConfig, groupMembers, newGroupId, termsOf, type PlcGroupCfg } from './plcGroup';
 import { nextTerminal, nextToPlace, parseTerminalNo, terminalNo, ensureStrip, renumberStrip as renumberStripModel, renameStrip as renameStripModel, renameTerminals as renameTerminalsModel, addLevel, addJumper as addJumperModel, removeFromJumpers, addSpares as addSparesModel, removeSpares as removeSparesModel, setSparePart, syncStripPages, allStrips } from './terminals';
 import { nextTagFor, renumberDevices, settingsOf } from './numbering';
 import { computeNetlist, lockWireNumbers, clearWireNumbers, syncPlcLinkNames, withNetlistCache, invalidateNetlist } from './netlist';
@@ -369,7 +369,7 @@ export interface State {
   addPlcCard(typeId: string, station?: string, tag?: string): PlcCard;
   updatePlcCard(id: string, patch: Partial<PlcCard>): void;
   /**
-   * Pin della scheda di un canale (fino a 2): si scrivono sul canale e sui canali dei gruppi I/O
+   * Pin della scheda di un canale (fino a 4): si scrivono sul canale e sui canali dei gruppi I/O
    * disegnati nello schema, così vista PLC, schema, panoramiche e liste mostrano gli stessi
    */
   setChannelPins(cardId: string, channel: string, pins: string[]): void;
@@ -1236,7 +1236,7 @@ export const useStore = create<State>((set, get) => {
         }
         const max = cardType(card).channels[sym.io] ?? 0;
         const first = created ? 0 : firstFreeChannel(project, card, sym.io, sym.plcGroup.count);
-        const cfg: PlcGroupCfg = { tag: card.tag, kind: sym.io, first, count: Math.max(1, Math.min(sym.plcGroup.count, max - first)), terms: sym.plcGroup.slice.endsWith('2') ? 2 : 1, unused: [] };
+        const cfg: PlcGroupCfg = { tag: card.tag, kind: sym.io, first, count: Math.max(1, Math.min(sym.plcGroup.count, max - first)), terms: termsOf(sym.plcGroup.slice), unused: [] };
         const gid = newGroupId();
         let ids: string[] = [];
         get().commit(p => {
@@ -1629,7 +1629,7 @@ export const useStore = create<State>((set, get) => {
       get().commit(p => {
         const c = p.plc.cards.find(x => x.id === cardId);
         if (!c) return;
-        const list = pins.map(x => x.trim()).slice(0, 2);
+        const list = pins.map(x => x.trim()).slice(0, 4);
         while (list.length && !list[list.length - 1]) list.pop();
         const cur = { ...(c.io?.[channel] ?? {}) };
         if (list.length) cur.pins = list; else delete cur.pins;

@@ -3838,5 +3838,6 @@
   "Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d'acquisto vanno i componenti con le quantità.": "Artikel aus mehreren Artikeln (z. B. Steckverbinder = Stifteinsatz + Gehäuse + Kabelverschraubung): wo dieser Artikel verwendet wird, kommen die Bestandteile mit ihren Mengen in Stückliste und Bestellliste.",
   "Connettore (senza tipo del catalogo)": "Steckverbinder (ohne Katalogtyp)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Keine Steckverbinder-Artikel: in Artikel den Artikel öffnen und den Typ in der Liste «Steckverbinder» wählen",
-  "Set di articoli": "Artikelset"
+  "Set di articoli": "Artikelset",
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (z. B. M12-Buchsen: +24 V, Signal, 0 V, zweites Signal)"
 }

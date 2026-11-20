@@ -278,7 +278,7 @@ export function PlcView() {
                   {[0, 1].map(k => (
                     <td key={`pin${k}`} title={tx('Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O')}>
                       <Cell value={r.pins[k] ?? ''} width={56} placeholder={k === 0 ? '—' : ''}
-                        onCommit={v => st().setChannelPins(r.card.id, r.channel, k === 0 ? [v, r.pins[1] ?? ''] : [r.pins[0] ?? '', v])} />
+                        onCommit={v => { const list = [...r.pins]; while (list.length < 2) list.push(''); list[k] = v; st().setChannelPins(r.card.id, r.channel, list); }} />
                     </td>
                   ))}
                   <td className="mono">{r.address}</td>

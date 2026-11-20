@@ -4,7 +4,7 @@
 // I/O, tabelle variabili, panoramica, controlli e netlist non cambiano).
 import type { IoKind, Page, PlcCard, Project, SymbolInstance } from './types';
 import { cardByTag, cardType, parseChannel, usedChannels } from './plc';
-import { PLC_GROUP_STEP } from './symbols';
+import { plcGroupStep, type PlcTerms } from './symbols';
 import { toWorld, uid } from './geometry';
 
 export interface PlcGroupCfg {
@@ -16,13 +16,13 @@ export interface PlcGroupCfg {
   /** Canali del gruppo, anche quelli nascosti */
   count: number;
   /** Morsetti per canale */
-  terms: 1 | 2;
+  terms: PlcTerms;
   /** Canali nascosti (posizioni nel gruppo): lo spazio resta, il canale non c'è */
   unused: number[];
 }
 
-export const sliceIdFor = (kind: IoKind, terms: 1 | 2) => `plc_ch_${kind === 'DO' ? 'do' : 'di'}${terms}`;
-const termsOf = (symbolId: string): 1 | 2 => (symbolId.endsWith('2') ? 2 : 1);
+export const sliceIdFor = (kind: IoKind, terms: PlcTerms) => `plc_ch_${kind === 'DO' ? 'do' : 'di'}${terms}`;
+export const termsOf = (symbolId: string): PlcTerms => (symbolId.endsWith('4') ? 4 : symbolId.endsWith('2') ? 2 : 1);
 
 /** Canali di un gruppo sulla pagina, in ordine di posizione */
 export function groupMembers(page: Page, gid: string): SymbolInstance[] {
@@ -47,15 +47,16 @@ export function groupConfig(page: Page, gid: string): PlcGroupCfg | undefined {
 
 /**
  * Numeri dei pin della scheda proposti per un canale: quelli dell'articolo se ci sono, altrimenti
- * in sequenza (1 morsetto: 1, 2, 3…; 2 morsetti: 1-2, 3-4…)
+ * in sequenza (1 morsetto: 1, 2, 3…; 2 morsetti: 1-2, 3-4…; 4 morsetti: 1-4, 5-8…)
  */
-export function defaultGroupPins(card: PlcCard | undefined, kind: IoKind, index: number, terms: 1 | 2): Record<string, string> {
+export function defaultGroupPins(card: PlcCard | undefined, kind: IoKind, index: number, terms: PlcTerms): Record<string, string> {
+  const ids = Array.from({ length: terms }, (_, i) => String(i + 1));
   // Pin già scritti sul canale (vista PLC o un altro gruppo): si usano quelli
   const own = card?.io?.[`${kind}${index}`]?.pins?.filter(Boolean);
-  if (own?.length) return terms === 1 ? { 1: own[0] } : { 1: own[0], 2: own[1] ?? '' };
+  if (own?.length) return Object.fromEntries(ids.map((id, i) => [id, own[i] ?? '']));
   const fromPart = card?.custom?.terminals?.[`${kind}${index}`];
-  if (terms === 1) return { 1: fromPart ?? String(index + 1) };
-  return fromPart ? { 1: fromPart, 2: '' } : { 1: String(2 * index + 1), 2: String(2 * index + 2) };
+  if (fromPart) return Object.fromEntries(ids.map((id, i) => [id, i === 0 ? fromPart : '']));
+  return Object.fromEntries(ids.map((id, i) => [id, String(terms * index + i + 1)]));
 }
 
 /**
@@ -72,9 +73,13 @@ export function buildPlcGroup(project: Project, page: Page, gid: string, cfg: Pl
   const rot = old[0]?.rot ?? place?.rot ?? 0;
   const mirror = old[0]?.mirror;
   // Passo lungo il gruppo, secondo la rotazione; origine del canale 0
-  const o = toWorld({ x: 0, y: 0, rot, mirror }, { x: 0, y: 0 }), s = toWorld({ x: 0, y: 0, rot, mirror }, { x: PLC_GROUP_STEP, y: 0 });
-  const axis = { x: s.x - o.x, y: s.y - o.y };
-  const anchor = old.length ? { x: old[0].x - axis.x * old[0].plcGroup!.index, y: old[0].y - axis.y * old[0].plcGroup!.index } : place?.at ?? { x: 0, y: 0 };
+  // (il passo dipende dai morsetti per canale: l'origine si ricava con il passo dei canali che c'erano)
+  const axisOf = (terms: PlcTerms) => {
+    const o = toWorld({ x: 0, y: 0, rot, mirror }, { x: 0, y: 0 }), s = toWorld({ x: 0, y: 0, rot, mirror }, { x: plcGroupStep(terms), y: 0 });
+    return { x: s.x - o.x, y: s.y - o.y };
+  };
+  const axis = axisOf(cfg.terms), oldAxis = old.length ? axisOf(termsOf(old[0].symbolId)) : axis;
+  const anchor = old.length ? { x: old[0].x - oldAxis.x * old[0].plcGroup!.index, y: old[0].y - oldAxis.y * old[0].plcGroup!.index } : place?.at ?? { x: 0, y: 0 };
   // Canali usati fuori dal gruppo
   const taken = usedChannels(project, cfg.tag);
   for (const e of old) if (e.plcChannel && e.tag === cfg.tag) taken.delete(e.plcChannel);

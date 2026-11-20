@@ -3838,5 +3838,6 @@
   "Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d'acquisto vanno i componenti con le quantità.": "Part made of several parts (e.g. connector = male insert + housing + cable gland): wherever this part is used, the components with their quantities go into the bill of materials and the purchase list.",
   "Connettore (senza tipo del catalogo)": "Connector (no catalogue type)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "No connector parts: in Parts open the part and choose the type in the «Connector» list",
-  "Set di articoli": "Part set"
+  "Set di articoli": "Part set",
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (e.g. M12 sockets: +24 V, signal, 0 V, second signal)"
 }

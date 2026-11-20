@@ -3838,5 +3838,6 @@
   "Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d'acquisto vanno i componenti con le quantità.": "Article composé de plusieurs articles (ex. connecteur = insert mâle + boîtier + presse-étoupe) : partout où cet article est utilisé, la nomenclature et la liste d'achat reçoivent les composants avec leurs quantités.",
   "Connettore (senza tipo del catalogo)": "Connecteur (sans type du catalogue)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Aucun article connecteur : dans Articles ouvrez l'article et choisissez le type dans la liste « Connecteur »",
-  "Set di articoli": "Ensemble d'articles"
+  "Set di articoli": "Ensemble d'articles",
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (ex. prises M12 : +24 V, signal, 0 V, second signal)"
 }

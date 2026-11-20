@@ -3838,5 +3838,6 @@
   "Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d'acquisto vanno i componenti con le quantità.": "Изделие из нескольких изделий (например, разъём = вставка-вилка + корпус + кабельный ввод): везде, где используется это изделие, в спецификацию и список закупки попадают его компоненты с количествами.",
   "Connettore (senza tipo del catalogo)": "Разъём (без типа из каталога)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Нет изделий-разъёмов: в «Изделия» откройте изделие и выберите тип в списке «Разъём»",
-  "Set di articoli": "Комплект изделий"
+  "Set di articoli": "Комплект изделий",
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (напр. разъёмы M12: +24 В, сигнал, 0 В, второй сигнал)"
 }

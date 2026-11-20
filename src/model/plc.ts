@@ -111,15 +111,15 @@ export function parseChannel(ch: string | undefined): { kind: IoKind; index: num
 export const terminalOf = (card: PlcCard, channel: string) => card.custom?.terminals?.[channel] ?? channel;
 
 /**
- * Pin della scheda di un canale (fino a 2): quelli scritti sul canale; per i progetti delle versioni
+ * Pin della scheda di un canale (fino a 4): quelli scritti sul canale; per i progetti delle versioni
  * precedenti quelli scritti sul gruppo I/O dello schema (inst); poi il morsetto dell'articolo
  */
 export function channelPins(card: PlcCard, channel: string, inst?: SymbolInstance): string[] {
   const own = card.io?.[channel]?.pins?.filter(Boolean);
-  if (own?.length) return own.slice(0, 2);
+  if (own?.length) return own.slice(0, 4);
   if (inst?.plcGroup) {
     const fromGroup = Object.keys(inst.pinLabels).sort().map(k => inst.pinLabels[k]?.trim()).filter(Boolean) as string[];
-    if (fromGroup.length) return fromGroup.slice(0, 2);
+    if (fromGroup.length) return fromGroup.slice(0, 4);
   }
   const t = card.custom?.terminals?.[channel];
   return t ? [t] : [];
