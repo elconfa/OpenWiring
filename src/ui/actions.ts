@@ -22,7 +22,8 @@ import { useAi, activeProfile } from './aiState';
 import { aiAsk, PROVIDERS } from '../io/ai';
 import { translateSystem, translatePrompt, parseTranslations } from '../model/aiPrompts';
 import { projectTexts, translateText, TARGET_LANGS } from '../model/i18n';
-import { plcopenXml } from '../model/plc';
+import { plcopenXml, parseGvl, parseTagTable, parseCsv, type TagImportRow } from '../model/plc';
+import { CARDS_SHEET_NAME, IO_SHEET_HELP, IO_SHEET_NAME, cardsSheetRows, ioSheetRows } from '../model/plcIoSheet';
 import { nextRevisionIndex } from '../model/revisions';
 import { dictionaryCsv } from '../model/i18n';
 import { ask, askText, askChoice, askConfirm, askChecks } from './Ask';
@@ -521,6 +522,46 @@ export function allReports(): Table[] {
 }
 
 /** Lista di assegnazione I/O come tabella (liste, PDF, CSV) */
+/**
+ * Lista I/O Excel da modificare e reimportare: fogli «Lista I/O» (tutti i canali), «Schede» e «Istruzioni»
+ */
+export async function exportPlcIoExcel() {
+  const { project, library } = st();
+  if (!project.plc.cards.length) { st().logMsg(tx('Nessuna scheda PLC nel progetto'), 'warn'); return; }
+  const p = await saveFile(`${safeName(project.info.name)}_lista_IO.xlsx`, writeXlsx([
+    { name: IO_SHEET_NAME, rows: ioSheetRows(project, library) },
+    { name: CARDS_SHEET_NAME, rows: cardsSheetRows(project) },
+    { name: 'Istruzioni', rows: IO_SHEET_HELP },
+  ]), [{ name: 'Excel', extensions: ['xlsx'] }]);
+  if (p) st().logMsg(tx('Lista I/O esportata: {0}', p));
+}
+
+/**
+ * Importa la Lista I/O Excel modificata (pin, nomi, commenti, schede), oppure nomi e commenti da
+ * Excel di TIA Portal, GVL di CODESYS o CSV
+ */
+export async function importPlcFile() {
+  const [file] = await openFiles([{ name: 'Tabella variabili', extensions: ['xlsx', 'csv', 'txt', 'st', 'exp'] }]);
+  if (!file) return;
+  try {
+    let rows: TagImportRow[];
+    if (/\.xlsx$/i.test(file.name)) {
+      const sheets = readXlsx(file.data);
+      // Lista I/O esportata da OpenWiring: pin, nomi, commenti e dati delle schede
+      if (st().importPlcWorkbook(sheets, file.name)) return;
+      const sheet = sheets.find(x => /plc tags|variabil|tags/i.test(x.name)) ?? sheets[0];
+      rows = parseTagTable(sheet?.rows ?? []);
+    } else {
+      const text = new TextDecoder().decode(file.data);
+      rows = /\bAT\s+%[IQM]/i.test(text) ? parseGvl(text) : parseTagTable(parseCsv(text));
+    }
+    if (!rows.length) { st().logMsg(tx('{0}: nessuna variabile con indirizzo trovata', file.name), 'warn'); return; }
+    st().importPlcTags(rows, file.name);
+  } catch (e) {
+    st().logMsg(tx('Errore nell\'import di {0}: {1}', file.name, (e as Error).message), 'error');
+  }
+}
+
 export function plcIoTable(): Table {
   const { project, library } = st();
   return plcIoReport(project, library);

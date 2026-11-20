@@ -16,8 +16,7 @@ import { saveFile, safeName, openFiles } from '../io/fileio';
 import { writeXlsx, readXlsx } from '../io/xlsx';
 import { partsIndex } from '../model/devices';
 import { tableToCsv } from '../model/reports';
-import { plcIoTable } from './actions';
-import { CARDS_SHEET_NAME, IO_SHEET_HELP, IO_SHEET_NAME, cardsSheetRows, ioSheetRows } from '../model/plcIoSheet';
+import { plcIoTable, exportPlcIoExcel, importPlcFile } from './actions';
 import { useGrid, Th, gridProps } from './grid';
 import { ResizableSection } from './split';
 import { tx } from '../i18n/ui';
@@ -101,37 +100,8 @@ export function PlcView() {
     const p = await saveFile(`${base}_GVL_IO.txt`, codesysGvl(project, library), [{ name: 'Testo', extensions: ['txt', 'st'] }]);
     if (p) st().logMsg(tx('Variabili globali CODESYS esportate: {0}', p));
   };
-  const exportList = async () => {
-    // Un file con lista I/O, schede e istruzioni: si modifica e si reimporta con «Importa Excel»
-    const { project: pr, library } = st();
-    const p = await saveFile(`${base}_lista_IO.xlsx`, writeXlsx([
-      { name: IO_SHEET_NAME, rows: ioSheetRows(pr, library) },
-      { name: CARDS_SHEET_NAME, rows: cardsSheetRows(pr) },
-      { name: 'Istruzioni', rows: IO_SHEET_HELP },
-    ]), [{ name: 'Excel', extensions: ['xlsx'] }]);
-    if (p) st().logMsg(tx('Lista I/O esportata: {0}', p));
-  };
-  const importTags = async () => {
-    const [file] = await openFiles([{ name: 'Tabella variabili', extensions: ['xlsx', 'csv', 'txt', 'st', 'exp'] }]);
-    if (!file) return;
-    try {
-      let rows: TagImportRow[];
-      if (/\.xlsx$/i.test(file.name)) {
-        const sheets = readXlsx(file.data);
-        // Lista I/O esportata da OpenWiring: pin, nomi, commenti e dati delle schede
-        if (st().importPlcWorkbook(sheets, file.name)) return;
-        const sheet = sheets.find(x => /plc tags|variabil|tags/i.test(x.name)) ?? sheets[0];
-        rows = parseTagTable(sheet?.rows ?? []);
-      } else {
-        const text = new TextDecoder().decode(file.data);
-        rows = /\bAT\s+%[IQM]/i.test(text) ? parseGvl(text) : parseTagTable(parseCsv(text));
-      }
-      if (!rows.length) { st().logMsg(tx('{0}: nessuna variabile con indirizzo trovata', file.name), 'warn'); return; }
-      st().importPlcTags(rows, file.name);
-    } catch (e) {
-      st().logMsg(tx('Errore nell\'import di {0}: {1}', file.name, (e as Error).message), 'error');
-    }
-  };
+  const exportList = () => void exportPlcIoExcel();
+  const importTags = () => void importPlcFile();
   const exportCsv = () => saveFile(`${base}_lista_IO.csv`, tableToCsv(plcIoTable()), [{ name: 'CSV', extensions: ['csv'] }]);
 
   return (

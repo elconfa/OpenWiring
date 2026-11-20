@@ -216,6 +216,8 @@ export function ribbonTabs(s: State): RTab[] {
           { icon: 'list', label: tx('Liste'), big: true, title: tx('Tutte le liste del progetto'),
             menu: () => A.allReports().map(t => ({ label: `${tx(t.title)} (${t.rows.length})`, run: () => A.openReport(t.title) })) },
           { icon: 'plc', label: tx('Lista I/O PLC e hardware'), run: () => st().setView('plc') },
+          { icon: 'plc', label: tx('Lista I/O Excel'), title: tx('Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»'),
+            menu: () => [{ label: tx('Esporta Lista I/O Excel…'), run: () => void A.exportPlcIoExcel() }, { label: tx('Importa Lista I/O Excel…'), run: () => void A.importPlcFile() }] },
           { icon: 'table', label: tx('Liste personalizzate…'), run: () => st().setDialog('customLists'), title: tx('Liste nuove dalle liste del progetto: colonne, filtri, ordinamento e raggruppamento') },
         ] },
         { name: tn('Viste'), items: [

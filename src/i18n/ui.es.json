@@ -3853,5 +3853,12 @@
   "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "Toma M12 de la estación de E/S (+24 V, 0 V, FE)",
   "Prese": "Tomas",
   "Prese M12 a 2 canali -{0}": "Tomas M12 de 2 canales -{0}",
-  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Un archivo Excel con todos los canales (pines 1…5, nombres, comentarios, posición) y las tarjetas: se modifica y se vuelve a importar con «Importar variables»"
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Un archivo Excel con todos los canales (pines 1…5, nombres, comentarios, posición) y las tarjetas: se modifica y se vuelve a importar con «Importar variables»",
+  "Esporta Lista I/O Excel…": "Exportar lista de E/S Excel…",
+  "Excel da modificare e reimportare (.xlsx)": "Excel para modificar y volver a importar (.xlsx)",
+  "Importa Lista I/O Excel…": "Importar lista de E/S Excel…",
+  "Morsetto 3": "Borne 3",
+  "Morsetto 4": "Borne 4",
+  "Morsetto 5": "Borne 5",
+  "Nessuna scheda PLC nel progetto": "No hay tarjetas PLC en el proyecto"
 }

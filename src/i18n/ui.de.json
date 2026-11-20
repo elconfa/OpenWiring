@@ -3853,5 +3853,12 @@
   "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "M12-Buchse der E/A-Station (+24 V, 0 V, FE)",
   "Prese": "Buchsen",
   "Prese M12 a 2 canali -{0}": "M12-Buchsen mit 2 Kanälen -{0}",
-  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Eine Excel-Datei mit allen Kanälen (Pins 1…5, Namen, Kommentare, Position) und den Baugruppen: bearbeiten und mit «Variablen importieren» wieder einlesen"
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Eine Excel-Datei mit allen Kanälen (Pins 1…5, Namen, Kommentare, Position) und den Baugruppen: bearbeiten und mit «Variablen importieren» wieder einlesen",
+  "Esporta Lista I/O Excel…": "E/A-Liste als Excel exportieren…",
+  "Excel da modificare e reimportare (.xlsx)": "Excel zum Bearbeiten und Wiedereinlesen (.xlsx)",
+  "Importa Lista I/O Excel…": "E/A-Liste aus Excel importieren…",
+  "Morsetto 3": "Klemme 3",
+  "Morsetto 4": "Klemme 4",
+  "Morsetto 5": "Klemme 5",
+  "Nessuna scheda PLC nel progetto": "Keine SPS-Baugruppen im Projekt"
 }

@@ -3853,5 +3853,12 @@
   "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "Prise M12 de la station E/S (+24 V, 0 V, FE)",
   "Prese": "Prises",
   "Prese M12 a 2 canali -{0}": "Prises M12 à 2 voies -{0}",
-  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Un fichier Excel avec toutes les voies (broches 1…5, noms, commentaires, position) et les cartes : à modifier puis réimporter avec « Importer les variables »"
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Un fichier Excel avec toutes les voies (broches 1…5, noms, commentaires, position) et les cartes : à modifier puis réimporter avec « Importer les variables »",
+  "Esporta Lista I/O Excel…": "Exporter la liste E/S Excel…",
+  "Excel da modificare e reimportare (.xlsx)": "Excel à modifier et réimporter (.xlsx)",
+  "Importa Lista I/O Excel…": "Importer la liste E/S Excel…",
+  "Morsetto 3": "Borne 3",
+  "Morsetto 4": "Borne 4",
+  "Morsetto 5": "Borne 5",
+  "Nessuna scheda PLC nel progetto": "Aucune carte API dans le projet"
 }

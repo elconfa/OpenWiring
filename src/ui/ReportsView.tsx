@@ -9,7 +9,7 @@ import { useGrid, Th, gridProps } from './grid';
 import { checkProject, acceptedOf, issueKey } from '../model/checks';
 import { ask } from './Ask';
 import { saveFile, safeName } from '../io/fileio';
-import { allReports, exportPdfAction } from './actions';
+import { allReports, exportPdfAction, exportPlcIoExcel, importPlcFile } from './actions';
 import { TranslationsView } from './TranslationsView';
 import { RevisionChangesView } from './RevisionChangesView';
 import { askChoice } from './Ask';
@@ -145,6 +145,10 @@ export function ReportsView() {
               <button onClick={() => void exportTable(t, 'csv')}>{tx('CSV (Excel, separato da ;)')}</button>
               <button onClick={() => void exportTable(t, 'xlsx')}>{tx('Excel (.xlsx)')}</button>
               <button onClick={() => void exportTable(t, 'txt')}>{tx('Testo (.txt, colonne allineate)')}</button>
+              {t.title === 'Lista I/O PLC' && <>
+                <button onClick={() => void exportPlcIoExcel()} title={tx('Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»')}>{tx('Excel da modificare e reimportare (.xlsx)')}</button>
+                <button onClick={() => void importPlcFile()}>{tx('Importa Lista I/O Excel…')}</button>
+              </>}
             </div>
           </details>
         )}

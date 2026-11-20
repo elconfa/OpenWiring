@@ -433,9 +433,9 @@ export function plcIoReport(project: Project, library: Part[] = []): Table {
   const io = ioAssignments(project, library);
   return {
     title: 'Lista I/O PLC',
-    columns: ['Scheda', 'Canale', 'Morsetto 1', 'Morsetto 2', 'Indirizzo', 'Nome simbolico', 'Commento', 'Collegato a', 'Posizione'],
-    rows: io.map(r => [`-${r.card.tag}`, r.channel, r.pins[0] ?? '', r.pins[1] ?? '', r.address, r.inst || !r.symbolIsDefault ? r.symbol : '', r.comment, r.connected, r.location]),
-    goto: io.map(r => ({ 8: r.location ? pageOfLocation(r.location) : undefined })),
+    columns: ['Scheda', 'Canale', 'Morsetto 1', 'Morsetto 2', 'Morsetto 3', 'Morsetto 4', 'Morsetto 5', 'Indirizzo', 'Nome simbolico', 'Commento', 'Collegato a', 'Posizione'],
+    rows: io.map(r => [`-${r.card.tag}`, r.channel, ...[0, 1, 2, 3, 4].map(k => r.pins[k] ?? ''), r.address, r.inst || !r.symbolIsDefault ? r.symbol : '', r.comment, r.connected, r.location]),
+    goto: io.map(r => ({ 11: r.location ? pageOfLocation(r.location) : undefined })),
   };
 }
 

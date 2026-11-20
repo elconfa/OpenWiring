@@ -241,6 +241,8 @@ export function buildMenus(s: State): { name: string; items: Item[] }[] {
         sep,
         ...tables.map(t => ({ label: `${tx(t.title)} (${t.rows.length})`, run: () => A.openReport(t.title) })),
         { label: tx('Lista I/O PLC e hardware'), run: () => st().setView('plc') },
+        { label: tx('Esporta Lista I/O Excel…'), run: () => void A.exportPlcIoExcel(), title: tx('Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»') },
+        { label: tx('Importa Lista I/O Excel…'), run: () => void A.importPlcFile(), title: tx('Importa la Lista I/O Excel modificata (pin, nomi, commenti e dati delle schede), oppure nomi e commenti da Excel di TIA Portal, GVL di CODESYS o CSV (Nome; Indirizzo; Commento)') },
         sep,
         { label: tx('Liste personalizzate…'), run: () => st().setDialog('customLists'), title: tx('Liste nuove dalle liste del progetto: colonne, filtri, ordinamento e raggruppamento') },
         { label: tx('PDF completo…'), run: A.exportPdfAction },

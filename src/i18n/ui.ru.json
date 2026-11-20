@@ -3853,5 +3853,12 @@
   "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "Разъём M12 станции ввода-вывода (+24 В, 0 В, FE)",
   "Prese": "Разъёмы",
   "Prese M12 a 2 canali -{0}": "Разъёмы M12 на 2 канала -{0}",
-  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Файл Excel со всеми каналами (контакты 1…5, имена, комментарии, положение) и модулями: отредактируйте и импортируйте обратно через «Импорт переменных»"
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Файл Excel со всеми каналами (контакты 1…5, имена, комментарии, положение) и модулями: отредактируйте и импортируйте обратно через «Импорт переменных»",
+  "Esporta Lista I/O Excel…": "Экспорт списка входов/выходов в Excel…",
+  "Excel da modificare e reimportare (.xlsx)": "Excel для редактирования и обратного импорта (.xlsx)",
+  "Importa Lista I/O Excel…": "Импорт списка входов/выходов из Excel…",
+  "Morsetto 3": "Клемма 3",
+  "Morsetto 4": "Клемма 4",
+  "Morsetto 5": "Клемма 5",
+  "Nessuna scheda PLC nel progetto": "В проекте нет модулей ПЛК"
 }
