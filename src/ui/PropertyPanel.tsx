@@ -52,6 +52,7 @@ import { partKeys } from '../model/settingsProfiles';
 import { tx, tn } from '../i18n/ui';
 import { symShown, withShow, type SymVisKey, type WireVisKey } from '../model/visibility';
 import { groupConfig, groupMembers, firstFreeChannel } from '../model/plcGroup';
+import { connectorGroup, connectorType, isConnectorPart } from '../model/connectorTypes';
 import { editRichText } from './RichTextEditor';
 
 /** Editor completo del testo libero: le modifiche valgono con OK */
@@ -554,7 +555,7 @@ function SymbolProps({ inst }: { inst: SymbolInstance }) {
           <Row label={tx('Costruttore')} vis={devVis('manufacturer')}>{devField('manufacturer', part?.manufacturer)}<ManufacturersList parts={parts} /></Row>
           <Row label={tx('Tipo')} vis={devVis('typeNr')}>{devField('typeNr', part?.typeNr)}</Row>
           <Row label={tx('Codice ordinazione')} vis={devVis('orderNr')}>{devField('orderNr', part?.orderNr)}</Row>
-          {sym.role !== 'terminal' && <ExtraPartsRows instId={inst.id} list={info.extraParts ?? []} parts={parts} />}
+          {sym.role !== 'terminal' && <ExtraPartsRows list={info.extraParts ?? []} parts={parts} onChange={next => useStore.getState().setExtraParts(inst.id, next)} />}
           {part?.picture && <tr><td colSpan={2} className="prop-img"><img src={part.picture} alt={part.typeNr ?? part.partNr} /></td></tr>}
           {/* Proprietà definite dall'utente dell'articolo: valgono per l'articolo in libreria */}
           {part && <PartUserPropRows part={part} />}
@@ -917,6 +918,7 @@ function BusCableRows({ wire, tagShown }: { wire: Wire; tagShown: boolean }) {
           {parts.map(p => <option key={p.partNr} value={p.partNr}>{p.partNr}{p.descr1 ? ` · ${p.descr1}` : ''}</option>)}
         </select>
       </Row>
+      <ExtraPartsRows cable list={c.extraParts ?? []} parts={partsIndex(project, library)} onChange={next => set({ extraParts: next.length ? next : undefined })} />
       <tr hidden><td><datalist id="bus-cable-types">{[...new Set(Object.values(BUS_CABLE_TYPES))].map(t => <option key={t} value={t} />)}</datalist></td></tr>
     </>
   );
@@ -1054,6 +1056,7 @@ function CableProps({ line, derived }: { line: CableLine; derived: Derived }) {
             {parts.map(p => <option key={p.partNr} value={p.partNr}>{p.partNr}{p.descr1 ? ` · ${p.descr1}` : ''}</option>)}
           </select>
         </Row>
+        <ExtraPartsRows cable list={c.extraParts ?? []} parts={partsIndex(project, library)} onChange={next => upd({ extraParts: next.length ? next : undefined })} />
         <Row label={tx('Usati / liberi')}>{`${info.conductors.length}/${c.conductors.length}`}{info.spare.length ? tx(' · liberi: {0}', info.spare.join(' ')) : ''}</Row>
         <Row label={tx('Comandi')}>
           <button onClick={() => { st().setCableSel(c.id); st().setView('cables'); }}>{tx('Apri nel pannello Cavi')}</button>
@@ -1173,9 +1176,12 @@ export function PartInput({ value, parts, onCommit, listId }: { value: string; p
  * Articoli aggiuntivi del dispositivo (es. sezionatore generale: apparecchio, barra di prolunga e
  * manopola): uno per riga con la quantità; vanno in distinta e nella lista d'acquisto
  */
-function ExtraPartsRows({ instId, list, parts }: { instId: string; list: ExtraPart[]; parts: Map<string, Part> }) {
+function ExtraPartsRows({ list, parts, onChange, cable }: { list: ExtraPart[]; parts: Map<string, Part>; onChange: (next: ExtraPart[]) => void; cable?: boolean }) {
   const st = useStore.getState;
-  const set = (next: ExtraPart[]) => st().setExtraParts(instId, next);
+  const set = onChange;
+  // Cavi: prima gli articoli segnati come connettore, raggruppati per tipo (M12 codifica D, RJ45…)
+  const connectors = cable ? [...parts.values()].filter(isConnectorPart).sort((a, b) => a.partNr.localeCompare(b.partNr, undefined, { numeric: true })) : [];
+  const groupOf = (p: Part) => { const t = connectorType(p.connectorType); return t ? connectorGroup(t, tx) : tx('Altri connettori'); };
   const upd = (i: number, patch: Partial<ExtraPart>) => set(list.map((y, k) => (k === i ? { ...y, ...patch } : y)));
   // Il codice si scrive a mano o si sceglie tra i suggerimenti della libreria; descrizione e
   // costruttore di un codice nuovo lo aggiungono alla libreria
@@ -1200,8 +1206,21 @@ function ExtraPartsRows({ instId, list, parts }: { instId: string; list: ExtraPa
           </Row>
         );
       })}
-      <Row label={list.length ? '' : tx('Articoli aggiuntivi')}>
-        <span title={tx('Accessori dello stesso dispositivo (es. barra di prolunga e manopola del sezionatore): vanno in distinta con la sua sigla')}>
+      {cable && (
+        <Row label={list.length ? '' : tx('Articoli aggiuntivi')}>
+          <select value="" onChange={e => { if (e.target.value) set([...list, { partNr: e.target.value }]); }}
+            title={connectors.length ? tx('Articoli segnati come connettore (Articoli ▸ Connettore)') : tx('Nessun articolo connettore: in Articoli apri l\'articolo e scegli il tipo nella tendina «Connettore»')}>
+            <option value="">{connectors.length ? tx('+ aggiungi un connettore…') : tx('— nessun articolo connettore —')}</option>
+            {[...new Set(connectors.map(groupOf))].map(g => (
+              <optgroup key={g} label={g}>
+                {connectors.filter(p => groupOf(p) === g).map(p => <option key={p.partNr} value={p.partNr}>{p.partNr}{p.descr1 ? ` · ${p.descr1}` : ''}</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </Row>
+      )}
+      <Row label={list.length || cable ? '' : tx('Articoli aggiuntivi')}>
+        <span title={cable ? tx('Connettori da intestare (RJ45, M12…), pressacavi, guaine: vanno in distinta materiali con la sigla del cavo.') : tx('Accessori dello stesso dispositivo (es. barra di prolunga e manopola del sezionatore): vanno in distinta con la sua sigla')}>
           <Field key={list.length} value="" list="extra-parts-list" placeholder={tx('+ scrivi o scegli un codice…')} onCommit={v => { if (v.trim()) set([...list, { partNr: v.trim() }]); }} />
         </span>
         <datalist id="extra-parts-list">
