@@ -33,7 +33,7 @@ desktop su **macOS** e **Windows** (Electron) e anche nel browser.
 *Il progetto d'esempio in 35 secondi: lo schema si disegna, i rimandi incrociati si aggiornano da soli,
 la libreria si filtra per funzione, poi PLC, morsettiere, cavi, schema di rete, liste e PDF.*
 
-> **Stato:** versione 2.1.9. Schema elettrico, morsettiere, cavi, PLC e layout 2D del quadro sono
+> **Stato:** versione 2.1.10. Schema elettrico, morsettiere, cavi, PLC e layout 2D del quadro sono
 > utilizzabili; il layout 3D e la firma digitale delle app non ci sono ancora: vedi [Roadmap](#roadmap).
 
 ---
