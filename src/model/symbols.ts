@@ -68,6 +68,48 @@ function plcSlice(id: string, io: 'DI' | 'DO', n: PlcTerms): SymbolDef {
   };
 }
 
+/**
+ * Presa M12 a 2 canali (stazioni I/O con doppia assegnazione, es. ET 200eco PN): passo 80 mm, pin 1
+ * (+24 V) a x 0, 4 (canale A) a 16, 3 (0 V) a 32, 2 (canale B) a 48, 5 (FE) a 64. La presa disegna il
+ * riquadro e i pin comuni; i due canali sono simboli a parte con il loro pin e i testi nella loro metà.
+ * up: pin in alto (come gli ingressi), altrimenti in basso (come le uscite)
+ */
+export const PLC_SOCKET_STEP = 80;
+export const PLC_SOCKET_PINS = { body: [['1', 0], ['3', 32], ['5', 64]], a: [['4', 16]], b: [['2', 48]] } as const;
+function plcSocketParts(up: boolean): SymbolDef[] {
+  const H = PLC_GROUP_H, x0 = -4, x1 = PLC_SOCKET_STEP - 4, mid = 40;
+  const top = up ? 4 : 14 - H, bottom = top + H;
+  const pinY = up ? 0 : bottom + 4, stub = up ? [0, 4] : [bottom, bottom + 4];
+  const dir = up ? 'up' : 'down';
+  const side = up ? 'up' : 'down';
+  const stubs = (xs: readonly (readonly [string, number])[]) => xs.map(([, x]) => L(x, stub[0], x, stub[1]));
+  const pins = (xs: readonly (readonly [string, number])[]) => xs.map(([id, x]) => P(id, x, pinY, '', dir));
+  const body: SymbolDef = {
+    id: `plc_m12_body_${side}`, name: 'Presa M12 della stazione I/O (+24 V, 0 V, FE)', category: 'PLC', letter: 'A', role: 'plc', hidden: true,
+    prims: [L(x0, top, x1, top), L(x0, bottom, x1, bottom), L(x0, top, x0, bottom), L(x1, top, x1, bottom), L(mid, top, mid, bottom, true), ...stubs(PLC_SOCKET_PINS.body)],
+    pins: pins(PLC_SOCKET_PINS.body), tagPos: { x: x0 - 2, y: top + 6 },
+  };
+  const channel = (part: 'a' | 'b', io: 'DI' | 'DO'): SymbolDef => {
+    const [bx0, bx1] = part === 'a' ? [x0, mid] : [mid, x1];
+    const row = (f: 'plcAddress' | 'plcSymbol' | 'plcComment', y: number) => ({ f, x: bx0 + 1.2, y: top + y, size: 2.5, anchor: 'start' as const });
+    return {
+      id: `plc_m12_${part}_${io.toLowerCase()}_${side}`, name: `Canale ${part.toUpperCase()} della presa M12 (${io === 'DI' ? 'ingresso' : 'uscita'}, pin ${part === 'a' ? 4 : 2})`,
+      category: 'PLC', letter: 'A', role: 'plc', io, hidden: true,
+      prims: stubs(PLC_SOCKET_PINS[part]), pins: pins(PLC_SOCKET_PINS[part]), tagPos: { x: x0 - 2, y: top + 6 },
+      fields: [row('plcAddress', 3.2), row('plcSymbol', 6.5), row('plcComment', 9.8)],
+      textBox: { x: bx0 + 1.2, y: top + 0.5, w: bx1 - bx0 - 2.4, h: H - 1 },
+    };
+  };
+  const parts = [body, channel('a', 'DI'), channel('a', 'DO'), channel('b', 'DI'), channel('b', 'DO')];
+  const group: SymbolDef = {
+    id: `plc_grp_m12_${side}`, name: `Gruppo 4 prese M12 a 2 canali (pin ${up ? 'in alto, ingressi' : 'in basso, uscite'})`, category: 'PLC', letter: 'A', role: 'plc', io: up ? 'DI' : 'DO',
+    prims: Array.from({ length: 4 }, (_, i) => [...body.prims, ...parts[1].prims, ...parts[3].prims].map(p => shiftPrim(p, i * PLC_SOCKET_STEP))).flat(),
+    pins: [], tagPos: body.tagPos, plcGroup: { slice: body.id, count: 4, socket: true },
+    description: 'Ogni presa ha +24 V (pin 1), 0 V (pin 3), FE (pin 5) e due canali: A sul pin 4 e B sul pin 2, ognuno ingresso, uscita o non usato',
+  };
+  return [...parts, group];
+}
+
 const plcVarFields = (y0: number): SymbolDef['fields'] => [
   { f: 'plcAddress', x: 3, y: y0 + 3.4, size: 2.3, anchor: 'start' },
   { f: 'plcSymbol', x: -2.5, y: y0 + 7, size: 2.2, anchor: 'start' },
@@ -520,6 +562,7 @@ export const BUILTIN_SYMBOLS: SymbolDef[] = [
     };
     return [slice, group];
   }),
+  ...plcSocketParts(true), ...plcSocketParts(false),
 
   // ---------------- Unifilare ----------------
   // Rappresentazioni a una linea: stessa sigla del dispositivo nel multifilare

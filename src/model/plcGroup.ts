@@ -52,8 +52,8 @@ export function groupConfig(page: Page, gid: string): PlcGroupCfg | undefined {
 export function defaultGroupPins(card: PlcCard | undefined, kind: IoKind, index: number, terms: PlcTerms): Record<string, string> {
   const ids = Array.from({ length: terms }, (_, i) => String(i + 1));
   // Pin già scritti sul canale (vista PLC o un altro gruppo): si usano quelli
-  const own = card?.io?.[`${kind}${index}`]?.pins?.filter(Boolean);
-  if (own?.length) return Object.fromEntries(ids.map((id, i) => [id, own[i] ?? '']));
+  const own = card?.io?.[`${kind}${index}`]?.pins;
+  if (own?.some(Boolean)) return Object.fromEntries(ids.map((id, i) => [id, own[i] ?? '']));
   const fromPart = card?.custom?.terminals?.[`${kind}${index}`];
   if (fromPart) return Object.fromEntries(ids.map((id, i) => [id, i === 0 ? fromPart : '']));
   return Object.fromEntries(ids.map((id, i) => [id, String(terms * index + i + 1)]));

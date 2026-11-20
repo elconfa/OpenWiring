@@ -101,6 +101,7 @@ export function pasteElements(project: Project, pageId: string, clip: ClipData, 
   const tagMap = new Map<string, string>();
   const termMap = new Map<string, string>();
   const groupMap = new Map<string, string>();
+  const socketCards = new Map<string, string>();
   const newCards: string[] = [];
   const add = (e: Element) => page.elements.push(e);
   // Prima i dispositivi principali e autonomi (sigla nuova), poi i contatti che li seguono
@@ -132,7 +133,7 @@ export function pasteElements(project: Project, pageId: string, clip: ClipData, 
       if (alloc.created) { project.plc.cards.push(alloc.card); newCards.push(`-${alloc.card.tag} (${cardType(alloc.card).name})`); }
       c.tag = alloc.card.tag; c.plcChannel = alloc.channel; delete c.plcSymbol; delete c.plcComment;
       // Canale di un gruppo I/O: il gruppo copiato è un gruppo nuovo, con i pin del nuovo canale
-      if (c.plcGroup) {
+      if (c.plcGroup && !c.plcGroup.socket) {
         const gid = groupMap.get(c.plcGroup.id) ?? newGroupId();
         groupMap.set(c.plcGroup.id, gid);
         c.plcGroup = { id: gid, index: c.plcGroup.index, count: c.plcGroup.count };
@@ -140,8 +141,17 @@ export function pasteElements(project: Project, pageId: string, clip: ClipData, 
         c.pinLabels = defaultGroupPins(alloc.card, ch.kind, ch.index, sym.pins.length >= 4 ? 4 : sym.pins.length > 1 ? 2 : 1);
       }
     }
+    // Prese M12: la copia è un gruppo nuovo, con la scheda dei canali copiati e i pin della presa
+    if (c.plcGroup?.socket) {
+      const gid = groupMap.get(c.plcGroup.id) ?? newGroupId();
+      groupMap.set(c.plcGroup.id, gid);
+      c.plcGroup = { ...c.plcGroup, id: gid, own: undefined };
+      if (c.plcGroup.socket !== 'body') socketCards.set(gid, c.tag);
+    }
     add(c);
   }
+  // La presa (senza canale) va sulla scheda dei suoi canali copiati
+  for (const c of copies) if (c.kind === 'symbol' && c.plcGroup?.socket === 'body' && socketCards.has(c.plcGroup.id)) c.tag = socketCards.get(c.plcGroup.id)!;
   return { ids: copies.map(c => c.id), newCards };
 }
 

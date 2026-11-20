@@ -17,6 +17,7 @@ import { writeXlsx, readXlsx } from '../io/xlsx';
 import { partsIndex } from '../model/devices';
 import { tableToCsv } from '../model/reports';
 import { plcIoTable } from './actions';
+import { CARDS_SHEET_NAME, IO_SHEET_HELP, IO_SHEET_NAME, cardsSheetRows, ioSheetRows } from '../model/plcIoSheet';
 import { useGrid, Th, gridProps } from './grid';
 import { ResizableSection } from './split';
 import { tx } from '../i18n/ui';
@@ -73,8 +74,10 @@ export function PlcView() {
     rack: c => c.rack ?? 0, slot: c => c.slot, used: c => usedChannels(project, c.tag).size, description: c => c.description, orderNr: c => c.orderNr,
   });
   type IoRow = typeof shown[number];
+  // Colonne dei pin: 2, o quante ne usa il canale con più pin (prese M12 fino a 5)
+  const pinCols = Array.from({ length: Math.min(5, Math.max(2, ...shown.map(r => r.pins.length))) }, (_, k) => k);
   const ig = useGrid<IoRow>('plc-io', shown, {
-    card: r => r.card.tag, channel: r => r.channel, pin1: r => r.pins[0] ?? '', pin2: r => r.pins[1] ?? '', address: r => r.address, symbol: r => r.symbol,
+    card: r => r.card.tag, channel: r => r.channel, pin1: r => r.pins[0] ?? '', pin2: r => r.pins[1] ?? '', pin3: r => r.pins[2] ?? '', pin4: r => r.pins[3] ?? '', pin5: r => r.pins[4] ?? '', address: r => r.address, symbol: r => r.symbol,
     comment: r => r.comment, connected: r => r.connected, pos: r => r.location,
   });
 
@@ -99,8 +102,13 @@ export function PlcView() {
     if (p) st().logMsg(tx('Variabili globali CODESYS esportate: {0}', p));
   };
   const exportList = async () => {
-    const p = await saveFile(`${base}_lista_IO.xlsx`, writeXlsx([{ name: 'Lista I/O', rows: [plcIoTable().columns, ...plcIoTable().rows] }]),
-      [{ name: 'Excel', extensions: ['xlsx'] }]);
+    // Un file con lista I/O, schede e istruzioni: si modifica e si reimporta con «Importa Excel»
+    const { project: pr, library } = st();
+    const p = await saveFile(`${base}_lista_IO.xlsx`, writeXlsx([
+      { name: IO_SHEET_NAME, rows: ioSheetRows(pr, library) },
+      { name: CARDS_SHEET_NAME, rows: cardsSheetRows(pr) },
+      { name: 'Istruzioni', rows: IO_SHEET_HELP },
+    ]), [{ name: 'Excel', extensions: ['xlsx'] }]);
     if (p) st().logMsg(tx('Lista I/O esportata: {0}', p));
   };
   const importTags = async () => {
@@ -110,6 +118,8 @@ export function PlcView() {
       let rows: TagImportRow[];
       if (/\.xlsx$/i.test(file.name)) {
         const sheets = readXlsx(file.data);
+        // Lista I/O esportata da OpenWiring: pin, nomi, commenti e dati delle schede
+        if (st().importPlcWorkbook(sheets, file.name)) return;
         const sheet = sheets.find(x => /plc tags|variabil|tags/i.test(x.name)) ?? sheets[0];
         rows = parseTagTable(sheet?.rows ?? []);
       } else {
@@ -148,13 +158,13 @@ export function PlcView() {
         }}>{tx('Riassegna indirizzi')}</button>
         <div className="tb-spacer" />
         <button disabled={!cards.length} onClick={() => st().syncPlcOverviews()} title={tx('Crea una pagina panoramica per ogni scheda (e toglie quelle di schede eliminate)')}>{tx('Pagine panoramiche')}</button>
-        <button disabled={!cards.length} onClick={importTags} title={tx('Importa nomi e commenti: Excel esportato da TIA Portal, GVL di CODESYS o CSV (Nome; Indirizzo; Commento)')}>{tx('Importa variabili')}</button>
+        <button disabled={!cards.length} onClick={importTags} title={tx('Importa la Lista I/O Excel modificata (pin, nomi, commenti e dati delle schede), oppure nomi e commenti da Excel di TIA Portal, GVL di CODESYS o CSV (Nome; Indirizzo; Commento)')}>{tx('Importa variabili')}</button>
         <button disabled={!cards.length || !canExportTia(project)} onClick={exportTia}
           title={canExportTia(project) ? tx('File Excel da importare in TIA Portal: Variabili PLC ▸ Importa') : tx('Disponibile con i formati Siemens')}>{tx('Esporta TIA Portal')}</button>
         <button disabled={!cards.length || !canExportGvl(project)} onClick={exportGvl}
           title={canExportGvl(project) ? tx('Testo da incollare in una lista di variabili globali (GVL) di CODESYS o TwinCAT') : tx('Disponibile con i formati IEC 61131 / CODESYS e TwinCAT')}>{tx('Esporta CODESYS')}</button>
         <button disabled={!cards.length} onClick={() => void exportPlcopen()} title={tx('Variabili globali con indirizzo in PLCopen XML (CODESYS, Beckhoff, B&R…)')}>{tx('PLCopen XML')}</button>
-        <button disabled={!cards.length} onClick={exportList}>{tx('Lista I/O Excel')}</button>
+        <button disabled={!cards.length} onClick={exportList} title={tx('Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»')}>{tx('Lista I/O Excel')}</button>
         <button disabled={!cards.length} onClick={exportCsv}>{tx('CSV')}</button>
       </div>
 
@@ -255,7 +265,7 @@ export function PlcView() {
       <div className="table-wrap">
         <table {...gridProps(ig)}>
           <thead><tr>
-            <Th g={ig} k="card">{tx('Scheda')}</Th><Th g={ig} k="channel">{tx('Canale')}</Th><Th g={ig} k="pin1">{tx('Morsetto 1')}</Th><Th g={ig} k="pin2">{tx('Morsetto 2')}</Th><Th g={ig} k="address">{tx('Indirizzo')}</Th>
+            <Th g={ig} k="card">{tx('Scheda')}</Th><Th g={ig} k="channel">{tx('Canale')}</Th>{pinCols.map(k => <Th key={k} g={ig} k={`pin${k + 1}` as 'pin1'}>{tx('Morsetto {0}', k + 1)}</Th>)}<Th g={ig} k="address">{tx('Indirizzo')}</Th>
             <Th g={ig} k="symbol">{tx('Nome simbolico')}</Th><Th g={ig} k="comment">{tx('Commento')}</Th><Th g={ig} k="connected">{tx('Collegato a')}</Th><Th g={ig} k="pos">{tx('Posizione')}</Th>
           </tr></thead>
           <tbody>
@@ -275,10 +285,10 @@ export function PlcView() {
                 <tr key={`${r.card.id}|${r.channel}`} className={r.inst ? '' : 'free'}>
                   <td>-{r.card.tag}</td>
                   <td>{r.channel}</td>
-                  {[0, 1].map(k => (
+                  {pinCols.map(k => (
                     <td key={`pin${k}`} title={tx('Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O')}>
                       <Cell value={r.pins[k] ?? ''} width={56} placeholder={k === 0 ? '—' : ''}
-                        onCommit={v => { const list = [...r.pins]; while (list.length < 2) list.push(''); list[k] = v; st().setChannelPins(r.card.id, r.channel, list); }} />
+                        onCommit={v => { const list = [...r.pins]; while (list.length < pinCols.length) list.push(''); list[k] = v; st().setChannelPins(r.card.id, r.channel, list); }} />
                     </td>
                   ))}
                   <td className="mono">{r.address}</td>

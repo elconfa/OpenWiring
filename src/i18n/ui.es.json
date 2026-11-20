@@ -3839,5 +3839,19 @@
   "Connettore (senza tipo del catalogo)": "Conector (sin tipo del catálogo)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Ningún artículo conector: en Artículos abre el artículo y elige el tipo en la lista «Conector»",
   "Set di articoli": "Conjunto de artículos",
-  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (p. ej. tomas M12: +24 V, señal, 0 V, segunda señal)"
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (p. ej. tomas M12: +24 V, señal, 0 V, segunda señal)",
+  "{0} righe con scheda o canale non presenti nel progetto: {1}{2}": "{0} filas con tarjeta o canal que no están en el proyecto: {1}{2}",
+  "Canale A (pin 4)": "Canal A (pin 4)",
+  "Canale A (pin 4) della prima presa": "Canal A (pin 4) de la primera toma",
+  "Canale B (pin 2)": "Canal B (pin 2)",
+  "Canale B (pin 2) della prima presa": "Canal B (pin 2) de la primera toma",
+  "Import di {0}: {1} schede e {2} canali modificati": "Importación de {0}: {1} tarjetas y {2} canales modificados",
+  "Importa la Lista I/O Excel modificata (pin, nomi, commenti e dati delle schede), oppure nomi e commenti da Excel di TIA Portal, GVL di CODESYS o CSV (Nome; Indirizzo; Commento)": "Importa la lista de E/S Excel modificada (pines, nombres, comentarios y datos de las tarjetas), o nombres y comentarios desde Excel de TIA Portal, GVL de CODESYS o CSV (Nombre; Dirección; Comentario)",
+  "Nome della prima presa": "Nombre de la primera toma",
+  "Pin +24 V / 0 V / FE": "Pines +24 V / 0 V / FE",
+  "Presa {0}": "Toma {0}",
+  "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "Toma M12 de la estación de E/S (+24 V, 0 V, FE)",
+  "Prese": "Tomas",
+  "Prese M12 a 2 canali -{0}": "Tomas M12 de 2 canales -{0}",
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Un archivo Excel con todos los canales (pines 1…5, nombres, comentarios, posición) y las tarjetas: se modifica y se vuelve a importar con «Importar variables»"
 }

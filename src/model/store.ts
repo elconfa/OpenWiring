@@ -49,6 +49,8 @@ import { titleBlockTemplates, templateFields } from './titleBlocks';
 import { linkPartners, pairLinks } from './links';
 import { nameTapsInOrder } from './bundles';
 import { withShow, type WireVisKey, type SymVisKey } from './visibility';
+import { applyCardsSheet, applyIoSheet, isCardsSheet, isIoSheet, type CardsSheetResult, type IoSheetResult } from './plcIoSheet';
+import { buildSocketGroup, socketConfig, socketMembers, type PlcSocketCfg } from './plcSocket';
 import { buildPlcGroup, firstFreeChannel, groupConfig, groupMembers, newGroupId, termsOf, type PlcGroupCfg } from './plcGroup';
 import { nextTerminal, nextToPlace, parseTerminalNo, terminalNo, ensureStrip, renumberStrip as renumberStripModel, renameStrip as renameStripModel, renameTerminals as renameTerminalsModel, addLevel, addJumper as addJumperModel, removeFromJumpers, addSpares as addSparesModel, removeSpares as removeSparesModel, setSparePart, syncStripPages, allStrips } from './terminals';
 import { nextTagFor, renumberDevices, settingsOf } from './numbering';
@@ -362,6 +364,8 @@ export interface State {
   pairLinks(id: string, to: string): void;
   /** Gruppo I/O PLC: cambia scheda, primo canale, numero di canali, morsetti per canale o canali nascosti */
   updatePlcGroup(gid: string, patch: Partial<PlcGroupCfg>): void;
+  /** Cambia il gruppo di prese M12 a 2 canali */
+  updatePlcSocket(gid: string, patch: Partial<PlcSocketCfg>): void;
   /** Mostra o nasconde sullo schema una proprietà di tutti i canali del gruppo */
   setPlcGroupShow(gid: string, key: SymVisKey, on: boolean): void;
 
@@ -369,7 +373,7 @@ export interface State {
   addPlcCard(typeId: string, station?: string, tag?: string): PlcCard;
   updatePlcCard(id: string, patch: Partial<PlcCard>): void;
   /**
-   * Pin della scheda di un canale (fino a 4): si scrivono sul canale e sui canali dei gruppi I/O
+   * Pin della scheda di un canale (fino a 5): si scrivono sul canale e sui canali dei gruppi I/O
    * disegnati nello schema, così vista PLC, schema, panoramiche e liste mostrano gli stessi
    */
   setChannelPins(cardId: string, channel: string, pins: string[]): void;
@@ -380,6 +384,8 @@ export interface State {
   /** I simboli con la sigla indicata passano alla scheda PLC cardTag (diventano suoi elementi) */
   linkToPlcCard(fromTag: string, cardTag: string): void;
   importPlcTags(rows: TagImportRow[], source: string): TagImportResult;
+  /** Reimporta il file Excel della lista I/O (fogli «Lista I/O» e «Schede»); false se non lo è */
+  importPlcWorkbook(sheets: { name: string; rows: string[][] }[], source: string): boolean;
   /** Crea/aggiorna le pagine panoramiche delle schede PLC */
   syncPlcOverviews(): void;
   deleteSelection(): void;
@@ -1225,6 +1231,37 @@ export const useStore = create<State>((set, get) => {
         });
         return inst;
       }
+      if (sym.plcGroup?.socket && sym.io) {
+        // Prese M12 a 2 canali: la scheda indicata o quella del primo canale libero; canale A dal primo
+        // libero, canale B 8 dopo (doppia assegnazione), tutti del tipo del gruppo
+        let card = presetTag ? cardByTag(project, presetTag) : undefined;
+        let created = false;
+        if (!card || !(cardType(card).channels[sym.io] ?? 0)) {
+          const alloc = allocateChannel(project, sym.io, letter => nextTagFor(project, letter, page, at.x));
+          card = alloc.card; created = alloc.created;
+        }
+        const io: 'DI' | 'DO' = sym.io === 'DO' ? 'DO' : 'DI';
+        const max = cardType(card).channels[io] ?? 0;
+        const count = sym.plcGroup.count;
+        const first = created ? 0 : firstFreeChannel(project, card, io, count);
+        const second = first + 8 < max ? first + 8 : first + count;
+        const cfg: PlcSocketCfg = {
+          tag: card.tag, count, up: io === 'DI', first, second, name: 'X1',
+          kinds: Array.from({ length: count }, (_, s) => ({ a: first + s < max ? io : null, b: second + s < max ? io : null })),
+        };
+        const gid = newGroupId();
+        let ids: string[] = [];
+        get().commit(p => {
+          if (created) p.plc.cards.push(card!);
+          const pg = currentPage(p, pageId);
+          ids = buildSocketGroup(p, pg, gid, cfg, { at, rot }).ids;
+          autoConnect(p, pg, ids);
+        });
+        if (created) get().logMsg(tx('Creata la scheda PLC -{0} ({1})', card.tag, cardType(card).name));
+        get().setSelection(ids);
+        const pg = currentPage(get().project, pageId);
+        return pg.elements.find(e => e.id === ids[0]) as SymbolInstance | undefined;
+      }
       if (sym.plcGroup && sym.io) {
         // Gruppo I/O: la scheda indicata (dalla vista PLC) o quella del primo canale libero; il gruppo
         // parte dal primo canale libero e ha al massimo i canali rimasti sulla scheda
@@ -1611,6 +1648,15 @@ export const useStore = create<State>((set, get) => {
       for (const w of warnings) get().logMsg(w, 'warn');
       get().setSelection(groupMembers(currentPage(get().project, pageId), gid).map(e => e.id));
     },
+    updatePlcSocket(gid, patch) {
+      const { pageId } = get();
+      const cfg = socketConfig(currentPage(get().project, pageId), gid);
+      if (!cfg) return;
+      let warnings: string[] = [];
+      get().commit(p => { warnings = buildSocketGroup(p, currentPage(p, pageId), gid, { ...cfg, ...patch }).warnings; });
+      for (const w of warnings) get().logMsg(w, 'warn');
+      get().setSelection(socketMembers(currentPage(get().project, pageId), gid).map(e => e.id));
+    },
     setPlcGroupShow(gid, key, on) {
       const { pageId } = get();
       get().commit(p => {
@@ -1629,7 +1675,7 @@ export const useStore = create<State>((set, get) => {
       get().commit(p => {
         const c = p.plc.cards.find(x => x.id === cardId);
         if (!c) return;
-        const list = pins.map(x => x.trim()).slice(0, 4);
+        const list = pins.map(x => x.trim()).slice(0, 5);
         while (list.length && !list[list.length - 1]) list.pop();
         const cur = { ...(c.io?.[channel] ?? {}) };
         if (list.length) cur.pins = list; else delete cur.pins;
@@ -1711,6 +1757,18 @@ export const useStore = create<State>((set, get) => {
       get().logMsg(tx('Import variabili da {0}: {1} canali disegnati e {2} non ancora disegnati aggiornati', source, res.placed, res.unplaced));
       if (res.notFound.length) get().logMsg(tx('{0} variabili senza canale corrispondente: {1}{2}', res.notFound.length, res.notFound.slice(0, 10).join(', '), res.notFound.length > 10 ? '…' : ''), 'warn');
       return res;
+    },
+    importPlcWorkbook(sheets, source) {
+      const io = sheets.find(s => isIoSheet(s.rows)), cards = sheets.find(s => isCardsSheet(s.rows));
+      if (!io && !cards) return false;
+      let a: IoSheetResult | undefined, b: CardsSheetResult | undefined;
+      // Prima le schede (indirizzi iniziali), poi i canali
+      get().commit(p => { if (cards) b = applyCardsSheet(p, cards.rows); if (io) a = applyIoSheet(p, io.rows); });
+      get().logMsg(tx('Import di {0}: {1} schede e {2} canali modificati', source, b?.changed ?? 0, a?.changed ?? 0));
+      const unknown = [...(b?.unknown ?? []), ...(a?.unknown ?? [])];
+      if (unknown.length) get().logMsg(tx('{0} righe con scheda o canale non presenti nel progetto: {1}{2}', unknown.length, unknown.slice(0, 10).join(', '), unknown.length > 10 ? '…' : ''), 'warn');
+      for (const e of b?.errors ?? []) get().logMsg(e, 'warn');
+      return true;
     },
     syncPlcOverviews() {
       let r = { added: 0, removed: 0 };

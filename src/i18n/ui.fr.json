@@ -3839,5 +3839,19 @@
   "Connettore (senza tipo del catalogo)": "Connecteur (sans type du catalogue)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Aucun article connecteur : dans Articles ouvrez l'article et choisissez le type dans la liste « Connecteur »",
   "Set di articoli": "Ensemble d'articles",
-  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (ex. prises M12 : +24 V, signal, 0 V, second signal)"
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (ex. prises M12 : +24 V, signal, 0 V, second signal)",
+  "{0} righe con scheda o canale non presenti nel progetto: {1}{2}": "{0} lignes avec une carte ou une voie absente du projet : {1}{2}",
+  "Canale A (pin 4)": "Voie A (broche 4)",
+  "Canale A (pin 4) della prima presa": "Voie A (broche 4) de la première prise",
+  "Canale B (pin 2)": "Voie B (broche 2)",
+  "Canale B (pin 2) della prima presa": "Voie B (broche 2) de la première prise",
+  "Import di {0}: {1} schede e {2} canali modificati": "Import de {0} : {1} cartes et {2} voies modifiées",
+  "Importa la Lista I/O Excel modificata (pin, nomi, commenti e dati delle schede), oppure nomi e commenti da Excel di TIA Portal, GVL di CODESYS o CSV (Nome; Indirizzo; Commento)": "Importer la liste E/S Excel modifiée (broches, noms, commentaires et données des cartes), ou noms et commentaires depuis Excel de TIA Portal, GVL CODESYS ou CSV (Nom ; Adresse ; Commentaire)",
+  "Nome della prima presa": "Nom de la première prise",
+  "Pin +24 V / 0 V / FE": "Broches +24 V / 0 V / FE",
+  "Presa {0}": "Prise {0}",
+  "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "Prise M12 de la station E/S (+24 V, 0 V, FE)",
+  "Prese": "Prises",
+  "Prese M12 a 2 canali -{0}": "Prises M12 à 2 voies -{0}",
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Un fichier Excel avec toutes les voies (broches 1…5, noms, commentaires, position) et les cartes : à modifier puis réimporter avec « Importer les variables »"
 }

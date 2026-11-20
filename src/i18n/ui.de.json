@@ -3839,5 +3839,19 @@
   "Connettore (senza tipo del catalogo)": "Steckverbinder (ohne Katalogtyp)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Keine Steckverbinder-Artikel: in Artikel den Artikel öffnen und den Typ in der Liste «Steckverbinder» wählen",
   "Set di articoli": "Artikelset",
-  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (z. B. M12-Buchsen: +24 V, Signal, 0 V, zweites Signal)"
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (z. B. M12-Buchsen: +24 V, Signal, 0 V, zweites Signal)",
+  "{0} righe con scheda o canale non presenti nel progetto: {1}{2}": "{0} Zeilen mit Baugruppe oder Kanal, die im Projekt fehlen: {1}{2}",
+  "Canale A (pin 4)": "Kanal A (Pin 4)",
+  "Canale A (pin 4) della prima presa": "Kanal A (Pin 4) der ersten Buchse",
+  "Canale B (pin 2)": "Kanal B (Pin 2)",
+  "Canale B (pin 2) della prima presa": "Kanal B (Pin 2) der ersten Buchse",
+  "Import di {0}: {1} schede e {2} canali modificati": "Import von {0}: {1} Baugruppen und {2} Kanäle geändert",
+  "Importa la Lista I/O Excel modificata (pin, nomi, commenti e dati delle schede), oppure nomi e commenti da Excel di TIA Portal, GVL di CODESYS o CSV (Nome; Indirizzo; Commento)": "Bearbeitete E/A-Liste (Excel) importieren (Pins, Namen, Kommentare und Baugruppendaten) oder Namen und Kommentare aus TIA-Portal-Excel, CODESYS-GVL oder CSV (Name; Adresse; Kommentar)",
+  "Nome della prima presa": "Name der ersten Buchse",
+  "Pin +24 V / 0 V / FE": "Pins +24 V / 0 V / FE",
+  "Presa {0}": "Buchse {0}",
+  "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "M12-Buchse der E/A-Station (+24 V, 0 V, FE)",
+  "Prese": "Buchsen",
+  "Prese M12 a 2 canali -{0}": "M12-Buchsen mit 2 Kanälen -{0}",
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Eine Excel-Datei mit allen Kanälen (Pins 1…5, Namen, Kommentare, Position) und den Baugruppen: bearbeiten und mit «Variablen importieren» wieder einlesen"
 }

@@ -196,7 +196,7 @@ export interface SymbolDef {
    * Gruppo I/O PLC: inserendolo si dispongono count canali del simbolo slice uno accanto all'altro,
    * legati tra loro (vedi plcGroup.ts)
    */
-  plcGroup?: { slice: string; count: number };
+  plcGroup?: { slice: string; count: number; /** Prese M12 a 2 canali (vedi plcSocket.ts) */ socket?: boolean };
   /**
    * Riquadro in cui i testi del componente vanno uno sotto l'altro e a capo da soli, con l'altezza
    * dei «Testi dei gruppi I/O PLC» del progetto (le posizioni dei campi non contano)
@@ -291,7 +291,15 @@ export interface SymbolInstance {
    * Canale di un gruppo I/O PLC: id del gruppo, posizione nel gruppo (0 = primo), canali del gruppo
    * (anche quelli nascosti) e own = canale scelto a mano (non segue il primo canale del gruppo)
    */
-  plcGroup?: { id: string; index: number; count: number; own?: boolean };
+  plcGroup?: {
+    id: string; index: number; count: number; own?: boolean;
+    /**
+     * Prese M12 a 2 canali (plcSocket.ts): body = la presa con +24 V, 0 V e FE (pin 1, 3, 5),
+     * a = canale sul pin 4, b = canale sul pin 2; index = numero della presa nel gruppo.
+     * Sulla presa: primo canale A, scarto del canale B e nome della prima presa (es. X10)
+     */
+    socket?: 'body' | 'a' | 'b'; first?: number; second?: number; name?: string;
+  };
   /** Nome simbolico della variabile PLC (es. "Pompa_Marcia") */
   plcSymbol?: string;
   /** Commento della variabile PLC */

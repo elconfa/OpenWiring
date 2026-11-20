@@ -52,6 +52,7 @@ import { partKeys } from '../model/settingsProfiles';
 import { tx, tn } from '../i18n/ui';
 import { symShown, withShow, type SymVisKey, type WireVisKey } from '../model/visibility';
 import { groupConfig, groupMembers, firstFreeChannel } from '../model/plcGroup';
+import { socketConfig, socketMembers, socketName, type SocketKind } from '../model/plcSocket';
 import { connectorGroup, connectorType, isConnectorPart } from '../model/connectorTypes';
 import { editRichText } from './RichTextEditor';
 
@@ -217,7 +218,7 @@ export function PropertyPanel({ derived }: { derived: Derived }) {
   // Gruppo I/O PLC: tutti i canali selezionati appartengono allo stesso gruppo
   const gid = selected[0]?.kind === 'symbol' ? selected[0].plcGroup?.id : undefined;
   if (gid && selected.every(e => e.kind === 'symbol' && e.plcGroup?.id === gid)) {
-    body = <PlcGroupProps gid={gid} />;
+    body = selected.some(e => e.kind === 'symbol' && e.plcGroup?.socket) ? <PlcSocketProps gid={gid} /> : <PlcGroupProps gid={gid} />;
   } else if (selected.length > 1) {
     body = (
       <Group title={tx('{0} elementi selezionati', selected.length)}>
@@ -1410,6 +1411,120 @@ function PlcGroupProps({ gid }: { gid: string }) {
                 <Field value={m.plcComment ?? ''} placeholder={tx('descrizione del dispositivo collegato')} onCommit={v => upd(m.id, { plcComment: v.trim() || undefined })} />
               </Row>
             </>}
+          </Group>
+        );
+      })}
+    </>
+  );
+}
+
+/**
+ * Prese M12 a 2 canali: scheda, numero di prese, nome della prima presa, primi canali A e B e, per ogni
+ * presa, canale A (pin 4) e B (pin 2) ingresso, uscita o non usato, con pin, variabile e commento
+ */
+function PlcSocketProps({ gid }: { gid: string }) {
+  const project = useStore(s => s.project);
+  const pageId = useStore(s => s.pageId);
+  const st = useStore.getState;
+  const page = project.pages.find(p => p.id === pageId) ?? project.pages[0];
+  const cfg = socketConfig(page, gid);
+  if (!cfg) return null;
+  const members = socketMembers(page, gid);
+  const cards = project.plc.cards.filter(c => (cardType(c).channels.DI ?? 0) + (cardType(c).channels.DO ?? 0) > 0);
+  const card = cardByTag(project, cfg.tag);
+  const fmt = card ? cardFormat(project, card) : settingsOf(project).plcAddressFormat;
+  const maxCh = card ? Math.max(cardType(card).channels.DI ?? 0, cardType(card).channels.DO ?? 0) : 0;
+  const addr = (ch: string) => (card ? channelAddress(card, ch, fmt) : '');
+  const vis = (k: SymVisKey): Vis => ({ on: members.filter(m => m.plcGroup!.socket !== 'body').every(m => m.show?.[k] !== false), set: on => st().setPlcGroupShow(gid, k, on) });
+  const upd = (id: string, patch: Partial<SymbolInstance>) => st().updateInstance(id, patch);
+  const setKind = (s: number, part: 'a' | 'b', k: SocketKind) =>
+    st().updatePlcSocket(gid, { kinds: cfg.kinds.map((x, i) => (i === s ? { ...x, [part]: k } : x)) });
+  const kindSel = (s: number, part: 'a' | 'b') => {
+    const index = (part === 'a' ? cfg.first : cfg.second) + s;
+    return (
+      <select value={cfg.kinds[s]?.[part] ?? ''} onChange={e => setKind(s, part, (e.target.value || null) as SocketKind)}>
+        <option value="">{tx('non usato')}</option>
+        {(['DI', 'DO'] as const).filter(k => card && index < (cardType(card).channels[k] ?? 0)).map(k => <option key={k} value={k}>{`${k}${index} · ${addr(`${k}${index}`)}`}</option>)}
+      </select>
+    );
+  };
+  return (
+    <>
+      <Group title={tx('Prese M12 a 2 canali -{0}', cfg.tag)}>
+        <Row label={tx('Scheda')}>
+          <select value={cfg.tag} onChange={e => st().updatePlcSocket(gid, { tag: e.target.value })}>
+            {cards.map(c => <option key={c.id} value={c.tag}>-{c.tag} · {cardType(c).name}</option>)}
+          </select>
+        </Row>
+        <Row label={tx('Prese')}>
+          <select value={cfg.count} onChange={e => {
+            const n = parseInt(e.target.value, 10);
+            const def = cfg.kinds[cfg.kinds.length - 1] ?? { a: cfg.up ? 'DI' : 'DO', b: cfg.up ? 'DI' : 'DO' };
+            st().updatePlcSocket(gid, { count: n, kinds: Array.from({ length: n }, (_, i) => cfg.kinds[i] ?? def) });
+          }}>
+            {Array.from({ length: 8 }, (_, i) => <option key={i} value={i + 1}>{i + 1}</option>)}
+          </select>
+        </Row>
+        <Row label={tx('Nome della prima presa')}>
+          <Field value={cfg.name} placeholder="X1" onCommit={v => { if (v.trim()) st().updatePlcSocket(gid, { name: v.trim() }); }} />
+        </Row>
+        <Row label={tx('Canale A (pin 4) della prima presa')}>
+          <select value={cfg.first} onChange={e => st().updatePlcSocket(gid, { first: parseInt(e.target.value, 10) })}>
+            {Array.from({ length: maxCh }, (_, i) => <option key={i} value={i}>{i}</option>)}
+          </select>
+        </Row>
+        <Row label={tx('Canale B (pin 2) della prima presa')}>
+          <select value={cfg.second} onChange={e => st().updatePlcSocket(gid, { second: parseInt(e.target.value, 10) })}>
+            {Array.from({ length: maxCh }, (_, i) => <option key={i} value={i}>{i}</option>)}
+          </select>
+        </Row>
+        <Row label={tx('Numeri dei pin')} vis={vis('pins')} />
+        <Row label={tx('Indirizzi')} vis={vis('plcAddress')} />
+        <Row label={tx('Variabili')} vis={vis('plcSymbol')} />
+        <Row label={tx('Commenti')} vis={vis('plcComment')} />
+        <Row label={tx('Azioni')}>
+          <button onClick={() => st().rotateSelection()}>{tx('Ruota')}</button>{' '}
+          <button onClick={() => st().deleteSelection()}>{tx('Elimina')}</button>{' '}
+          <button onClick={() => st().setView('plc')}>{tx('Apri vista PLC')}</button>
+        </Row>
+      </Group>
+      {Array.from({ length: cfg.count }, (_, s) => {
+        const body = members.find(x => x.plcGroup!.index === s && x.plcGroup!.socket === 'body');
+        return (
+          <Group key={s} title={tx('Presa {0}', socketName(cfg.name, s))}>
+            {body && (
+              <Row label={tx('Pin +24 V / 0 V / FE')}>
+                <span className="panel-row">
+                  {(['1', '3', '5'] as const).map(pid => (
+                    <Field key={pid} value={body.pinLabels[pid] ?? ''} placeholder={pid} onCommit={v => upd(body.id, { pinLabels: { ...body.pinLabels, [pid]: v.trim() } })} />
+                  ))}
+                </span>
+              </Row>
+            )}
+            {(['a', 'b'] as const).map(part => {
+              const m = members.find(x => x.plcGroup!.index === s && x.plcGroup!.socket === part);
+              const pid = part === 'a' ? '4' : '2';
+              return (
+                <div key={part}>
+                  <Row label={part === 'a' ? tx('Canale A (pin 4)') : tx('Canale B (pin 2)')}>{kindSel(s, part)}</Row>
+                  {m && <>
+                    <Row label={tx('Pin della scheda')}>
+                      <Field value={m.pinLabels[pid] ?? ''} placeholder={pid} onCommit={v => {
+                        if (card && m.plcChannel) st().setChannelPins(card.id, m.plcChannel, [v]);
+                        else upd(m.id, { pinLabels: { ...m.pinLabels, [pid]: v.trim() } });
+                      }} />
+                    </Row>
+                    <Row label={tx('Variabile')}>
+                      <Field value={m.plcSymbol ?? ''} placeholder={defaultSymbol(m.tag, m.plcChannel ?? '')}
+                        onCommit={v => upd(m.id, { plcSymbol: v.trim() ? sanitizeSymbol(v.trim()) : undefined })} />
+                    </Row>
+                    <Row label={tx('Commento')}>
+                      <Field value={m.plcComment ?? ''} placeholder={tx('descrizione del dispositivo collegato')} onCommit={v => upd(m.id, { plcComment: v.trim() || undefined })} />
+                    </Row>
+                  </>}
+                </div>
+              );
+            })}
           </Group>
         );
       })}

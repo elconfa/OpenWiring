@@ -3839,5 +3839,19 @@
   "Connettore (senza tipo del catalogo)": "Connector (no catalogue type)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "No connector parts: in Parts open the part and choose the type in the «Connector» list",
   "Set di articoli": "Part set",
-  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (e.g. M12 sockets: +24 V, signal, 0 V, second signal)"
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (e.g. M12 sockets: +24 V, signal, 0 V, second signal)",
+  "{0} righe con scheda o canale non presenti nel progetto: {1}{2}": "{0} rows with a card or channel not in the project: {1}{2}",
+  "Canale A (pin 4)": "Channel A (pin 4)",
+  "Canale A (pin 4) della prima presa": "Channel A (pin 4) of the first socket",
+  "Canale B (pin 2)": "Channel B (pin 2)",
+  "Canale B (pin 2) della prima presa": "Channel B (pin 2) of the first socket",
+  "Import di {0}: {1} schede e {2} canali modificati": "Import of {0}: {1} cards and {2} channels changed",
+  "Importa la Lista I/O Excel modificata (pin, nomi, commenti e dati delle schede), oppure nomi e commenti da Excel di TIA Portal, GVL di CODESYS o CSV (Nome; Indirizzo; Commento)": "Import the edited I/O list Excel file (pins, names, comments and card data), or names and comments from a TIA Portal Excel file, CODESYS GVL or CSV (Name; Address; Comment)",
+  "Nome della prima presa": "Name of the first socket",
+  "Pin +24 V / 0 V / FE": "Pins +24 V / 0 V / FE",
+  "Presa {0}": "Socket {0}",
+  "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "M12 socket of the I/O station (+24 V, 0 V, FE)",
+  "Prese": "Sockets",
+  "Prese M12 a 2 canali -{0}": "M12 sockets with 2 channels -{0}",
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "An Excel file with all channels (pins 1…5, names, comments, position) and the cards: edit it and import it back with «Import variables»"
 }

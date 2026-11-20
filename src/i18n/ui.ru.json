@@ -3839,5 +3839,19 @@
   "Connettore (senza tipo del catalogo)": "Разъём (без типа из каталога)",
   "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Нет изделий-разъёмов: в «Изделия» откройте изделие и выберите тип в списке «Разъём»",
   "Set di articoli": "Комплект изделий",
-  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (напр. разъёмы M12: +24 В, сигнал, 0 В, второй сигнал)"
+  "4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)": "4 (напр. разъёмы M12: +24 В, сигнал, 0 В, второй сигнал)",
+  "{0} righe con scheda o canale non presenti nel progetto: {1}{2}": "{0} строк с модулем или каналом, которых нет в проекте: {1}{2}",
+  "Canale A (pin 4)": "Канал A (контакт 4)",
+  "Canale A (pin 4) della prima presa": "Канал A (контакт 4) первого разъёма",
+  "Canale B (pin 2)": "Канал B (контакт 2)",
+  "Canale B (pin 2) della prima presa": "Канал B (контакт 2) первого разъёма",
+  "Import di {0}: {1} schede e {2} canali modificati": "Импорт {0}: изменено модулей {1}, каналов {2}",
+  "Importa la Lista I/O Excel modificata (pin, nomi, commenti e dati delle schede), oppure nomi e commenti da Excel di TIA Portal, GVL di CODESYS o CSV (Nome; Indirizzo; Commento)": "Импорт изменённого списка входов/выходов Excel (контакты, имена, комментарии и данные модулей) или имён и комментариев из Excel TIA Portal, GVL CODESYS или CSV (Имя; Адрес; Комментарий)",
+  "Nome della prima presa": "Имя первого разъёма",
+  "Pin +24 V / 0 V / FE": "Контакты +24 В / 0 В / FE",
+  "Presa {0}": "Разъём {0}",
+  "Presa M12 della stazione I/O (+24 V, 0 V, FE)": "Разъём M12 станции ввода-вывода (+24 В, 0 В, FE)",
+  "Prese": "Разъёмы",
+  "Prese M12 a 2 canali -{0}": "Разъёмы M12 на 2 канала -{0}",
+  "Un file Excel con tutti i canali (pin 1…5, nomi, commenti, posizione) e le schede: si modifica e si reimporta con «Importa variabili»": "Файл Excel со всеми каналами (контакты 1…5, имена, комментарии, положение) и модулями: отредактируйте и импортируйте обратно через «Импорт переменных»"
 }
