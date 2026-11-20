@@ -20,7 +20,7 @@ export const TEXT_COVERAGE = {
     bus: 'bus=', busCable: 'cavo= tipocavo= lunghezza= articolocavo=', poles: 'poli=', text: 'testo=', lineType: 'linea=', width: 'spessore=',
     labelSize: 'hnumero=', tickAt: 'lineetta=', spare: 'scorta=', labelColor: 'colorenumero=', bundle: 'busfili=', bundlePart: 'articolobus=', tapSize: 'hcond=', tapColor: 'colorecond=', tapStart: 'cond1=', tapEnd: 'cond2=', tNode: 'nodo1= nodo2=', userProps: 'proprieta=',
   } satisfies Coverage<Wire>,
-  busCable: { tag: 'cavo=', type: 'tipocavo=', length: 'lunghezza=', partNr: 'articolocavo=', auto: 'no: dato interno della sigla automatica' } satisfies Record<keyof BusCable, string>,
+  busCable: { tag: 'cavo=', type: 'tipocavo=', length: 'lunghezza=', partNr: 'articolocavo=', extraParts: 'articolicavo=', auto: 'no: dato interno della sigla automatica' } satisfies Record<keyof BusCable, string>,
   text: { x: '@x,y', y: '@x,y', text: '"<testo>"', size: 'h=', rot: 'rot=', w: 'l=', align: 'allinea=' } satisfies Coverage<TextItem>,
   cable: {
     cableId: 'lineacavo -<sigla>', points: 'x,y x,y', main: 'principale', show: 'testi=', labelPos: 'posizione=', labelOffset: 'spostamento=',
@@ -32,7 +32,7 @@ export const TEXT_COVERAGE = {
   cableData: {
     tag: 'cavo -<sigla>', type: 'tipo=', cross: 'sezione=', conductors: 'conduttori=', marking: 'marcatura=', shield: 'schermato', pairs: 'coppie',
     length: 'lunghezza=', pieces: 'pezzi=', description: 'descr=', from: 'da=', to: 'a=', partNr: 'articolo=',
-    assign: 'filo … conduttore=', fixed: 'filo … fissato=', pinsOf: 'pindi=',
+    assign: 'filo … conduttore=', fixed: 'filo … fissato=', pinsOf: 'pindi=', extraParts: 'articoli=',
   } satisfies Record<Exclude<keyof Cable, 'id'>, string>,
   strip: {
     partNr: 'articolo=', endPlatePartNr: 'piastra=', endPlateQty: 'piastre=', endStopPartNr: 'fermo=', endStopQty: 'fermi=', accessories: 'accessori=',

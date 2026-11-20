@@ -12,8 +12,8 @@ import { cableInfos, cableSection } from './cables';
 import { computeNetlist, type Net, type NetPin } from './netlist';
 import { bundleTaps, bundleCable, bundleConductorList } from './bundles';
 import { columnOf } from './types';
-import { connectorData, connectorRows, allConnectors, pinCount, pinNames } from './connectors';
-import { connectorType, connectorShortName, GENDER_NAMES } from './connectorTypes';
+import { connectorData, connectorRows, allConnectors, pinCount, pinNames, connectorTypeOf } from './connectors';
+import { circLayout, connectorShortName, GENDER_NAMES, typePinNames } from './connectorTypes';
 import { devicePanels } from './network';
 
 export type DrawingKind = 'cable' | 'connector' | 'system';
@@ -174,8 +174,10 @@ export interface ConnectorSheet {
   /** Pin totali (dati del connettore o articolo), almeno quelli usati */
   pins: number;
   /** Forma del disegno: SUB-D per 9, 15, 25, 37 e 50 pin, altrimenti rettangolare a due file */
-  shape: 'subd' | 'rect' | 'rj45';
-  rows: { no: string; a: string; b: string; wires: string }[];
+  shape: 'subd' | 'rect' | 'rj45' | 'circ';
+  rows: { no: string; a: string; b: string; wires: string; info?: string }[];
+  /** Connettori circolari (M8, M12): contatti sulla faccia, coordinate da −1 a 1 */
+  circ?: { name: string; x: number; y: number }[];
   /** Nomi dei pin sulla faccia, nell'ordine (1…n, PE per i connettori del catalogo) */
   names: string[];
   /** Tipo del catalogo, genere e codici degli inserti, se indicati */
@@ -185,17 +187,20 @@ export interface ConnectorSheet {
 const SUBD = [9, 15, 25, 37, 50];
 
 export function connectorSheet(project: Project, conn: string, library: Part[] = [], nets?: Net[]): ConnectorSheet {
-  const rows = connectorRows(project, conn, nets).map(r => ({ no: r.no, a: r.sideA, b: r.sideB, wires: r.wires }));
+  const t = connectorTypeOf(project, conn, library);
+  // Colore e segnale tipici del contatto (M8, M12)
+  const infoOf = (no: string) => { const i = t?.info ? typePinNames(t).indexOf(no) : -1; return i >= 0 ? t!.info![i] : undefined; };
+  const rows = connectorRows(project, conn, nets).map(r => ({ no: r.no, a: r.sideA, b: r.sideB, wires: r.wires, ...(infoOf(r.no) ? { info: infoOf(r.no) } : {}) }));
   const maxNo = Math.max(0, ...rows.map(r => parseInt(r.no, 10)).filter(n => !isNaN(n)));
   const pins = Math.max(pinCount(project, conn, library) ?? 0, maxNo, rows.length);
-  const d = connectorData(project, conn), t = connectorType(d.type);
+  const d = connectorData(project, conn);
   const own = pinNames(project, conn, library);
   const names = own.length >= pins ? own : Array.from({ length: pins }, (_, i) => String(i + 1));
   const typeText = t ? [connectorShortName(t), d.gender ? GENDER_NAMES[d.gender] : '', `${t.male} / ${t.female}`, d.housing ?? (t.housing ? (t.shape ? t.housing : `custodia ${t.housing}`) : '')].filter(Boolean).join(' · ') : undefined;
   // Faccia: quella del tipo (i contatti in più, come lo schermo, non sono sulla faccia)
   const facePins = t ? t.poles + (t.pe ? 1 : 0) : pins;
   const shape = t ? t.shape ?? 'rect' : SUBD.includes(pins) ? 'subd' : 'rect';
-  return { conn, description: d.description, pins: facePins, shape, rows, names, ...(typeText ? { typeText } : {}) };
+  return { conn, description: d.description, pins: facePins, shape, rows, names, ...(typeText ? { typeText } : {}), ...(t?.shape === 'circ' ? { circ: circLayout(t) } : {}) };
 }
 
 /** Posizione dei pin sulla faccia: SUB-D con la fila lunga sopra (pin 1 a sinistra), rettangolare a due file */

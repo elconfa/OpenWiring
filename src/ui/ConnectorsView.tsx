@@ -4,8 +4,8 @@
 // numerati da 1.
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../model/store';
-import { allConnectors, connectorRows, connectorData, pinCount, freePins, rangeText } from '../model/connectors';
-import { CONNECTOR_TYPES, connectorType, connectorTypeName, GENDER_NAMES, type ConnectorGender } from '../model/connectorTypes';
+import { allConnectors, connectorRows, connectorData, pinCount, freePins, rangeText, connectorTypeOf } from '../model/connectors';
+import { CONNECTOR_TYPES, connectorGroup, connectorTypeName, GENDER_NAMES, type ConnectorGender } from '../model/connectorTypes';
 import { buildDevices, deviceInfo, partsIndex } from '../model/devices';
 import type { DeviceField, SymbolInstance } from '../model/types';
 import { askText } from './Ask';
@@ -46,13 +46,15 @@ export function ConnectorsView() {
   const data = conn ? connectorData(project, conn) : {};
   const count = conn ? pinCount(project, conn, library) : undefined;
   const free = conn ? freePins(project, conn, library) : [];
-  const ctype = connectorType(data.type);
-  const group = (t: (typeof CONNECTOR_TYPES)[number]) => (t.shape ? tx('Segnale (RJ45, SUB-D)') : `${t.maker} ${t.series}`);
+  const ctype = conn ? connectorTypeOf(project, conn, library) : undefined;
+  /** Tipo che arriva dall'articolo (nessun tipo scelto qui) */
+  const typeFromPart = !data.type && ctype ? ctype : undefined;
+  const group = (t: (typeof CONNECTOR_TYPES)[number]) => connectorGroup(t, tx);
   const series = [...new Set(CONNECTOR_TYPES.map(group))];
   /** Elenco dei tipi del catalogo raggruppati per serie */
   const typeOptions = series.map(s => (
     <optgroup key={s} label={s}>
-      {CONNECTOR_TYPES.filter(t => group(t) === s).map(t => <option key={t.id} value={t.id}>{[connectorTypeName(t), t.shape ? '' : `${t.amps} A`, t.housing].filter(Boolean).join(' · ')}</option>)}
+      {CONNECTOR_TYPES.filter(t => group(t) === s).map(t => <option key={t.id} value={t.id}>{[connectorTypeName(t), t.shape && t.shape !== 'circ' ? '' : `${t.amps} A`, t.housing].filter(Boolean).join(' · ')}</option>)}
     </optgroup>
   ));
   const newConnector = (type: string) => { const tag = st().addConnector(type || undefined, 'MF'); st().setConnSel(tag); };
@@ -185,7 +187,7 @@ export function ConnectorsView() {
                   <tr><td className="prop-name">{tx('Descrizione')}</td><td className="prop-value"><Field value={data.description ?? ''} placeholder={tx('es. Connettore motore')} onCommit={v => st().updateConnector(conn, { description: v.trim() || undefined })} /></td></tr>
                   <tr><td className="prop-name">{tx('Tipo')}</td><td className="prop-value">
                     <select value={data.type ?? ''} onChange={e => st().updateConnector(conn, { type: e.target.value || undefined, pins: undefined })}>
-                      <option value="">{tx('— nessuno —')}</option>
+                      <option value="">{typeFromPart ? tx('dall\'articolo: {0}', connectorTypeName(typeFromPart)) : tx('— nessuno —')}</option>
                       {typeOptions}
                     </select>
                   </td></tr>

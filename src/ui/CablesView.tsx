@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../model/store';
 import { cableByPiece, pinDeviceOptions, cableInfos, cableSection, conductorColors, conductorEnds, conductorsFor, isPeName, markingOf, type CableInfo, type Conductor } from '../model/cables';
 import { partsIndex } from '../model/devices';
-import { WIRE_SECTIONS, type Cable, type CableMarking } from '../model/types';
+import { WIRE_SECTIONS, type BusCable, type Cable, type CableMarking, type ExtraPart, type Part } from '../model/types';
+import { busCableRows, portText, protocolLabel, BUS_CABLE_TYPES, type BusCableRow } from '../model/network';
 import { useGrid, Th, gridProps } from './grid';
 import { ColSplitter, ResizableSection } from './split';
 import { askConfirm } from './Ask';
@@ -46,6 +47,10 @@ export function CablesView() {
   const parts = useMemo(() => partsIndex(project, library), [project, library]);
   const cableParts = useMemo(() => [...parts.values()].filter(p => p.cable?.conductors.length), [parts]);
   const [sel, setSel] = useState<string[]>([]);
+  // Cavi di rete (Profinet, EtherCAT…): collegamenti bus disegnati tra le porte dei dispositivi
+  const busRows = useMemo(() => busCableRows(project), [project]);
+  const [busSel, setBusSel] = useState<string>();
+  const busCur = busSel ? busRows.find(r => r.wire.id === busSel) : undefined;
   const cur = infos.find(i => i.cable.id === cableSel) ?? infos[0];
   // Selezione: solo cavi che esistono ancora
   const chosenIds = sel.filter(id => infos.some(i => i.cable.id === id));
@@ -58,6 +63,7 @@ export function CablesView() {
     from: i => i.cable.from ?? '', to: i => i.cable.to ?? '', length: i => i.cable.length ?? 0, description: i => i.cable.description ?? '',
   });
   const click = (id: string, ev: React.MouseEvent) => {
+    setBusSel(undefined);
     st().setCableSel(id);
     if (ev.shiftKey && chosenIds.length) {
       const list = g.rows.map(r => r.cable.id);
@@ -100,7 +106,7 @@ export function CablesView() {
       <div className="parts-list">
         <div className="parts-toolbar">
           <b>{tx('Cavi')}</b>
-          <span className="muted small">{tx('{0} cavi', infos.length)}</span>
+          <span className="muted small">{tx('{0} cavi', infos.length)}{busRows.length ? ` · ${tx('{0} cavi di rete', busRows.length)}` : ''}</span>
           <div className="tb-spacer" />
           <span className="muted small">{chosenIds.length > 1 ? tx('{0} selezionati', chosenIds.length) : tx('Clic, ⇧ clic o ⌘/Ctrl clic per selezionare più cavi')}</span>
           <button onClick={() => { st().setView('schema'); st().setTool({ kind: 'cable' }); }} title={tx('Linea di definizione cavo: clic prima e dopo i fili da includere')}>{tx('Disegna linea di cavo')}</button>
@@ -127,12 +133,38 @@ export function CablesView() {
                   </tr>
                 );
               })}
-              {!infos.length && <tr><td colSpan={11}><EmptyState icon="cable" text={tx('Nessun cavo. Disegna una linea di cavo sullo schema (strumento «Cavo»): i fili che attraversa diventano conduttori del cavo.')}
+              {!infos.length && !busRows.length && <tr><td colSpan={11}><EmptyState icon="cable" text={tx('Nessun cavo. Disegna una linea di cavo sullo schema (strumento «Cavo»): i fili che attraversa diventano conduttori del cavo.')}
                 action={tx('Disegna il primo cavo')} onAction={() => { const s = useStore.getState(); s.setView('schema'); s.setTool({ kind: 'cable' }); }} /></td></tr>}
             </tbody>
           </table>
         </ResizableSection>
-        {c && (
+        {busRows.length > 0 && (
+          <>
+            <div className="parts-toolbar">
+              <b>{tx('Cavi di rete')}</b>
+              <span className="muted small">{tx('Collegamenti bus tra le porte dei dispositivi (Profinet, EtherCAT…): sigla, tipo e articolo si scrivono anche selezionando il collegamento sullo schema')}</span>
+            </div>
+            <div className="table-wrap bus-cables">
+              <table className="grid">
+                <thead><tr>
+                  <th>{tx('Sigla')}</th><th>{tx('Rete')}</th><th>{tx('Tipo')}</th><th>{tx('Lunghezza (m)')}</th><th>{tx('Da')}</th><th>A</th><th>{tx('Posizione')}</th><th>{tx('Articolo')}</th><th>{tx('Articoli aggiuntivi')}</th>
+                </tr></thead>
+                <tbody>
+                  {busRows.map(r => (
+                    <tr key={r.wire.id} className={busCur === r ? 'sel' : ''} onClick={() => setBusSel(r.wire.id)}>
+                      <td className="nowrap">{r.tag ? `-${r.tag}` : ''}</td><td>{protocolLabel(r.protocol)}</td><td>{r.type}</td>
+                      <td>{r.length !== undefined ? String(r.length).replace('.', ',') : ''}</td>
+                      <td className="nowrap">{portText(r.a)}</td><td className="nowrap">{portText(r.b)}</td>
+                      <td className="nowrap"><a href="#" onClick={ev => { ev.preventDefault(); ev.stopPropagation(); goTo(r.page.id, r.wire.id); }}>/{r.loc}</a></td>
+                      <td>{r.partNr ?? ''}</td><td>{(r.extraParts ?? []).map(x => `${x.qty && x.qty !== 1 ? `${x.qty}× ` : ''}${x.partNr}`).join(', ')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+        {c && !busCur && (
           <>
             <div className="parts-toolbar">
               <b>{tx('Conduttori di -{0}', c.tag)}</b>
@@ -180,7 +212,8 @@ export function CablesView() {
       <ColSplitter id="cables" />
       <div className="part-detail">
         <div className="detail-scroll">
-          {c && (
+          {busCur && <BusCableDetail r={busCur} parts={parts} onGo={() => goTo(busCur.page.id, busCur.wire.id)} />}
+          {c && !busCur && (
             <>
               <h4>{many ? tx('Modifica {0} cavi insieme', chosen.length) : tx('Cavo -{0}', c.tag)}</h4>
               {many && <p className="muted small">{tx('I campi vuoti hanno valori diversi nei cavi scelti: scrivendo un valore vale per tutti.')}</p>}
@@ -240,6 +273,7 @@ export function CablesView() {
                 </tbody>
               </table>
               <datalist id="cable-sections">{WIRE_SECTIONS.map(x => <option key={x} value={x} />)}</datalist>
+              {!many && <ExtraPartsTable list={c.extraParts ?? []} parts={parts} onChange={list => st().updateCable(c.id, { extraParts: list.length ? list : undefined })} />}
               <div className="row-btns">
                 {!many && <button onClick={() => st().copyCableProps(c.id)} title={tx('Copia tipo, sezione, conduttori, colori scelti a mano e gli altri dati, tranne la sigla')}>{tx('Copia proprietà')}</button>}
                 {clip && <button onClick={() => st().pasteCableProps(ids)} title={tx('I cavi scelti prendono tutte le proprietà copiate tranne la sigla; restano modificabili')}>{tx('Incolla proprietà di -{0}', clip.tag)}</button>}
@@ -271,5 +305,64 @@ export function PiecesSelect({ value, fromPart, onChange }: { value: string | un
       <option value="m">{tx('a metri')}</option>
       <option value="pz">{tx('a pezzi (cavo confezionato)')}</option>
     </select>
+  );
+}
+
+/**
+ * Articoli aggiuntivi di un cavo (connettori da intestare, pressacavi, guaine…): codice dalla libreria
+ * o scritto a mano, quantità; vanno in distinta materiali con la sigla del cavo
+ */
+export function ExtraPartsTable({ list, parts, onChange }: { list: ExtraPart[]; parts: Map<string, Part>; onChange: (list: ExtraPart[]) => void }) {
+  const upd = (i: number, patch: Partial<ExtraPart>) => onChange(list.map((x, k) => (k === i ? { ...x, ...patch } : x)));
+  return (
+    <>
+      <h4>{tx('Articoli aggiuntivi')}</h4>
+      <p className="muted small">{tx('Connettori da intestare (RJ45, M12…), pressacavi, guaine: vanno in distinta materiali con la sigla del cavo.')}</p>
+      <table className="prop-table extra-parts">
+        <tbody>
+          {list.map((x, i) => {
+            const part = parts.get(x.partNr);
+            return (
+              <tr key={i}>
+                <td className="prop-value"><Field value={x.partNr} list="cable-extra-parts" placeholder={tx('codice articolo')} onCommit={v => (v.trim() ? upd(i, { partNr: v.trim() }) : onChange(list.filter((_, k) => k !== i)))} /></td>
+                <td className="prop-value small">{part?.descr1 ?? <Field value={x.descr ?? ''} placeholder={tx('descrizione')} onCommit={v => upd(i, { descr: v.trim() || undefined })} />}</td>
+                <td className="prop-value" style={{ width: 56 }} title={tx('Quantità')}><Field value={String(x.qty ?? 1)} onCommit={v => { const n = parseFloat(v.replace(',', '.')); upd(i, { qty: n > 0 && n !== 1 ? n : undefined }); }} /></td>
+                <td><button className="mini" title={tx('Togli l\'articolo')} onClick={() => onChange(list.filter((_, k) => k !== i))}>✕</button></td>
+              </tr>
+            );
+          })}
+          <tr>
+            <td className="prop-value" colSpan={4}><Field key={list.length} value="" list="cable-extra-parts" placeholder={tx('+ scrivi o scegli un codice…')} onCommit={v => { if (v.trim()) onChange([...list, { partNr: v.trim() }]); }} /></td>
+          </tr>
+        </tbody>
+      </table>
+      <datalist id="cable-extra-parts">{[...parts.values()].map(p => <option key={p.partNr} value={p.partNr}>{p.descr1 ?? ''}</option>)}</datalist>
+    </>
+  );
+}
+
+/** Cavo di rete scelto nella vista Cavi: sigla, tipo, lunghezza, articolo e articoli aggiuntivi (valgono per tutti i suoi tratti) */
+function BusCableDetail({ r, parts, onGo }: { r: BusCableRow; parts: Map<string, Part>; onGo: () => void }) {
+  const st = useStore.getState;
+  const c = r.wire.busCable ?? {};
+  const set = (patch: Partial<BusCable>) =>
+    st().setWireProps(r.wires.map(w => w.id), { busCable: { ...c, ...patch, ...('tag' in patch ? { auto: patch.tag ? undefined : c.auto } : {}) } });
+  return (
+    <>
+      <h4>{tx('Cavo di rete {0}', r.tag ? `-${r.tag}` : '')} · {protocolLabel(r.protocol)}</h4>
+      <table className="prop-table">
+        <tbody>
+          <tr><td className="prop-name">{tx('Sigla')}</td><td className="prop-value"><span className="tag-input"><span className="dash">-</span><Field value={c.tag ?? r.tag} placeholder={tx('automatica')} onCommit={v => set({ tag: v.replace(/^-/, '').trim() || undefined })} /></span></td></tr>
+          <tr><td className="prop-name">{tx('Tipo')}</td><td className="prop-value"><Field value={c.type ?? ''} list="bus-cable-types-view" placeholder={BUS_CABLE_TYPES[r.protocol] ?? tx('es. Cat5e SF/UTP')} onCommit={v => set({ type: v.trim() || undefined })} /></td></tr>
+          <tr><td className="prop-name">{tx('Lunghezza (m)')}</td><td className="prop-value"><Field value={c.length !== undefined ? String(c.length).replace('.', ',') : ''} placeholder={tx('es. 2')} onCommit={v => set({ length: num(v) })} /></td></tr>
+          <tr><td className="prop-name">{tx('Articolo')}</td><td className="prop-value"><Field value={c.partNr ?? ''} list="cable-extra-parts" placeholder={tx('codice articolo (es. cavo confezionato)')} onCommit={v => set({ partNr: v.trim() || undefined })} /></td></tr>
+          <tr><td className="prop-name">{tx('Da')}</td><td className="prop-value">{portText(r.a)}</td></tr>
+          <tr><td className="prop-name">A</td><td className="prop-value">{portText(r.b)}</td></tr>
+        </tbody>
+      </table>
+      <datalist id="bus-cable-types-view">{[...new Set(Object.values(BUS_CABLE_TYPES))].map(t => <option key={t} value={t} />)}</datalist>
+      <div className="row-btns"><button onClick={onGo}>{tx('Mostra sullo schema')}</button></div>
+      <ExtraPartsTable list={c.extraParts ?? []} parts={parts} onChange={list => set({ extraParts: list.length ? list : undefined })} />
+    </>
   );
 }

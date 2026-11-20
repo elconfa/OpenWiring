@@ -149,21 +149,28 @@ function ConnectorDrawing({ c, t, S }: { c: ConnectorSheet; t: T; S: ResolvedDra
   const cx = FRAME.left + 10 + Math.max(w, 60) / 2, cy = FRAME.top + 60;
   const x0 = cx - w / 2, y0 = cy - h / 2;
   const at = (p: (typeof pins)[number]) => ({ x: x0 + 6 + p.col * pitch, y: y0 + 6 + p.row * rowGap });
-  const face: ReactNode = c.shape === 'rj45'
+  // Connettori circolari (M8, M12): cerchio con la chiave in alto e i contatti sulla corona
+  const R = 13;
+  const circAt = (q: { x: number; y: number }) => ({ x: cx + q.x * R, y: cy + q.y * R });
+  const face: ReactNode = c.circ
+    ? <g fill="none" stroke={look.ink} strokeWidth={0.5}><circle cx={cx} cy={cy} r={R} /><rect x={cx - 1.6} y={cy - R - 0.2} width={3.2} height={2.6} /></g>
+    : c.shape === 'rj45'
     ? <path d={`M${x0} ${y0} L${x0 + w} ${y0} L${x0 + w} ${y0 + h - 4} L${cx + 4} ${y0 + h - 4} L${cx + 4} ${y0 + h} L${cx - 4} ${y0 + h} L${cx - 4} ${y0 + h - 4} L${x0} ${y0 + h - 4} Z`} fill="none" stroke={look.ink} strokeWidth={0.5} />
     : c.shape === 'subd'
     ? <path d={`M${x0} ${y0} L${x0 + w} ${y0} L${x0 + w - 4} ${y0 + h} L${x0 + 4} ${y0 + h} Z`} fill="none" stroke={look.ink} strokeWidth={0.5} strokeLinejoin="round" />
     : <rect x={x0} y={y0} width={w} height={h} rx={1.5} fill="none" stroke={look.ink} strokeWidth={0.5} />;
   const tableX = Math.max(cx + Math.max(w, 60) / 2 + 12, 200), rowH = Math.min(S.rowH, (FRAME.bottom - 6 - (FRAME.top + 26)) / (c.rows.length + 1));
   const side = (FRAME.right - 10 - tableX - 44) / 2;
-  const tcols = columns([{ key: 'no', title: t('Pin'), w: 14 }, { key: 'a', title: t('Lato 1'), w: side }, { key: 'b', title: t('Lato 2'), w: side }, { key: 'wires', title: t('Fili'), w: 30 }], S);
+  const withInfo = c.rows.some(r => r.info);
+  const tcols = columns([{ key: 'no', title: t('Pin'), w: 14 }, ...(withInfo ? [{ key: 'info', title: t('Colore / segnale'), w: 30 }] : []),
+    { key: 'a', title: t('Lato 1'), w: side - (withInfo ? 15 : 0) }, { key: 'b', title: t('Lato 2'), w: side - (withInfo ? 15 : 0) }, { key: 'wires', title: t('Fili'), w: 30 }], S);
   return (
     <g>
       <Title size={S.titleSize} title={`${t('Connettore')} -${c.conn}`} sub={[c.description ? t(c.description) : '', c.typeText ?? `${c.pins} pin`, c.shape === 'subd' ? 'SUB-D' : ''].filter(Boolean).join('  ·  ')} />
-      <text x={cx} y={y0 - 4} fontSize={2.2} textAnchor="middle" fill={MUTED}>{t('Vista lato contatti')}</text>
+      <text x={cx} y={c.circ ? cy - R - 4 : y0 - 4} fontSize={2.2} textAnchor="middle" fill={MUTED}>{t('Vista lato contatti')}</text>
       {face}
-      {pins.map(p => {
-        const q = at(p), name = nameOf(p.no), on = used.has(name);
+      {(c.circ ? c.circ.map((q, i) => ({ no: i + 1, ...circAt(q), name: q.name })) : pins.map(p => ({ no: p.no, ...at(p), name: nameOf(p.no) }))).map(p => {
+        const q = p, name = p.name, on = used.has(name);
         return (
           <g key={p.no}>
             <circle cx={q.x} cy={q.y} r={1.25} fill={on ? '#cfe3ff' : 'none'} stroke={look.ink} strokeWidth={0.2} />
@@ -172,7 +179,7 @@ function ConnectorDrawing({ c, t, S }: { c: ConnectorSheet; t: T; S: ResolvedDra
         );
       })}
       {tcols.length > 0 && <Grid x={tableX} y={FRAME.top + 26} rowH={rowH} size={Math.min(S.tableSize, rowH * 0.6)} cols={tcols}
-        rows={c.rows.map(r => tcols.map(k => ({ no: r.no, a: r.a, b: r.b, wires: r.wires } as Record<string, string>)[k.key] ?? ''))} />}
+        rows={c.rows.map(r => tcols.map(k => ({ no: r.no, a: r.a, b: r.b, wires: r.wires, info: r.info ?? '' } as Record<string, string>)[k.key] ?? ''))} />}
     </g>
   );
 }

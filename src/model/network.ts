@@ -3,11 +3,11 @@
 import { projectionPages } from './projection';
 import { tx } from '../i18n/ui';
 import { nextProjectPageNo } from './pageOrder';
-import type { Project, Panel, Page, Zone, Wire, IpNetwork, SymbolInstance, Part, Pt, PlcStation } from './types';
+import type { Project, Panel, Page, Zone, Wire, IpNetwork, SymbolInstance, Part, Pt, PlcStation, ExtraPart } from './types';
 import { columnOf } from './types';
 import { allPlaced, locationOf, effectivePinLabels, buildDevices, deviceInfo, partsIndex, type PlacedElement } from './devices';
 import { computeNetlist, type Net } from './netlist';
-import { uid, pinsWorld } from './geometry';
+import { uid, pinsWorld, getSymbol } from './geometry';
 import { linkPartners } from './links';
 import { nextTagFor } from './numbering';
 
@@ -521,6 +521,7 @@ export interface BusCableRow {
   type: string;
   length?: number;
   partNr?: string;
+  extraParts?: ExtraPart[];
   a?: NetPort;
   b?: NetPort;
   loc: string;
@@ -611,7 +612,7 @@ export function busCableRows(project: Project, nets?: Net[]): BusCableRow[] {
     const page = pages.get(main.pageId)!;
     out.push({
       wire: main.wire, page, protocol: proto, tag: tags[0] ?? '', type: first('type') ?? BUS_CABLE_TYPES[proto] ?? '',
-      length: first('length') as number | undefined, partNr: first('partNr') as string | undefined,
+      length: first('length') as number | undefined, partNr: first('partNr') as string | undefined, extraParts: first('extraParts') as ExtraPart[] | undefined,
       a: a ? port(a) : undefined, b: b && b !== a ? port(b) : undefined,
       loc: `${page.name}.${columnOf(main.wire.points[0].x)}`,
       wires: wires.map(w => w.wire), otherTags: tags.length > 1 ? tags.slice(1) : undefined,
@@ -874,4 +875,19 @@ export function assignIps(project: Project): number {
     }
   }
   return count;
+}
+
+/**
+ * Filo disegnato con lo strumento normale tra due punti di connessione per cavi bus (porte Profinet,
+ * EtherCAT…): diventa un collegamento di rete, così entra nella lista cavi e nello schema di rete
+ */
+export function endsOnBusPins(page: Page, pts: Pt[], project?: Project): boolean {
+  if (pts.length < 2) return false;
+  const ends = [pts[0], pts[pts.length - 1]];
+  const busAt = (q: Pt) => page.elements.some(e => {
+    if (e.kind !== 'symbol') return false;
+    const sym = getSymbol(e.symbolId, project);
+    return !!sym && pinsWorld(e, sym).some(p => p.pin.medium === 'bus' && Math.abs(p.x - q.x) < 0.01 && Math.abs(p.y - q.y) < 0.01);
+  });
+  return ends.every(busAt);
 }

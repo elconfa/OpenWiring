@@ -4,7 +4,7 @@
 // programma calcola il percorso del filo.
 import { deviceLetter } from './letterCodes';
 import { isDeletedSymbol } from './symbolSync';
-import type { Project, Page, Element, SymbolInstance, Wire, SymbolDef, PinDir, PinDef, Prim, Pt, Cable, PageType } from './types';
+import type { Project, Page, Element, SymbolInstance, Wire, SymbolDef, PinDir, PinDef, Prim, Pt, Cable, PageType, ExtraPart } from './types';
 import { PAGE_W, PAGE_H } from './types';
 import { isRailEnd } from './checks';
 import { getSymbol, pinsWorld, samePt, onSegmentInterior, uid, pinDirWorld } from './geometry';
@@ -46,7 +46,7 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 # progetto [nome="…"] [descr="…"] [ditta="…"] [cliente="…"] [disegno=…] [autore=…] [rev=…] [data=AAAA-MM-GG]
 # luogo +<codice> "<nome>" [tipo="Quadro elettrico|Pulsantiera|Bordo macchina|Cassetta di derivazione|Campo|Altro"]
 # cavo -<sigla> [tipo=FG16OR16] [sezione=1,5] [conduttori="BN BK GY GNYE"] [lunghezza=15] [da=…] [a=…]
-#     [descr="…"] [articolo=…] [marcatura=numeri|colori] [pezzi=si|no] [pindi=-510NG1] [schermato] [coppie]
+#     [descr="…"] [articolo=…] [marcatura=numeri|colori] [pezzi=si|no] [pindi=-510NG1] [articoli='[{"partNr":"…","qty":2}]'] [schermato] [coppie]
 #     pindi: dispositivo con il connettore integrato, il filo dal suo morsetto n prende il conduttore n.
 # morsettiera -<sigla> [articolo=…] [fermo=… fermi=2] [piastra=… piastre=1] [ponticello=…] [separatore=…]
 #     [riserve="11 12"] [articoliriserve="11=WDU 2.5"] [separatori="3 7"] [ponticelli="pettine:1,2,3 | fisso:4,5:WQV 2.5/2"]
@@ -91,7 +91,7 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 #     ridotta: con coppia=, solo disegnino del contatto, morsetti e pagina, senza sigla (rot=0 verticale,
 #     rot=90 orizzontale); hcoppia=1,5 altezza dei suoi testi in mm.
 # filo x,y x,y [x,y…] [sezione=1,5] [colore=BU] [n=2.01] [bus=Profinet] [cavo=5W1]
-#     [tipocavo="…"] [lunghezza=10] [articolocavo=…] [poli=3] [testo="3/N/PE ~400 V"]
+#     [tipocavo="…"] [lunghezza=10] [articolocavo=…] [articolicavo='[{"partNr":"…","qty":2}]'] [poli=3] [testo="3/N/PE ~400 V"]
 #     [busfili=<nome>|_] [articolobus=<articolo cavo>] [cond1=L1] [cond2=L1]   (bus di conduttori, modalità BUS: nome del bus, «_» senza
 #     nome; cond1/cond2 = conduttore del bus a cui si collega il primo/l'ultimo estremo del filo)
 #     [hcond=2,5] [colorecond=#0050c0]   (bus di conduttori: altezza e colore dei nomi dei conduttori dove entrano i fili)
@@ -287,6 +287,7 @@ function projectSection(project: Project): string[] {
     if (c.marking) a.push(`marcatura=${c.marking === 'colors' ? 'colori' : 'numeri'}`);
     if (c.pieces !== undefined) a.push(`pezzi=${c.pieces ? 'si' : 'no'}`);
     if (c.pinsOf) a.push(`pindi=-${bare(c.pinsOf)}`);
+    if (c.extraParts?.length) a.push(`articoli=${json(c.extraParts)}`);
     if (c.shield) a.push('schermato');
     if (c.pairs) a.push('coppie');
     out.push(a.join(' '));
@@ -390,6 +391,7 @@ export function pagesToText(project: Project, opts: TextExportOptions = {}): str
       if (w.busCable?.type) parts.push(`tipocavo=${bare(w.busCable.type)}`);
       if (w.busCable?.length !== undefined) parts.push(`lunghezza=${num(w.busCable.length)}`);
       if (w.busCable?.partNr) parts.push(`articolocavo=${bare(w.busCable.partNr)}`);
+      if (w.busCable?.extraParts?.length) parts.push(`articolicavo=${json(w.busCable.extraParts)}`);
       if (w.poles) parts.push(`poli=${w.poles}`);
       if (w.lineType && w.lineType !== 'solid') parts.push(`linea=${w.lineType}`);
       if (w.width) parts.push(`spessore=${num(w.width)}`);
@@ -554,6 +556,7 @@ function wireAttrs(k: string, v: string, w: Partial<Wire>): boolean {
     case 'tipocavo': w.busCable = { ...w.busCable, type: v }; return true;
     case 'lunghezza': w.busCable = { ...w.busCable, length: parseFloat(v.replace(',', '.')) }; return true;
     case 'articolocavo': w.busCable = { ...w.busCable, partNr: v }; return true;
+    case 'articolicavo': { const val = parseJson<ExtraPart[]>(v); if (!Array.isArray(val)) return false; w.busCable = { ...w.busCable, extraParts: val }; return true; }
     case 'poli': w.poles = parseInt(v, 10) || undefined; return true;
     case 'testo': w.text = v; return true;
     case 'linea': if (['solid', 'dash', 'dashdot', 'dot'].includes(v)) { w.lineType = v as Wire['lineType']; return true; } return false;
@@ -1016,7 +1019,7 @@ function applyProjectLines(work: Project, defined: Map<string, SymbolDef>, lines
       if (words[1] !== undefined) p.name = words[1];
       if (attrs.tipo) p.kind = attrs.tipo;
     } else if (cmd === 'cavo') {
-      unknown(['tipo', 'sezione', 'conduttori', 'lunghezza', 'da', 'a', 'descr', 'articolo', 'marcatura', 'pezzi', 'pindi']);
+      unknown(['tipo', 'sezione', 'conduttori', 'lunghezza', 'da', 'a', 'descr', 'articolo', 'marcatura', 'pezzi', 'pindi', 'articoli']);
       const tag = words[0]?.replace(/^-/, '');
       if (!tag) { errors.push({ line, msg: 'formato: cavo -<sigla> [tipo=…] [conduttori="…"]' }); continue; }
       let c = work.cables?.find(x => x.tag === tag);
@@ -1032,6 +1035,7 @@ function applyProjectLines(work: Project, defined: Map<string, SymbolDef>, lines
       if (attrs.marcatura) { if (/^colori$/i.test(attrs.marcatura)) c.marking = 'colors'; else if (/^numeri$/i.test(attrs.marcatura)) c.marking = 'numbers'; else errors.push({ line, msg: 'marcatura deve essere numeri o colori' }); }
       if (attrs.pezzi !== undefined) c.pieces = yes(attrs.pezzi);
       if (attrs.pindi) c.pinsOf = attrs.pindi.replace(/^-/, '');
+      if (attrs.articoli) { const val = parseJson<ExtraPart[]>(attrs.articoli); if (Array.isArray(val)) c.extraParts = val; else errors.push({ line, msg: 'articoli: JSON non valido' }); }
       if (words.includes('schermato')) c.shield = true;
       if (words.includes('coppie')) c.pairs = true;
     } else if (cmd === 'morsettiera') {

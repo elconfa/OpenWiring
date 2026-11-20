@@ -13,6 +13,16 @@ const pins = (p: Project) => allPlaced(p).filter(e => e.sym.role === 'pin' && e.
 
 export const connectorData = (p: Project, conn: string): ConnectorData => p.connectors?.[conn] ?? {};
 
+/** Articolo del connettore: quello dei suoi pin sullo schema */
+export function connectorPart(p: Project, conn: string, library: Part[] = []): Part | undefined {
+  const partNr = pins(p).find(e => stripOf(e.inst.tag) === conn && e.inst.partNr)?.inst.partNr;
+  return partNr ? partsIndex(p, library).get(partNr) : undefined;
+}
+
+/** Tipo del catalogo del connettore: scelto nella vista Connettori, altrimenti quello del suo articolo */
+export const connectorTypeOf = (p: Project, conn: string, library: Part[] = []) =>
+  connectorType(connectorData(p, conn).type) ?? connectorType(connectorPart(p, conn, library)?.connectorType);
+
 /** Connettori: quelli con i pin sullo schema e quelli creati nella vista Connettori (anche senza pin) */
 export function allConnectors(p: Project): string[] {
   return [...new Set([...pins(p).map(e => stripOf(e.inst.tag)), ...Object.keys(p.connectors ?? {})])].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
@@ -20,7 +30,7 @@ export function allConnectors(p: Project): string[] {
 
 /** Nomi dei pin previsti dal connettore: quelli del tipo (1…n, PE) o 1…pin totali; vuoto se non si sa */
 export function pinNames(p: Project, conn: string, library: Part[] = []): string[] {
-  const d = connectorData(p, conn), t = connectorType(d.type);
+  const d = connectorData(p, conn), t = connectorTypeOf(p, conn, library);
   if (t && !d.pins) return typePinNames(t);
   const n = pinCount(p, conn, library);
   return n ? Array.from({ length: n }, (_, i) => String(i + 1)) : [];
@@ -37,7 +47,7 @@ export function freePins(p: Project, conn: string, library: Part[] = []): string
  * altrimenti quello dopo l'ultimo
  */
 export function nextPin(p: Project, conn: string, library: Part[] = []): string {
-  const free = connectorType(connectorData(p, conn).type) ? freePins(p, conn, library) : [];
+  const free = connectorTypeOf(p, conn, library) ? freePins(p, conn, library) : [];
   if (free.length) return `${conn}:${free[0]}`;
   let max = 0;
   for (const e of pins(p)) if (stripOf(e.inst.tag) === conn) { const n = parseInt(terminalNo(e.inst.tag), 10); if (!isNaN(n)) max = Math.max(max, n); }
@@ -60,10 +70,9 @@ export function rangeText(names: string[]): string {
 export function pinCount(p: Project, conn: string, library: Part[] = []): number | undefined {
   const d = connectorData(p, conn);
   if (d.pins) return d.pins;
-  const t = connectorType(d.type);
+  const t = connectorTypeOf(p, conn, library);
   if (t) return typePinNames(t).length;
-  const partNr = pins(p).find(e => stripOf(e.inst.tag) === conn && e.inst.partNr)?.inst.partNr;
-  const part = partNr ? partsIndex(p, library).get(partNr) : undefined;
+  const part = connectorPart(p, conn, library);
   const n = part?.functionTemplates.reduce((a, f) => a + f.connections.filter(Boolean).length, 0);
   return n || undefined;
 }
@@ -160,7 +169,7 @@ export function connectorFrames(p: Project, page: Page): ConnectorFrame[] {
         }
       }
     }
-    const d = connectorData(p, conn), t = connectorType(d.type);
+    const d = connectorData(p, conn), t = connectorTypeOf(p, conn);
     const label = [`-${conn}`, t ? connectorShortName(t) : '', d.gender ? ({ M: 'M', F: 'F', MF: 'M/F' } as const)[d.gender] : ''].filter(Boolean).join(' · ');
     for (const b of boxes) out.push({ conn, x0: b.x0 - 3, y0: b.y0 - 3, x1: b.x1 + 3, y1: b.y1 + 3, label });
   }

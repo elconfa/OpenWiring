@@ -192,7 +192,7 @@ Dati di progetto (righe facoltative, prima delle pagine; aggiornano o creano i d
 progetto [nome="…"] [descr="…"] [ditta="…"] [cliente="…"] [disegno=…] [autore=…] [rev=…] [data=AAAA-MM-GG]
 luogo +<codice> "<nome>" [tipo="Quadro elettrico|Pulsantiera|Bordo macchina|Cassetta di derivazione|Campo|Altro"]
 cavo -<sigla> [tipo=FG16OR16] [sezione=1,5] [conduttori="BN BK GY GNYE"] [lunghezza=15] [da=…] [a=…]
-    [descr="…"] [articolo=…] [marcatura=numeri|colori] [pezzi=si|no] [pindi=-510NG1] [schermato] [coppie]
+    [descr="…"] [articolo=…] [marcatura=numeri|colori] [pezzi=si|no] [pindi=-510NG1] [articoli='[{"partNr":"…","qty":2}]'] [schermato] [coppie]
     pindi: dispositivo con il connettore integrato, il filo dal suo morsetto n prende il conduttore n.
 morsettiera -<sigla> [articolo=…] [fermo=… fermi=2] [piastra=… piastre=1] [ponticello=…] [separatore=…]
     [riserve="11 12"] [articoliriserve="11=WDU 2.5"] [separatori="3 7"] [ponticelli="pettine:1,2,3 | fisso:4,5:WQV 2.5/2"]
@@ -237,7 +237,7 @@ simbolo <id> <sigla> @x,y [rot=0|90|180|270] [specchio] [descr="…"] [dati="…
     ridotta: con coppia=, solo disegnino del contatto, morsetti e pagina, senza sigla (rot=0 verticale,
     rot=90 orizzontale); hcoppia=1,5 altezza dei suoi testi in mm.
 filo x,y x,y [x,y…] [sezione=1,5] [colore=BU] [n=2.01] [bus=Profinet] [cavo=5W1]
-    [tipocavo="…"] [lunghezza=10] [articolocavo=…] [poli=3] [testo="3/N/PE ~400 V"]
+    [tipocavo="…"] [lunghezza=10] [articolocavo=…] [articolicavo='[{"partNr":"…","qty":2}]'] [poli=3] [testo="3/N/PE ~400 V"]
     [busfili=<nome>|_] [articolobus=<articolo cavo>] [cond1=L1] [cond2=L1]   (bus di conduttori, modalità BUS: nome del bus, «_» senza
     nome; cond1/cond2 = conduttore del bus a cui si collega il primo/l'ultimo estremo del filo)
     [hcond=2,5] [colorecond=#0050c0]   (bus di conduttori: altezza e colore dei nomi dei conduttori dove entrano i fili)

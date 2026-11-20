@@ -3813,5 +3813,20 @@
   "Documenti non allegati (file non trovato o non PDF): {0}": "Документы не приложены (файл не найден или не PDF): {0}",
   "I file PDF collegati agli articoli usati (schede tecniche, dichiarazioni CE e UL, manuali…), con una pagina di elenco; si scelgono i tipi da allegare, per esempio solo le dichiarazioni per il fascicolo tecnico; solo nell'app desktop": "PDF-файлы, связанные с используемыми изделиями (технические паспорта, декларации CE и UL, руководства…), со страницей перечня; выбираются типы для вложения, например только декларации для технического файла; только в настольном приложении",
   "Schede tecniche, dichiarazioni e manuali": "Технические паспорта, декларации и руководства",
-  "Tipo di documento: di serie dalla sottocartella di Documenti (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o dal nome del file": "Тип документа: по умолчанию по подпапке «Документы» (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) или по имени файла"
+  "Tipo di documento: di serie dalla sottocartella di Documenti (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) o dal nome del file": "Тип документа: по умолчанию по подпапке «Документы» (Data Sheet, Dichiarazioni/CE, Dichiarazioni/UL, Dichiarazioni/Altre, Manuali) или по имени файла",
+  "— non è un connettore —": "— не разъём —",
+  "{0} cavi di rete": "{0} сетевых кабелей",
+  "Articolo connettore (spina, presa, M12, RJ45…): il connettore che usa questo articolo prende dal tipo numero e nomi dei pin, piedinatura e colori": "Изделие-разъём (вилка, розетка, M12, RJ45…): разъём с этим изделием берёт из типа число и имена контактов, распиновку и цвета",
+  "Cavi di rete": "Сетевые кабели",
+  "Cavo di rete {0}": "Сетевой кабель {0}",
+  "codice articolo (es. cavo confezionato)": "код изделия (например, готовый кабель)",
+  "codifica": "кодировка",
+  "Collegamenti bus tra le porte dei dispositivi (Profinet, EtherCAT…): sigla, tipo e articolo si scrivono anche selezionando il collegamento sullo schema": "Шинные связи между портами устройств (Profinet, EtherCAT…): обозначение, тип и изделие можно также задать, выбрав связь на схеме",
+  "Connettori da intestare (RJ45, M12…), pressacavi, guaine: vanno in distinta materiali con la sigla del cavo.": "Разъёмы для монтажа (RJ45, M12…), кабельные вводы, оболочки: попадают в спецификацию с обозначением кабеля.",
+  "dall'articolo: {0}": "из изделия: {0}",
+  "Ethernet 100 Mbit (Profinet, EtherCAT)": "Ethernet 100 Мбит (Profinet, EtherCAT)",
+  "Ethernet fino a 10 Gbit": "Ethernet до 10 Гбит",
+  "potenza 24 V (Profinet), 4 + FE": "питание 24 В (Profinet), 4 + FE",
+  "Profibus DP": "Profibus DP",
+  "sensori e attuatori": "датчики и исполнительные устройства"
 }

@@ -11,6 +11,7 @@ import * as A from './actions';
 import { ask, askConfirm } from './Ask';
 import { useGrid, Th, gridProps } from './grid';
 import { ColSplitter } from './split';
+import { CONNECTOR_TYPES, connectorGroup, connectorTypeName } from '../model/connectorTypes';
 import { DOC_KINDS, docKind, docKindInfo, edzDocs, fileName, isAbsPath, isWebDoc, kindFromName, relToFolder } from '../model/partDocs';
 import { openDocument } from '../io/fileio';
 import { PartSearchDialog } from './PartSearchDialog';
@@ -261,6 +262,19 @@ function PartDetail({ part: shown, known }: { part: Part & { inLibrary: boolean 
             {[1, 2, 3].map(n => <option key={n} value={n}>{n > 1 ? tx('{0} piani', n) : tx('1 piano')}</option>)}
           </select>
         )}
+      </h4>
+      <h4>
+        <label className="inline-check" title={tx('Articolo connettore (spina, presa, M12, RJ45…): il connettore che usa questo articolo prende dal tipo numero e nomi dei pin, piedinatura e colori')}>
+          {tx('Connettore')}{' '}
+          <select value={part.connectorType ?? ''} onChange={e => st().updatePart(part.partNr, { connectorType: e.target.value || undefined })} style={{ width: 'auto', marginLeft: 8 }}>
+            <option value="">{tx('— non è un connettore —')}</option>
+            {[...new Set(CONNECTOR_TYPES.map(t => connectorGroup(t, tx)))].map(g => (
+              <optgroup key={g} label={g}>
+                {CONNECTOR_TYPES.filter(t => connectorGroup(t, tx) === g).map(t => <option key={t.id} value={t.id}>{connectorTypeName(t)}</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </label>
       </h4>
       <PartCableEditor part={part} />
       <h4>{tx('Modello funzione (punti di connessione)')}</h4>

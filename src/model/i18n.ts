@@ -76,6 +76,7 @@ const BUILTIN: Record<string, [string, string]> = {
   'codice ordinazione': ['Order number', 'Bestellnummer'],
   'collegato a': ['Connected to', 'Angeschlossen an'],
   'colore': ['Colour', 'Farbe'],
+  'colore / segnale': ['Colour / signal', 'Farbe / Signal'],
   'commento': ['Comment', 'Kommentar'],
   'conduttore': ['Conductor', 'Ader'],
   'connettore': ['Connector', 'Steckverbinder'],

@@ -442,6 +442,8 @@ export interface BusCable {
   /** Lunghezza in metri */
   length?: number;
   partNr?: string;
+  /** Articoli aggiuntivi (es. i due connettori RJ45 o M12 da intestare): in distinta con la sigla del cavo */
+  extraParts?: ExtraPart[];
   /**
    * Sigla data dal programma (non scritta dall'utente): se poi il tratto si collega con i rimandi a
    * un cavo che ha già una sigla, prende quella
@@ -744,6 +746,8 @@ export interface Cable {
   length?: number;
   /** A pezzi (cavo confezionato con connettore): true/false scelto sul cavo, assente = come l'articolo */
   pieces?: boolean;
+  /** Articoli aggiuntivi del cavo (connettori da intestare, pressacavi, guaine…): in distinta con la sua sigla */
+  extraParts?: ExtraPart[];
   description?: string;
   /** Sigle o descrizioni delle estremità (es. "-X1", "-M1") */
   from?: string;
@@ -874,6 +878,8 @@ export interface Part {
   functionTemplates: FunctionTemplate[];
   /** Articolo cavo: tipologia con tutti i suoi conduttori (es. 25 colori) */
   cable?: PartCable;
+  /** Articolo connettore: tipo del catalogo (es. "m12-d-4"); il connettore con questo articolo prende numero e nomi dei pin */
+  connectorType?: string;
   /** Articolo morsetto, con il numero di piani (1, 2 o 3): compare nelle scelte delle morsettiere */
   terminal?: { levels: number };
   /** Tutti gli attributi originali dell'XML, per non perdere dati */

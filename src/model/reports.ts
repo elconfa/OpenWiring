@@ -1,6 +1,6 @@
 // Liste di progetto: distinta materiali, lista dispositivi, morsetti, connessioni.
 import { SEQ_MODE_NAMES } from './wiringOrder';
-import { FRAME, type Project, type Part, type SymbolDef, type Cable, type Jumper } from './types';
+import { FRAME, type Project, type Part, type SymbolDef, type Cable, type Jumper, type ExtraPart } from './types';
 import { buildDevices, deviceInfo, designation, partsIndex, locationOf, allPlaced as placedSymbols, type DeviceInfo } from './devices';
 import { terminalBomItems, terminalConnections, allStrips, stripData, stripAccessories } from './terminals';
 import { cableInfos, cableSection, conductorEnds, cableByPiece } from './cables';
@@ -154,8 +154,18 @@ export function bomReport(project: Project, library: Part[] = [], keep?: (tag: s
     add({ partNr: c.partNr, part, typeNr: part?.typeNr ?? c.type, manufacturer: part?.manufacturer, orderNr: part?.orderNr, description: part?.descr1 ?? c.description }, `-${c.tag}`, cableByPiece(c, part) ? 1 : c.length ?? 1,
       [c.from ?? '', c.to ?? '', ...(ends?.get(c.id) ?? [])]);
   }
+  // Articoli aggiuntivi dei cavi (connettori da intestare, pressacavi…), anche dei cavi di rete
+  const extras = (list: ExtraPart[] | undefined, tag: string, refs: string[]) => {
+    for (const x of list ?? []) {
+      if (!x.partNr) continue;
+      const part = parts.get(x.partNr);
+      add({ partNr: x.partNr, part, typeNr: part?.typeNr, manufacturer: part?.manufacturer ?? x.manufacturer, orderNr: part ? part.orderNr : x.partNr, description: part?.descr1 ?? x.descr }, tag, x.qty ?? 1, refs);
+    }
+  };
+  for (const c of project.cables ?? []) extras(c.extraParts, `-${c.tag}`, [c.from ?? '', c.to ?? '', ...(ends?.get(c.id) ?? [])]);
   // Cavi di rete con articolo
   for (const r of busCableRows(project)) {
+    extras(r.extraParts, `-${r.tag}`, [r.a ? `-${r.a.el.inst.tag}` : '', r.b ? `-${r.b.el.inst.tag}` : '']);
     if (!r.partNr) continue;
     const part = parts.get(r.partNr);
     add({ partNr: r.partNr, part, typeNr: part?.typeNr ?? r.type, manufacturer: part?.manufacturer, orderNr: part?.orderNr, description: part?.descr1 ?? r.type }, `-${r.tag}`, r.length ?? 1,

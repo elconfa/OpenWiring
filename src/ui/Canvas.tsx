@@ -45,6 +45,7 @@ import { editWireOrder } from './wireOrderDialog';
 import { DRAG_PLACE } from './SymbolTreeView';
 import { showInLibrary } from './LibrarySync';
 import { libraryIndex, isDeletedSymbol } from '../model/symbolSync';
+import { endsOnBusPins } from '../model/network';
 import { resizeZone, zoneHandles, zoneLabelBox, zoneLookOf, zoneText, type ZoneHandle } from '../model/leaders';
 
 interface ViewBox { x: number; y: number; w: number; h: number }
@@ -512,7 +513,10 @@ export function Canvas({ derived }: { derived: Derived }) {
       const st = useStore.getState();
       const before = new Set(st.project.pages.flatMap(pg => pg.elements).filter(e => e.kind === 'wire').map(e => e.id));
       const bundle = tool.kind === 'wire' && tool.bundle;
-      const w = st.addWire(clean, tool.kind === 'wire' ? tool.bus : undefined, bundle ? '' : undefined);
+      // Filo normale tra due porte bus: collegamento di rete con il protocollo scelto (lista cavi, schema di rete)
+      const page = st.project.pages.find(pg => pg.id === st.pageId);
+      const bus = tool.kind === 'wire' ? tool.bus ?? (!bundle && page && endsOnBusPins(page, clean, st.project) ? st.busProtocol : undefined) : undefined;
+      const w = st.addWire(clean, bus, bundle ? '' : undefined);
       // Modalità BUS: nome del bus, o conduttore dei fili che vi entrano
       if (bundle) void chooseBundleName(w.id);
       else void chooseNewTaps(before);
