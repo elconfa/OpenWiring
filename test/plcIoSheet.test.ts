@@ -55,3 +55,11 @@ describe('lista I/O Excel', () => {
     expect(p.plc.cards[0].start.DO).toBeUndefined();
   });
 });
+
+describe('nomi dei fogli Excel', () => {
+  it('senza caratteri vietati, non vuoti, al massimo 31 caratteri e diversi tra loro', async () => {
+    const { sheetNames } = await import('../src/io/xlsx');
+    expect(sheetNames(['Lista I/O', 'a:b*c?[d]\\e', '', 'Schede', 'schede', 'x'.repeat(40)]))
+      .toEqual(['Lista I-O', 'a-b-c--d--e', 'Foglio3', 'Schede', 'schede 2', 'x'.repeat(31)]);
+  });
+});

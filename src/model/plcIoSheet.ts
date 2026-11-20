@@ -9,7 +9,8 @@ export const MAX_CHANNEL_PINS = 5;
 
 const PIN_COLS = Array.from({ length: MAX_CHANNEL_PINS }, (_, i) => `Morsetto ${i + 1}`);
 
-export const IO_SHEET_NAME = 'Lista I/O';
+/** Nome del foglio (senza «/», che Excel non accetta nei nomi dei fogli) */
+export const IO_SHEET_NAME = 'Lista IO';
 export const IO_SHEET_COLUMNS = [
   'Stazione', 'Scheda', 'Rack', 'Slot', 'Tipo scheda', 'Articolo', 'Canale', 'Tipo', 'Indirizzo',
   ...PIN_COLS, 'Nome simbolico', 'Commento', 'Descrizione dal dispositivo', 'Collegato a', 'Posizione',

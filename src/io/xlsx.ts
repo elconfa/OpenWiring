@@ -6,7 +6,10 @@ export interface Sheet { name: string; rows: string[][] }
 /** Foglio da scrivere: le celle numeriche restano numeri in Excel; widths = larghezze in caratteri */
 export interface SheetOut { name: string; rows: (string | number | undefined)[][]; widths?: number[] }
 
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// Caratteri di controllo non ammessi in XML (Excel segnala il file come danneggiato)
+// eslint-disable-next-line no-control-regex
+const clean = (s: string) => s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '');
+const esc = (s: string) => clean(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function colName(i: number): string {
   let s = '';
@@ -14,7 +17,24 @@ function colName(i: number): string {
   return s;
 }
 
+/**
+ * Nomi dei fogli validi per Excel: senza \ / ? * [ ] :, non vuoti, al massimo 31 caratteri, senza
+ * apostrofo all'inizio o alla fine e diversi tra loro (senza distinguere maiuscole e minuscole)
+ */
+export function sheetNames(names: string[]): string[] {
+  const used = new Set<string>();
+  return names.map((n, i) => {
+    let base = clean(n).replace(/[\\/?*[\]:]/g, '-').replace(/^'+|'+$/g, '').trim() || `Foglio${i + 1}`;
+    base = base.slice(0, 31).trim();
+    let name = base;
+    for (let k = 2; used.has(name.toLowerCase()); k++) name = `${base.slice(0, 31 - String(k).length - 1)} ${k}`;
+    used.add(name.toLowerCase());
+    return name;
+  });
+}
+
 export function writeXlsx(sheets: SheetOut[]): Uint8Array {
+  const names = sheetNames(sheets.map(s => s.name));
   const shared: string[] = [];
   const index = new Map<string, number>();
   const si = (v: string) => {
@@ -26,7 +46,8 @@ export function writeXlsx(sheets: SheetOut[]): Uint8Array {
     const rows = sh.rows.map((r, ri) => {
       const cells = r.map((v, ci) => (v === '' || v === undefined ? ''
         : typeof v === 'number' ? (Number.isFinite(v) ? `<c r="${colName(ci)}${ri + 1}"><v>${v}</v></c>` : '')
-          : `<c r="${colName(ci)}${ri + 1}" t="s"><v>${si(v)}</v></c>`)).join('');
+          // Una cella di Excel tiene al massimo 32767 caratteri
+          : `<c r="${colName(ci)}${ri + 1}" t="s"><v>${si(clean(v).slice(0, 32767))}</v></c>`)).join('');
       return `<row r="${ri + 1}">${cells}</row>`;
     }).join('');
     const cols = sh.widths?.length ? `<cols>${sh.widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>` : '';
@@ -38,7 +59,7 @@ export function writeXlsx(sheets: SheetOut[]): Uint8Array {
     '_rels/.rels': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`),
     'xl/workbook.xml': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((sh, i) => `<sheet name="${esc(sh.name.slice(0, 31))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>`),
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((_, i) => `<sheet name="${esc(names[i])}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>`),
     'xl/_rels/workbook.xml.rels': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId${sheets.length + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/></Relationships>`),
     'xl/styles.xml': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
