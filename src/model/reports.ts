@@ -79,8 +79,18 @@ export function bomReport(project: Project, library: Part[] = [], keep?: (tag: s
   interface Row { qty: number; tags: string[]; partNr: string; typeNr: string; descr: string; manufacturer: string; orderNr: string }
   const agg = new Map<string, Row>();
   // refs: altri riferimenti che decidono se l'elemento resta (es. le estremità di un cavo)
-  const add = (info: DeviceInfo, tag: string, qty = 1, refs: string[] = []) => {
+  const add = (info: DeviceInfo, tag: string, qty = 1, refs: string[] = [], depth = 0) => {
     if (keep && !keep(tag) && !refs.some(keep)) return;
+    // Set di articoli (connettore = frutto + custodia + pressacavo): al suo posto i componenti
+    const kit = info.partNr ? (info.part ?? parts.get(info.partNr))?.kit : undefined;
+    if (kit?.length && depth < 4) {
+      for (const k of kit) {
+        if (!k.partNr || k.partNr === info.partNr) continue;
+        const part = parts.get(k.partNr);
+        add({ partNr: k.partNr, part, typeNr: part?.typeNr, manufacturer: part?.manufacturer ?? k.manufacturer, orderNr: part ? part.orderNr : k.partNr, description: part?.descr1 ?? k.descr }, tag, qty * (k.qty ?? 1), refs, depth + 1);
+      }
+      return;
+    }
     const key = info.partNr ? `P|${info.partNr}` : info.orderNr ? `O|${info.manufacturer ?? ''}|${info.orderNr}` : undefined;
     if (!key) return;
     const r = agg.get(key) ?? {

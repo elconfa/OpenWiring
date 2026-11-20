@@ -3828,5 +3828,15 @@
   "Ethernet fino a 10 Gbit": "Ethernet до 10 Гбит",
   "potenza 24 V (Profinet), 4 + FE": "питание 24 В (Profinet), 4 + FE",
   "Profibus DP": "Profibus DP",
-  "sensori e attuatori": "датчики и исполнительные устройства"
+  "sensori e attuatori": "датчики и исполнительные устройства",
+  "— nessun articolo connettore —": "— нет изделий-разъёмов —",
+  "+ aggiungi un connettore…": "+ добавить разъём…",
+  "+ altro articolo (pressacavo, guaina…): scrivi o scegli un codice": "+ другое изделие (кабельный ввод, оболочка…): введите или выберите код",
+  "Altri connettori": "Другие разъёмы",
+  "Articoli segnati come connettore (Articoli ▸ Connettore)": "Изделия, отмеченные как разъём (Изделия ▸ Разъём)",
+  "Articolo connettore (spina, presa, custodia, M12, RJ45…): si propone tra gli articoli aggiuntivi dei cavi; con un tipo del catalogo il connettore che usa questo articolo prende anche numero e nomi dei pin, piedinatura e colori": "Изделие-разъём (вилка, розетка, корпус, M12, RJ45…): предлагается среди дополнительных изделий кабелей; с типом из каталога разъём с этим изделием берёт также число и имена контактов, распиновку и цвета",
+  "Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d'acquisto vanno i componenti con le quantità.": "Изделие из нескольких изделий (например, разъём = вставка-вилка + корпус + кабельный ввод): везде, где используется это изделие, в спецификацию и список закупки попадают его компоненты с количествами.",
+  "Connettore (senza tipo del catalogo)": "Разъём (без типа из каталога)",
+  "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Нет изделий-разъёмов: в «Изделия» откройте изделие и выберите тип в списке «Разъём»",
+  "Set di articoli": "Комплект изделий"
 }

@@ -3828,5 +3828,15 @@
   "Ethernet fino a 10 Gbit": "Ethernet jusqu'à 10 Gbit",
   "potenza 24 V (Profinet), 4 + FE": "puissance 24 V (Profinet), 4 + FE",
   "Profibus DP": "Profibus DP",
-  "sensori e attuatori": "capteurs et actionneurs"
+  "sensori e attuatori": "capteurs et actionneurs",
+  "— nessun articolo connettore —": "— aucun article connecteur —",
+  "+ aggiungi un connettore…": "+ ajouter un connecteur…",
+  "+ altro articolo (pressacavo, guaina…): scrivi o scegli un codice": "+ autre article (presse-étoupe, gaine…) : saisir ou choisir une référence",
+  "Altri connettori": "Autres connecteurs",
+  "Articoli segnati come connettore (Articoli ▸ Connettore)": "Articles marqués comme connecteur (Articles ▸ Connecteur)",
+  "Articolo connettore (spina, presa, custodia, M12, RJ45…): si propone tra gli articoli aggiuntivi dei cavi; con un tipo del catalogo il connettore che usa questo articolo prende anche numero e nomi dei pin, piedinatura e colori": "Article connecteur (fiche, embase, boîtier, M12, RJ45…) : proposé parmi les articles supplémentaires des câbles ; avec un type du catalogue le connecteur qui utilise cet article prend aussi le nombre et les noms des broches, le brochage et les couleurs",
+  "Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d'acquisto vanno i componenti con le quantità.": "Article composé de plusieurs articles (ex. connecteur = insert mâle + boîtier + presse-étoupe) : partout où cet article est utilisé, la nomenclature et la liste d'achat reçoivent les composants avec leurs quantités.",
+  "Connettore (senza tipo del catalogo)": "Connecteur (sans type du catalogue)",
+  "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Aucun article connecteur : dans Articles ouvrez l'article et choisissez le type dans la liste « Connecteur »",
+  "Set di articoli": "Ensemble d'articles"
 }

@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect, useRef } from 'react';
 import { useStore } from '../model/store';
 import type { DocKind, Part, PartCable, PartDoc } from '../model/types';
 import { conductorsFor, isPeName } from '../model/cables';
-import { ConductorSwatch } from './CablesView';
+import { ConductorSwatch, ExtraPartsTable } from './CablesView';
 import { blackBoxFromPart, BUILTIN_SYMBOLS } from '../model/symbols';
 import { getSymbol } from '../model/geometry';
 import { SymbolPreview } from './SymbolLibrary';
@@ -11,12 +11,13 @@ import * as A from './actions';
 import { ask, askConfirm } from './Ask';
 import { useGrid, Th, gridProps } from './grid';
 import { ColSplitter } from './split';
-import { CONNECTOR_TYPES, connectorGroup, connectorTypeName } from '../model/connectorTypes';
+import { CONNECTOR_TYPES, connectorGroup, connectorTypeName, GENERIC_CONNECTOR } from '../model/connectorTypes';
 import { DOC_KINDS, docKind, docKindInfo, edzDocs, fileName, isAbsPath, isWebDoc, kindFromName, relToFolder } from '../model/partDocs';
 import { openDocument } from '../io/fileio';
 import { PartSearchDialog } from './PartSearchDialog';
 import { tx, tn } from '../i18n/ui';
 import { partsInDb, searchPartsDb, useFullPart } from './partsDbSync';
+import { partsIndex } from '../model/devices';
 import { edzPrefs, setEdzPrefs } from './edzPrefs';
 
 const FIELDS: [keyof Part, string, 'text' | 'number'][] = [
@@ -209,6 +210,9 @@ function PartDetail({ part: shown, known }: { part: Part & { inLibrary: boolean 
   // Gli attributi degli articoli del database arrivano un attimo dopo
   const part = useFullPart(shown)!;
   const sym = blackBoxFromPart(part);
+  const project = useStore(s => s.project);
+  const library = useStore(s => s.library);
+  const partsMap = useMemo(() => partsIndex(project, library), [project, library]);
   const set = (k: keyof Part, raw: string, type: 'text' | 'number') => {
     const v = type === 'number' ? (raw === '' ? undefined : parseFloat(raw.replace(',', '.'))) : raw || undefined;
     st().updatePart(part.partNr, { [k]: v });
@@ -264,10 +268,11 @@ function PartDetail({ part: shown, known }: { part: Part & { inLibrary: boolean 
         )}
       </h4>
       <h4>
-        <label className="inline-check" title={tx('Articolo connettore (spina, presa, M12, RJ45…): il connettore che usa questo articolo prende dal tipo numero e nomi dei pin, piedinatura e colori')}>
+        <label className="inline-check" title={tx('Articolo connettore (spina, presa, custodia, M12, RJ45…): si propone tra gli articoli aggiuntivi dei cavi; con un tipo del catalogo il connettore che usa questo articolo prende anche numero e nomi dei pin, piedinatura e colori')}>
           {tx('Connettore')}{' '}
           <select value={part.connectorType ?? ''} onChange={e => st().updatePart(part.partNr, { connectorType: e.target.value || undefined })} style={{ width: 'auto', marginLeft: 8 }}>
             <option value="">{tx('— non è un connettore —')}</option>
+            <option value={GENERIC_CONNECTOR}>{tx('Connettore (senza tipo del catalogo)')}</option>
             {[...new Set(CONNECTOR_TYPES.map(t => connectorGroup(t, tx)))].map(g => (
               <optgroup key={g} label={g}>
                 {CONNECTOR_TYPES.filter(t => connectorGroup(t, tx) === g).map(t => <option key={t.id} value={t.id}>{connectorTypeName(t)}</option>)}
@@ -276,6 +281,8 @@ function PartDetail({ part: shown, known }: { part: Part & { inLibrary: boolean 
           </select>
         </label>
       </h4>
+      <ExtraPartsTable list={part.kit ?? []} parts={partsMap} onChange={list => st().updatePart(part.partNr, { kit: list.length ? list : undefined })}
+        title={tx('Set di articoli')} hint={tx('Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d\'acquisto vanno i componenti con le quantità.')} />
       <PartCableEditor part={part} />
       <h4>{tx('Modello funzione (punti di connessione)')}</h4>
       <p className="muted small">{tx('Una funzione per riga: designazioni separate da spazio, poi «;» e descrizione. Es.')} <code>{tx('13 14 ; Contatto NA')}</code></p>

@@ -3828,5 +3828,15 @@
   "Ethernet fino a 10 Gbit": "Ethernet bis 10 Gbit",
   "potenza 24 V (Profinet), 4 + FE": "Leistung 24 V (Profinet), 4 + FE",
   "Profibus DP": "Profibus DP",
-  "sensori e attuatori": "Sensoren und Aktoren"
+  "sensori e attuatori": "Sensoren und Aktoren",
+  "— nessun articolo connettore —": "— keine Steckverbinder-Artikel —",
+  "+ aggiungi un connettore…": "+ Steckverbinder hinzufügen…",
+  "+ altro articolo (pressacavo, guaina…): scrivi o scegli un codice": "+ anderer Artikel (Kabelverschraubung, Schlauch…): Code eingeben oder wählen",
+  "Altri connettori": "Andere Steckverbinder",
+  "Articoli segnati come connettore (Articoli ▸ Connettore)": "Als Steckverbinder markierte Artikel (Artikel ▸ Steckverbinder)",
+  "Articolo connettore (spina, presa, custodia, M12, RJ45…): si propone tra gli articoli aggiuntivi dei cavi; con un tipo del catalogo il connettore che usa questo articolo prende anche numero e nomi dei pin, piedinatura e colori": "Steckverbinder-Artikel (Stecker, Buchse, Gehäuse, M12, RJ45…): wird bei den Zusatzartikeln der Kabel angeboten; mit einem Katalogtyp übernimmt der Steckverbinder mit diesem Artikel auch Anzahl und Namen der Pins, Belegung und Farben",
+  "Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d'acquisto vanno i componenti con le quantità.": "Artikel aus mehreren Artikeln (z. B. Steckverbinder = Stifteinsatz + Gehäuse + Kabelverschraubung): wo dieser Artikel verwendet wird, kommen die Bestandteile mit ihren Mengen in Stückliste und Bestellliste.",
+  "Connettore (senza tipo del catalogo)": "Steckverbinder (ohne Katalogtyp)",
+  "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "Keine Steckverbinder-Artikel: in Artikel den Artikel öffnen und den Typ in der Liste «Steckverbinder» wählen",
+  "Set di articoli": "Artikelset"
 }

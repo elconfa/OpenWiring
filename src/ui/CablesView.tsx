@@ -7,6 +7,7 @@ import { useStore } from '../model/store';
 import { cableByPiece, pinDeviceOptions, cableInfos, cableSection, conductorColors, conductorEnds, conductorsFor, isPeName, markingOf, type CableInfo, type Conductor } from '../model/cables';
 import { partsIndex } from '../model/devices';
 import { WIRE_SECTIONS, type BusCable, type Cable, type CableMarking, type ExtraPart, type Part } from '../model/types';
+import { connectorGroup, connectorType, isConnectorPart } from '../model/connectorTypes';
 import { busCableRows, portText, protocolLabel, BUS_CABLE_TYPES, type BusCableRow } from '../model/network';
 import { useGrid, Th, gridProps } from './grid';
 import { ColSplitter, ResizableSection } from './split';
@@ -312,12 +313,15 @@ export function PiecesSelect({ value, fromPart, onChange }: { value: string | un
  * Articoli aggiuntivi di un cavo (connettori da intestare, pressacavi, guaine…): codice dalla libreria
  * o scritto a mano, quantità; vanno in distinta materiali con la sigla del cavo
  */
-export function ExtraPartsTable({ list, parts, onChange }: { list: ExtraPart[]; parts: Map<string, Part>; onChange: (list: ExtraPart[]) => void }) {
+export function ExtraPartsTable({ list, parts, onChange, title, hint }: { list: ExtraPart[]; parts: Map<string, Part>; onChange: (list: ExtraPart[]) => void; title?: string; hint?: string }) {
   const upd = (i: number, patch: Partial<ExtraPart>) => onChange(list.map((x, k) => (k === i ? { ...x, ...patch } : x)));
+  // Articoli connettore della libreria e del progetto, raggruppati per tipo (M12 codifica D, RJ45…)
+  const connectors = [...parts.values()].filter(isConnectorPart).sort((a, b) => a.partNr.localeCompare(b.partNr, undefined, { numeric: true }));
+  const groupOf = (p: Part) => { const t = connectorType(p.connectorType); return t ? connectorGroup(t, tx) : tx('Altri connettori'); };
   return (
     <>
-      <h4>{tx('Articoli aggiuntivi')}</h4>
-      <p className="muted small">{tx('Connettori da intestare (RJ45, M12…), pressacavi, guaine: vanno in distinta materiali con la sigla del cavo.')}</p>
+      <h4>{title ?? tx('Articoli aggiuntivi')}</h4>
+      <p className="muted small">{hint ?? tx('Connettori da intestare (RJ45, M12…), pressacavi, guaine: vanno in distinta materiali con la sigla del cavo.')}</p>
       <table className="prop-table extra-parts">
         <tbody>
           {list.map((x, i) => {
@@ -332,7 +336,20 @@ export function ExtraPartsTable({ list, parts, onChange }: { list: ExtraPart[]; 
             );
           })}
           <tr>
-            <td className="prop-value" colSpan={4}><Field key={list.length} value="" list="cable-extra-parts" placeholder={tx('+ scrivi o scegli un codice…')} onCommit={v => { if (v.trim()) onChange([...list, { partNr: v.trim() }]); }} /></td>
+            <td className="prop-value" colSpan={4}>
+              <select value="" onChange={e => { if (e.target.value) onChange([...list, { partNr: e.target.value }]); }}
+                title={connectors.length ? tx('Articoli segnati come connettore (Articoli ▸ Connettore)') : tx('Nessun articolo connettore: in Articoli apri l\'articolo e scegli il tipo nella tendina «Connettore»')}>
+                <option value="">{connectors.length ? tx('+ aggiungi un connettore…') : tx('— nessun articolo connettore —')}</option>
+                {[...new Set(connectors.map(groupOf))].map(g => (
+                  <optgroup key={g} label={g}>
+                    {connectors.filter(p => groupOf(p) === g).map(p => <option key={p.partNr} value={p.partNr}>{p.partNr}{p.descr1 ? ` · ${p.descr1}` : ''}</option>)}
+                  </optgroup>
+                ))}
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td className="prop-value" colSpan={4}><Field key={list.length} value="" list="cable-extra-parts" placeholder={tx('+ altro articolo (pressacavo, guaina…): scrivi o scegli un codice')} onCommit={v => { if (v.trim()) onChange([...list, { partNr: v.trim() }]); }} /></td>
           </tr>
         </tbody>
       </table>

@@ -3828,5 +3828,15 @@
   "Ethernet fino a 10 Gbit": "Ethernet up to 10 Gbit",
   "potenza 24 V (Profinet), 4 + FE": "24 V power (Profinet), 4 + FE",
   "Profibus DP": "Profibus DP",
-  "sensori e attuatori": "sensors and actuators"
+  "sensori e attuatori": "sensors and actuators",
+  "— nessun articolo connettore —": "— no connector parts —",
+  "+ aggiungi un connettore…": "+ add a connector…",
+  "+ altro articolo (pressacavo, guaina…): scrivi o scegli un codice": "+ other part (cable gland, sleeve…): type or choose a code",
+  "Altri connettori": "Other connectors",
+  "Articoli segnati come connettore (Articoli ▸ Connettore)": "Parts marked as connector (Parts ▸ Connector)",
+  "Articolo connettore (spina, presa, custodia, M12, RJ45…): si propone tra gli articoli aggiuntivi dei cavi; con un tipo del catalogo il connettore che usa questo articolo prende anche numero e nomi dei pin, piedinatura e colori": "Connector part (plug, socket, housing, M12, RJ45…): offered among the additional parts of cables; with a catalogue type the connector using this part also takes pin count and names, pinout and colours",
+  "Articolo fatto di più articoli (es. connettore = frutto maschio + custodia + pressacavo): dove usi questo articolo, in distinta materiali e lista d'acquisto vanno i componenti con le quantità.": "Part made of several parts (e.g. connector = male insert + housing + cable gland): wherever this part is used, the components with their quantities go into the bill of materials and the purchase list.",
+  "Connettore (senza tipo del catalogo)": "Connector (no catalogue type)",
+  "Nessun articolo connettore: in Articoli apri l'articolo e scegli il tipo nella tendina «Connettore»": "No connector parts: in Parts open the part and choose the type in the «Connector» list",
+  "Set di articoli": "Part set"
 }

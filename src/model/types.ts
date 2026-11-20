@@ -878,6 +878,11 @@ export interface Part {
   functionTemplates: FunctionTemplate[];
   /** Articolo cavo: tipologia con tutti i suoi conduttori (es. 25 colori) */
   cable?: PartCable;
+  /**
+   * Set di articoli (es. connettore = frutto maschio + custodia + pressacavo): dove si usa questo
+   * articolo, in distinta materiali e lista d'acquisto vanno i suoi componenti con le quantità
+   */
+  kit?: ExtraPart[];
   /** Articolo connettore: tipo del catalogo (es. "m12-d-4"); il connettore con questo articolo prende numero e nomi dei pin */
   connectorType?: string;
   /** Articolo morsetto, con il numero di piani (1, 2 o 3): compare nelle scelte delle morsettiere */

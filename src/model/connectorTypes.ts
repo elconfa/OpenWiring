@@ -89,6 +89,11 @@ export const CONNECTOR_TYPES: ConnectorType[] = [
   ...circ('M12', 'L', [5], [16], tn('potenza 24 V (Profinet), 4 + FE')),
 ];
 
+/** Articolo connettore senza tipo del catalogo (custodia, frutto, connettore di un costruttore qualsiasi) */
+export const GENERIC_CONNECTOR = 'generic';
+/** Articolo segnato come connettore (con o senza tipo del catalogo): si propone tra gli articoli aggiuntivi dei cavi */
+export const isConnectorPart = (p: { connectorType?: string }) => !!p.connectorType;
+
 export const connectorType = (id?: string) => (id ? CONNECTOR_TYPES.find(t => t.id === id) : undefined);
 
 /** Nome breve: "ILME CNE 16 (16+PE)" */

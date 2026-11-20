@@ -97,3 +97,30 @@ describe('cavi: articoli aggiuntivi e collegamenti di rete', () => {
     expect(w.busCable?.extraParts).toEqual([{ partNr: 'RJ45-FC', qty: 2 }]);
   });
 });
+
+import { GENERIC_CONNECTOR, isConnectorPart } from '../src/model/connectorTypes';
+
+describe('articoli connettore e set di articoli', () => {
+  it('connettore senza tipo del catalogo: è un connettore ma non dà pin', () => {
+    expect(isConnectorPart({ connectorType: GENERIC_CONNECTOR })).toBe(true);
+    expect(isConnectorPart({})).toBe(false);
+    expect(connectorType(GENERIC_CONNECTOR)).toBeUndefined();
+  });
+  it('set: in distinta i componenti con le quantità, sul cavo e sul dispositivo', () => {
+    const p = emptyProject();
+    p.parts.push(
+      { partNr: 'M12-KIT', typeNr: 'Connettore M12 completo', functionTemplates: [], attrs: {}, connectorType: 'm12-d-4', kit: [{ partNr: 'M12-FRUTTO' }, { partNr: 'M12-CUST' }, { partNr: 'PG7', qty: 2 }, { partNr: 'M12-KIT' }] },
+      { partNr: 'M12-FRUTTO', typeNr: 'Frutto maschio', functionTemplates: [], attrs: {} },
+      { partNr: 'M12-CUST', typeNr: 'Custodia', functionTemplates: [], attrs: {} },
+      { partNr: 'PG7', typeNr: 'Pressacavo', functionTemplates: [], attrs: {} },
+    );
+    p.cables = [{ id: 'c1', tag: 'W1', conductors: ['1', '2'], assign: {}, extraParts: [{ partNr: 'M12-KIT', qty: 2 }] }];
+    p.pages[0].elements = [S('x', 'conn_male', 40, 80, 'X7:1', { partNr: 'M12-KIT' })];
+    const bom = new Map(bomReport(p).rows.map(r => [r[2], r]));
+    expect(bom.has('M12-KIT')).toBe(false);
+    expect(bom.get('M12-FRUTTO')?.[1]).toBe('3');
+    expect(bom.get('M12-CUST')?.[1]).toBe('3');
+    expect(bom.get('PG7')?.[1]).toBe('6');
+    expect(bom.get('PG7')?.[7]).toBe('-X7, -W1');
+  });
+});
