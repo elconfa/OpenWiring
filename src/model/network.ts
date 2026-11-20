@@ -171,7 +171,7 @@ export function foreignDevices(project: Project): ForeignDevice[] {
   return [...out.values()];
 }
 
-export interface NetPort { el: PlacedElement; port: string; panel?: Panel }
+export interface NetPort { el: PlacedElement; port: string; panel?: Panel; /** Punto di connessione del simbolo (distingue le porte senza nome) */ pinId?: string }
 export interface NetLink {
   protocol: string;
   a: NetPort;
@@ -201,7 +201,7 @@ export function networkLinks(project: Project, nets?: Net[]): NetLink[] {
     const pins = [...n.pins].sort((a, b) => a.el.pageIndex - b.el.pageIndex || a.pos.x - b.pos.x || a.pos.y - b.pos.y);
     const port = (i: number): NetPort => {
       const p = pins[i];
-      return { el: p.el, port: labels.get(p.el.inst.id)?.[p.pinId] || p.label || '', panel: panelOfElement(project, p.el, locs) };
+      return { el: p.el, port: labels.get(p.el.inst.id)?.[p.pinId] || p.label || '', panel: panelOfElement(project, p.el, locs), pinId: p.pinId };
     };
     for (let i = 0; i < pins.length - 1; i++) {
       const a = port(i), b = port(i + 1);
@@ -485,13 +485,14 @@ export function networkProblems(project: Project): NetIssue[] {
   for (const l of links) {
     if (protocolOf(l.protocol)?.multidrop) continue;
     for (const p of [l.a, l.b]) {
-      const k = `${p.el.inst.id}|${p.port}`;
+      // Le porte senza nome si distinguono dal punto di connessione del simbolo
+      const k = `${p.el.inst.id}|${p.port || `#${p.pinId ?? ''}`}`;
       const c = count.get(k) ?? { n: 0, l, p };
       c.n++; count.set(k, c);
     }
   }
   for (const c of count.values()) {
-    if (c.n > 1) out.push({ msg: `-${c.p.el.inst.tag} porta ${c.p.port}: ${c.n} collegamenti ${c.l.protocol} sulla stessa porta (serve uno switch)`, pageId: c.p.el.page.id, elementId: c.p.el.inst.id, loc: locationOf(c.p.el) });
+    if (c.n > 1) out.push({ msg: `-${c.p.el.inst.tag} porta ${c.p.port || '(senza nome)'}: ${c.n} collegamenti ${c.l.protocol} sulla stessa porta (serve uno switch)`, pageId: c.p.el.page.id, elementId: c.p.el.inst.id, loc: locationOf(c.p.el) });
   }
   return out;
 }
@@ -596,7 +597,7 @@ export function busCableRows(project: Project, nets?: Net[]): BusCableRow[] {
     const k = seen.get(n) ?? 0;
     seen.set(n, k + 1);
     const sorted = [...n.pins].sort((a, b) => a.el.pageIndex - b.el.pageIndex || a.pos.x - b.pos.x || a.pos.y - b.pos.y);
-    const port = (p: Net['pins'][number]): NetPort => ({ el: p.el, port: labels.get(p.el.inst.id)?.[p.pinId] || p.label || '', panel: panelOfElement(project, p.el, locs) });
+    const port = (p: Net['pins'][number]): NetPort => ({ el: p.el, port: labels.get(p.el.inst.id)?.[p.pinId] || p.label || '', panel: panelOfElement(project, p.el, locs), pinId: p.pinId });
     // Porte toccate dai capi dei tratti, nell'ordine delle pagine
     const touched = sorted.filter(p => wires.some(({ wire, pageId }) => p.el.page.id === pageId && [wire.points[0], wire.points[wire.points.length - 1]].some(e => near(p.pos, e))));
     let a: Net['pins'][number] | undefined = touched[0], b = touched.find(p => p !== a);
