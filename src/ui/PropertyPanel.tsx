@@ -1,5 +1,8 @@
 // Editor delle proprietà a due colonne (Proprietà | Valore), come in FreeCAD.
+import { notFitted } from '../model/notFitted';
 import { deviceLetter } from '../model/letterCodes';
+import { PART_TABLE_COLS, partTableColsOf } from '../model/partTables';
+import type { PartTableCols } from '../model/types';
 import { contactPlaceOf, type ContactPlace } from '../model/pairs';
 import { zoneCodeOnly } from '../model/leaders';
 import { openSettingsAt } from './SettingsDialog';
@@ -50,6 +53,8 @@ import { NoteField as RevisionNoteField } from './RevisionChangesView';
 import type { RevisionFormat, ProjectSettings, PlcAddressFormat } from '../model/types';
 import { partKeys } from '../model/settingsProfiles';
 import { tx, tn } from '../i18n/ui';
+import { miniStation } from '../model/stationMini';
+import { REV_GRID } from '../model/revisionGrid';
 import { symShown, withShow, type SymVisKey, type WireVisKey } from '../model/visibility';
 import { groupConfig, groupMembers, firstFreeChannel } from '../model/plcGroup';
 import { socketConfig, socketMembers, socketName, type SocketKind } from '../model/plcSocket';
@@ -284,8 +289,55 @@ export function PropertyPanel({ derived }: { derived: Derived }) {
     );
   } else if (selected.length === 1 && selected[0].kind === 'zone') {
     body = <ZoneProps zone={selected[0]} />;
+  } else if (selected.length === 1 && selected[0].kind === 'nofit') {
+    const a = selected[0];
+    // Parti dentro il riquadro: dispositivi, morsetti e fili non montati della pagina
+    const nf = notFitted(project);
+    const pg = project.pages.find(x => x.elements.some(e => e.id === a.id));
+    const inside = (pg?.elements ?? []).filter(e => nf.ids.has(e.id));
+    const tags = [...new Set(inside.flatMap(e => (e.kind === 'symbol' && e.tag ? [`-${e.tag}`] : [])))];
+    body = (
+      <Group title={tx('Non montato')}>
+        <Row label={tx('Parti')}>{tags.length ? tags.join(', ') : '—'}</Row>
+        <Row label={tx('Fili')}>{inside.filter(e => e.kind === 'wire').length}</Row>
+        <p className="muted small">{tx('Restano sullo schema in grigio, ma non vanno in distinta, lista d\'acquisto, tabelle materiali, targhette dei fili e liste; i morsetti restano nella lista morsetti con «Non montato». Si sposta e si ridimensiona con le maniglie; eliminandolo le parti tornano montate.')}</p>
+      </Group>
+    );
   } else if (selected.length === 1 && selected[0].kind === 'image') {
     body = <ImageProps img={selected[0]} />;
+  } else if (selected.length === 1 && selected[0].kind === 'block' && selected[0].block === 'revgrid') {
+    const b = selected[0];
+    body = (
+      <Group title={tx('Stato revisione fogli')}>
+        <Row label={tx('Caselle per riga')}>
+          <Field type="number" value={String(b.cols ?? REV_GRID.cols)} onCommit={v => { const n = parseInt(v, 10); st().updateElement(b.id, { cols: n >= 4 && n <= 40 && n !== REV_GRID.cols ? n : undefined }); }} />
+        </Row>
+        <p className="muted small">{tx('Sotto ogni foglio l\'ultima revisione che l\'ha cambiato: casella vuota = come alla prima emissione, # = foglio non presente. Si aggiorna a ogni rilascio; si sposta trascinandola.')}</p>
+      </Group>
+    );
+  } else if (selected.length === 1 && selected[0].kind === 'block' && selected[0].block === 'station') {
+    const b = selected[0];
+    const stations = [...new Set(project.plc.cards.map(c => c.station))];
+    body = (
+      <Group title={tx('Miniatura stazione PLC')}>
+        <Row label={tx('Stazione')}>
+          <select value={b.station ?? ''} onChange={e => st().updateElement(b.id, { station: e.target.value || undefined })}>
+            <option value="">{tx('automatica ({0})', miniStation(project, { ...b, station: undefined }) || '—')}</option>
+            {stations.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </Row>
+        <p className="muted small">{tx('Moduli della stazione in fila per rack e slot; quelli con canali disegnati in questa pagina sono in grigio con la freccia. Si sposta trascinandola.')}</p>
+      </Group>
+    );
+  } else if (selected.length === 1 && selected[0].kind === 'block') {
+    body = (
+      <Group title={tx('Tabella tensioni')}>
+        <Row label={tx('Righe')}>
+          <button onClick={() => st().setDialog('voltages')} title={tx('Potenziale, tensione, descrizione, colore e linea di ogni riga')}>{tx('Tensioni utilizzate…')}</button>
+        </Row>
+        <p className="muted small">{tx('Si sposta trascinandola; le righe sono le stesse in tutte le tabelle del progetto.')}</p>
+      </Group>
+    );
   } else if (selected.length === 1 && selected[0].kind === 'cable') {
     body = <CableProps line={selected[0]} derived={derived} />;
   } else if (selected.length === 1 && selected[0].kind === 'wiredef') {
@@ -471,6 +523,7 @@ function SymbolProps({ inst }: { inst: SymbolInstance }) {
         {inst.pairOf && <PairRow inst={inst} />}
         {!inst.pairOf && sym.role === 'aux' && <ContactPlaceRow realId={inst.id} />}
         {(sym.role === 'main' || sym.role === 'aux' || sym.role === 'oneline') && <Row label={tx('Riferimenti incrociati')} vis={vis('xref')} />}
+        {!perInst && <Row label={tx('Tabella materiali')} vis={vis('parts')} />}
         {sym.role === 'main' && (
           <Row label={tx('Immagine dei contatti')}>
             <select value={inst.contactImage ?? ''} title={tx('Si può anche trascinare sullo schema; tasto destro ▸ Testi nella posizione del simbolo la rimette al suo posto')}
@@ -852,6 +905,15 @@ function ConnectorProps({ inst }: { inst: SymbolInstance }) {
       <Row label={tx('Pin')}><Field value={no} onCommit={v => v.trim() && st().updateElement(inst.id, { tag: `${conn}:${v.trim()}` })} /></Row>
       <Row label={tx('Pin totali')}><Field value={d.pins ? String(d.pins) : ''} placeholder={count ? tx('{0} (articolo)', count) : tx('es. 16')} onCommit={v => st().updateConnector(conn, { pins: parseInt(v, 10) || undefined })} /></Row>
       <Row label={tx('Usati')}>{`${used}${count ? ` di ${count}` : ''}`}</Row>
+      <Row label={tx('Riquadro sullo schema')}>
+        <input type="checkbox" checked={d.frame !== false} title={tx('Riquadro tratteggiato attorno ai pin del connettore con sigla, tipo e genere')} onChange={e => st().updateConnector(conn, { frame: e.target.checked ? undefined : false })} />
+      </Row>
+      <Row label={tx('Scritta del riquadro')}>
+        <input type="checkbox" checked={!d.hideLabel && !d.ofCable} disabled={!!d.ofCable || d.frame === false} title={tx('Sigla, tipo e genere sopra il riquadro; si trascina sullo schema dove si vuole')} onChange={e => st().updateConnector(conn, { hideLabel: e.target.checked ? undefined : true })} />
+      </Row>
+      <Row label={tx('Fa parte del cavo')}>
+        <input type="checkbox" checked={!!d.ofCable} title={tx('Connettore del cavo (es. cavo M12 preconfezionato): niente sigla sullo schema; i suoi articoli vanno nella tabella materiali del dispositivo in campo collegato con il cavo')} onChange={e => st().setConnectorOfCable(conn, e.target.checked)} />
+      </Row>
       <Row label="">
         <button onClick={() => { st().setConnSel(conn); st().setView('connectors'); }}>{tx('Apri connettore')}</button>
       </Row>
@@ -1312,6 +1374,11 @@ function PlcProps({ inst, io, vis }: { inst: SymbolInstance; io: IoKind; vis: (k
           onCommit={v => upd({ plcSymbol: v.trim() ? sanitizeSymbol(v.trim()) : undefined })} />
       </Row>
       <Row label={tx('Commento')} vis={vis('plcComment')}><Field value={inst.plcComment ?? ''} placeholder={tx('descrizione del dispositivo collegato')} onCommit={v => upd({ plcComment: v.trim() || undefined })} /></Row>
+      {getSymbol(inst.symbolId, project)?.fields?.some(f => f.f === 'plcCard') && <>
+        <Row label={tx('Scheda e foglio')} vis={vis('plcCard')} />
+        <Row label={tx('Stazione, rack e slot')} vis={vis('plcPlace')} />
+        <Row label={tx('Morsetti del canale')} vis={vis('plcPins')} />
+      </>}
       <Row label={tx('Gestione')}><button onClick={() => st().setView('plc')}>{tx('Apri vista PLC')}</button></Row>
     </Group>
   );
@@ -1335,7 +1402,7 @@ function PlcGroupProps({ gid }: { gid: string }) {
   const fmt = card ? cardFormat(project, card) : settingsOf(project).plcAddressFormat;
   const max = card ? cardType(card).channels[cfg.kind] ?? 0 : 0;
   const addr = (ch: string) => (card ? channelAddress(card, ch, fmt) : '');
-  const vis = (k: SymVisKey): Vis => ({ on: members.every(m => m.show?.[k] !== false), set: on => st().setPlcGroupShow(gid, k, on) });
+  const vis = (k: SymVisKey): Vis => ({ on: members.every(m => symShown(m.show, k, { settings: settingsOf(project) })), set: on => st().setPlcGroupShow(gid, k, on) });
   const upd = (id: string, patch: Partial<SymbolInstance>) => st().updateInstance(id, patch);
   return (
     <>
@@ -1365,10 +1432,15 @@ function PlcGroupProps({ gid }: { gid: string }) {
         <Row label={tx('Indirizzi')} vis={vis('plcAddress')} />
         <Row label={tx('Variabili')} vis={vis('plcSymbol')} />
         <Row label={tx('Commenti')} vis={vis('plcComment')} />
+        <Row label={tx('Scheda e foglio')} vis={vis('plcCard')} />
+        <Row label={tx('Stazione, rack e slot')} vis={vis('plcPlace')} />
+        <Row label={tx('Morsetti del canale')} vis={vis('plcPins')} />
         <Row label={tx('Azioni')}>
           <button onClick={() => st().rotateSelection()}>{tx('Ruota')}</button>{' '}
           <button onClick={() => st().deleteSelection()}>{tx('Elimina')}</button>{' '}
-          <button onClick={() => st().setView('plc')}>{tx('Apri vista PLC')}</button>
+          <button onClick={() => st().setView('plc')}>{tx('Apri vista PLC')}</button>{' '}
+          <button onClick={() => st().splitPlcGroup(gid)}
+            title={tx('Ogni canale diventa un punto I/O a sé (stesso canale, pin, variabile e commento) da mettere sotto il suo circuito; si riuniscono selezionandoli e con il tasto destro ▸ Riunisci in un gruppo')}>{tx('Separa in canali')}</button>
         </Row>
       </Group>
       {Array.from({ length: cfg.count }, (_, k) => {
@@ -1435,7 +1507,7 @@ function PlcSocketProps({ gid }: { gid: string }) {
   const fmt = card ? cardFormat(project, card) : settingsOf(project).plcAddressFormat;
   const maxCh = card ? Math.max(cardType(card).channels.DI ?? 0, cardType(card).channels.DO ?? 0) : 0;
   const addr = (ch: string) => (card ? channelAddress(card, ch, fmt) : '');
-  const vis = (k: SymVisKey): Vis => ({ on: members.filter(m => m.plcGroup!.socket !== 'body').every(m => m.show?.[k] !== false), set: on => st().setPlcGroupShow(gid, k, on) });
+  const vis = (k: SymVisKey): Vis => ({ on: members.filter(m => m.plcGroup!.socket !== 'body').every(m => symShown(m.show, k, { settings: settingsOf(project) })), set: on => st().setPlcGroupShow(gid, k, on) });
   const upd = (id: string, patch: Partial<SymbolInstance>) => st().updateInstance(id, patch);
   const setKind = (s: number, part: 'a' | 'b', k: SocketKind) =>
     st().updatePlcSocket(gid, { kinds: cfg.kinds.map((x, i) => (i === s ? { ...x, [part]: k } : x)) });
@@ -1469,7 +1541,12 @@ function PlcSocketProps({ gid }: { gid: string }) {
           <Field value={cfg.name} placeholder="X1" onCommit={v => { if (v.trim()) st().updatePlcSocket(gid, { name: v.trim() }); }} />
         </Row>
         <Row label={tx('Canale A (pin 4) della prima presa')}>
-          <select value={cfg.first} onChange={e => st().updatePlcSocket(gid, { first: parseInt(e.target.value, 10) })}>
+          <select value={cfg.first} onChange={e => {
+            // Il canale B segue il canale A (stessa distanza, di serie 8: pin 2 = canale A + 8)
+            const first = parseInt(e.target.value, 10);
+            const second = cfg.second + first - cfg.first;
+            st().updatePlcSocket(gid, { first, ...(second >= 0 && second < maxCh ? { second } : {}) });
+          }}>
             {Array.from({ length: maxCh }, (_, i) => <option key={i} value={i}>{i}</option>)}
           </select>
         </Row>
@@ -1482,6 +1559,9 @@ function PlcSocketProps({ gid }: { gid: string }) {
         <Row label={tx('Indirizzi')} vis={vis('plcAddress')} />
         <Row label={tx('Variabili')} vis={vis('plcSymbol')} />
         <Row label={tx('Commenti')} vis={vis('plcComment')} />
+        <Row label={tx('Scheda e foglio')} vis={vis('plcCard')} />
+        <Row label={tx('Stazione, rack e slot')} vis={vis('plcPlace')} />
+        <Row label={tx('Morsetti del canale')} vis={vis('plcPins')} />
         <Row label={tx('Azioni')}>
           <button onClick={() => st().rotateSelection()}>{tx('Ruota')}</button>{' '}
           <button onClick={() => st().deleteSelection()}>{tx('Elimina')}</button>{' '}
@@ -1730,6 +1810,7 @@ function MultiSymbolRows({ insts }: { insts: SymbolInstance[] }) {
     ...(device ? [['description', tx('Descrizione')], ['techData', tx('Dati tecnici')], ['func', tx('Funzione (=)')], ['loc', tx('Luogo (+)')],
       ['note', tx('Note')], ['partNr', tx('Articolo')], ['manufacturer', tx('Costruttore')], ['typeNr', tx('Tipo')], ['orderNr', tx('Codice ordinazione')]] as [SymVisKey, string][] : []),
     ...(roles.has('main') || roles.has('aux') || roles.has('oneline') ? [['xref', tx('Riferimenti incrociati')]] as [SymVisKey, string][] : []),
+    ...(device ? [['parts', tx('Tabella materiali')]] as [SymVisKey, string][] : []),
     ['pins', tx('Designazioni sullo schema')],
     ...(roles.has('terminal') ? [['strip', tx('Sigla della morsettiera sullo schema')]] as [SymVisKey, string][] : []),
     ...(roles.has('plc') ? [['plcAddress', tx('Indirizzo')], ['plcSymbol', tx('Nome simbolico')], ['plcComment', tx('Commento')]] as [SymVisKey, string][] : []),
@@ -1857,6 +1938,25 @@ function PlcPowerProps({ inst }: { inst: SymbolInstance }) {
   );
 }
 
+/** Larghezze delle colonne delle tabelle materiali (mm): vuoto = quelle di base (del progetto o predefinite) */
+function PartColsFields({ value, base, onChange }: { value?: PartTableCols; base: PartTableCols; onChange: (v: PartTableCols | undefined) => void }) {
+  const keys: [keyof PartTableCols, string][] = [['qty', tx('Q.tà')], ['maker', tx('Costruttore')], ['code', tx('Codice')]];
+  const set = (k: keyof PartTableCols, v: string) => {
+    const n = parseFloat(v.replace(',', '.'));
+    const next = { ...base, ...(value ?? {}), [k]: n > 0 ? Math.min(200, n) : base[k] };
+    onChange(keys.every(([x]) => next[x] === base[x]) ? undefined : next);
+  };
+  return (
+    <span className="part-cols" style={{ display: 'flex', gap: 4 }}>
+      {keys.map(([k, l]) => (
+        <span key={k} title={`${l} (mm)`} style={{ flex: 1, minWidth: 0 }}>
+          <Field type="number" value={value?.[k] !== undefined && value[k] !== base[k] ? String(value[k]) : ''} placeholder={`${l} ${base[k]}`} onCommit={v => set(k, v)} />
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function PageProps() {
   const project = useStore(s => s.project);
   const tbLibrary = useStore(s => s.tbLibrary);
@@ -1885,6 +1985,9 @@ function PageProps() {
       </Row>
       {isListPage(page) && <Row label={tx('Lista')}>
         <button onClick={() => st().openListStyleOf(page)} title={tx('Tutte le modifiche della lista in una finestra (anche con il tasto destro sulla pagina)')}>{tx('Personalizza la lista…')}</button>
+      </Row>}
+      {(page.type === 'multiline' || page.type === 'singleline') && <Row label={tx('Tabelle materiali: colonne (mm)')}>
+        <PartColsFields value={page.partTableCols} base={partTableColsOf(project)} onChange={v => st().updatePage(page.id, { partTableCols: v })} />
       </Row>}
       {page.type === 'cover' && <Row label={tx('Copertina')}>
         <button onClick={() => st().setDialog('cover')} title={tx('Logo, caratteri, posizioni, righe dei dati, revisioni e firme')}>{tx('Personalizza…')}</button>
@@ -2196,9 +2299,19 @@ export function DrawingSection() {
           {TERM_TEXT_DIRS.map(([v, l]) => <option key={v} value={v}>{tx(l)}</option>)}
         </select>
       </Row>
+      <Row label={tx('Riquadro del canale PLC')}>
+        <select value={s.plcChannelBox ?? ''} onChange={e => st().updateSettings({ plcChannelBox: e.target.value === 'full' ? 'full' : undefined })}
+          title={tx('Completo: nei canali dei gruppi I/O anche la scheda con il foglio della panoramica, la stazione con rack e slot e i morsetti del canale; ogni campo si nasconde anche sul singolo canale (occhio nelle proprietà)')}>
+          <option value="">{tx('semplice (indirizzo, variabile, commento)')}</option>
+          <option value="full">{tx('completo (anche scheda e foglio, stazione/rack/slot, morsetti)')}</option>
+        </select>
+      </Row>
       <Row label={tx('Riquadri dei connettori sullo schema')}>
         <input type="checkbox" checked={s.connectorFrames !== false} onChange={e => st().updateSettings({ connectorFrames: e.target.checked ? undefined : false })}
           title={tx('Riquadro tratteggiato attorno ai pin dello stesso connettore, con sigla, tipo e genere (si toglie anche per un solo connettore nella vista Connettori)')} />
+      </Row>
+      <Row label={tx('Tabelle materiali: colonne (mm)')}>
+        <PartColsFields value={s.partTableCols} base={PART_TABLE_COLS} onChange={v => st().updateSettings({ partTableCols: v })} />
       </Row>
       <Row label={tx('Testi dei simboli spostabili sullo schema')}>
         <input type="checkbox" checked={!!s.freeSymbolTexts} onChange={e => st().updateSettings({ freeSymbolTexts: e.target.checked || undefined })}

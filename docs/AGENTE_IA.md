@@ -220,6 +220,8 @@ simbolo <id> <sigla> @x,y [rot=0|90|180|270] [specchio] [descr="…"] [dati="…
     [costruttore=…] [tipo=…] [ordine=…] [note="…"] [luogo=…] [funzione=…] [canale=DI0]
     [variabile=…] [commento="…"] [ip=…] [indirizzo=…] [pin="1=13;2=14"] [numerofilo=passa|cambia]
     [testi=si|no] [immaginecontatti=sotto|simbolo] [versotesti=auto|parallelo|perpendicolare]
+    [tabellasotto=-K1]   (tabella materiali agganciata sotto quella di -K1 nella stessa pagina; la tabella si
+    mostra con mostra={"parts":true})
     [articoli=JSON] [proprieta=JSON] [mostra=JSON] [postesti=JSON] [interfacce=JSON]   (articoli aggiuntivi, proprietà,
     testi mostrati/nascosti e testi spostati: scritti dal programma, da lasciare come sono se non servono)
     <id> è l'identificativo del simbolo (vedi catalogo); <sigla> con il trattino: -2K1, -X1:3;
@@ -257,6 +259,10 @@ collega <estremo> <estremo> [via x,y …] [stessi attributi di filo]
     es. /1 sopra e /2 sotto per i morsetti), L1 o +24V (potenziale/rimando), oppure x,y.
     Se il punto non è indicato si usa quello più vicino all'altro estremo. Il percorso è a L.
 testo @x,y [h=3] [l=60] [rot=90] [allinea=sinistra|centro|destra] "<testo>"   (l: larghezza del riquadro in mm, a capo da solo)
+blocco tensioni @x,y   (tabella «Tensioni utilizzate nello schema elettrico», angolo in alto a sinistra)
+blocco stazione @x,y ["PLC1"]   (miniatura dell'isola I/O con la freccia sui moduli usati nella pagina; senza nome la stazione della pagina)
+blocco revisioni @x,y [colonne=16]   (stato revisione fogli, di solito sulla copertina: sotto ogni foglio l'ultima revisione che l'ha cambiato)
+nonmontato @x,y <larghezza>x<altezza>   (riquadro grigio: le parti dentro restano sullo schema ma non si montano: niente distinta, targhette, liste)
 riquadro +<luogo> @x,y <larghezza>x<altezza> [scritta=dx,dy] [solosigla[=no]] [aspetto="linea=#c00;spessore=0,3;h=2,8;testo=#000"]   (riquadro di luogo; scritta rispetto all'angolo in alto a sinistra)
 lineacavo -<sigla> x,y x,y [principale] [testi="sigla=si;tipo=no;sezione=no;descrizione=no;conduttori=si"]
     [posizione=prima|dopo|sopra-inizio|sopra-fine|sotto-inizio|sotto-fine] [spostamento=x,y]

@@ -1,6 +1,6 @@
 // Connettori e spine: pin disegnati dove servono (sigla "X10:3"), dati del connettore
 // (numero di pin, articolo e controparte), lista connettori e controlli.
-import type { Project, Part, ConnectorData, Page } from './types';
+import type { Project, Part, ConnectorData, Page, Pt } from './types';
 import { getSymbol, instanceBounds } from './geometry';
 import { allPlaced, stripOf, locationOf, partsIndex, type PlacedElement } from './devices';
 import { computeNetlist, type Net } from './netlist';
@@ -137,7 +137,13 @@ export function connectorProblems(p: Project, library: Part[] = []): ConnIssue[]
   return out;
 }
 
-export interface ConnectorFrame { conn: string; x0: number; y0: number; x1: number; y1: number; label: string }
+export interface ConnectorFrame {
+  conn: string; x0: number; y0: number; x1: number; y1: number;
+  /** Scritta del riquadro: vuota se nascosta o se il connettore fa parte del cavo */
+  label: string;
+  /** Punto della scritta (inizio della riga di base), con lo spostamento scelto */
+  labelAt: Pt;
+}
 
 /**
  * Riquadri dei connettori sulla pagina: i pin dello stesso connettore vicini tra loro (a meno di 24 mm
@@ -170,8 +176,9 @@ export function connectorFrames(p: Project, page: Page): ConnectorFrame[] {
       }
     }
     const d = connectorData(p, conn), t = connectorTypeOf(p, conn);
-    const label = [`-${conn}`, t ? connectorShortName(t) : '', d.gender ? ({ M: 'M', F: 'F', MF: 'M/F' } as const)[d.gender] : ''].filter(Boolean).join(' · ');
-    for (const b of boxes) out.push({ conn, x0: b.x0 - 3, y0: b.y0 - 3, x1: b.x1 + 3, y1: b.y1 + 3, label });
+    const label = d.hideLabel || d.ofCable ? '' : [`-${conn}`, t ? connectorShortName(t) : '', d.gender ? ({ M: 'M', F: 'F', MF: 'M/F' } as const)[d.gender] : ''].filter(Boolean).join(' · ');
+    const off = d.labelOffsets?.[page.id] ?? { x: 0, y: 0 };
+    for (const b of boxes) out.push({ conn, x0: b.x0 - 3, y0: b.y0 - 3, x1: b.x1 + 3, y1: b.y1 + 3, label, labelAt: { x: b.x0 - 3 + 1 + off.x, y: b.y0 - 3 - 1 + off.y } });
   }
   return out;
 }

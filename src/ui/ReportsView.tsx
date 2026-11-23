@@ -1,5 +1,6 @@
 // Liste di progetto generate automaticamente dallo schema, e controlli di progetto.
 import { useMemo, useState } from 'react';
+import { fitMenu } from './fitMenu';
 import { useStore } from '../model/store';
 import { tableToCsv, tableToTxt, type Table } from '../model/reports';
 import { scopeLocations, scopeTables, scopedLists } from '../model/panelScope';
@@ -157,7 +158,7 @@ export function ReportsView() {
       </div>
       {menu && t && (
         <div className="ctx-back" onMouseDown={() => setMenu(null)} onContextMenu={e => { e.preventDefault(); setMenu(null); }}>
-          <div className="ctx-menu" style={{ left: Math.min(menu.x, window.innerWidth - 260), top: Math.min(menu.y, window.innerHeight - 90) }} onMouseDown={e => e.stopPropagation()}>
+          <div className="ctx-menu" ref={fitMenu} style={{ left: Math.min(menu.x, window.innerWidth - 260), top: Math.min(menu.y, window.innerHeight - 90) }} onMouseDown={e => e.stopPropagation()}>
             <button onClick={() => { setMenu(null); void editWireOrder(menu.wireId!); }}><span>{tx('Ordine dei collegamenti di {0}…', menu.label ?? '')}</span></button>
             <hr />
             <button onClick={() => { setMenu(null); st().openReportStyle(t.title); }}><span>{tx('Personalizza la lista…')}</span></button>

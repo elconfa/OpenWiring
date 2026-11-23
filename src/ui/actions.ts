@@ -1,4 +1,5 @@
 // Comandi dell'applicazione richiamati da barra strumenti, menu e scorciatoie.
+import { fittedProject } from '../model/notFitted';
 import { proposePageName } from '../model/pages';
 import { withFullParts, flushParts, applyFromDb, shrinkPicture } from './partsDbSync';
 import { parseCommercialCsv, mergeCommercial } from '../io/commercialCsv';
@@ -564,7 +565,7 @@ export async function importPlcFile() {
 
 export function plcIoTable(): Table {
   const { project, library } = st();
-  return plcIoReport(project, library);
+  return plcIoReport(fittedProject(project), library);
 }
 
 export function exportPdfAction() {

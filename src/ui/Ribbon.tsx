@@ -129,10 +129,14 @@ export function ribbonTabs(s: State): RTab[] {
         { name: tn('Luoghi'), items: [
           { icon: 'zone', label: tx('Luogo'), big: true, run: tool({ kind: 'zone' }), active: is(t => t.kind === 'zone'), title: tx('Riquadro di luogo (+): clic su due angoli, quello che sta dentro prende il luogo') },
           { icon: 'place', label: tx('Nuovo luogo…'), run: A.addPlace, title: tx('Nuovo luogo (quadro, pulsantiera…)…') },
+          { icon: 'zone', label: tx('Non montato'), run: () => (st().selection.length ? st().noFitAroundSelection() : st().setTool({ kind: 'nofit' })), active: is(t => t.kind === 'nofit'), disabled: !schema, title: tx('Riquadro grigio «Non montato» attorno alle parti selezionate (o clic su due angoli): restano sullo schema ma non vanno in distinta, tabelle materiali, targhette e liste') },
         ] },
         { name: tn('Grafica'), items: [
           { icon: 'text', label: tx('Testo'), big: true, run: tool({ kind: 'text' }), active: is(t => t.kind === 'text') },
           { icon: 'image', label: tx('Immagine…'), run: () => void insertImageFromFile(), disabled: !schema, title: tx('Foto, logo o disegno (PNG, JPG, SVG…); si incolla anche dagli appunti') },
+          { icon: 'table', label: tx('Tabella tensioni'), run: () => { st().setView('schema'); st().insertBlock('voltages'); }, disabled: !schema, title: tx('Tabella «Tensioni utilizzate nello schema elettrico» con i potenziali del progetto (campione della linea, tensione, descrizione); si sposta come un\'immagine, le righe si scrivono in Progetto ▸ Tensioni utilizzate') },
+          { icon: 'table', label: tx('Stato revisione fogli'), run: () => { st().setView('schema'); st().insertBlock('revgrid'); }, disabled: !schema, title: tx('Griglia dei fogli con l\'ultima revisione di ciascuno (casella vuota = prima emissione, # = foglio non presente), in alto a destra; di solito va sulla copertina') },
+          { icon: 'table', label: tx('Miniatura stazione PLC'), run: () => { st().setView('schema'); st().insertBlock('station'); }, disabled: !schema || !st().project.plc.cards.length, title: tx('Piccola immagine della stazione PLC (isola I/O) in alto a destra: moduli in fila per rack e slot, con la freccia sui moduli usati nella pagina; si sposta come un\'immagine') },
           { icon: 'drawing', label: tx('Disegno DXF…'), run: () => void insertDxfDrawing(), disabled: !schema, title: tx('Grafica di un file DXF (linee, cerchi, archi, testi) sulla pagina, 1:1 in mm se ci sta; si sposta e si ridimensiona come un\'immagine') },
         ] },
       ],
@@ -149,6 +153,7 @@ export function ribbonTabs(s: State): RTab[] {
         { name: tn('Pagine automatiche'), items: [
           { icon: 'list', label: tx('Liste'), big: true, run: () => st().setDialog('reportPages'), title: tx('Indice, distinta, lista d\'acquisto, dispositivi, morsetti, fili, cavi… come pagine del progetto') },
           { icon: 'cable', label: tx('Disegni dei cavi (cablaggio)'), run: () => { st().syncDrawingPages('cable'); st().setView('schema'); }, disabled: !s.project.cables?.length && !s.project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && !!e.bundlePart)), title: tx('Una pagina per cavo e per bus fili con l\'articolo di un cavo: estremità, conduttori e tabella; si aggiornano da sole') },
+          { icon: 'cable', label: tx('Collegamenti in campo'), run: () => { st().syncDrawingPages('field'); st().setView('schema'); }, disabled: !s.project.cables?.length, title: tx('Una pagina per morsettiera: i morsetti in fila con il numero filo, i cavi che partono con il nome dei conduttori e i dispositivi in campo con i pin; si aggiornano da sole') },
           { icon: 'connector', label: tx('Piedinature dei connettori'), run: () => { st().syncDrawingPages('connector'); st().setView('schema'); }, title: tx('Una pagina per connettore: faccia con i pin numerati e tabella dei collegamenti') },
           { icon: 'system', label: tx('Schema d\'insieme'), run: () => { st().syncDrawingPages('system'); st().setView('schema'); }, disabled: !s.project.cables?.length, title: tx('Luoghi (quadri, pulsantiere, bordo macchina) con i dispositivi, le foto e i cavi di collegamento') },
           { icon: 'update', label: tx('Aggiorna le pagine di lista'), run: () => st().syncReportPages() },

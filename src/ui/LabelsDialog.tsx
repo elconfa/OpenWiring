@@ -1,4 +1,5 @@
 // Export delle etichette di siglatura per M-Print PRO, GeniusPRO o Excel/CSV generico.
+import { fittedProject } from '../model/notFitted';
 import { useMemo, useState } from 'react';
 import { useStore } from '../model/store';
 import {
@@ -23,8 +24,8 @@ export function LabelsDialog() {
   const library = useStore(s => s.library);
   const st = useStore.getState;
   const [p, setP] = useState<Prefs>(load);
-  const counts = useMemo(() => (open ? Object.fromEntries((Object.keys(SET_NAMES) as LabelSet[]).map(s => [s, makeLabels(project, s, p.o, library).length])) : {}) as Record<LabelSet, number>, [open, project, library, p.o]);
-  const marks = useMemo(() => (open ? wireMarkers(project, p.marks) : []), [open, project, p.marks]);
+  const counts = useMemo(() => (open ? Object.fromEntries((Object.keys(SET_NAMES) as LabelSet[]).map(s => [s, makeLabels(fittedProject(project), s, p.o, library).length])) : {}) as Record<LabelSet, number>, [open, project, library, p.o]);
+  const marks = useMemo(() => (open ? wireMarkers(fittedProject(project), p.marks) : []), [open, project, p.marks]);
   if (!open) return null;
   const o = p.o;
   const m = p.marks ?? {};
@@ -43,7 +44,7 @@ export function LabelsDialog() {
   const go = async () => {
     try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* preferenze non salvabili */ }
     const base = `${safeName(project.info.name)}_etichette_${p.profile}`;
-    const sheets = p.sets.map(s => ({ name: SET_NAMES[s], rows: labelRows(makeLabels(project, s, o, library), p.profile) }));
+    const sheets = p.sets.map(s => ({ name: SET_NAMES[s], rows: labelRows(makeLabels(fittedProject(project), s, o, library), p.profile) }));
     close();
     if (p.format === 'xlsx') {
       const path = await saveFile(`${base}.xlsx`, writeXlsx(sheets), [{ name: 'Excel', extensions: ['xlsx'] }]);

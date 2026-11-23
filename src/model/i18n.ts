@@ -135,6 +135,19 @@ const BUILTIN: Record<string, [string, string]> = {
   'destinazione interna': ['Internal destination', 'Ziel intern'],
   'filo': ['Wire', 'Draht'],
   'riserva': ['Spare', 'Reserve'],
+  'morsetti': ['Terminals', 'Klemmen'],
+  'nessuna stazione plc': ['No PLC station', 'Keine SPS-Station'],
+  'stazione plc': ['PLC station', 'SPS-Station'],
+  'collegamenti in campo': ['Field connections', 'Feldanschlüsse'],
+  'foglio': ['Sheet', 'Blatt'],
+  'stato revisione fogli': ['Sheet revision status', 'Revisionsstand der Blätter'],
+  'legenda posizioni': ['Item legend', 'Positionslegende'],
+  'legenda posizioni quadro': ['Cabinet item legend', 'Positionslegende Schaltschrank'],
+  'zona': ['Zone', 'Bereich'],
+  'nessuna posizione numerata': ['No numbered items', 'Keine nummerierten Positionen'],
+  '… le altre nella lista «legenda posizioni quadro»': ['… the others in the «Cabinet item legend» list', '… die übrigen in der Liste «Positionslegende Schaltschrank»'],
+  'cavi': ['cables', 'Kabel'],
+  'schermato': ['shielded', 'geschirmt'],
   'tra quadri': ['between cabinets', 'zwischen Schränken'],
   'libero': ['spare', 'frei'],
   'scorta': ['spare', 'Reserve'],
@@ -338,6 +351,7 @@ const BUILTIN: Record<string, [string, string]> = {
   'minimo': ['Minimum', 'Minimum'],
   'massimo': ['Maximum', 'Maximum'],
   'rete macchina': ['Machine network', 'Maschinennetz'],
+  'non montato': ['Not fitted', 'Nicht bestückt'],
 };
 
 const PREPOSITIONS = new Set(['di', 'del', 'della', 'dello', 'dei', 'degli', 'delle', 'per', 'da']);

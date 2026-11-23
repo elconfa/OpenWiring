@@ -18,7 +18,7 @@ describe('cavi di rete', () => {
   });
   it('lista cavi e distinta in metri', () => {
     const rows = cableReport(p).rows;
-    expect(rows.find(r => r[0] === '-5W2')).toEqual(['-5W2', 'Profinet tipo A 2×2×AWG22, verde', 'Profinet', '', '', '10', '-5A1:P2', '-5A2:P1', 'Cavo Profinet', '5.3', '']);
+    expect(rows.find(r => r[0] === '-5W2')).toEqual(['-5W2', 'Profinet tipo A 2×2×AWG22, verde', 'Profinet', '', '', '10', '-5A1:P2', '-5A2:P1', 'Cavo Profinet', '5.3', '', '']);
     const q = structuredClone(p);
     for (const e of q.pages[4].elements) if (e.kind === 'wire' && e.busCable) e.busCable.partNr = 'PN-CABLE';
     q.parts.push({ partNr: 'PN-CABLE', descr1: 'Cavo Profinet', functionTemplates: [], attrs: {} });

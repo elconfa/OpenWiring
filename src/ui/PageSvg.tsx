@@ -1,5 +1,8 @@
 // Rendering SVG di una pagina di schema: usato sia dall'editor sia dall'export PDF.
 import type { ReportSheet, RevisionCloud } from '../model/derive';
+import { blockBox, voltageTableDrawing } from '../model/voltages';
+import { stationMiniDrawing, type StationMiniDrawing } from '../model/stationMini';
+import { revGridDrawing } from '../model/revisionGrid';
 import { REPORT_DEFAULTS, REPORT_X, reportColumns, styledHeadH, type ReportCol } from '../model/reportStyle';
 import { memo, type ReactNode } from 'react';
 import type { Project, Page, Prim, SymbolInstance, SymbolDef, Pt, FieldKey, TextItem, CableLine, StripStyle } from '../model/types';
@@ -13,7 +16,7 @@ import { pageOfLocation, type CrossRefInfo } from '../model/devices';
 import { OVERVIEW, overviewRowHeight, type OverviewData } from '../model/plc';
 import { STRIP_LAYOUT, STRIP_TEXT, STRIP_COLS, stripTextOf, type StripSheetData } from '../model/terminals';
 import { COVER_DEFAULTS, coverLines, coverStyleOf } from '../model/cover';
-import { layoutOf, layoutView, railUsage } from '../model/layout';
+import { BALLOON_R, balloons, layoutOf, layoutView, legendBox, railUsage, type PositionRow } from '../model/layout';
 import { protocolOf, nodeIp } from '../model/network';
 import { translator } from '../model/i18n';
 import { titleBlockPrims } from '../model/titleBlocks';
@@ -23,7 +26,7 @@ import { flowLines, LINE_GAP } from '../model/textFlow';
 import { layoutRich } from '../model/textRich';
 import { terminalTextLayout } from '../model/terminalText';
 import { textPlace, orientPlace, textOffset } from '../model/symbolTexts';
-import type { Layout, LayoutItem, Zone, ZoneStyle, Panel, TerminalTextDir, TextMoveKey, ImageItem, WireDef } from '../model/types';
+import type { Layout, LayoutItem, Zone, ZoneStyle, Panel, TerminalTextDir, TextMoveKey, ImageItem, WireDef, BlockItem, NoFitArea } from '../model/types';
 import { wireDefLabel, wireDefCrossings, wireDefLabelAt } from '../model/wireDefs';
 import { plotPrims } from '../model/types';
 import { tx } from '../i18n/ui';
@@ -34,6 +37,7 @@ import { drawingStyleOf, type ResolvedDrawingStyle } from '../model/drawingStyle
 
 import { look, applyLook } from './look';
 import { approxTextW, leaderLine, nearestInBox, zoneLabelBox, zoneLeader, zoneLookOf, zoneText } from '../model/leaders';
+import { PART_TABLE, layoutPartTables, type PartTable } from '../model/partTables';
 import { cableStyleOf, lineShow, shieldDims, shieldGeometry, SHIELD, type ResolvedCableStyle } from '../model/cableStyle';
 
 /** Inchiostro predefinito (quello del progetto è look.ink) */
@@ -217,6 +221,10 @@ function CableView({ line, mark, selected, style: base }: { line: CableLine; mar
 export const SEL = '#1f6feb';
 
 export interface PageDerived {
+  /** Layout con la legenda accanto: posizioni numerate della pagina (layout.ts) */
+  positions?: PositionRow[];
+  /** Tabelline dei componenti della pagina (luogo, sigla, articoli), vedi partTables.ts */
+  partTables?: PartTable[];
   labels: Map<string, Record<string, string>>;
   xrefs: Map<string, CrossRefInfo>;
   junctions: Pt[];
@@ -677,7 +685,7 @@ function PlcLabel({ inst, sym, derived, color, vis }: { inst: SymbolInstance; sy
     return (
       <g fill={t ? color : '#cf222e'} stroke="none">
         {!t && <text x={c.x} y={c.y + 0.9} fontSize={2.4} fontWeight={600} textAnchor="middle">?</text>}
-        {t?.ref && <RefText x={right.x} y={right.y + 0.7} size={1.7} refs={[{ loc: t.ref }]} />}
+        {t?.ref && !derived.deviceFields.get(inst.id)?.plcCard && <RefText x={right.x} y={right.y + 0.7} size={1.7} refs={[{ loc: t.ref }]} />}
       </g>
     );
   }
@@ -860,14 +868,14 @@ function CellSymbol({ sym, x, y, w, h }: { sym: SymbolDef; x: number; y: number;
 
 function ReportPage({ data }: { data?: ReportSheet }) {
   if (!data) return <text x={30} y={30} fontSize={4} fill="#cf222e">{tx('Lista vuota o non più presente: rigenera le pagine di lista')}</text>;
-  const { table: t, style: st, keys } = data;
+  const { table: t, style: st, keys, lens } = data;
   const D = REPORT_DEFAULTS;
   const { x0, x1 } = REPORT_X;
   const top = FRAME.top + 14, rowH = t.rowH ?? D.rowH, headH = styledHeadH(st);
   const size = st.textSize ?? D.textSize, headSize = st.headSize ?? D.headSize;
   const ink = st.textColor ?? look.ink, headInk = st.headColor ?? look.ink;
   const lw = st.lineWidth ?? D.lineWidth;
-  const cols = reportColumns(t, st, keys);
+  const cols = reportColumns(t, st, keys, lens);
   const fit = (s: string, w: number, sz: number) => { const n = Math.floor((w - 1) / (sz * 0.55)); return s.length > n ? `${s.slice(0, Math.max(1, n - 1))}…` : s; };
   const tx0 = (c: ReportCol) => (c.align === 'middle' ? c.x + c.w / 2 : c.align === 'end' ? c.x + c.w - 1 : c.x + 1);
   const bottom = top + headH + rowH * t.rows.length;
@@ -1079,6 +1087,78 @@ function PlcOverview({ data, t, S }: { data?: OverviewData; t: (s: string) => st
  * il morsetto con numero e piano al centro, ponticelli e separatori, destinazioni interne
  * a destra e le posizioni sullo schema (cliccabili, anche nel PDF).
  */
+/**
+ * Tabellina del componente: intestazione con luogo e sigla, una riga per articolo (quantità,
+ * costruttore, codice). Si trascina come i testi del simbolo (data-devtext, chiave «parts»).
+ */
+function PartTableView({ tb, at, selected }: { tb: PartTable; at: Pt; selected: boolean }) {
+  const S = PART_TABLE;
+  const ink = selected ? SEL : look.ink;
+  const [c0, c1] = tb.cols;
+  const lw = 0.18;
+  return (
+    <g data-devtext={tb.instId} data-key="parts" style={{ cursor: 'move' }}>
+      <rect x={at.x} y={at.y} width={tb.w} height={tb.h} fill={look.c.paper} stroke={ink} strokeWidth={0.25} />
+      {tb.head.map((l, k) => <text key={`h${k}`} x={at.x + S.pad} y={at.y + S.headH - 1.2 + k * S.lineH} fontSize={S.headSize} fill={ink} fontWeight={600}>{l}</text>)}
+      {tb.rows.map((r, i) => {
+        const y = at.y + tb.headH + tb.rows.slice(0, i).reduce((a, x) => a + x.h, 0);
+        // Prima riga di testo come in una riga normale, le altre sotto (testi a capo)
+        const ty = (k: number) => y + S.rowH - 1.1 + k * S.lineH;
+        const cell = (x: number, ls: string[]) => ls.map((l, k) => <text key={k} x={x} y={ty(k)} fontSize={S.size} fill={ink}>{l}</text>);
+        return (
+          <g key={i}>
+            <line x1={at.x} y1={y} x2={at.x + tb.w} y2={y} stroke={ink} strokeWidth={lw} />
+            <line x1={at.x + c0} y1={y} x2={at.x + c0} y2={y + r.h} stroke={ink} strokeWidth={lw} />
+            <line x1={at.x + c0 + c1} y1={y} x2={at.x + c0 + c1} y2={y + r.h} stroke={ink} strokeWidth={lw} />
+            {cell(at.x + S.pad, r.lines.qty)}
+            {cell(at.x + c0 + S.pad, r.lines.manufacturer)}
+            {cell(at.x + c0 + c1 + S.pad, r.lines.code)}
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Tabella «Tensioni utilizzate nello schema elettrico» (blocco della pagina, vedi voltages.ts) */
+/** Miniatura dell'isola I/O: moduli in fila, quelli usati nella pagina in grigio con la freccia (punto 187) */
+function StationMiniView({ project, block, selected }: { project: Project; block: BlockItem; selected: boolean }) {
+  const d: StationMiniDrawing = block.block === 'revgrid' ? revGridDrawing(project, block) : stationMiniDrawing(project, block);
+  const ink = selected ? SEL : look.ink;
+  return (
+    <g data-id={block.id}>
+      {d.rects.map((r, i) => <rect key={`r${i}`} x={r.x} y={r.y} width={r.w} height={r.h} fill={r.used ? '#c8c8c8' : look.c.paper} stroke={ink} strokeWidth={r.used ? 0.35 : 0.2} />)}
+      {d.lines.map((l, i) => <line key={`l${i}`} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={ink} strokeWidth={0.3} />)}
+      {d.arrows.map((a, i) => <path key={`a${i}`} d={`M ${a.x} ${a.y} L ${a.x - 0.9} ${a.y - 1.8} L ${a.x + 0.9} ${a.y - 1.8} Z`} fill={ink} stroke="none" />)}
+      {d.texts.map((t, i) => <text key={`t${i}`} x={t.x} y={t.y} fontSize={t.size} textAnchor={t.anchor} fontWeight={t.bold ? 600 : undefined} fill={ink}
+        transform={t.rot ? `rotate(${t.rot} ${t.x} ${t.y})` : undefined}>{t.s}</text>)}
+    </g>
+  );
+}
+
+function VoltageTableView({ project, block, selected }: { project: Project; block: BlockItem; selected: boolean }) {
+  const d = voltageTableDrawing(project, block);
+  const ink = selected ? SEL : look.ink;
+  const box = blockBox(project, block);
+  return (
+    <g data-id={block.id}>
+      <rect x={box.x0} y={box.y0} width={box.x1 - box.x0} height={box.y1 - box.y0} fill={look.c.paper} />
+      {d.lines.map((l, i) => <line key={`l${i}`} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={ink} strokeWidth={l.bold ? 0.35 : 0.2} />)}
+      {d.samples.map((s, i) => {
+        const c = s.color ? WIRE_COLORS[s.color.toUpperCase()] : undefined;
+        const ls = wireDash(s.line, 0.5);
+        return (
+          <g key={`s${i}`}>
+            <line x1={s.x1} y1={s.y} x2={s.x2} y2={s.y} stroke={selected ? SEL : c?.hex ?? look.ink} strokeWidth={0.5} strokeDasharray={ls.dash} strokeLinecap={ls.dash ? ls.cap : undefined} />
+            {!selected && !ls.dash && s.color?.toUpperCase() === 'GNYE' && <line x1={s.x1} y1={s.y} x2={s.x2} y2={s.y} stroke="#d4a72c" strokeWidth={0.5} strokeDasharray="1.5 1.5" />}
+          </g>
+        );
+      })}
+      {d.texts.map((t, i) => <text key={`t${i}`} x={t.x} y={t.y} fontSize={t.size} textAnchor={t.anchor} fontWeight={t.bold ? 600 : undefined} fill={ink}>{t.s}</text>)}
+    </g>
+  );
+}
+
 function StripDiagram({ data, t, style: S, cols }: { data?: StripSheetData; t: (s: string) => string; style: typeof STRIP_TEXT; cols?: Pick<StripStyle, 'hide' | 'widths'> }) {
   if (!data) return <text x={30} y={30} fontSize={4} fill="#cf222e">{tx('Morsettiera vuota o eliminata: rigenera gli schemi dalla vista Morsettiere')}</text>;
   const { top } = STRIP_LAYOUT, rowH = S.rowH;
@@ -1188,6 +1268,24 @@ function ImageView({ img, selected, offset }: { img: ImageItem; selected: boolea
  * Riquadro di un quadro: sugli schemi bordo tratto-punto con «+codice», nello schema di rete con
  * l'intestazione piena. La scritta si trascina e resta legata al bordo con un righino
  */
+/**
+ * Riquadro «Non montato»: velo chiaro e grigio sopra le parti (che si vedono in grigio, anche in stampa),
+ * bordo grigio tratteggiato e scritta in alto a sinistra
+ */
+function NoFitView({ area: a0, selected, offset, t }: { area: NoFitArea; selected: boolean; offset?: Pt; t: (s: string) => string }) {
+  const a = offset ? { ...a0, x: a0.x + offset.x, y: a0.y + offset.y } : a0;
+  const grey = '#8c8c8c', ink = selected ? SEL : grey;
+  const label = t('Non montato').toUpperCase(), size = 2.5, w = label.length * size * 0.62 + 2;
+  return (
+    <g className="nofit">
+      <rect x={a.x} y={a.y} width={a.w} height={a.h} fill={look.c.paper} fillOpacity={0.55} stroke="none" pointerEvents="none" />
+      <rect x={a.x} y={a.y} width={a.w} height={a.h} fill={grey} fillOpacity={0.16} stroke={ink} strokeWidth={0.35} strokeDasharray="2 1" pointerEvents="none" />
+      <rect x={a.x} y={a.y} width={w} height={size + 1.6} fill={look.c.paper} stroke={ink} strokeWidth={0.25} />
+      <text x={a.x + 1} y={a.y + size + 0.5} fontSize={size} fontWeight={700} fill={ink}>{label}</text>
+    </g>
+  );
+}
+
 function ZoneView({ zone: z0, panel, selected, offset, t, schematic, style }: { zone: Zone; panel?: Panel; selected: boolean; offset?: Pt; t: (s: string) => string; schematic?: boolean; style?: ZoneStyle }) {
   const zone = offset ? { ...z0, x: z0.x + offset.x, y: z0.y + offset.y } : z0;
   const { x, y } = zone, lk = zoneLookOf(zone, style);
@@ -1230,7 +1328,12 @@ function ZoneView({ zone: z0, panel, selected, offset, t, schematic, style }: { 
  * Layout del quadro in scala: piastra, guide DIN (tratteggiate), canaline (campite),
  * apparecchi e morsettiere con la sigla, quote della piastra e occupazione delle guide.
  */
-export function LayoutDrawing({ layout, selection, drag }: { layout: Layout; selection?: Set<string>; drag?: { id: string; dx: number; dy: number } }) {
+export function LayoutDrawing({ layout, selection, drag, rows, t = (s: string) => s }: {
+  layout: Layout; selection?: Set<string>; drag?: { id: string; dx: number; dy: number };
+  /** Righe della legenda accanto alla piastra (con layout.legend) */
+  rows?: PositionRow[];
+  t?: (s: string) => string;
+}) {
   const v = layoutView(layout);
   const P = (x: number, y: number) => ({ x: v.ox + x * v.k, y: v.oy + y * v.k });
   const usage = new Map(railUsage(layout).map(u => [u.rail.id, u]));
@@ -1290,6 +1393,50 @@ export function LayoutDrawing({ layout, selection, drag }: { layout: Layout; sel
         <text x={o.x - 4} y={(o.y + e.y) / 2} textAnchor="middle" stroke="none" transform={`rotate(-90 ${o.x - 4} ${(o.y + e.y) / 2})`}>{layout.plate.h}</text>
       </g>
       {[...layout.items].sort((a, b) => ({ rail: 0, duct: 1, strip: 2, device: 3 }[a.kind] - { rail: 0, duct: 1, strip: 2, device: 3 }[b.kind])).map(item)}
+      {/* Bollini con i numeri di posizione (punto 174) */}
+      {balloons(layout, v).map(b => {
+        const d = drag?.id === b.id ? drag : undefined;
+        const dx = (d?.dx ?? 0) * v.k, dy = (d?.dy ?? 0) * v.k, ink = selection?.has(b.id) ? SEL : look.ink;
+        const s = String(b.pos), fs = s.length > 2 ? 1.5 : 2;
+        return (
+          <g key={`b${b.id}`} data-id={b.id}>
+            {b.y + BALLOON_R < b.ay - 0.3 && <line x1={b.x + dx} y1={b.y + BALLOON_R + dy} x2={b.ax + dx} y2={b.ay + dy} stroke={ink} strokeWidth={0.12} />}
+            <circle cx={b.x + dx} cy={b.y + dy} r={BALLOON_R} fill="#fff" stroke={ink} strokeWidth={0.2} />
+            <text x={b.x + dx} y={b.y + dy + fs * 0.36} fontSize={fs} textAnchor="middle" fill={ink}>{s}</text>
+          </g>
+        );
+      })}
+      {layout.legend && <LayoutLegend rows={rows ?? []} t={t} />}
+    </g>
+  );
+}
+
+/** Legenda accanto alla piastra: n° – descrizione – sigla delle posizioni della pagina */
+function LayoutLegend({ rows, t }: { rows: PositionRow[]; t: (s: string) => string }) {
+  const b = legendBox(), rh = 3.6, size = 2, cw = [10, 22];
+  const fit = (s: string, w: number) => (s.length * size * 0.55 > w ? `${s.slice(0, Math.max(1, Math.floor(w / (size * 0.55)) - 1))}…` : s);
+  const max = Math.floor((b.h - 9) / rh);
+  const shown = rows.length > max ? rows.slice(0, max - 1) : rows;
+  return (
+    <g fill={look.ink} fontSize={size}>
+      <text x={b.x} y={b.y + 3} fontSize={2.8} fontWeight={600}>{t('Legenda posizioni')}</text>
+      <line x1={b.x} y1={b.y + 5} x2={b.x + b.w} y2={b.y + 5} stroke={look.ink} strokeWidth={0.3} />
+      <text x={b.x + 1} y={b.y + 4.3} fontSize={1.8} fill="#5b636d">{t('Pos.')}</text>
+      <text x={b.x + cw[0] + 1} y={b.y + 4.3} fontSize={1.8} fill="#5b636d">{t('Sigla')}</text>
+      <text x={b.x + cw[0] + cw[1] + 1} y={b.y + 4.3} fontSize={1.8} fill="#5b636d">{t('Descrizione')}</text>
+      {shown.map((r, i) => {
+        const y = b.y + 5 + (i + 1) * rh;
+        return (
+          <g key={r.itemId}>
+            <text x={b.x + cw[0] - 2} y={y - 1} textAnchor="end">{r.pos}</text>
+            <text x={b.x + cw[0] + 1} y={y - 1}>{fit(`-${r.tag}`, cw[1] - 2)}</text>
+            <text x={b.x + cw[0] + cw[1] + 1} y={y - 1}>{fit(t(r.description), b.w - cw[0] - cw[1] - 2)}</text>
+            <line x1={b.x} y1={y} x2={b.x + b.w} y2={y} stroke="#c9d1d9" strokeWidth={0.12} />
+          </g>
+        );
+      })}
+      {shown.length < rows.length && <text x={b.x + 1} y={b.y + 5 + (shown.length + 1) * rh - 1} fill="#5b636d">{t('… le altre nella lista «Legenda posizioni quadro»')}</text>}
+      {!rows.length && <text x={b.x + 1} y={b.y + 5 + rh - 1} fill="#5b636d">{t('Nessuna posizione numerata')}</text>}
     </g>
   );
 }
@@ -1313,13 +1460,13 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
       {page.type === 'report' && <ReportPage data={derived.reportSheet} />}
       {derived.drawing && <DrawingPage d={derived.drawing} t={L.t} project={project} />}
       {derived.connFrames?.map((f, i) => (
-        <g key={`cf${i}`} pointerEvents="none">
-          <rect x={f.x0} y={f.y0} width={f.x1 - f.x0} height={f.y1 - f.y0} rx={1.5} fill="none" stroke={look.ink} strokeWidth={0.25} strokeDasharray="1.6 0.8" />
-          <text x={f.x0 + 1} y={f.y0 - 1} fontSize={2.2} fill={look.ink}>{f.label}</text>
+        <g key={`cf${i}`}>
+          <rect x={f.x0} y={f.y0} width={f.x1 - f.x0} height={f.y1 - f.y0} rx={1.5} fill="none" stroke={look.ink} strokeWidth={0.25} strokeDasharray="1.6 0.8" pointerEvents="none" />
+          {f.label && <text x={f.labelAt.x} y={f.labelAt.y} fontSize={2.2} fill={look.ink} data-connlabel={f.conn} style={{ cursor: 'move' }}>{f.label}</text>}
         </g>
       ))}
       {page.type === 'cover' && <CoverPage project={project} />}
-      {page.type === 'layout' && <LayoutDrawing layout={layoutOf(page)} selection={selection} />}
+      {page.type === 'layout' && <LayoutDrawing layout={layoutOf(page)} selection={selection} rows={derived.positions} t={L.t} />}
       {page.elements.map(e => e.kind === 'image' && !e.front && <ImageView key={e.id} img={e} selected={!!selection?.has(e.id)} offset={selection?.has(e.id) ? offset : undefined} />)}
       {page.elements.map(e => e.kind === 'zone' && (
         <ZoneView key={e.id} zone={e} panel={project.panels?.find(p => p.id === e.panelId)} t={L.t} style={project.settings?.zoneStyle} selected={!!selection?.has(e.id)} schematic={page.type !== 'network'}
@@ -1387,8 +1534,10 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
           return <g key={e.id} transform={tr}><CableView line={e} mark={derived.cableMarks?.get(e.id)} selected={sel} style={cableStyle} /></g>;
         }
         if (e.kind === 'wiredef') return <g key={e.id} transform={tr}><WireDefView d={e} page={page} selected={sel} /></g>;
-        if (e.kind === 'zone') return null; // disegnati sotto a tutto
+        if (e.kind === 'zone' || e.kind === 'nofit') return null; // riquadri di luogo sotto a tutto, «non montato» sopra
         if (e.kind === 'image') return e.front ? <ImageView key={e.id} img={e} selected={sel} offset={off} /> : null;
+        if (e.kind === 'block' && (e.block === 'station' || e.block === 'revgrid')) return <g key={e.id} transform={tr}><StationMiniView project={project} block={e} selected={sel} /></g>;
+        if (e.kind === 'block') return <g key={e.id} transform={tr}><VoltageTableView project={project} block={e} selected={sel} /></g>;
         if (e.kind === 'text') {
           return <RichText key={e.id} t={{ ...e, text: L.t(e.text) }} transform={e.rot ? `${tr ?? ''} rotate(${e.rot} ${e.x} ${e.y})`.trim() : tr} fill={sel ? SEL : look.ink} />;
         }
@@ -1404,6 +1553,15 @@ export function PageContent({ project, page, pageIndex, derived, selection, offs
         return <polygon key={`t${i}`} points={`${t.p.x},${t.p.y} ${t.p.x + a.x * L},${t.p.y + a.y * L} ${t.p.x + b.x * L},${t.p.y + b.y * L}`} fill={look.ink} />;
       })}
       {derived.bundleTaps?.map((t, i) => <BundleTapLabel key={i} tap={derived.mono ? { ...t, color: look.ink } : t} def={(derived.textStyles ?? DEFAULT_TEXT).bundleTap} />)}
+      {derived.partTables?.length ? (() => {
+        // Tabelle materiali sopra al disegno (coprono fili e simboli sotto): posizioni dagli elementi della pagina (anche durante il trascinamento)
+        const pos = layoutPartTables(derived.partTables, page.elements);
+        return derived.partTables.map(tb => {
+          const at = pos.get(tb.instId);
+          return at && <PartTableView key={`pt${tb.instId}`} tb={tb} at={at} selected={!!selection?.has(tb.instId)} />;
+        });
+      })() : null}
+      {page.elements.map(e => e.kind === 'nofit' && <NoFitView key={e.id} area={e} selected={!!selection?.has(e.id)} offset={selection?.has(e.id) ? offset : undefined} t={L.t} />)}
       {derived.revisionClouds?.map((c, i) => <Cloud key={i} cloud={c} />)}
     </g>
   );

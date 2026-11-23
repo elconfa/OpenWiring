@@ -6,9 +6,13 @@ import { socketConfig, socketMembers, socketName } from '../src/model/plcSocket'
 import { checkProject } from '../src/model/checks';
 import { copyElements, pasteElements } from '../src/model/clipboard';
 import { getSymbol, pinsWorld } from '../src/model/geometry';
+import { derive } from '../src/model/derive';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let useStoreRef: any;
 async function store() {
   const { useStore } = await import('../src/model/store');
+  useStoreRef = useStore;
   const st = useStore.getState;
   const p = emptyProject();
   p.plc.cards = [{ id: 'c1', tag: '700A4', typeId: 'custom', station: 'PLC1', start: { DI: 0, DO: 0 }, custom: { name: '16 DIQ', channels: { DI: 16, DO: 16 } } }];
@@ -38,6 +42,25 @@ describe('prese M12 a 2 canali', () => {
     expect(world(m[3])).toEqual([['X11.1', 120], ['X11.3', 152], ['X11.5', 184]]);
     // Pin del canale anche sulla scheda: vista PLC, Lista I/O, Excel
     expect(ioAssignments(st().project).find(r => r.channel === 'DI8')!.pins).toEqual(['X10.2']);
+  });
+  it('canale già disegnato altrove: indirizzo scritto anche sulla presa; il canale B segue il canale A', async () => {
+    const st = await store();
+    // DI8 già usato da un punto I/O su un'altra pagina (es. gruppo a 4 morsetti)
+    st().placeSymbol('plc_ch_di2', { x: 40, y: 150 }, 0, undefined, '700A4');
+    const old = st().project.pages[0].elements.find(e => e.kind === 'symbol' && e.plcChannel) as any;
+    st().updateInstance(old.id, { plcChannel: 'DI8' });
+    const msgs: string[] = [];
+    const log = st().logMsg;
+    useStoreRef.setState({ logMsg: (m: string) => { msgs.push(m); } } as any);
+    const first = st().placeSymbol('plc_grp_m12_up', { x: 40, y: 60 }, 0, undefined, '700A4')!;
+    useStoreRef.setState({ logMsg: log } as any);
+    const gid = first.plcGroup!.id;
+    const b0 = socketMembers(st().project.pages[0], gid).find(e => e.plcGroup!.socket === 'b' && e.plcGroup!.index === 0)!;
+    expect(b0.plcChannel).toBe('DI8');
+    expect(msgs.some(m => m.includes('DI8'))).toBe(true);
+    const d = derive(st().project).pages.get(st().project.pages[0].id)!;
+    expect(d.deviceFields.get(b0.id)?.plcAddress).toBe(d.deviceFields.get(old.id)?.plcAddress);
+    expect(d.deviceFields.get(b0.id)?.plcAddress).toBeTruthy();
   });
   it('ogni canale si sceglie ingresso, uscita o non usato; variabili e posizione restano', async () => {
     const st = await store();

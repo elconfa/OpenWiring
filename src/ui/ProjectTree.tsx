@@ -1,4 +1,5 @@
 import { askConfirm } from './Ask';
+import { fitMenu } from './fitMenu';
 // Albero del modello (come la "Vista combinata" di FreeCAD).
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../model/store';
@@ -263,7 +264,7 @@ export function ProjectTree() {
         const o = others.find(x => x.key === otherMenu.key);
         if (!o) return null;
         return (
-          <div className="ctx-menu" style={{ left: Math.min(otherMenu.x, window.innerWidth - 240), top: Math.min(otherMenu.y, window.innerHeight - 200) }}
+          <div className="ctx-menu" ref={fitMenu} style={{ left: Math.min(otherMenu.x, window.innerWidth - 240), top: Math.min(otherMenu.y, window.innerHeight - 200) }}
             onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}>
             {otherMenu.page && <button disabled={!copyable(otherMenu.page)} onClick={() => { setOtherMenu(null); st().copyPage(otherMenu.page!.id, o.key); }}
               title={tx('Da incollare nel progetto attivo con «Incolla pagina», con sigle e numeri filo nuovi')}><span>{tx('Copia pagina')}</span></button>}
@@ -279,7 +280,7 @@ export function ProjectTree() {
         const run = (f: () => void) => () => { setListMenu(null); f(); };
         const style = l?.style === 'report' ? () => st().openReportStyle(reportTitleOf(l)) : l?.style === 'strip' ? () => st().setDialog('stripStyle') : l?.style ? () => st().openDrawingStyle(l.style as DrawingStyleKind) : undefined;
         return (
-          <div className="ctx-menu" style={{ left: Math.min(listMenu.x, window.innerWidth - 260), top: Math.min(listMenu.y, window.innerHeight - 260) }}
+          <div className="ctx-menu" ref={fitMenu} style={{ left: Math.min(listMenu.x, window.innerWidth - 260), top: Math.min(listMenu.y, window.innerHeight - 260) }}
             onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}>
             {l && <>
               <button disabled={!style} onClick={run(() => style?.())} className="ctx-main"
@@ -298,7 +299,7 @@ export function ProjectTree() {
         );
       })()}
       {pageMenu && (
-        <div className="ctx-menu" style={{ left: Math.min(pageMenu.x, window.innerWidth - 240), top: Math.min(pageMenu.y, window.innerHeight - 380) }}
+        <div className="ctx-menu" ref={fitMenu} style={{ left: Math.min(pageMenu.x, window.innerWidth - 240), top: Math.min(pageMenu.y, window.innerHeight - 380) }}
           onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}>
           {([
             ...(pageMenu.onPage ? [[tx('Apri'), () => st().setPage(pageMenu.page.id), false, false]] as const : []),

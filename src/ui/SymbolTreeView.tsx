@@ -3,6 +3,7 @@
 // rientro, una riga per simbolo con l'icona piccola. Clic per inserire, trascinamento sullo schema,
 // anteprima grande passando sopra, tasto destro per il menu, frecce della tastiera per muoversi.
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { fitMenu } from './fitMenu';
 import { useStore } from '../model/store';
 import type { SymbolDef } from '../model/types';
 import { countOf, type TreeNode } from '../model/symbolTree';
@@ -193,7 +194,7 @@ export function SymbolTreeView({ roots, q, filtered, isOpen, toggle, reveal }: {
       )}
       {menu && (
         <div className="ctx-back" onMouseDown={() => setMenu(null)} onContextMenu={e => { e.preventDefault(); setMenu(null); }}>
-          <div className="ctx-menu" style={{ left: Math.min(menu.x, window.innerWidth - 240), top: Math.min(menu.y, window.innerHeight - 260) }} onMouseDown={e => e.stopPropagation()}>
+          <div className="ctx-menu" ref={fitMenu} style={{ left: Math.min(menu.x, window.innerWidth - 240), top: Math.min(menu.y, window.innerHeight - 260) }} onMouseDown={e => e.stopPropagation()}>
             {menu.row.kind === 'sym' ? (() => {
               const { s, root } = menu.row;
               const run = (f: () => void) => () => { setMenu(null); f(); };

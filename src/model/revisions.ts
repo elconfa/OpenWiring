@@ -1,6 +1,7 @@
 // Revisioni: congelamento del progetto, pagine modificate, nuvolette sulle modifiche
 // successive e confronto con un altro file di progetto.
 import { textBounds } from './textFlow';
+import { blockBox } from './voltages';
 import type { Project, Revision, RevisionFormat, Element, Page, Part } from './types';
 import { getSymbol, instanceBounds, uid } from './geometry';
 import { buildDevices, deviceInfo, partsIndex } from './devices';
@@ -21,7 +22,8 @@ export function elementBox(e: Element, project: Project): Box {
     return [r(Math.min(...xs)), r(Math.min(...ys)), r(Math.max(...xs)), r(Math.max(...ys))];
   }
   if (e.kind === 'text') { const b = textBounds(e); return [b.x0, b.y0, r(b.x1), r(b.y1)]; }
-  if (e.kind === 'zone' || e.kind === 'image') return [e.x, e.y, e.x + e.w, e.y + e.h];
+  if (e.kind === 'zone' || e.kind === 'image' || e.kind === 'nofit') return [e.x, e.y, e.x + e.w, e.y + e.h];
+  if (e.kind === 'block') { const b = blockBox(project, e); return [r(b.x0), r(b.y0), r(b.x1), r(b.y1)]; }
   const sym = getSymbol(e.symbolId, project);
   if (!sym) return [e.x - 2, e.y - 2, e.x + 2, e.y + 2];
   const b = instanceBounds(e, sym);

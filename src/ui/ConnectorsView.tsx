@@ -3,6 +3,7 @@
 // e incollato un connettore: si selezionano i pin incollati e si spostano in un connettore nuovo,
 // numerati da 1.
 import { useEffect, useMemo, useState } from 'react';
+import { askConfirm } from './Ask';
 import { useStore } from '../model/store';
 import { allConnectors, connectorRows, connectorData, pinCount, freePins, rangeText, connectorTypeOf } from '../model/connectors';
 import { CONNECTOR_TYPES, connectorGroup, connectorTypeName, GENDER_NAMES, type ConnectorGender } from '../model/connectorTypes';
@@ -37,6 +38,8 @@ export function ConnectorsView() {
   const conn = connSel && conns.includes(connSel) ? connSel : conns[0];
   const rows = useMemo(() => (conn ? connectorRows(project, conn) : []), [project, conn]);
   const counts = useMemo(() => new Map(connectorRows(project).reduce((m, r) => m.set(r.conn, (m.get(r.conn) ?? 0) + 1), new Map<string, number>())), [project]);
+  // Connettori con i soli dati, senza pin sullo schema
+  const empties = conns.filter(c => !(counts.get(c) ?? 0));
   const parts = useMemo(() => partsIndex(project, library), [project, library]);
   const [sel, setSel] = useState<string[]>([]);
   useEffect(() => setSel([]), [conn]);
@@ -134,6 +137,9 @@ export function ConnectorsView() {
             <option value="-">{tx('senza tipo (numero di pin a mano)')}</option>
             {typeOptions}
           </select>
+          {empties.length > 0 && <button onClick={async () => {
+            if (await askConfirm(tx('Connettori senza pin'), tx('Questi connettori hanno solo i dati (descrizione, tipo…) e nessun pin sullo schema: {0}. Eliminarli? Si può annullare.', empties.map(c => `-${c}`).join(', ')), tx('Elimina'))) st().deleteEmptyConnectors();
+          }} title={tx('Connettori rimasti solo con i dati, senza pin sullo schema (es. dopo aver rinominato o cancellato i pin)')}>{tx('Elimina i connettori senza pin ({0})…', empties.length)}</button>}
           <div className="tb-spacer" />
           <span className="muted small">{sel.length ? tx('{0} selezionati', sel.length) : tx('Clic, ⇧ clic o ⌘/Ctrl clic per selezionare')}</span>
           <button disabled={!rows.length} onClick={() => void renumber()} title={tx('Numeri consecutivi ai pin selezionati (o a tutti), nell\'ordine della tabella')}>{tx('Rinumera…')}</button>
@@ -181,6 +187,13 @@ export function ConnectorsView() {
           {conn && (
             <>
               <h4>{tx('Dati di -{0}', conn)}</h4>
+              <p>
+                <button className="mini" title={tx('Toglie i pin del connettore da tutte le pagine (i fili interrotti si ricuciono) e i suoi dati; si può annullare')}
+                  onClick={async () => {
+                    const n = counts.get(conn) ?? 0;
+                    if (await askConfirm(tx('Elimina connettore'), n ? tx('Eliminare -{0} e i suoi {1} pin sullo schema? I fili che passavano dai pin tornano interi. Si può annullare con Annulla.', conn, n) : tx('Eliminare i dati di -{0}? Non ha pin sullo schema.', conn), tx('Elimina'))) st().deleteConnector(conn);
+                  }}>{tx('Elimina connettore…')}</button>
+              </p>
               <table className="prop-table">
                 <tbody>
                   <tr><td className="prop-name">{tx('Nome')}</td><td className="prop-value"><Field value={conn} onCommit={v => renameConnector(v)} /></td></tr>
@@ -206,6 +219,13 @@ export function ConnectorsView() {
                   </td></tr>
                   <tr><td className="prop-name">{tx('Riquadro sullo schema')}</td><td className="prop-value">
                     <input type="checkbox" checked={data.frame !== false} title={tx('Riquadro tratteggiato attorno ai pin del connettore con sigla, tipo e genere')} onChange={e => st().updateConnector(conn, { frame: e.target.checked ? undefined : false })} />
+                  </td></tr>
+                  <tr><td className="prop-name">{tx('Scritta del riquadro')}</td><td className="prop-value">
+                    <input type="checkbox" checked={!data.hideLabel && !data.ofCable} disabled={!!data.ofCable} title={tx('Sigla, tipo e genere sopra il riquadro; si trascina sullo schema dove si vuole')} onChange={e => st().updateConnector(conn, { hideLabel: e.target.checked ? undefined : true })} />
+                    {data.labelOffsets && <> <button className="mini" onClick={() => st().updateConnector(conn, { labelOffsets: undefined })} title={tx('Rimette la scritta nell\'angolo del riquadro')}>{tx('Al suo posto')}</button></>}
+                  </td></tr>
+                  <tr><td className="prop-name">{tx('Fa parte del cavo')}</td><td className="prop-value">
+                    <input type="checkbox" checked={!!data.ofCable} title={tx('Connettore del cavo (es. cavo M12 preconfezionato): niente sigla sullo schema; i suoi articoli vanno nella tabella materiali del dispositivo in campo collegato con il cavo')} onChange={e => st().setConnectorOfCable(conn, e.target.checked)} />
                   </td></tr>
                   <tr><td className="prop-name">{tx('Pin totali')}</td><td className="prop-value"><Field value={data.pins ? String(data.pins) : ''} placeholder={count ? tx('{0} (articolo)', count) : tx('es. 16')} onCommit={v => st().updateConnector(conn, { pins: parseInt(v, 10) || undefined })} /></td></tr>
                   <tr><td className="prop-name">{tx('Usati')}</td><td className="prop-value">{`${rows.length}${count ? ` ${tx('di')} ${count}` : ''}`}</td></tr>

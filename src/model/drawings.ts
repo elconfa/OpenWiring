@@ -15,8 +15,9 @@ import { columnOf } from './types';
 import { connectorData, connectorRows, allConnectors, pinCount, pinNames, connectorTypeOf } from './connectors';
 import { circLayout, connectorShortName, GENDER_NAMES, typePinNames } from './connectorTypes';
 import { devicePanels } from './network';
+import { fieldItems, fieldSheet, fieldTitle, type FieldSheet } from './fieldSheet';
 
-export type DrawingKind = 'cable' | 'connector' | 'system';
+export type DrawingKind = 'cable' | 'connector' | 'system' | 'field';
 
 /** Luogo di un elemento: quello scritto nel dispositivo o quello del quadro a cui appartiene */
 function placeCode(project: Project, el: PlacedElement, panels: Map<string, { code: string }>, loc: Map<string, string | undefined>): string {
@@ -297,12 +298,14 @@ const TITLES: Record<DrawingKind, (k: string) => string> = {
   cable: k => (k.startsWith(BUS_ITEM) ? `Cablaggio bus fili ${k.slice(BUS_ITEM.length)}` : `Cablaggio cavo -${k}`),
   connector: k => `Connettore -${k}`,
   system: () => 'Schema d\'insieme',
+  field: k => fieldTitle(k),
 };
 
 /** Elementi rappresentati: sigle dei cavi, dei connettori, o la sola pagina d'insieme */
 export function drawingItems(p: Project, kind: DrawingKind, library: Part[] = []): string[] {
   if (kind === 'cable') return [...(p.cables ?? []).map(c => c.tag).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })), ...cableBundles(p, library).map(n => BUS_ITEM + n)];
   if (kind === 'connector') return allConnectors(p);
+  if (kind === 'field') return fieldItems(p);
   return (p.cables ?? []).length ? [''] : [];
 }
 
@@ -331,11 +334,13 @@ export function syncDrawingPages(p: Project, kind: DrawingKind, library: Part[] 
 export type DrawingData =
   | { kind: 'cable'; data?: CableSheet }
   | { kind: 'connector'; data: ConnectorSheet }
-  | { kind: 'system'; data: SystemSheet };
+  | { kind: 'system'; data: SystemSheet }
+  | { kind: 'field'; data?: FieldSheet };
 
 export function drawingData(project: Project, page: Page, library: Part[] = [], nl = computeNetlist(project)): DrawingData | undefined {
   if (page.type === 'cable') return { kind: 'cable', data: page.item?.startsWith(BUS_ITEM) ? bundleSheet(project, page.item.slice(BUS_ITEM.length), library, nl) : cableSheet(project, page.item ?? '', library, nl) };
   if (page.type === 'connector') return { kind: 'connector', data: connectorSheet(project, page.item ?? '', library, nl.nets) };
   if (page.type === 'system') return { kind: 'system', data: systemSheet(project, library, nl) };
+  if (page.type === 'field') return { kind: 'field', data: fieldSheet(project, page.item ?? '', library, nl) };
   return undefined;
 }

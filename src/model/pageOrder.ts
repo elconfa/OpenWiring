@@ -15,18 +15,19 @@ export const SCHEMA_GROUP = '@schema';
 const fixedNames = (): Record<string, string> => ({
   [SCHEMA_GROUP]: tn('Pagine di progetto'), index: INDEX_TITLE, legend: LEGEND_TITLE, plc: tn('Panoramiche PLC'),
   strip: tn('Schemi delle morsettiere'), cable: tn('Disegni dei cavi'), connector: tn('Piedinature dei connettori'), system: tn('Schema d\'insieme'),
+  field: tn('Collegamenti in campo'),
 });
 export const DEFAULT_PREFIXES: Record<string, string> = {
-  index: 'IND.', legend: 'LEG.', plc: 'PLC.', strip: 'MOR.', cable: 'CAV.', connector: 'CON.', system: 'SIS.', report: 'LST.',
+  index: 'IND.', legend: 'LEG.', plc: 'PLC.', strip: 'MOR.', cable: 'CAV.', connector: 'CON.', system: 'SIS.', field: 'CMP.', report: 'LST.',
 };
 /** Ordine di serie: indice e legenda prima delle pagine di progetto, il resto dopo */
-const DEFAULT_ORDER = ['index', 'legend', SCHEMA_GROUP, 'plc', 'strip', 'cable', 'connector', 'system'];
+const DEFAULT_ORDER = ['index', 'legend', SCHEMA_GROUP, 'plc', 'strip', 'field', 'cable', 'connector', 'system'];
 const BEFORE_SCHEMA = new Set(['index', 'legend']);
 
 /** Gruppo della pagina, o undefined per le pagine di progetto e la copertina */
 export function pageGroup(pg: Page): PageGroup | undefined {
   if (pg.type === 'report') return pg.report === INDEX_TITLE ? 'index' : pg.report === LEGEND_TITLE ? 'legend' : `report:${pg.report ?? ''}`;
-  if (pg.type === 'strip' || pg.type === 'cable' || pg.type === 'connector' || pg.type === 'system') return pg.type;
+  if (pg.type === 'strip' || pg.type === 'cable' || pg.type === 'connector' || pg.type === 'system' || pg.type === 'field') return pg.type;
   if (pg.type === 'plc' && pg.cardId) return 'plc';
   return undefined;
 }

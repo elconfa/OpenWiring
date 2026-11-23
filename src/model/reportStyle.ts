@@ -91,13 +91,14 @@ export const REPORT_X = { get x0() { return FRAME.left + 4; }, get x1() { return
 /**
  * Colonne visibili (keys: nomi originali delle colonne, quando quelli della tabella sono tradotti) nell'ordine scelto, con posizione e larghezza: le colonne con la larghezza
  * indicata la tengono (ridotte in proporzione se non ci stanno), le altre si dividono il resto
- * in base alla lunghezza dei testi
+ * in base alla lunghezza dei testi (di tutta la lista con lens: le pagine della lista hanno le stesse colonne)
  */
-export function reportColumns(t: Table, s: ReportStyle, keys = columnKeys(t.columns)): ReportCol[] {
+export function reportColumns(t: Table, s: ReportStyle, keys = columnKeys(t.columns), lens?: number[]): ReportCol[] {
   const cols = columnOrder(s, keys).map(key => ({ key, i: keys.indexOf(key), st: s.columns?.[key] })).filter(c => !c.st?.hidden);
   const total = REPORT_X.x1 - REPORT_X.x0;
   // Con i simboli disegnati la prima colonna è larga quanto basta per il disegno
-  const auto = (i: number) => (i === 0 && t.symbols ? 14 : Math.min(40, Math.max(t.columns[i].length, ...t.rows.map(r => (r[i] ?? '').length), 3)));
+  // lens: lunghezze dei testi di tutta la lista (non solo della pagina), perché ogni pagina abbia le stesse colonne
+  const auto = (i: number) => (i === 0 && t.symbols ? 14 : Math.min(40, Math.max(t.columns[i].length, lens?.[i] ?? 0, ...(lens ? [] : t.rows.map(r => (r[i] ?? '').length)), 3)));
   const fixed = cols.reduce((a, c) => a + (c.st?.width ?? 0), 0);
   const autoSum = cols.reduce((a, c) => a + (c.st?.width ? 0 : auto(c.i)), 0);
   const scale = fixed > total || (fixed && !autoSum) ? total / fixed : 1;

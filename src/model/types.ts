@@ -84,7 +84,9 @@ export type PinMedium = 'wire' | 'bus';
 /** Dati del dispositivo che un simbolo può mostrare in un punto scelto nell'editor */
 export type FieldKey = 'description' | 'techData' | 'manufacturer' | 'typeNr' | 'orderNr' | 'partNr' | 'func' | 'loc' | 'note'
   /** Punti I/O PLC: indirizzo, nome della variabile e commento del canale */
-  | 'plcAddress' | 'plcSymbol' | 'plcComment';
+  | 'plcAddress' | 'plcSymbol' | 'plcComment'
+  /** Riquadro del canale completo (punto 175): scheda con il foglio della panoramica, stazione/rack/slot, morsetti */
+  | 'plcCard' | 'plcPlace' | 'plcPins';
 
 /** Articolo aggiuntivo di un dispositivo (assente qty = 1) */
 export interface ExtraPart {
@@ -105,7 +107,7 @@ export function plotPrims(sym: Pick<SymbolDef, 'prims' | 'layers'>): Prim[] {
 /** Testi di un simbolo che si spostano a mano sullo schema: sigla, righe sotto la sigla, testi del componente */
 /** Testi spostabili di un simbolo: sigla, righe sotto la sigla, immagine contatti, testi del componente,
  * numero e morsettiera dei morsetti, designazioni dei punti di connessione (pin:id) */
-export type TextMoveKey = 'tag' | 'lines' | 'contacts' | FieldKey | 'termNum' | 'termStrip' | `pin:${string}`;
+export type TextMoveKey = 'tag' | 'lines' | 'contacts' | 'parts' | FieldKey | 'termNum' | 'termStrip' | `pin:${string}`;
 
 /** Posizione di un testo rispetto all'origine del simbolo già ruotato (vedi symbolTexts.ts) */
 export interface TextPlace { x: number; y: number; anchor?: 'start' | 'middle' | 'end'; rot?: number }
@@ -314,6 +316,11 @@ export interface SymbolInstance {
    * simbolo (assente = come il progetto); spostata a mano con textOffsets.contacts
    */
   contactImage?: 'bottom' | 'symbol';
+  /**
+   * Tabella materiali agganciata sotto quella di un altro dispositivo (id dell'elemento che la porta),
+   * vedi partTables.ts; senza aggancio la tabella sta dove è stata trascinata o in colonna
+   */
+  partsLink?: string;
   /** Morsetto: numero e sigla della morsettiera scritti paralleli o perpendicolari al morsetto (assente = come il progetto) */
   termText?: TerminalTextDir;
   /** Nodo di rete: indirizzo (IP, ID Modbus, nome Profinet, indirizzo EtherCAT…) */
@@ -667,9 +674,58 @@ export interface ConnectorData {
   housing?: string;
   /** Riquadro del connettore sullo schema (assente = sì) */
   frame?: boolean;
+  /** Scritta del riquadro (sigla, tipo, genere) nascosta */
+  hideLabel?: boolean;
+  /** Scritta del riquadro spostata a mano, per pagina (id della pagina → spostamento in mm) */
+  labelOffsets?: Record<string, Pt>;
+  /**
+   * Il connettore fa parte del cavo (es. cavo M12 preconfezionato): niente sigla sullo schema e i suoi
+   * articoli nella tabella materiali del dispositivo in campo collegato con il cavo, non in una sua
+   */
+  ofCable?: boolean;
 }
 
-export type Element = SymbolInstance | Wire | TextItem | CableLine | WireDef | Zone | ImageItem;
+export type Element = SymbolInstance | Wire | TextItem | CableLine | WireDef | Zone | ImageItem | BlockItem | NoFitArea;
+
+/**
+ * Riquadro «Non montato»: le parti disegnate dentro restano sullo schema (in grigio) ma non si montano nel
+ * quadro: niente distinta, tabelle materiali, targhette dei fili, liste e controlli (vedi notFitted.ts)
+ */
+export interface NoFitArea {
+  kind: 'nofit';
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * Blocco disegnato dai dati del progetto e posato su una pagina (angolo in alto a sinistra x, y):
+ * voltages = tabella «Tensioni utilizzate nello schema elettrico» (vedi voltages.ts)
+ */
+export interface BlockItem {
+  kind: 'block';
+  id: string;
+  x: number;
+  y: number;
+  /** voltages: tabella delle tensioni; station: miniatura dell'isola I/O (stationMini.ts); revgrid: stato revisione fogli (revisionGrid.ts) */
+  block: 'voltages' | 'station' | 'revgrid';
+  /** Miniatura: stazione PLC mostrata (assente = quella dei canali disegnati nella pagina) */
+  station?: string;
+  /** Stato revisione fogli: caselle per riga (assente = 16) */
+  cols?: number;
+}
+
+/** Riga della tabella delle tensioni: potenziale, tensione, descrizione e campione della linea */
+export interface VoltageRow {
+  name: string;
+  voltage?: string;
+  description?: string;
+  /** Colore del filo (sigla IEC, es. BU) e tipo di linea del campione */
+  color?: string;
+  line?: WireLineType;
+}
 
 /**
  * Luogo di installazione (contenitore): quadro, pulsantiera, bordo macchina, cassetta…
@@ -779,7 +835,7 @@ export interface Cable {
  * Tipi di pagina; cable (cablaggio di un cavo), connector (piedinatura di un connettore) e system
  * (schema d'insieme) si disegnano da soli dai dati del progetto (vedi drawings.ts)
  */
-export type PageType = 'multiline' | 'singleline' | 'cover' | 'notes' | 'plc' | 'strip' | 'layout' | 'network' | 'report' | 'cable' | 'connector' | 'system';
+export type PageType = 'multiline' | 'singleline' | 'cover' | 'notes' | 'plc' | 'strip' | 'layout' | 'network' | 'report' | 'cable' | 'connector' | 'system' | 'field';
 
 export interface Page {
   id: string;
@@ -822,7 +878,12 @@ export interface Page {
   titleBlockId?: string;
   /** Proprietà definite dall'utente della pagina */
   userProps?: Record<string, string>;
+  /** Larghezze delle colonne delle tabelle materiali in questa pagina (assente = quelle del progetto) */
+  partTableCols?: PartTableCols;
 }
+
+/** Larghezze in mm delle colonne delle tabelle materiali */
+export interface PartTableCols { qty: number; maker: number; code: number }
 
 /** Elemento posato sulla piastra; coordinate reali in mm dall'angolo in alto a sinistra della piastra */
 export interface LayoutItem {
@@ -838,6 +899,8 @@ export interface LayoutItem {
   partNr?: string;
   /** Testo libero (per guide e canaline, es. "TS 35x7,5" o "40x60") */
   label?: string;
+  /** Apparecchio o morsettiera: numero di posizione (bollino sul layout e riga della legenda) */
+  pos?: number;
 }
 
 export interface Layout {
@@ -846,6 +909,10 @@ export interface Layout {
   items: LayoutItem[];
   /** Riserva di filo per estremità (mm) usata per le lunghezze stimate */
   wireReserve?: number;
+  /** Bollini con i numeri di posizione (assente = mostrati se ci sono numeri) */
+  balloons?: boolean;
+  /** Legenda delle posizioni accanto alla piastra, sulla stessa pagina */
+  legend?: boolean;
 }
 
 export interface FunctionTemplate {
@@ -1099,6 +1166,15 @@ export interface ProjectSettings {
   freeSymbolTexts?: boolean;
   /** Riquadri dei connettori sullo schema (assente = sì) */
   connectorFrames?: boolean;
+  /**
+   * Riquadro del canale PLC: «full» scrive anche scheda con il foglio della panoramica, stazione con rack e
+   * slot e morsetti del canale (ogni campo si nasconde anche sul singolo canale); assente = indirizzo,
+   * variabile e commento
+   */
+  plcChannelBox?: 'full';
+  /** Larghezze in mm delle colonne delle tabelle materiali (quantità, costruttore, codice), uguali in tutte le pagine; vedi partTables.ts */
+  partTableCols?: PartTableCols;
+
   /** Fili in alto e in basso in posizione fissa (vedi fixedPos.ts; assente = valori predefiniti) */
   railTop?: RailSetting;
   railBottom?: RailSetting;
@@ -1371,6 +1447,8 @@ export interface Project {
   cables?: Cable[];
   /** Ripartitori e morsettiere di distribuzione per i conduttori di potenza (vedi distributors.ts) */
   distributors?: Distributor[];
+  /** Righe della tabella delle tensioni utilizzate (assente = ricavate dai potenziali dello schema, vedi voltages.ts) */
+  voltages?: VoltageRow[];
   /**
    * Ordine dei collegamenti scelto a mano (vedi wiringOrder.ts): per ogni conduttore i punti di
    * connessione ("idIstanza|idPunto") nell'ordine in cui il cablatore li collega, in catena
@@ -1524,7 +1602,7 @@ export interface CoverStyle {
 }
 
 /** Pagine «schema della morsettiera»: altezze dei caratteri e delle righe in mm */
-export type DrawingStyleKind = 'cable' | 'connector' | 'system' | 'plc';
+export type DrawingStyleKind = 'cable' | 'connector' | 'system' | 'plc' | 'field';
 /** Testi in mm (vuoto = di serie) e colonne nascoste (chiavi, vedi model/drawingStyle) */
 export interface DrawingStyle {
   titleSize?: number;

@@ -1,15 +1,17 @@
 import { deviceLetter } from './letterCodes';
+import { cableEnds } from './cableEnds';
 import { syncPairs, newRepresentation, placeSideReps, setContactPlace, type ContactPlace } from './pairs';
 import { createProjections } from './projection';
 import { create } from 'zustand';
 import { nextRail } from './fixedPos';
 import { nextRot, fitRot, allowedRots, ROTS } from './rotations';
 import { applySheet } from './types';
-import type { TextMoveKey, ExtraPart, UserPropDef, PinDir } from './types';
+import type { TextMoveKey, ExtraPart, UserPropDef, PinDir, BlockItem, VoltageRow } from './types';
+import { FRAME } from './types';
 import type { DrawingStyleKind, Project, Page, Element, Part, SymbolInstance, Pt, Wire, ProjectInfo, ProjectSettings, DeviceField, PlcCard, IoKind, SymbolDef, TerminalStripData, Jumper, Cable, CableLine, CableMarking, Layout, WireDef, Distributor } from './types';
-import { newLayoutPage, autoLayout as autoLayoutModel, layoutOf, type AutoLayoutOptions } from './layout';
+import { newLayoutPage, autoLayout as autoLayoutModel, layoutOf, numberPositions, type AutoLayoutOptions } from './layout';
 import { newPanel, newNetworkPage, assignBusCableTags, unifyBusCableTags, syncBusLinkNames, busCableLinks, assignIps, newIpNetwork, netInterfaces, setNetInterface, stationInterface, splitNetInterface as splitNetInterfaceModel, mergeNetInterface as mergeNetInterfaceModel, assignProfinetNames } from './network';
-import { nextPin, freePins, allConnectors, type ConnectorData } from './connectors';
+import { nextPin, freePins, allConnectors, pinCount, type ConnectorData } from './connectors';
 import { genderSymbol, type ConnectorGender } from './connectorTypes';
 import { releaseRevision as releaseRevisionModel, openRevision as openRevisionModel, cancelRevision as cancelRevisionModel, unpackProject, isReleased, lastRevision, archiveKb, type Difference, type ReleaseData } from './revisions';
 import { parseProject } from '../io/fileio';
@@ -17,9 +19,9 @@ import { syncReportPages as syncReportPagesModel, addCoverPage as addCoverPageMo
 import { projectReports } from './reports';
 import type { TitleBlock, TitleBlockTemplate, PlcStation, IolinkPort, ReportStyle, ReportColumnStyle, RevisionNote, ThermalCalc, CableCalc } from './types';
 import { newThermal } from './calculations';
-import type { Panel, Zone, IpNetwork, LanguageSettings, Lang } from './types';
+import type { Panel, Zone, IpNetwork, LanguageSettings, Lang, NoFitArea } from './types';
 import { autoTranslate as autoTranslateModel } from './i18n';
-import { moveWithWires, normalizeWire, splitWiresAtSymbols, healWiresAtRemoved } from './wireEdit';
+import { moveWithWires, withAttachedTerminals, normalizeWire, splitWiresAtSymbols, healWiresAtRemoved } from './wireEdit';
 import type { IssueFix } from './checks';
 import { articlePinPlan } from './articlePins';
 import { autoConnect, splitWiresAtPins, quickWirePath } from './autoWire';
@@ -37,7 +39,9 @@ import { placeByNumber, sortByNumber, proposePageName } from './pages';
 import { importPagesText, type TextImportResult } from './textFormat';
 import { listEntries, updateList as updateListModel, deleteList as deleteListModel, updateAllLists as updateAllListsModel } from './lists';
 import { planTerminalRow, applyTerminalRow, type TerminalPick, type TerminalRowMode } from './terminalRow';
-import { newCable, remarkCable, repairPartCables, cableFromPart, crossedWires, copyCableProps, pasteCableProps, lockCableConductors, syncCablesWithPart, differsFromPart, type CableClip } from './cables';
+import { stationMiniPlace } from './stationMini';
+import { revGridPlace } from './revisionGrid';
+import { newCable, dropOrphanCables, remarkCable, repairPartCables, cableFromPart, crossedWires, copyCableProps, pasteCableProps, lockCableConductors, syncCablesWithPart, differsFromPart, type CableClip } from './cables';
 import { allocateChannel, cardByTag, PLC_CARD_TYPES, newCard, cardType, reassignAddresses, adaptAddressFormat, keepAnalogFirst, stationFormat, needsReassign, cardFromPart, applyTagImport, syncOverviewPages, stationNames, type TagImportRow, type TagImportResult } from './plc';
 import { DEFAULT_SETTINGS, DEVICE_FIELDS, PIN_OWN_FIELDS, AUX_OWN_FIELDS } from './types';
 import { getSymbol, snap, uid, setLibrarySymbols, instanceBounds } from './geometry';
@@ -49,9 +53,10 @@ import { titleBlockTemplates, templateFields } from './titleBlocks';
 import { linkPartners, pairLinks } from './links';
 import { nameTapsInOrder } from './bundles';
 import { withShow, type WireVisKey, type SymVisKey } from './visibility';
+import { partTables, partTableTail, PART_TABLE } from './partTables';
 import { applyCardsSheet, applyIoSheet, isCardsSheet, isIoSheet, type CardsSheetResult, type IoSheetResult } from './plcIoSheet';
 import { buildSocketGroup, socketConfig, socketMembers, type PlcSocketCfg } from './plcSocket';
-import { buildPlcGroup, firstFreeChannel, groupConfig, groupMembers, newGroupId, termsOf, type PlcGroupCfg } from './plcGroup';
+import { buildPlcGroup, firstFreeChannel, groupConfig, groupMembers, newGroupId, termsOf, splitPlcGroup, joinPlcChannels, type PlcGroupCfg } from './plcGroup';
 import { nextTerminal, nextToPlace, parseTerminalNo, terminalNo, ensureStrip, renumberStrip as renumberStripModel, renameStrip as renameStripModel, renameTerminals as renameTerminalsModel, addLevel, addJumper as addJumperModel, removeFromJumpers, addSpares as addSparesModel, removeSpares as removeSparesModel, setSparePart, syncStripPages, allStrips } from './terminals';
 import { nextTagFor, renumberDevices, settingsOf } from './numbering';
 import { computeNetlist, lockWireNumbers, clearWireNumbers, syncPlcLinkNames, withNetlistCache, invalidateNetlist } from './netlist';
@@ -73,6 +78,8 @@ export type Tool =
   | { kind: 'wiredef' }
   /** Riquadro di un quadro nello schema di rete: trascina per disegnarlo */
   | { kind: 'zone' }
+  /** Riquadro «Non montato»: clic su due angoli */
+  | { kind: 'nofit' }
   /** Inserimento di una macro: clic per l'angolo in alto a sinistra */
   | { kind: 'macro'; macroId: string }
   /** Allinea numeri filo: si traccia una linea attraverso i fili, i numeri vanno sulla linea */
@@ -107,7 +114,7 @@ export interface OpenProject {
   pageId: string;
 }
 
-export type Dialog = 'release' | 'revisions' | 'reportStyle' | 'cover' | 'stripStyle' | 'drawingStyle' | 'cableStyle' | 'pdf' | 'print' | 'search' | 'labels' | 'about' | 'text' | 'ai' | 'aiSettings' | 'reportPages' | 'settings' | 'userProps' | 'props' | 'start' | 'customLists' | 'palette' | 'backstage' | 'netAddresses' | null;
+export type Dialog = 'release' | 'revisions' | 'reportStyle' | 'cover' | 'stripStyle' | 'drawingStyle' | 'cableStyle' | 'pdf' | 'print' | 'search' | 'labels' | 'about' | 'text' | 'ai' | 'aiSettings' | 'reportPages' | 'settings' | 'userProps' | 'props' | 'start' | 'customLists' | 'palette' | 'backstage' | 'netAddresses' | 'voltages' | null;
 
 /** Oggetto a cui va il valore di una proprietà definita dall'utente */
 export type UserPropTarget = { kind: 'device'; instId: string } | { kind: 'page'; pageId: string } | { kind: 'project' } | { kind: 'wire'; wireId: string } | { kind: 'part'; partNr: string };
@@ -300,6 +307,10 @@ export interface State {
   startRepresentation(instId: string): void;
   placeRepresentation(realId: string, at: Pt, rot: SymbolInstance['rot']): SymbolInstance | undefined;
   addElements(els: Element[]): void;
+  /** Righe della tabella delle tensioni (undefined = ricavate dai potenziali dello schema) */
+  setVoltages(rows: VoltageRow[] | undefined): void;
+  /** Posa un blocco (tabella delle tensioni) in alto a sinistra nella pagina e lo seleziona */
+  insertBlock(block: BlockItem['block']): void;
   /** Filo disegnato: si spezza sui punti di connessione che attraversa */
   /** Disegna un filo; bundle: bus di conduttori con quel nome ("" = senza nome). Restituisce il filo nuovo */
   addWire(points: Pt[], bus?: string, bundle?: string): Wire;
@@ -324,6 +335,10 @@ export interface State {
   wireTicksOnLine(p: Pt, q: Pt): number;
   /** Sposta a mano un testo del simbolo sullo schema (undefined = di nuovo nella posizione del simbolo) */
   setTextOffset(instId: string, key: TextMoveKey, off: Pt | undefined): void;
+  /** Tabella materiali: spostata rispetto al simbolo (off) o agganciata sotto quella di un altro elemento (link) */
+  setPartTablePlace(instId: string, off: Pt | undefined, link: string | undefined): void;
+  /** Aggiunge o toglie la tabella materiali del dispositivo dell'elemento */
+  setPartTable(instId: string, on: boolean): void;
   /** Tutti i testi dei simboli indicati di nuovo nella posizione del simbolo */
   resetTextOffsets(instIds: string[]): void;
   /** Mette un altro simbolo al posto di quello dell'elemento: sigla, dati e fili restano */
@@ -364,6 +379,10 @@ export interface State {
   pairLinks(id: string, to: string): void;
   /** Gruppo I/O PLC: cambia scheda, primo canale, numero di canali, morsetti per canale o canali nascosti */
   updatePlcGroup(gid: string, patch: Partial<PlcGroupCfg>): void;
+  /** Separa il gruppo I/O PLC in canali singoli, ognuno da spostare sotto il suo circuito */
+  splitPlcGroup(gid: string): void;
+  /** Riunisce in un gruppo i canali singoli scelti (stessa scheda, stesso tipo) */
+  joinPlcChannels(ids: string[]): void;
   /** Cambia il gruppo di prese M12 a 2 canali */
   updatePlcSocket(gid: string, patch: Partial<PlcSocketCfg>): void;
   /** Mostra o nasconde sullo schema una proprietà di tutti i canali del gruppo */
@@ -504,6 +523,15 @@ export interface State {
   setComparison(c: { file: string; rows: Difference[] } | null): void;
   /** Dati di un connettore (pin totali, descrizione, controparte) */
   updateConnector(conn: string, patch: Partial<ConnectorData>): void;
+  /**
+   * Il connettore fa parte del cavo (o no): con un solo cavo collegato prende la sigla dal cavo
+   * (701W1-A dal lato del dispositivo in campo, 701W1-B dall'altro)
+   */
+  setConnectorOfCable(conn: string, on: boolean): void;
+  /** Elimina il connettore: i suoi dati e i suoi pin su tutte le pagine (i fili interrotti si ricuciono) */
+  deleteConnector(conn: string): void;
+  /** Elimina i dati dei connettori che non hanno pin sullo schema */
+  deleteEmptyConnectors(): void;
   /** Connettore nuovo (anche senza pin sullo schema), con il tipo del catalogo; ritorna la sigla */
   addConnector(type?: string, gender?: ConnectorGender): string;
   /** Inserimento dei pin liberi del connettore: ogni clic sullo schema mette il prossimo */
@@ -540,6 +568,10 @@ export interface State {
   addTypedPage(type: Page['type'], title: string): void;
   /** Riquadro di un quadro: usa il quadro indicato o il primo senza riquadro nella pagina (o ne crea uno) */
   addZone(x: number, y: number, w: number, h: number, panelId?: string): void;
+  /** Riquadro «Non montato» (le parti dentro restano sullo schema ma non si montano), vedi notFitted.ts */
+  addNoFit(x: number, y: number, w: number, h: number): void;
+  /** Riquadro «Non montato» attorno agli elementi selezionati della pagina */
+  noFitAroundSelection(): void;
   /** Ultimo protocollo scelto per i collegamenti di rete */
   busProtocol: string;
   setBusProtocol(p: string): void;
@@ -548,6 +580,8 @@ export interface State {
   /** Modifica il layout della pagina indicata (una voce di annullamento) */
   updateLayout(pageId: string, fn: (l: Layout) => void): void;
   autoLayout(pageId: string, opts?: AutoLayoutOptions): void;
+  /** Numeri di posizione del layout (luogo della pagina): solo i nuovi, o tutti da capo */
+  numberLayoutPositions(pageId: string, all?: boolean): void;
   /** Macro della libreria personale (circuiti riutilizzabili) */
   macros: Macro[];
   saveMacro(name: string, category: string, description?: string): void;
@@ -943,7 +977,7 @@ export const useStore = create<State>((set, get) => {
     syncDrawingPages(kind) {
       let r = { added: 0, removed: 0 };
       get().commit(p => { r = syncDrawingPagesModel(p, kind, get().library); });
-      const what = kind === 'cable' ? tx('Disegni dei cavi') : kind === 'connector' ? tx('Piedinature dei connettori') : tx('Schema d\'insieme');
+      const what = kind === 'cable' ? tx('Disegni dei cavi') : kind === 'connector' ? tx('Piedinature dei connettori') : kind === 'field' ? tx('Collegamenti in campo') : tx('Schema d\'insieme');
       get().logMsg(r.added || r.removed ? tx('{0}: {1} pagine aggiunte{2}', what, r.added, r.removed ? `, ${r.removed} rimosse` : '') : tx('{0}: pagine già aggiornate', what));
       // Si va alla prima pagina del tipo
       const pg = get().project.pages.find(x => x.type === kind);
@@ -1009,6 +1043,8 @@ export const useStore = create<State>((set, get) => {
       migrateAuxDescriptions(p);
       p.parts = repairPartCables(p.parts) ?? p.parts;
       if (settingsOf(p).wireNumbering === 'fixed') lockWireNumbers(p);
+      // Sigle automatiche dei cavi di rete già usate da altri cavi (progetti salvati prima della correzione): si rifanno
+      assignBusCableTags(p);
       arrangePages(p);
       set({ viewing: null, project: p, pageId: p.pages[0]?.id ?? '', past: [], future: [], selection: [], dirty: false, filePath, savedAt: filePath ? Date.now() : null, treeSel: { type: 'project' }, view: 'schema' });
     },
@@ -1126,8 +1162,14 @@ export const useStore = create<State>((set, get) => {
     },
     deletePage(id) {
       if (get().project.pages.length <= 1) return;
-      get().commit(p => { p.pages = p.pages.filter(x => x.id !== id); });
+      let gone: string[] = [];
+      get().commit(p => {
+        const lines = p.pages.find(x => x.id === id)?.elements.flatMap(e => (e.kind === 'cable' ? [e.cableId] : [])) ?? [];
+        p.pages = p.pages.filter(x => x.id !== id);
+        gone = dropOrphanCables(p, lines);
+      });
       if (get().pageId === id) set({ pageId: get().project.pages[0].id });
+      if (gone.length) get().logMsg(tx('Tolti dall\'elenco cavi, senza più linee nello schema: {0} (Annulla per riaverli)', gone.map(t => `-${t}`).join(', ')));
     },
     updatePage(id, patch) {
       const old = get().project.pages.find(x => x.id === id);
@@ -1251,13 +1293,15 @@ export const useStore = create<State>((set, get) => {
         };
         const gid = newGroupId();
         let ids: string[] = [];
+        let warnings: string[] = [];
         get().commit(p => {
           if (created) p.plc.cards.push(card!);
           const pg = currentPage(p, pageId);
-          ids = buildSocketGroup(p, pg, gid, cfg, { at, rot }).ids;
+          ({ ids, warnings } = buildSocketGroup(p, pg, gid, cfg, { at, rot }));
           autoConnect(p, pg, ids);
         });
         if (created) get().logMsg(tx('Creata la scheda PLC -{0} ({1})', card.tag, cardType(card).name));
+        for (const w of warnings) get().logMsg(w, 'warn');
         get().setSelection(ids);
         const pg = currentPage(get().project, pageId);
         return pg.elements.find(e => e.id === ids[0]) as SymbolInstance | undefined;
@@ -1341,6 +1385,8 @@ export const useStore = create<State>((set, get) => {
       if (sym.role === 'pin' && presetTag && tool.kind === 'place') {
         const conn = stripOf(presetTag), free = freePins(get().project, conn, get().library);
         if (free.length) set({ tool: { ...tool, tag: `${conn}:${free[0]}` } });
+        // Connettore senza numero di pin (nuovo, senza tipo): si continua con il pin dopo l'ultimo
+        else if (!pinCount(get().project, conn, get().library)) set({ tool: { ...tool, tag: nextPin(get().project, conn, get().library) } });
         else { set({ tool: { kind: 'select' } }); get().logMsg(tx('Connettore -{0}: tutti i pin previsti sono sullo schema', conn)); }
       }
       return inst;
@@ -1348,6 +1394,20 @@ export const useStore = create<State>((set, get) => {
     addElements(els) {
       const pageId = get().pageId;
       get().commit(p => { currentPage(p, pageId).elements.push(...els); });
+    },
+    setVoltages(rows) {
+      get().commit(p => { if (rows) p.voltages = structuredClone(rows); else delete p.voltages; });
+    },
+    insertBlock(block) {
+      const b: BlockItem = { kind: 'block', id: uid('b'), x: FRAME.left + 10, y: FRAME.top + 14, block };
+      get().addElements([b]);
+      // Miniatura della stazione e stato revisione fogli: in alto a destra (la larghezza dipende dalla stazione della pagina), un solo Annulla
+      if (block === 'station' || block === 'revgrid') {
+        const at = (block === 'station' ? stationMiniPlace : revGridPlace)(get().project, b);
+        get().commit(p => { const e = currentPage(p, get().pageId).elements.find(x => x.id === b.id); if (e?.kind === 'block') { e.x = at.x; e.y = at.y; } });
+        set(s => ({ past: s.past.slice(0, -1) }));
+      }
+      get().setSelection([b.id]);
     },
     addWire(points, bus, bundle) {
       const pageId = get().pageId;
@@ -1425,6 +1485,72 @@ export const useStore = create<State>((set, get) => {
         if (off && (off.x || off.y)) o[key] = { x: Math.round(off.x * 100) / 100, y: Math.round(off.y * 100) / 100 }; else delete o[key];
         if (Object.keys(o).length) e.textOffsets = o; else delete e.textOffsets;
       });
+    },
+    setPartTablePlace(instId, off, link) {
+      const pageId = get().pageId;
+      get().commit(p => {
+        const e = currentPage(p, pageId).elements.find(x => x.id === instId);
+        if (e?.kind !== 'symbol') return;
+        const o = { ...(e.textOffsets ?? {}) };
+        if (off) o.parts = { x: Math.round(off.x * 100) / 100, y: Math.round(off.y * 100) / 100 }; else delete o.parts;
+        if (Object.keys(o).length) e.textOffsets = o; else delete e.textOffsets;
+        if (link) e.partsLink = link; else delete e.partsLink;
+      });
+    },
+    setPartTable(instId, on) {
+      const { project } = get();
+      const ids = new Set(sameDeviceIds(project, instId));
+      const els = project.pages.flatMap(pg => pg.elements).filter((e): e is SymbolInstance => e.kind === 'symbol' && ids.has(e.id));
+      // Le scelte «mostra» del dispositivo stanno sull'elemento che porta i dati (il principale se c'è)
+      const show = els.find(e => e.show)?.show;
+      const lib = get().library;
+      const before = partTables(project, lib);
+      if (!on) {
+        // Tabella tolta: quelle agganciate sotto passano alla tabella sopra (la catena resta unita)
+        const heads = new Set([...before.values()].flat().map(t => t.instId).filter(id => ids.has(id)));
+        get().commit(p => {
+          for (const pg of p.pages) {
+            const up = new Map(pg.elements.filter((e): e is SymbolInstance => e.kind === 'symbol' && heads.has(e.id)).map(e => [e.id, e]));
+            for (const e of pg.elements) if (e.kind === 'symbol' && e.partsLink && up.has(e.partsLink)) {
+              const m = up.get(e.partsLink)!;
+              if (m.partsLink && !heads.has(m.partsLink)) e.partsLink = m.partsLink;
+              else {
+                delete e.partsLink;
+                // La tabella sopra era trascinata: quella sotto resta dov'era (spostamento rispetto al suo simbolo)
+                const o = m.textOffsets?.parts;
+                if (o) e.textOffsets = { ...e.textOffsets, parts: { x: Math.round((m.x + o.x - e.x) * 100) / 100, y: Math.round((m.y + o.y - e.y + PART_TABLE.headH) * 100) / 100 } };
+              }
+            }
+          }
+          for (const pg of p.pages) for (const e of pg.elements) {
+            if (e.kind !== 'symbol' || !ids.has(e.id)) continue;
+            e.show = withShow(e.show, 'parts', undefined);
+            if (!e.show || !Object.keys(e.show).length) delete e.show;
+            // La tabella aggiunta di nuovo riparte dalla colonna (senza aggancio né spostamento)
+            if (heads.has(e.id)) {
+              delete e.partsLink;
+              if (e.textOffsets?.parts) { const { parts: _p, ...rest } = e.textOffsets; if (Object.keys(rest).length) e.textOffsets = rest; else delete e.textOffsets; }
+            }
+          }
+        });
+        return;
+      }
+      get().updateDevice(instId, { show: withShow(show, 'parts', true) });
+      // Tabella nuova nella colonna: si aggancia sotto l'ultima tabella della colonna (un solo passo da annullare)
+      const after = partTables(get().project, lib);
+      const old = new Set([...before.values()].flat().map(t => t.instId));
+      for (const [pid, list] of after) {
+        const added = list.find(t => !old.has(t.instId));
+        if (!added) continue;
+        const pg = get().project.pages.find(x => x.id === pid);
+        const el = pg?.elements.find(e => e.id === added.instId);
+        if (!pg || el?.kind !== 'symbol' || el.partsLink || el.textOffsets?.parts) continue;
+        const tail = partTableTail(list, pg.elements as SymbolInstance[], added.instId);
+        if (!tail) continue;
+        const n = get().past.length;
+        get().commit(p => { const e = p.pages.find(x => x.id === pid)?.elements.find(x => x.id === added.instId); if (e?.kind === 'symbol') e.partsLink = tail; });
+        if (get().past.length === n + 1) set(s => ({ past: s.past.slice(0, -1) }));
+      }
     },
     resetTextOffsets(instIds) {
       const pageId = get().pageId;
@@ -1647,6 +1773,23 @@ export const useStore = create<State>((set, get) => {
       get().commit(p => { warnings = buildPlcGroup(p, currentPage(p, pageId), gid, { ...cfg, ...patch }).warnings; });
       for (const w of warnings) get().logMsg(w, 'warn');
       get().setSelection(groupMembers(currentPage(get().project, pageId), gid).map(e => e.id));
+    },
+    splitPlcGroup(gid) {
+      const { pageId } = get();
+      let ids: string[] = [];
+      get().commit(p => { ids = splitPlcGroup(currentPage(p, pageId), gid); });
+      set({ selection: ids });
+      get().logMsg(tx('Gruppo separato in {0} canali: ognuno si sposta da solo sotto il suo circuito', ids.length));
+    },
+    joinPlcChannels(ids) {
+      const { pageId } = get();
+      let r: ReturnType<typeof joinPlcChannels> = {};
+      // Prova su una copia: se i canali non vanno bene il progetto non cambia
+      const probe = joinPlcChannels(structuredClone(get().project), structuredClone(currentPage(get().project, pageId)), ids);
+      if (probe.error) { get().logMsg(tx(probe.error), 'warn'); return; }
+      get().commit(p => { r = joinPlcChannels(p, currentPage(p, pageId), ids); });
+      for (const w of r.warnings ?? []) get().logMsg(w, 'warn');
+      if (r.gid) get().setSelection(groupMembers(currentPage(get().project, pageId), r.gid).map(e => e.id));
     },
     updatePlcSocket(gid, patch) {
       const { pageId } = get();
@@ -1914,15 +2057,18 @@ export const useStore = create<State>((set, get) => {
     deleteSelection() {
       const { selection, pageId } = get();
       if (!selection.length) return;
-      let healed = 0;
+      let healed = 0, gone: string[] = [];
       get().commit(p => {
         const pg = currentPage(p, pageId);
         const removed = pg.elements.filter(e => selection.includes(e.id));
         pg.elements = pg.elements.filter(e => !selection.includes(e.id));
         // Morsetto tolto da un filo: il filo interrotto torna intero
         healed = healWiresAtRemoved(p, pg, removed);
+        // Cavo con l'ultima linea tolta: esce anche dall'elenco cavi (Annulla lo riporta)
+        gone = dropOrphanCables(p, removed.flatMap(e => (e.kind === 'cable' ? [e.cableId] : [])));
       });
       if (healed) get().logMsg(tx('Fili ricuciti dove c\'erano i morsetti tolti: {0}', healed));
+      if (gone.length) get().logMsg(tx('Tolti dall\'elenco cavi, senza più linee nello schema: {0} (Annulla per riaverli)', gone.map(t => `-${t}`).join(', ')));
       set({ selection: [] });
     },
     moveSelection(dx, dy) {
@@ -2218,6 +2364,8 @@ export const useStore = create<State>((set, get) => {
             const c = p.cables?.find(x => x.id === f.cableId);
             const part = c?.partNr ? partsIndex(p, get().library).get(c.partNr) : undefined;
             if (c && part) Object.assign(c, cableFromPart(c, part));
+          } else if (f.kind === 'deleteCable') {
+            dropOrphanCables(p, [f.cableId]);
           } else if (f.kind === 'clearCardOrder') {
             const c = p.plc.cards.find(x => x.id === f.cardId);
             if (c) { delete c.partNr; delete c.orderNr; delete c.manufacturer; }
@@ -2250,7 +2398,7 @@ export const useStore = create<State>((set, get) => {
     openListStyleOf(pg) {
       if (pg.type === 'report' && pg.report) get().openReportStyle(pg.report);
       else if (pg.type === 'strip') set({ dialog: 'stripStyle' });
-      else if (pg.type === 'cable' || pg.type === 'connector' || pg.type === 'system' || (pg.type === 'plc' && pg.cardId)) get().openDrawingStyle(pg.type as DrawingStyleKind);
+      else if (pg.type === 'cable' || pg.type === 'connector' || pg.type === 'system' || pg.type === 'field' || (pg.type === 'plc' && pg.cardId)) get().openDrawingStyle(pg.type as DrawingStyleKind);
       else return false;
       return true;
     },
@@ -2390,6 +2538,49 @@ export const useStore = create<State>((set, get) => {
       set({ tool: { kind: 'place', symbolId: genderSymbol(project.connectors?.[conn]?.gender), rot: 0, tag }, view: 'schema' });
       get().logMsg(tx('Clic sullo schema per mettere il pin {0}; ogni clic mette il prossimo libero, Esc per finire', tag));
     },
+    deleteConnector(conn) {
+      let pins = 0, healed = 0;
+      get().commit(p => {
+        for (const pg of p.pages) {
+          const removed = pg.elements.filter(e => e.kind === 'symbol' && e.tag.includes(':') && stripOf(e.tag) === conn && getSymbol(e.symbolId, p)?.role === 'pin');
+          if (!removed.length) continue;
+          const ids = new Set(removed.map(e => e.id));
+          pg.elements = pg.elements.filter(e => !ids.has(e.id));
+          pins += removed.length;
+          // Pin tolto da un filo: il filo interrotto torna intero
+          healed += healWiresAtRemoved(p, pg, removed);
+        }
+        if (p.connectors?.[conn]) delete p.connectors[conn];
+      });
+      if (get().connSel === conn) get().setConnSel(undefined);
+      set({ selection: [] });
+      get().logMsg(tx('Connettore -{0} eliminato ({1} pin tolti dallo schema, {2} fili ricuciti)', conn, pins, healed));
+    },
+    deleteEmptyConnectors() {
+      const p0 = get().project;
+      const withPins = new Set(p0.pages.flatMap(pg => pg.elements).filter((e): e is SymbolInstance => e.kind === 'symbol' && e.tag.includes(':') && getSymbol(e.symbolId, p0)?.role === 'pin').map(e => stripOf(e.tag)));
+      const empty = Object.keys(p0.connectors ?? {}).filter(c => !withPins.has(c));
+      if (!empty.length) return;
+      get().commit(p => { for (const c of empty) delete p.connectors![c]; });
+      if (get().connSel && empty.includes(get().connSel!)) get().setConnSel(undefined);
+      get().logMsg(tx('Eliminati {0} connettori senza pin: {1}', empty.length, empty.map(c => `-${c}`).join(', ')));
+    },
+    setConnectorOfCable(conn, on) {
+      get().updateConnector(conn, { ofCable: on || undefined });
+      if (!on) return;
+      const p = get().project;
+      const hits = [...cableEnds(p).values()].filter(e => e.conns.some(x => x.conn === conn));
+      if (hits.length !== 1) return;
+      const end = hits[0].conns.find(x => x.conn === conn)!;
+      let to = `${hits[0].cable.tag}-${end.side}`;
+      if (to === conn) return;
+      const used = new Set(allConnectors(p).concat(allStrips(p)));
+      for (let k = 2; used.has(to); k++) to = `${hits[0].cable.tag}-${end.side}${k}`;
+      const pins = p.pages.flatMap(pg => pg.elements).filter((e): e is SymbolInstance => e.kind === 'symbol' && e.tag.includes(':') && stripOf(e.tag) === conn);
+      get().renamePins(Object.fromEntries(pins.map(e => [e.tag, `${to}:${e.tag.slice(e.tag.indexOf(':') + 1)}`])));
+      if (get().connSel === conn) get().setConnSel(to);
+      get().logMsg(tx('Connettore -{0} del cavo -{1}: ora si chiama -{2}', conn, hits[0].cable.tag, to));
+    },
     updateConnector(conn, patch) {
       get().commit(p => {
         p.connectors ??= {};
@@ -2525,6 +2716,29 @@ export const useStore = create<State>((set, get) => {
       get().setPage(id);
       get().logMsg(tx('Schema di rete: inserisci i nodi da «Reti e bus», collegali con lo strumento Bus e disegna i riquadri dei quadri con «Quadro»'));
     },
+    addNoFit(x, y, w, h) {
+      const pageId = get().pageId;
+      const r = (v: number) => Math.round(v * 10) / 10;
+      const area: NoFitArea = { kind: 'nofit', id: uid('nf'), x: r(x), y: r(y), w: r(w), h: r(h) };
+      get().commit(p => { currentPage(p, pageId).elements.push(area); });
+      set({ selection: [area.id], tool: { kind: 'select' } });
+      get().logMsg(tx('Riquadro «Non montato»: le parti dentro restano sullo schema ma non vanno in distinta, tabelle materiali, targhette e liste'));
+    },
+    noFitAroundSelection() {
+      const { project, pageId, selection } = get();
+      const page = currentPage(project, pageId);
+      // Ingombro degli elementi selezionati (simboli, fili, linee dei cavi, testi)
+      let b: { x0: number; y0: number; x1: number; y1: number } | undefined;
+      const grow = (x0: number, y0: number, x1: number, y1: number) => { b = b ? { x0: Math.min(b.x0, x0), y0: Math.min(b.y0, y0), x1: Math.max(b.x1, x1), y1: Math.max(b.y1, y1) } : { x0, y0, x1, y1 }; };
+      for (const e of page.elements) {
+        if (!selection.includes(e.id)) continue;
+        if (e.kind === 'symbol') { const sym = getSymbol(e.symbolId, project); if (sym) { const q = instanceBounds(e, sym); grow(q.x0, q.y0, q.x1, q.y1); } }
+        else if (e.kind === 'wire' || e.kind === 'cable' || e.kind === 'wiredef') for (const q of e.points) grow(q.x, q.y, q.x, q.y);
+        else if (e.kind === 'text') { const q = textBounds(e); grow(q.x0, q.y0, q.x1, q.y1); }
+      }
+      if (!b) { get().logMsg(tx('Seleziona le parti da mettere nel riquadro «Non montato»'), 'warn'); return; }
+      get().addNoFit(b.x0 - 2, b.y0 - 2 - 4, b.x1 - b.x0 + 4, b.y1 - b.y0 + 4 + 4);
+    },
     addZone(x, y, w, h, panelId) {
       const { project, pageId } = get();
       const page = currentPage(project, pageId);
@@ -2552,6 +2766,11 @@ export const useStore = create<State>((set, get) => {
         pg.layout = layoutOf(pg);
         fn(pg.layout);
       });
+    },
+    numberLayoutPositions(pageId, all) {
+      let n = 0;
+      get().commit(p => { n = numberPositions(p, pageId, all); });
+      get().logMsg(n ? tx('Numeri di posizione: {0} assegnati', n) : tx('Numeri di posizione: tutti gli apparecchi hanno già il numero'));
     },
     autoLayout(pageId, opts) {
       let r = { placed: 0, missing: [] as string[] };
@@ -3225,7 +3444,9 @@ function copyPart(p: Project, library: Part[], partNr?: string) {
  * punti di connessione spostati seguono il simbolo ("elastico"), mantenendo i segmenti ortogonali.
  */
 /** Sposta gli elementi e adatta i fili collegati restando ortogonali (vedi wireEdit.ts) */
-export function moveElements(p: Project, pg: Page, ids: Set<string>, dx: number, dy: number) {
+export function moveElements(p: Project, pg: Page, ids0: Set<string>, dx: number, dy: number) {
+  // Con i morsetti e i pin dei connettori appoggiati sui simboli spostati (si calcolano prima di spostare)
+  const ids = withAttachedTerminals(p, pg, ids0);
   moveWithWires(p, pg, ids, dx, dy);
   splitWiresAtSymbols(p, pg, ids);
   autoConnect(p, pg, ids);

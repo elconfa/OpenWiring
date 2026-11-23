@@ -88,6 +88,7 @@ const FIELDS: [FieldKey, string][] = [
   ['typeNr', tn('Tipo')], ['orderNr', tn('Codice ordinazione')], ['partNr', tn('Articolo')],
   ['func', tn('Funzione (=)')], ['loc', tn('Luogo (+)')], ['note', tn('Note')],
   ['plcAddress', tn('Indirizzo PLC')], ['plcSymbol', tn('Variabile PLC')], ['plcComment', tn('Commento PLC')],
+  ['plcCard', tn('Scheda PLC e foglio')], ['plcPlace', tn('Stazione, rack e slot PLC')], ['plcPins', tn('Morsetti del canale PLC')],
 ];
 /** I testi PLC hanno senso solo nei punti I/O */
 const fieldsFor = (role: SymbolRole) => FIELDS.filter(([f]) => role === 'plc' || !f.startsWith('plc'));

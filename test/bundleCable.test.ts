@@ -35,6 +35,15 @@ function project(a: [string?, string?] = [], b: [string?, string?] = [], lineA: 
 const conds = (p: Project) => cableInfos(p, computeNetlist(p))[0].conductors.map(c => `${c.wire.id}:${c.name}${c.problem ? '!' : ''}`);
 
 describe('bus fili come cavo', () => {
+  it('senza linea del cavo il bus con il suo nome è il cavo: conduttori dai nomi scritti nel bus', () => {
+    const p = project(['WH', 'BN'], ['WH', 'BN']);
+    for (const pg of p.pages) pg.elements = pg.elements.filter(e => e.kind !== 'cable');
+    expect(conds(p)).toEqual(['a1:WH', 'a2:BN']);
+    const i = cableInfos(p)[0];
+    expect(i.spare).toEqual(['GN', 'YE']);
+    expect(i.conductors[0].net?.pins.map(x => x.ref).sort()).toEqual(['K1:A2', 'K3:A1']);
+  });
+
   it('la linea del cavo che incrocia anche la linea spessa del bus conta solo i fili', () => {
     const p = project(['WH', 'BN'], ['WH', 'BN'], L('la', [90, 130], [190, 160]));
     expect(conds(p)).toEqual(['a1:WH', 'a2:BN']);

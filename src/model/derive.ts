@@ -1,4 +1,6 @@
 import { pairRepresentations } from './pairs';
+import { positionRows, type PositionRow } from './layout';
+import { fittedProject } from './notFitted';
 import { projectionSource } from './projection';
 import type { PlacedElement } from './devices';
 import { functionKind } from './articlePins';
@@ -23,7 +25,11 @@ import { listTextScale } from './drawingStyle';
 import type { ReportStyle } from './types';
 
 /** Foglio di una pagina di lista: righe del foglio (tradotte), nomi originali delle colonne e impaginazione */
-export interface ReportSheet { table: Table; first: number; keys: string[]; style: ReportStyle }
+export interface ReportSheet {
+  table: Table; first: number; keys: string[]; style: ReportStyle;
+  /** Lunghezza dei testi più lunghi di ogni colonna in tutta la lista: le pagine della stessa lista hanno le stesse colonne */
+  lens?: number[];
+}
 import { projectReports, type Table } from './reports';
 import { blockKey, reportBlocks } from './panelScope';
 import { drawingData } from './drawings';
@@ -34,6 +40,7 @@ import type { CableMark } from '../ui/PageSvg';
 import { pinsWorld, keyOf, getSymbol, instanceBounds, pairVertical } from './geometry';
 import { linkPartners, waitingLinks } from './links';
 import { translator, translateTable } from './i18n';
+import { partTables } from './partTables';
 import { placeWireLabels, wireLabelGap } from './wireLabels';
 import { DEVICE_LINE_KEYS, symShown, wireShown, type ShowMap, type SymVisKey, type WireVisKey } from './visibility';
 
@@ -140,8 +147,11 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
   const stripLabel = new Set<string>();
   const terms = allPlaced(project).filter(e => e.sym.role === 'terminal' || e.sym.role === 'pin');
   const horizontalWire = (r: number) => r === 90 || r === 270;
+  // Pin dei connettori: la sigla la scrive il riquadro del connettore (o non c'è se fa parte del cavo)
+  const framesOn = settingsOf(project).connectorFrames !== false;
   for (const t of terms) {
     const strip = stripOf(t.inst.tag);
+    if (t.sym.role === 'pin') { const d = project.connectors?.[strip]; if (d?.ofCable || (framesOn && d?.frame !== false)) continue; }
     const h = horizontalWire(t.inst.rot);
     const hasPrevious = terms.some(o => o !== t && o.page === t.page && stripOf(o.inst.tag) === strip && horizontalWire(o.inst.rot) === h &&
       (h ? o.inst.x === t.inst.x && o.inst.y < t.inst.y && t.inst.y - o.inst.y <= 12
@@ -238,7 +248,7 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
       description: info.description ? L.t(info.description) : undefined, techData: info.techData,
       manufacturer: info.manufacturer, typeNr: info.typeNr, orderNr: info.orderNr, partNr: info.partNr,
       func: info.func && `=${info.func}`, loc: info.loc && `+${info.loc}`, note: info.note,
-      plcAddress: undefined, plcSymbol: undefined, plcComment: undefined,
+      plcAddress: undefined, plcSymbol: undefined, plcComment: undefined, plcCard: undefined, plcPlace: undefined, plcPins: undefined,
     };
     // Contatti ausiliari con la bobina: la loro descrizione, se ce l'hanno, al posto di quella del dispositivo
     const auxDescr = (e: typeof d.elements[number]) => (d.main && e !== d.main && e.sym.role === 'aux' && e.inst.description ? L.t(e.inst.description) : undefined);
@@ -266,7 +276,17 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
   // Punti I/O PLC: indirizzo e nome simbolico
   const plcTexts = new Map<string, { address: string; symbol: string; ref?: string }>();
   const refs = overviewRefs(project);
-  for (const r of ioAssignments(project, library, false)) {
+  // Lo stesso canale disegnato in più punti (es. presa M12 e gruppo a morsetti, o un errore segnalato
+  // dai controlli): indirizzo e testi su ognuno, non solo sull'ultimo
+  const rowOf = new Map(ioAssignments(project, library, false).filter(r => r.inst).map(r => [`${r.card.tag}|${r.channel}`, r]));
+  const plcPoints = allPlaced(project).filter(e => e.sym.role === 'plc' && e.inst.plcChannel).flatMap(e => {
+    const r0 = rowOf.get(`${e.inst.tag}|${e.inst.plcChannel}`);
+    if (!r0) return [];
+    if (r0.inst === e.inst) return [r0];
+    const own = e.inst.plcSymbol?.trim();
+    return [{ ...r0, inst: e.inst, ...(own ? { symbol: own, symbolIsDefault: false } : {}), ...(e.inst.plcComment ? { comment: e.inst.plcComment } : {}) }];
+  });
+  for (const r of plcPoints) {
     if (!r.inst) continue;
     plcTexts.set(r.inst.id, { address: r.address, symbol: r.symbolIsDefault ? '' : r.symbol, ref: refs.get(r.card.tag) });
     // Blocchetti I/O: indirizzo, variabile e commento nei testi del simbolo
@@ -282,10 +302,19 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
         const max = Math.floor((box.x + box.w - f.x - 0.5) / ((f.size ?? 1.9) * 0.6));
         return max > 1 && v.length > max ? `${v.slice(0, max - 1)}…` : v;
       };
-      const vis = (k: SymVisKey) => show.get(r.inst!.id)?.[k] !== false;
+      const vis = (k: SymVisKey) => symShown(show.get(r.inst!.id), k, { settings, sym });
+      // Riquadro completo (punto 175): scheda con il foglio della panoramica, stazione con rack e slot, morsetti
+      const has = (k: FieldKey) => sym.fields!.some(f => f.f === k) && vis(k as SymVisKey);
+      const ref = refs.get(r.card.tag);
+      const place = [r.card.station, r.card.rack !== undefined ? `R${r.card.rack}` : '', r.card.slot !== undefined ? `S${r.card.slot}` : ''].filter(Boolean).join(' · ');
+      const pl = labels.get(r.inst.id) ?? {};
+      const pins = sym.pins.map(p => pl[p.id] ?? p.label).filter(Boolean);
       deviceFields.set(r.inst.id, {
         ...deviceFields.get(r.inst.id), plcAddress: vis('plcAddress') ? r.address : undefined,
         plcSymbol: vis('plcSymbol') ? fit('plcSymbol', r.symbol) : undefined, plcComment: vis('plcComment') ? fit('plcComment', r.comment ? L.t(r.comment) : undefined) : undefined,
+        plcCard: has('plcCard') ? `-${r.card.tag}${ref ? ` /${ref}` : ''}` : undefined,
+        plcPlace: has('plcPlace') && place ? place : undefined,
+        plcPins: has('plcPins') && pins.length ? `${L.t(pins.length > 1 ? 'Morsetti' : 'Morsetto')} ${pins.join(', ')}` : undefined,
       });
     }
   }
@@ -351,19 +380,26 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     const out = new Map<string, ReportSheet>();
     // Blocchi: le liste intere e, per le liste divise per quadro, le righe di ogni luogo
     const tables = new Map(reportBlocks(project, library, given ?? projectReports(project, library)).map(b => [blockKey(b.title, b.panel), b.table]));
+    const lensOf = new Map<string, number[]>();
     for (const pg of project.pages) {
       const t = pg.type === 'report' && pg.report ? tables.get(blockKey(pg.report, pg.reportPanel)) : undefined;
       if (!t) continue;
       // Impaginazione scelta per la lista: ordine delle righe, altezza delle righe, colonne
       const style = reportStyleOf(project, t.title), rowH = styledRowH(t, style), tt = sortedTable(t, style);
       const r = sheetRanges(t, style)[pg.reportSheet ?? 0], first = r?.first ?? 0, n = r?.n ?? 0;
-      out.set(pg.id, { table: translateTable(project, { ...tt, rowH, rows: tt.rows.slice(first, first + n), goto: tt.goto?.slice(first, first + n), symbols: tt.symbols?.slice(first, first + n) }), first, keys: columnKeys(t.columns), style: scaled(style) });
+      const lk = blockKey(pg.report!, pg.reportPanel);
+      let lens = lensOf.get(lk);
+      if (!lens) { const full = translateTable(project, tt); lens = full.columns.map((_, i) => Math.max(0, ...full.rows.map(row => (row[i] ?? '').length))); lensOf.set(lk, lens); }
+      out.set(pg.id, { table: translateTable(project, { ...tt, rowH, rows: tt.rows.slice(first, first + n), goto: tt.goto?.slice(first, first + n), symbols: tt.symbols?.slice(first, first + n) }), first, keys: columnKeys(t.columns), style: scaled(style), lens });
     }
     return out;
   });
   const textStyles = textStylesOf(settings);
   const bundleWidth = lookOf(settings).w.bundle;
   const pages = new Map<string, PageDerived>();
+  // Tabelline dei componenti (solo nelle pagine che le hanno attive)
+  // Tabelle materiali: le parti nei riquadri «Non montato» non ci vanno
+  const pTables = partTables(fittedProject(project), library);
   for (const pg of project.pages) {
     // Numeri filo in un punto libero del filo (non sotto componenti, sigle o altri fili)
     const texts = new Map<string, string>(), sizes = new Map<string, number>(), gaps = new Map<string, number>();
@@ -374,9 +410,14 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
       if (gap) gaps.set(e.id, gap);
     }
     const wireLabelPos = texts.size ? placeWireLabels(project, pg, texts, designations, deviceLines, netlist.junctions.get(pg.id) ?? [], sizes, gaps) : undefined;
-    const pd: PageDerived = { wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireTicks, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', contactImageText: settingsOf(project).contactImageStyle === 'text', pairLines: pairLines.get(pg.id), terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg) };
+    const pd: PageDerived = { wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireTicks, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', contactImageText: settingsOf(project).contactImageStyle === 'text', pairLines: pairLines.get(pg.id), terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg), partTables: pTables.get(pg.id) };
     if (pg.type === 'report') Object.defineProperty(pd, 'reportSheet', { get: () => sheets().get(pg.id), enumerable: true, configurable: true });
-    if (['cable', 'connector', 'system'].includes(pg.type)) {
+    // Layout con la legenda accanto: righe delle posizioni della pagina
+    if (pg.type === 'layout' && pg.layout?.legend) {
+      let rows: PositionRow[] | undefined;
+      Object.defineProperty(pd, 'positions', { get: () => (rows ??= positionRows(project, library, pg.id)), enumerable: true, configurable: true });
+    }
+    if (['cable', 'connector', 'system', 'field'].includes(pg.type)) {
       let drawing: ReturnType<typeof drawingData> | undefined, done = false;
       Object.defineProperty(pd, 'drawing', { get: () => (done ? drawing : (done = true, drawing = withNetlistCache(project, () => drawingData(project, pg, library, netlist)))), enumerable: true, configurable: true });
     }

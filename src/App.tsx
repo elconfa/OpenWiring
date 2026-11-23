@@ -55,6 +55,7 @@ import { ListStyleDialog } from './ui/ListStyleDialog';
 import { CoverDialog, CableStyleDialog } from './ui/PageStyleDialogs';
 import { ReportPagesDialog } from './ui/ReportPagesDialog';
 import { NetAddressDialog } from './ui/NetAddressDialog';
+import { VoltagesDialog } from './ui/VoltagesDialog';
 import { projectReports } from './model/reports';
 import { reportPagesOutdated } from './model/templates';
 import { SettingsDialog } from './ui/SettingsDialog';
@@ -428,6 +429,7 @@ export function App() {
       <AiSettings />
       <ReportPagesDialog />
       <NetAddressDialog />
+      <VoltagesDialog />
       <RevisionsDialog />
       <ReleaseDialog />
       <ListStyleDialog />

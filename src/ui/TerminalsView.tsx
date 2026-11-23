@@ -142,6 +142,7 @@ export function TerminalsView() {
           <button disabled={!strip || !sel.length} onClick={() => void renameSelected()}
             title={tx('Cambia il numero dei morsetti selezionati, es. 10 e 11 → 10A e 10B, oppure 15A → 18A (anche con doppio clic sul numero)')}>{tx('Rinomina morsetti…')}</button>
           <button onClick={() => st().syncStripPages()} title={tx('Crea o aggiorna una pagina di schema per ogni morsettiera')}>{tx('Genera schemi morsettiere')}</button>
+          <button onClick={() => st().syncDrawingPages('field')} title={tx('Una pagina per morsettiera: i morsetti in fila con il numero filo, i cavi che partono con il nome dei conduttori e i dispositivi in campo con i pin; si aggiornano da sole')}>{tx('Collegamenti in campo')}</button>
           <button onClick={() => void importWmc()} title={tx('Legge il file CAEdex di Weidmüller Configurator: articoli, ponticelli, separatori e morsetti in più delle morsettiere del progetto, e le morsettiere nuove')}>{tx('Da Weidmüller…')}</button>
           <button onClick={() => void exportWmc()} title={tx('Scrive le morsettiere del progetto in un file CAEdex da aprire in Weidmüller Configurator')}>{tx('Per Weidmüller…')}</button>
           <button onClick={() => st().setDialog('stripStyle')} title={tx('Testi e colonne delle pagine delle morsettiere (anche con il tasto destro sulla pagina)')}>{tx('Personalizza la lista…')}</button>

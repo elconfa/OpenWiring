@@ -5,7 +5,8 @@ import { useStore } from '../model/store';
 import type { Layout, LayoutItem, Page, Pt } from '../model/types';
 import { PAGE_W, PAGE_H } from '../model/types';
 import { Frame, LayoutDrawing, SEL } from './PageSvg';
-import { layoutOf, layoutView, placeables, placedRefs, railUsage, snapItem, layoutToDxf, RAIL_H, DUCT_W, type Placeable } from '../model/layout';
+import { layoutOf, layoutView, placeables, placedRefs, positionRows, railUsage, snapItem, layoutToDxf, RAIL_H, DUCT_W, type Placeable } from '../model/layout';
+import { translator } from '../model/i18n';
 import { uid } from '../model/geometry';
 import { saveFile, safeName } from '../io/fileio';
 import { AutoLayoutDialog } from './AutoLayoutDialog';
@@ -141,6 +142,8 @@ export function LayoutView({ page }: { page: Page }) {
         <button className={tool.kind === 'duct' ? 'tab active' : 'tab'} onClick={() => setTool({ kind: 'duct' })} title={tx('Trascina per disegnare una canalina')}>{tx('Canalina')}</button>
         <button onClick={() => setAutoOpen(true)} title={tx('Scegli cosa montare: crea guide e canaline se mancano e posa gli elementi scelti')}>{tx('Posa automatica…')}</button>
         <button disabled={!sel.length} onClick={() => { st().updateLayout(page.id, x => { x.items = x.items.filter(i => !selSet.has(i.id)); }); st().setSelection([]); }}>{tx('Elimina')}</button>
+        <button onClick={() => st().numberLayoutPositions(page.id)} title={tx('Numero di posizione agli apparecchi e alle morsettiere che non l\'hanno ancora, dopo l\'ultimo usato; numerazione continua tra le pagine di layout dello stesso luogo')}>{tx('Numera posizioni')}</button>
+        <button onClick={() => st().numberLayoutPositions(page.id, true)} title={tx('Rifà tutti i numeri di posizione del luogo nell\'ordine di lettura: pagine di layout in ordine, poi file dall\'alto e da sinistra')}>{tx('Rinumera')}</button>
         <div className="tb-spacer" />
         <span className="muted small">{tx('Piastra')} {Math.round(mouse.x)} · {Math.round(mouse.y)} {tx('mm · scala 1:')}{v.n}</span>
         <button onClick={() => void exportDxf()} title={tx('Piastra, guide, canaline, sagome e fori di fissaggio in scala 1:1')}>{tx('DXF foratura 1:1')}</button>
@@ -151,7 +154,8 @@ export function LayoutView({ page }: { page: Page }) {
           <rect x={-2000} y={-2000} width={5000} height={5000} fill="var(--canvas-bg)" />
           <rect x={0} y={0} width={PAGE_W} height={PAGE_H} fill="#fff" />
           <Frame project={project} page={page} pageIndex={project.pages.indexOf(page)} />
-          <LayoutDrawing layout={l} selection={selSet} drag={drag ? { id: drag.id, dx: drag.dx, dy: drag.dy } : undefined} />
+          <LayoutDrawing layout={l} selection={selSet} drag={drag ? { id: drag.id, dx: drag.dx, dy: drag.dy } : undefined}
+            rows={l.legend ? positionRows(project, library, page.id) : undefined} t={translator(project).t} />
           {draw && <line x1={v.ox + draw.a.x * v.k} y1={v.oy + draw.a.y * v.k} x2={v.ox + draw.b.x * v.k} y2={v.oy + draw.b.y * v.k} stroke={SEL} strokeWidth={0.6} />}
           {ghost && <rect {...ghost} width={ghost.w} height={ghost.h} fill="none" stroke={SEL} strokeDasharray="1 0.6" strokeWidth={0.3} />}
         </svg>
@@ -162,9 +166,18 @@ export function LayoutView({ page }: { page: Page }) {
               <tr><td className="prop-name">{tx('Larghezza (mm)')}</td><td className="prop-value">{num(l.plate.w, w => setPlate({ w }))}</td></tr>
               <tr><td className="prop-name">{tx('Altezza (mm)')}</td><td className="prop-value">{num(l.plate.h, h => setPlate({ h }))}</td></tr>
               <tr><td className="prop-name">{tx('Riserva filo per estremità (mm)')}</td><td className="prop-value">{num(l.wireReserve, r => st().updateLayout(page.id, x => { x.wireReserve = r; }))}</td></tr>
+              <tr className="prop-group"><td colSpan={2}>{tx('Numeri di posizione')}</td></tr>
+              <tr><td className="prop-name">{tx('Bollini sul layout')}</td><td className="prop-value"><input type="checkbox" checked={l.balloons !== false} onChange={e => st().updateLayout(page.id, x => { if (e.target.checked) delete x.balloons; else x.balloons = false; })} /></td></tr>
+              <tr><td className="prop-name">{tx('Legenda accanto alla piastra')}</td><td className="prop-value"><input type="checkbox" checked={!!l.legend} onChange={e => st().updateLayout(page.id, x => { if (e.target.checked) x.legend = true; else delete x.legend; })} /></td></tr>
+              <tr><td className="prop-name">{tx('Zona (titolo della pagina)')}</td><td className="prop-value muted small">{page.title}</td></tr>
               {one && (
                 <>
                   <tr className="prop-group"><td colSpan={2}>{one.ref ? `-${one.ref}` : one.kind === 'rail' ? tx('Guida DIN') : tx('Canalina')}</td></tr>
+                  {(one.kind === 'device' || one.kind === 'strip') && (
+                    <tr><td className="prop-name">{tx('N° di posizione')}</td><td className="prop-value">
+                      <input type="number" min={1} value={one.pos ?? ''} placeholder="—" onChange={e => { const n = parseInt(e.target.value, 10); setItem({ pos: n > 0 ? n : undefined }); }} />
+                    </td></tr>
+                  )}
                   {(['x', 'y', 'w', 'h'] as const).map(k => (
                     <tr key={k}><td className="prop-name">{{ x: 'X (mm)', y: 'Y (mm)', w: 'Larghezza (mm)', h: 'Altezza (mm)' }[k]}</td><td className="prop-value">{num(one[k], n => setItem({ [k]: n }))}</td></tr>
                   ))}

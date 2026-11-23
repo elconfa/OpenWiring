@@ -1,6 +1,7 @@
 // Stampa e PDF di alcuni quadri: le liste (morsetti, dispositivi, connessioni…) tengono solo le
 // righe dei quadri scelti e si impaginano di nuovo. Il quadro di una riga viene dal luogo scritto
 // (+Q1.1), dal dispositivo o dalla morsettiera citati nella riga.
+import { fittedProject } from './notFitted';
 import type { Panel, Part, Project } from './types';
 import { devicePanels, orderedPanels } from './network';
 import { bomReport, purchaseReport, manufacturerReport, PURCHASE_TITLE, MAKERS_TITLE, SEQUENCE_TITLE, type Table } from './reports';
@@ -107,9 +108,10 @@ export function scopeTables(project: Project, library: Part[], tables: Table[], 
   const panelOf = panelResolver(project);
   const kept = (ref: string) => keep.has(panelOf(ref));
   return tables.map(t => {
-    if (t.title === 'Distinta materiali') return bomReport(project, library, kept);
-    if (t.title === PURCHASE_TITLE) return purchaseReport(project, library, kept);
-    if (t.title === MAKERS_TITLE) return manufacturerReport(project, library, kept);
+    // Le parti nei riquadri «Non montato» non si ordinano
+    if (t.title === 'Distinta materiali') return bomReport(fittedProject(project), library, kept);
+    if (t.title === PURCHASE_TITLE) return purchaseReport(fittedProject(project), library, kept);
+    if (t.title === MAKERS_TITLE) return manufacturerReport(fittedProject(project), library, kept);
     const cols = REF_COLUMNS[t.title];
     if (!cols) return t;
     const idx = [...new Set(cols.flatMap(c => t.columns.flatMap((x, i) => (x === c ? [i] : []))))];

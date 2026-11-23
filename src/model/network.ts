@@ -639,7 +639,8 @@ export function allCableTags(project: Project, nets?: Net[]): string[] {
  * con i rimandi ne prende sigla, tipo, lunghezza e articolo. Restituisce quanti.
  */
 export function assignBusCableTags(project: Project, only?: Set<string>): number {
-  const todo = project.pages.flatMap(pg => pg.elements.flatMap(e => (e.kind === 'wire' && e.bus && !e.busCable?.tag && (!only || only.has(e.id)) ? [{ pg, e }] : [])));
+  const freed = only ? 0 : releaseClashingAutoTags(project);
+  const todo =project.pages.flatMap(pg => pg.elements.flatMap(e => (e.kind === 'wire' && e.bus && !e.busCable?.tag && (!only || only.has(e.id)) ? [{ pg, e }] : [])));
   if (!todo.length) return 0;
   // Cavi già siglati con i tratti uniti dai rimandi
   const groupOf = new Map<Wire, Wire[]>();
@@ -652,6 +653,38 @@ export function assignBusCableTags(project: Project, only?: Set<string>): number
     const x = Math.min(...e.points.map(p => p.x));
     e.busCable = { ...e.busCable, tag: nextTagFor(project, 'W', pg, x, allCableTags(project)), auto: true };
     n++;
+  }
+  return n;
+}
+
+/**
+ * Sigle automatiche dei cavi di rete che coincidono con quella di un altro cavo (un cavo multipolare
+ * del progetto, una sigla scritta a mano o un altro cavo di rete con la stessa sigla automatica): si
+ * tolgono, e assignBusCableTags dà la prima sigla libera della pagina. Le sigle scritte a mano non
+ * cambiano mai. Restituisce quanti tratti perdono la sigla.
+ */
+function releaseClashingAutoTags(project: Project): number {
+  if (!project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus && e.busCable?.auto))) return 0;
+  const groups = busCableGroups(project).map(g => g.wires.map(w => w.wire));
+  // Sigle che restano: cavi del progetto e sigle scritte a mano sui cavi di rete
+  const reserved = new Set((project.cables ?? []).map(c => c.tag));
+  for (const ws of groups) for (const w of ws) if (w.busCable?.tag && !w.busCable.auto) reserved.add(w.busCable.tag);
+  const claimed = new Set<string>();
+  let n = 0;
+  for (const ws of groups) {
+    const mine = new Set<string>();
+    for (const w of ws) {
+      const t = w.busCable?.tag;
+      if (!t || !w.busCable!.auto) continue;
+      // La stessa sigla su più tratti dello stesso cavo va bene; su un altro cavo no
+      if (reserved.has(t) || (claimed.has(t) && !mine.has(t))) {
+        const b = { ...w.busCable! };
+        delete b.tag; delete b.auto;
+        w.busCable = b;
+        n++;
+      } else mine.add(t);
+    }
+    for (const t of mine) claimed.add(t);
   }
   return n;
 }

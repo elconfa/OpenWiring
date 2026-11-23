@@ -46,6 +46,15 @@ export const DRAWING_STYLES: Record<DrawingStyleKind, DrawingStyleDef> = {
     ],
     columns: [{ key: 'description', label: tn('Descrizioni dei dispositivi') }, { key: 'picture', label: tn('Foto degli articoli') }, { key: 'cableText', label: tn('Tipo e lunghezza dei cavi') }],
   },
+  field: {
+    title: tn('Collegamenti in campo'),
+    sizes: [
+      { key: 'titleSize', label: tn('Titolo'), def: 4 },
+      { key: 'textSize', label: tn('Morsetti, conduttori e pin'), def: 2 },
+      { key: 'tableSize', label: tn('Sigle e descrizioni dei dispositivi e dei cavi'), def: 2.4 },
+    ],
+    columns: [{ key: 'wireNo', label: tn('Numeri filo') }, { key: 'cableText', label: tn('Tipo, sezione e lunghezza dei cavi') }, { key: 'description', label: tn('Descrizioni dei dispositivi') }],
+  },
   plc: {
     title: tn('Panoramiche PLC'),
     sizes: [

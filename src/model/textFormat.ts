@@ -24,7 +24,7 @@ import type { ProjectInfo, IoKind, WireDef, CableLine, CableLineShow, CableLabel
 const TYPE_NAMES: Partial<Record<PageType, string>> = { multiline: 'schema', singleline: 'unifilare', network: 'rete' };
 const TYPE_OF: Record<string, PageType> = { schema: 'multiline', multifilare: 'multiline', unifilare: 'singleline', rete: 'network' };
 /** Pagine generate dal programma: si esporta solo l'intestazione */
-const GENERATED: PageType[] = ['cover', 'plc', 'strip', 'layout', 'report', 'notes', 'cable', 'connector', 'system'];
+const GENERATED: PageType[] = ['cover', 'plc', 'strip', 'layout', 'report', 'notes', 'cable', 'connector', 'system', 'field'];
 
 const SYMBOL_ATTRS: [string, keyof SymbolInstance][] = [
   ['descr', 'description'], ['dati', 'techData'], ['articolo', 'partNr'], ['costruttore', 'manufacturer'], ['tipo', 'typeNr'],
@@ -74,6 +74,8 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 #     [costruttore=…] [tipo=…] [ordine=…] [note="…"] [luogo=…] [funzione=…] [canale=DI0]
 #     [variabile=…] [commento="…"] [ip=…] [indirizzo=…] [pin="1=13;2=14"] [numerofilo=passa|cambia]
 #     [testi=si|no] [immaginecontatti=sotto|simbolo] [versotesti=auto|parallelo|perpendicolare]
+#     [tabellasotto=-K1]   (tabella materiali agganciata sotto quella di -K1 nella stessa pagina; la tabella si
+#     mostra con mostra={"parts":true})
 #     [articoli=JSON] [proprieta=JSON] [mostra=JSON] [postesti=JSON] [interfacce=JSON]   (articoli aggiuntivi, proprietà,
 #     testi mostrati/nascosti e testi spostati: scritti dal programma, da lasciare come sono se non servono)
 #     <id> è l'identificativo del simbolo (vedi catalogo); <sigla> con il trattino: -2K1, -X1:3;
@@ -111,6 +113,10 @@ export const TEXT_HELP = `# OpenWiring testo v1 — pagine di schema in formato 
 #     es. /1 sopra e /2 sotto per i morsetti), L1 o +24V (potenziale/rimando), oppure x,y.
 #     Se il punto non è indicato si usa quello più vicino all'altro estremo. Il percorso è a L.
 # testo @x,y [h=3] [l=60] [rot=90] [allinea=sinistra|centro|destra] "<testo>"   (l: larghezza del riquadro in mm, a capo da solo)
+# blocco tensioni @x,y   (tabella «Tensioni utilizzate nello schema elettrico», angolo in alto a sinistra)
+# blocco stazione @x,y ["PLC1"]   (miniatura dell'isola I/O con la freccia sui moduli usati nella pagina; senza nome la stazione della pagina)
+# blocco revisioni @x,y [colonne=16]   (stato revisione fogli, di solito sulla copertina: sotto ogni foglio l'ultima revisione che l'ha cambiato)
+# nonmontato @x,y <larghezza>x<altezza>   (riquadro grigio: le parti dentro restano sullo schema ma non si montano: niente distinta, targhette, liste)
 # riquadro +<luogo> @x,y <larghezza>x<altezza> [scritta=dx,dy] [solosigla[=no]] [aspetto="linea=#c00;spessore=0,3;h=2,8;testo=#000"]   (riquadro di luogo; scritta rispetto all'angolo in alto a sinistra)
 # lineacavo -<sigla> x,y x,y [principale] [testi="sigla=si;tipo=no;sezione=no;descrizione=no;conduttori=si"]
 #     [posizione=prima|dopo|sopra-inizio|sopra-fine|sotto-inizio|sotto-fine] [spostamento=x,y]
@@ -366,6 +372,7 @@ export function pagesToText(project: Project, opts: TextExportOptions = {}): str
       if (has(e.show)) parts.push(`mostra=${json(e.show)}`);
       if (has(e.textOffsets)) parts.push(`postesti=${json(e.textOffsets)}`);
       if (e.contactImage) parts.push(`immaginecontatti=${e.contactImage === 'bottom' ? 'sotto' : 'simbolo'}`);
+      if (e.partsLink) { const m = page.elements.find(x => x.id === e.partsLink); if (m?.kind === 'symbol' && m.tag) parts.push(`tabellasotto=${bare(`-${m.tag}`)}`); }
       if (e.termText) parts.push(`versotesti=${TERM_TEXT[e.termText]}`);
       const mine = pins.filter(x => x.inst === e);
       const comment = sym ? `${sym.name}${mine.length ? ` · ${mine.map(x => `${sym.role === 'potential' || sym.role === 'link' ? '' : x.label || `/${x.pinId}`} (${pt(x.p)}${DIR_ARROW[x.dir]})`.trim()).join(' ')}` : ''}` : 'simbolo sconosciuto';
@@ -421,6 +428,10 @@ export function pagesToText(project: Project, opts: TextExportOptions = {}): str
     }
     for (const e of page.elements) {
       if (e.kind === 'text') out.push(`  testo @${pt(e)}${e.size !== 3 ? ` h=${num(e.size)}` : ''}${e.w ? ` l=${num(e.w)}` : ''}${e.rot ? ` rot=${num(e.rot)}` : ''}${e.align ? ` allinea=${ALIGN_TEXT[e.align]}` : ''} ${q(e.text)}`);
+      else if (e.kind === 'nofit') out.push(`  nonmontato @${pt(e)} ${num(e.w)}x${num(e.h)}   # le parti dentro non si montano`);
+      else if (e.kind === 'block' && e.block === 'revgrid') out.push(`  blocco revisioni @${pt(e)}${e.cols ? ` colonne=${e.cols}` : ''}   # stato revisione fogli: l'ultima revisione di ogni foglio`);
+      else if (e.kind === 'block' && e.block === 'station') out.push(`  blocco stazione @${pt(e)}${e.station ? ` ${q(e.station)}` : ''}   # miniatura dell'isola I/O con la freccia sui moduli usati nella pagina`);
+      else if (e.kind === 'block') out.push(`  blocco tensioni @${pt(e)}   # tabella delle tensioni utilizzate (righe in Progetto ▸ Tensioni utilizzate)`);
       else if (e.kind === 'image') out.push(`  # immagine ${q(e.name ?? '')} @${pt(e)} ${num(e.w)}x${num(e.h)} (resta sulla pagina, non si modifica dal testo)`);
       else if (e.kind === 'zone') { const pn = panels.get(e.panelId); out.push(`  riquadro +${bare(pn?.code ?? '?')} @${pt(e)} ${num(e.w)}x${num(e.h)}${e.label ? ` scritta=${pt(e.label)}` : ''}${e.codeOnly ? ' solosigla' : e.codeOnly === false ? ' solosigla=no' : ''}${lookText(e.look)}${pn?.name ? `   # ${pn.name}` : ''}`); }
       else if (e.kind === 'wiredef') out.push(`  sezionefili ${pt(e.points[0])} ${pt(e.points[1])}${e.cross ? ` sezione=${bare(e.cross)}` : ''}${e.label ? ` scritta=${pt(e.label)}` : ''}`);
@@ -609,6 +620,8 @@ export function importPagesText(project: Project, text: string): TextImportResul
   const errors: TextIssue[] = [], warnings: TextIssue[] = [];
   const drafts: PageDraft[] = [];
   const linkTargets: { inst: SymbolInstance; target: string; line: number }[] = [];
+  // Tabelle materiali agganciate sotto quella di un altro dispositivo della stessa pagina (tabellasotto=-K1)
+  const partLinks: { inst: SymbolInstance; tag: string; line: number }[] = [];
   const pairTargets: { inst: SymbolInstance; target: string; line: number }[] = [];
   const pendingOrders: { line: number; refs: string[] }[] = [];
   const projectLines: { line: number; cmd: string; attrs: Record<string, string>; words: string[] }[] = [];
@@ -700,6 +713,8 @@ export function importPagesText(project: Project, text: string): TextImportResul
             if (val === undefined) err(`${k}: JSON non valido`);
             else if (k === 'interfacce') inst.netIfs = val;
             else if (k === 'articoli') inst.extraParts = val; else if (k === 'proprieta') inst.userProps = val; else if (k === 'mostra') inst.show = val; else inst.textOffsets = val;
+          } else if (k === 'tabellasotto') {
+            partLinks.push({ inst, tag: v.replace(/^-/, ''), line });
           } else if (k === 'immaginecontatti') {
             if (/^sotto$/i.test(v)) inst.contactImage = 'bottom'; else if (/^simbolo$/i.test(v)) inst.contactImage = 'symbol'; else err('immaginecontatti deve essere sotto o simbolo');
           } else if (k === 'versotesti') {
@@ -765,6 +780,25 @@ export function importPagesText(project: Project, text: string): TextImportResul
         }
         if (!at || s === undefined) return err('formato: testo @x,y [h=3] [l=60] "testo"');
         page.elements.push({ kind: 'text', id: uid('t'), x: at.x, y: at.y, text: s, size: h, ...(wd ? { w: wd } : {}), ...(rot ? { rot } : {}), ...(align ? { align } : {}) });
+        return;
+      }
+      case 'blocco': {
+        const at = parsePt(t[2]?.s ?? ''), what = t[1]?.s.toLowerCase();
+        if ((what !== 'tensioni' && what !== 'stazione' && what !== 'revisioni') || !at) return err('formato: blocco tensioni @x,y  |  blocco stazione @x,y ["stazione"]  |  blocco revisioni @x,y [colonne=16]');
+        if (what === 'revisioni') {
+          const c = t.slice(3).map(tok => kv(tok)).find(k => k?.[0] === 'colonne');
+          const cols = c ? parseInt(c[1], 10) || undefined : undefined;
+          page.elements.push({ kind: 'block', id: uid('b'), x: at.x, y: at.y, block: 'revgrid', ...(cols ? { cols } : {}) });
+          return;
+        }
+        const station = what === 'stazione' ? t[3]?.s : undefined;
+        page.elements.push({ kind: 'block', id: uid('b'), x: at.x, y: at.y, block: what === 'stazione' ? 'station' : 'voltages', ...(station ? { station } : {}) });
+        return;
+      }
+      case 'nonmontato': {
+        const at = parsePt(t[1]?.s ?? ''), m = /^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)$/.exec(t[2]?.s ?? '');
+        if (!at || !m) return err('formato: nonmontato @x,y <larghezza>x<altezza>');
+        page.elements.push({ kind: 'nofit', id: uid('nf'), x: at.x, y: at.y, w: parseFloat(m[1]), h: parseFloat(m[2]) });
         return;
       }
       case 'riquadro': {
@@ -951,6 +985,11 @@ export function importPagesText(project: Project, text: string): TextImportResul
       if (xs.some(p => p.x < 0 || p.y < 0 || p.x > PAGE_W || p.y > PAGE_H)) { warnings.push({ line: draft.line, msg: `pagina ${page.name}: un elemento esce dal foglio` }); break; }
     }
     result.elements += page.elements.length;
+  }
+  for (const { inst, tag, line } of partLinks) {
+    const pg = work.pages.find(p => p.elements.includes(inst));
+    const m = pg?.elements.find(x => x.kind === 'symbol' && x !== inst && x.tag === tag && getSymbol(x.symbolId, work)?.role !== 'terminal');
+    if (m) inst.partsLink = m.id; else errors.push({ line, msg: `tabellasotto=-${tag}: nessun dispositivo -${tag} nella stessa pagina` });
   }
   // Abbinamenti scritti dei rimandi (con=<pagina>[@x,y] o con=-), anche verso pagine non nel testo
   for (const { inst, target, line } of linkTargets) {

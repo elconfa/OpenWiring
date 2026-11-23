@@ -21,7 +21,7 @@ export interface ListEntry {
   /** Pagine che la lista avrebbe dopo l'aggiornamento (0 = lista vuota) */
   need: number;
   /** Finestra della grafica della pagina: impaginazione della lista o dimensioni dei testi delle morsettiere */
-  style?: 'report' | 'strip' | 'cable' | 'connector' | 'system' | 'plc';
+  style?: 'report' | 'strip' | 'cable' | 'connector' | 'system' | 'plc' | 'field';
 }
 
 /** Gruppo delle pagine di una lista (indice e legenda hanno il loro) */
@@ -43,6 +43,7 @@ export function listEntries(p: Project, library: Part[] = [], tables: Table[] = 
   if (legend) out.push(rep(legend));
   out.push(
     { key: 'strip', title: groupName('strip'), pages: pagesOf('strip'), need: allStrips(p).reduce((n, s) => n + Math.max(1, Math.ceil(stripRows(p, s).length / per)), 0), style: 'strip' },
+    { key: 'field', title: groupName('field'), pages: pagesOf('field'), need: drawingItems(p, 'field').length, style: 'field' },
     { key: 'cable', title: groupName('cable'), pages: pagesOf('cable'), need: drawingItems(p, 'cable', library).length, style: 'cable' },
     { key: 'connector', title: groupName('connector'), pages: pagesOf('connector'), need: drawingItems(p, 'connector').length, style: 'connector' },
     { key: 'system', title: groupName('system'), pages: pagesOf('system'), need: drawingItems(p, 'system').length, style: 'system' },
@@ -73,7 +74,7 @@ export function updateList(p: Project, key: PageGroup, library: Part[] = []): { 
     return syncReportPages(p, projectReports(p, library), [title], library);
   }
   if (key === 'strip') return syncStripPages(p);
-  if (key === 'cable' || key === 'connector' || key === 'system') return syncDrawingPages(p, key, library);
+  if (key === 'cable' || key === 'connector' || key === 'system' || key === 'field') return syncDrawingPages(p, key, library);
   if (key === 'plc') return syncOverviewPages(p);
   return { added: 0, removed: 0 };
 }
@@ -104,4 +105,4 @@ export function updateAllLists(p: Project, library: Part[] = []): { added: numbe
 
 /** Pagina generata di una lista con «Personalizza la lista»: liste, morsettiere, cavi, connettori, schema d'insieme, panoramiche PLC */
 export const isListPage = (pg: Pick<Page, 'type' | 'report' | 'cardId'>) =>
-  (pg.type === 'report' && !!pg.report) || pg.type === 'strip' || pg.type === 'cable' || pg.type === 'connector' || pg.type === 'system' || (pg.type === 'plc' && !!pg.cardId);
+  (pg.type === 'report' && !!pg.report) || pg.type === 'strip' || pg.type === 'cable' || pg.type === 'connector' || pg.type === 'system' || pg.type === 'field' || (pg.type === 'plc' && !!pg.cardId);

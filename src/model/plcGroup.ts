@@ -6,6 +6,7 @@ import type { IoKind, Page, PlcCard, Project, SymbolInstance } from './types';
 import { cardByTag, cardType, parseChannel, usedChannels } from './plc';
 import { plcGroupStep, type PlcTerms } from './symbols';
 import { toWorld, uid } from './geometry';
+import { tn } from '../i18n/ui';
 
 export interface PlcGroupCfg {
   /** Sigla della scheda */
@@ -129,3 +130,41 @@ export function firstFreeChannel(project: Project, card: PlcCard, kind: IoKind, 
 }
 
 export const newGroupId = () => uid('g');
+
+/**
+ * Separa il gruppo (dentro un commit): ogni canale diventa un punto I/O a sé, con lo stesso canale,
+ * pin, variabile e commento e con la sigla della scheda, da spostare sotto il suo circuito.
+ * Restituisce gli id dei canali.
+ */
+export function splitPlcGroup(page: Page, gid: string): string[] {
+  const m = groupMembers(page, gid);
+  for (const e of m) {
+    delete e.plcGroup;
+    // La sigla della scheda su ogni canale (nel gruppo stava solo sul primo)
+    if (e.show) { const s = { ...e.show }; delete s.tag; if (Object.keys(s).length) e.show = s; else delete e.show; }
+  }
+  return m.map(e => e.id);
+}
+
+/**
+ * Riunisce in un gruppo (dentro un commit) i canali singoli scelti della stessa scheda, con lo stesso
+ * simbolo (ingressi o uscite, morsetti per canale) e la stessa rotazione: nell'ordine lungo il gruppo,
+ * ognuno con il suo canale, allineati a partire dal primo. Restituisce l'id del gruppo o il motivo.
+ */
+export function joinPlcChannels(project: Project, page: Page, ids: string[]): { gid?: string; error?: string; warnings?: string[] } {
+  const sel = page.elements.filter((e): e is SymbolInstance => e.kind === 'symbol' && ids.includes(e.id) && e.symbolId.startsWith('plc_ch_') && !e.plcGroup);
+  if (sel.length < 2) return { error: tn('Scegli almeno due canali singoli di gruppo I/O (separati con «Separa in canali»)') };
+  const a = sel[0];
+  if (sel.some(e => e.tag !== a.tag)) return { error: tn('I canali devono essere della stessa scheda') };
+  if (sel.some(e => e.symbolId !== a.symbolId)) return { error: tn('I canali devono essere tutti ingressi o tutte uscite, con gli stessi morsetti per canale') };
+  if (sel.some(e => e.rot !== a.rot || !!e.mirror !== !!a.mirror)) return { error: tn('I canali devono avere la stessa rotazione') };
+  // Ordine lungo l'asse del gruppo (verso dei canali secondo la rotazione)
+  const o = toWorld({ x: 0, y: 0, rot: a.rot, mirror: a.mirror }, { x: 0, y: 0 }), s = toWorld({ x: 0, y: 0, rot: a.rot, mirror: a.mirror }, { x: 1, y: 0 });
+  const ax = { x: s.x - o.x, y: s.y - o.y };
+  sel.sort((p, q) => (p.x * ax.x + p.y * ax.y) - (q.x * ax.x + q.y * ax.y));
+  const gid = newGroupId();
+  sel.forEach((e, i) => { e.plcGroup = { id: gid, index: i, count: sel.length, own: true }; });
+  const cfg = groupConfig(page, gid)!;
+  const { warnings } = buildPlcGroup(project, page, gid, cfg);
+  return { gid, warnings };
+}

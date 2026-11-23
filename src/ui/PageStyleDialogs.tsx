@@ -90,6 +90,13 @@ export function CoverDialog() {
               <Num value={s.rowGap} def={D.rowGap} onCommit={v => set({ rowGap: v || undefined })} />
             </td></tr>
             <tr><td className="prop-name">{tx('Revisioni elencate (0 = nessuna tabella)')}</td><td className="prop-value"><Num value={s.revisions} def={D.revisions} onCommit={v => set({ revisions: v === undefined ? undefined : Math.round(v) })} /></td></tr>
+            <tr><td className="prop-name">{tx('Stato revisione fogli')}</td><td className="prop-value">{(() => {
+              const cover = project.pages.find(pg => pg.type === 'cover');
+              const has = cover?.elements.some(e => e.kind === 'block' && e.block === 'revgrid');
+              return has ? <span className="muted small">{tx('sulla copertina (si sposta e si elimina dalla pagina)')}</span>
+                : <button disabled={!cover} onClick={() => { st().setPage(cover!.id); st().insertBlock('revgrid'); close(); }}
+                  title={tx('Griglia dei fogli con l\'ultima revisione di ciascuno: casella vuota = prima emissione, # = foglio non presente')}>{tx('Inserisci sulla copertina')}</button>;
+            })()}</td></tr>
             <tr><td className="prop-name">{tx('Riquadri delle firme (separati da virgole, vuoto = nessuno)')}</td><td className="prop-value">
               <Field value={(s.signatures ?? D.signatures).join(', ')} onCommit={v => set({ signatures: v.split(',').map(x => x.trim()).filter(Boolean) })} />
             </td></tr>

@@ -1,10 +1,12 @@
 // Liste di progetto: distinta materiali, lista dispositivi, morsetti, connessioni.
+import { notFitted, fittedProject } from './notFitted';
 import { SEQ_MODE_NAMES } from './wiringOrder';
+import { cableEnds, cableEndsText, isCableConnector } from './cableEnds';
 import { FRAME, type Project, type Part, type SymbolDef, type Cable, type Jumper, type ExtraPart } from './types';
 import { buildDevices, deviceInfo, designation, partsIndex, locationOf, allPlaced as placedSymbols, type DeviceInfo } from './devices';
 import { terminalBomItems, terminalConnections, allStrips, stripData, stripAccessories } from './terminals';
 import { cableInfos, cableSection, conductorEnds, cableByPiece } from './cables';
-import { wireList, ferrule, layoutBomItems, ductFill, type DuctFill } from './layout';
+import { wireList, ferrule, layoutBomItems, ductFill, positionRows, type DuctFill } from './layout';
 import { networkLinks, networkNodes, devicePanels, busCableRows, portText, ipPlan, netmask, networkAddressRows } from './network';
 import { connectorRows, allConnectors, pinCount } from './connectors';
 import { connectorType } from './connectorTypes';
@@ -84,6 +86,9 @@ export function bomReport(project: Project, library: Part[] = [], keep?: (tag: s
     // Set di articoli (connettore = frutto + custodia + pressacavo): al suo posto i componenti
     const kit = info.partNr ? (info.part ?? parts.get(info.partNr))?.kit : undefined;
     if (kit?.length && depth < 4) {
+      // Articolo con il suo codice d'ordine (es. fotocellula con il catarifrangente nel set): si compra
+      // anch'esso insieme ai componenti; il set senza codice proprio è solo il contenitore dei componenti
+      if (info.orderNr?.trim()) add(info, tag, qty, refs, 4);
       for (const k of kit) {
         if (!k.partNr || k.partNr === info.partNr) continue;
         const part = parts.get(k.partNr);
@@ -224,10 +229,16 @@ export function deviceReport(project: Project, library: Part[] = []): Table {
 /** Ponticello come scritto nelle liste dei morsetti, es. "Pettine 1-2-3" */
 const jumperText = (j: Jumper) => `${j.kind === 'comb' ? 'Pettine' : 'Fisso'} ${j.terminals.join('-')}`;
 
+/** Morsetto non montato (tutti i suoi elementi in un riquadro «Non montato»): resta in lista con la nota */
+const termOff = (project: Project, c: { row: { els: { inst: { id: string } }[] } }) => {
+  const ids = notFitted(project).ids;
+  return c.row.els.length > 0 && c.row.els.every(e => ids.has(e.inst.id));
+};
+
 export function terminalReport(project: Project): Table {
   const conns = terminalConnections(project);
   const rows = conns.map(c => [
-    c.row.strip, c.row.no, c.row.level, c.row.spare || c.spareWire ? 'Riserva' : c.type,
+    c.row.strip, c.row.no, c.row.level, termOff(project, c) ? 'Non montato' : c.row.spare || c.spareWire ? 'Riserva' : c.type,
     c.ext, c.extWire, c.int, c.intWire, c.jumper ? jumperText(c.jumper) : '', c.locations.map(l => l.loc).join(', '),
     // Morsetto a più piani: un solo articolo, scritto sul primo piano
     c.sameAs ? `= ${c.sameAs}` : c.partNr ?? '',
@@ -329,7 +340,8 @@ export function networkNodeReport(project: Project): Table {
 export function connectorReport(project: Project, library: Part[] = []): Table {
   const rows: string[][] = [];
   const goto: Record<number, string | undefined>[] = [];
-  for (const c of allConnectors(project)) {
+  // I connettori che fanno parte di un cavo (preconfezionato) non sono connettori a sé: stanno nella lista cavi
+  for (const c of allConnectors(project).filter(x => !isCableConnector(project, x))) {
     const n = pinCount(project, c, library);
     const d = project.connectors?.[c];
     for (const r of connectorRows(project, c)) {
@@ -343,20 +355,22 @@ export function connectorReport(project: Project, library: Part[] = []): Table {
 /** Lista cavi: un cavo per riga con tipo, conduttori usati/totali, lunghezza ed estremità */
 export function cableReport(project: Project): Table {
   const infos = cableInfos(project).sort((a, b) => a.cable.tag.localeCompare(b.cable.tag, undefined, { numeric: true }));
+  const ends = cableEnds(project);
   const rows = infos.map(i => {
     const c = i.cable;
     return [`-${c.tag}`, c.type ?? '', cableSection(c), `${i.conductors.length}/${c.conductors.length}`, i.spare.join(' '),
       c.length !== undefined ? String(c.length).replace('.', ',') : '', c.from ?? '', c.to ?? '', c.description ?? '',
-      i.lines.map(l => l.loc).join(', '), c.partNr ?? ''];
+      (i.lines.length ? i.lines.map(l => l.loc) : [...new Set(i.conductors.map(k => k.loc))]).join(', '), c.partNr ?? '', cableEndsText(ends.get(c.id))];
   });
-  const goto = infos.map(i => ({ 9: i.lines[0]?.loc.slice(0, i.lines[0].loc.lastIndexOf('.')) }));
+  // Posizione: la prima linea del cavo, altrimenti il bus fili con il suo nome
+  const goto = infos.map(i => { const loc = i.lines[0]?.loc ?? i.conductors[0]?.loc; return { 9: loc?.slice(0, loc.lastIndexOf('.')) }; });
   // Cavi di rete: uno per collegamento bus, con le porte alle estremità
   for (const r of busCableRows(project)) {
     rows.push([r.tag ? `-${r.tag}` : '', r.type, r.protocol, '', '', r.length !== undefined ? String(r.length).replace('.', ',') : '',
-      portText(r.a), portText(r.b), `Cavo ${r.protocol}`, r.loc, r.partNr ?? '']);
+      portText(r.a), portText(r.b), `Cavo ${r.protocol}`, r.loc, r.partNr ?? '', '']);
     goto.push({ 9: r.page.name });
   }
-  return { goto, title: 'Lista cavi', columns: ['Cavo', 'Tipo', 'Formazione', 'Usati', 'Liberi', 'Lunghezza (m)', 'Da', 'A', 'Descrizione', 'Posizione', 'Articolo'], rows };
+  return { goto, title: 'Lista cavi', columns: ['Cavo', 'Tipo', 'Formazione', 'Usati', 'Liberi', 'Lunghezza (m)', 'Da', 'A', 'Descrizione', 'Posizione', 'Articolo', 'Estremità'], rows };
 }
 
 export const BUNDLE_TITLE = 'Collegamenti bus fili';
@@ -588,7 +602,7 @@ export function terminalSequenceReport(project: Project): Table {
       const first = g.find(c => !c.row.spare && !c.spareWire) ?? g[0];
       const levels = g.length > 1 ? g.map(c => c.row.level).join('/') : '';
       const jumpers = [...new Set(g.map(c => (c.jumper ? jumperText(c.jumper) : '')).filter(Boolean))].join('; ');
-      piece(no, levels, first.row.spare || first.spareWire ? 'Riserva' : first.type, first.partNr ?? '', jumpers, [...new Set(g.flatMap(c => c.locations.map(l => l.loc)))]);
+      piece(no, levels, g.every(c => termOff(project, c)) ? 'Non montato' : first.row.spare || first.spareWire ? 'Riserva' : first.type, first.partNr ?? '', jumpers, [...new Set(g.flatMap(c => c.locations.map(l => l.loc)))]);
       if (g.some(c => c.separator)) piece('', '', 'Separatore', d.separatorPartNr ?? '');
     }
     for (let i = 0; i < (endPlate?.qty ?? 0); i++) piece('', '', 'Piastra di chiusura', endPlate!.partNr);
@@ -633,12 +647,33 @@ export function ductFillReport(fill: DuctFill[]): Table {
   };
 }
 
+export const POSITIONS_TITLE = 'Legenda posizioni quadro';
+
+/** Legenda delle posizioni del layout (punto 174): n°, descrizione e sigla per luogo e zona */
+export function positionReport(project: Project, library: Part[] = []): Table {
+  const rows = positionRows(project, library);
+  return {
+    title: POSITIONS_TITLE,
+    columns: ['Pos.', 'Descrizione', 'Sigla', 'Articolo', 'Zona', 'Luogo', 'Pagina'],
+    rows: rows.map(r => [String(r.pos), r.description, `-${r.tag}`, r.partNr, r.zone, r.panel ? `+${r.panel}` : '', r.pageName]),
+    goto: rows.map(r => ({ 6: r.pageName })),
+  };
+}
+
 export function projectReports(project: Project, library: Part[] = []): Table[] {
   return withNetlistCache(project, () => projectReportsNow(project, library));
 }
 
-function projectReportsNow(project: Project, library: Part[]): Table[] {
-  const out = [pageIndexReport(project), legendReport(project), bomReport(project, library), purchaseReport(project, library), manufacturerReport(project, library), deviceReport(project, library), terminalReport(project), terminalSequenceReport(project), connectionReport(project), wireListReport(project)];
+function projectReportsNow(full: Project, library: Part[]): Table[] {
+  // Le parti nei riquadri «Non montato» non vanno nelle liste (i morsetti sì, con la nota): si usa il
+  // progetto con le sole parti montate, tranne per indice, legenda e liste dei morsetti
+  const project = fittedProject(full);
+  const fitted = <T,>(f: () => T) => (project === full ? f() : withNetlistCache(project, f));
+  return fitted(() => projectReportsOf(full, project, library));
+}
+
+function projectReportsOf(full: Project, project: Project, library: Part[]): Table[] {
+  const out = [pageIndexReport(full), legendReport(full), bomReport(project, library), purchaseReport(project, library), manufacturerReport(project, library), deviceReport(project, library), withNetlistCache(full, () => terminalReport(full)), withNetlistCache(full, () => terminalSequenceReport(full)), connectionReport(project), wireListReport(project)];
   if (allConnectors(project).length) out.push(connectorReport(project, library));
   if (project.distributors?.length) out.push(distributorReport(project), distributorWiringReport(project));
   const hasBus = project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus));
@@ -655,6 +690,7 @@ function projectReportsNow(project: Project, library: Part[]): Table[] {
   if (docs.rows.length) out.push(docs);
   const fill = ductFill(project);
   if (fill.some(f => f.wires)) out.push(ductFillReport(fill));
+  if (full.pages.some(pg => pg.layout?.items.some(it => it.pos !== undefined))) out.push(positionReport(full, library));
   // Liste personalizzate, dalle liste qui sopra
   for (const def of project.settings?.customLists ?? []) {
     const t = customListTable(out, def);

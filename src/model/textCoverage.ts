@@ -12,7 +12,7 @@ export const TEXT_COVERAGE = {
     partNr: 'articolo=', extraParts: 'articoli=', userProps: 'proprieta=', description: 'descr=', techData: 'dati=', manufacturer: 'costruttore=',
     typeNr: 'tipo=', orderNr: 'ordine=', note: 'note=', func: 'funzione=', loc: 'luogo=', showTexts: 'testi=', show: 'mostra=',
     plcChannel: 'canale=', wirePass: 'numerofilo=', linkTo: 'con=', linkStar: 'stella', pairOf: 'coppia=', pairCompact: 'ridotta', pairSide: 'afianco', pairSize: 'hcoppia=', plcGroup: 'no: i gruppi I/O PLC si inseriscono dall\'interfaccia',
-    plcSymbol: 'variabile=', plcComment: 'commento=', textOffsets: 'postesti=', contactImage: 'immaginecontatti=', termText: 'versotesti=',
+    plcSymbol: 'variabile=', plcComment: 'commento=', textOffsets: 'postesti=', contactImage: 'immaginecontatti=', partsLink: 'tabellasotto=', termText: 'versotesti=',
     netAddress: 'indirizzo=', ip: 'ip=', netIfs: 'interfacce=',
   } satisfies Coverage<SymbolInstance>,
   wire: {

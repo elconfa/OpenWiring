@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { FRAME } from '../model/types';
 import { pinLayout, type CableSheet, type ConnectorSheet, type DrawingData, type SystemSheet } from '../model/drawings';
+import { FIELD, type FieldSheet } from '../model/fieldSheet';
 import { tx } from '../i18n/ui';
 import { look } from './look';
 import { drawingStyleOf, type ResolvedDrawingStyle } from '../model/drawingStyle';
@@ -20,6 +21,7 @@ export function DrawingPage({ d, t, project }: { d: DrawingData; t: T; project: 
   const S = drawingStyleOf(project, d.kind);
   if (d.kind === 'cable') return d.data ? <CableDrawing c={d.data} t={t} S={S} /> : <Missing text={tx('Cavo eliminato: aggiorna i disegni dei cavi')} />;
   if (d.kind === 'connector') return <ConnectorDrawing c={d.data} t={t} S={S} />;
+  if (d.kind === 'field') return d.data ? <FieldDrawing f={d.data} t={t} S={S} /> : <Missing text={tx('Nessun cavo parte da questa morsettiera: aggiorna i collegamenti in campo')} />;
   return <SystemDrawing s={d.data} t={t} S={S} />;
 }
 
@@ -266,6 +268,96 @@ function SystemDrawing({ s, t, S }: { s: SystemSheet; t: T; S: ResolvedDrawingSt
               );
             })}
             {n.devices.length > DEV_MAX && <text x={p.x + 2} y={p.y + 9 + DEV_MAX * devH + 3} fontSize={1.8} fill={MUTED}>{tx('… e altri {0}', n.devices.length - DEV_MAX)}</text>}
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/** Righe di un testo lungo, a parole intere */
+function wrapWords(s: string, per: number): string[] {
+  const out: string[] = [];
+  let cur = '';
+  for (const w of s.split(/\s+/).filter(Boolean)) {
+    if (cur && (cur + ' ' + w).length > per) { out.push(cur); cur = w; } else cur = cur ? `${cur} ${w}` : w;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+/**
+ * Collegamenti morsettiera → campo (punto 173): in alto i morsetti in fila con il numero filo, sotto i
+ * cavi (riquadro tratteggiato con sigla, tipo, sezione e schermo; nome o colore di ogni conduttore vicino
+ * al morsetto), in fondo i dispositivi in campo con i pin, la sigla e la descrizione scritte in verticale
+ */
+function FieldDrawing({ f, t, S }: { f: FieldSheet; t: T; S: ResolvedDrawingStyle }) {
+  const P = FIELD.pitch, size = S.textSize, big = S.tableSize;
+  const yT = FRAME.top + 34, termH = 6;
+  const yC0 = yT + termH + 16, yC1 = yC0 + 46;
+  const yD = FRAME.bottom - 54, yD1 = FRAME.bottom - 8;
+  const v = (x: number, y: number) => `rotate(-90 ${x} ${y})`;
+  // Posizione di ogni conduttore (centro della colonna)
+  let x = FIELD.left + FIELD.gap;
+  const placed = f.cables.map(c => {
+    const xs = c.cols.map((_k, i) => x + P / 2 + i * P);
+    x += c.cols.length * P + FIELD.gap;
+    return { c, xs };
+  });
+  const sub = [f.sheets > 1 ? `${t('Foglio')} ${f.sheet + 1}/${f.sheets}` : '', `${f.cables.length} ${t(f.cables.length === 1 ? 'cavo' : 'cavi')}`].filter(Boolean).join('  ·  ');
+  const devLines = (tag: string, w: number) => {
+    const per = Math.max(4, Math.floor((yD1 - yD - 10) / (big * 0.58)));
+    const fit = Math.max(1, Math.floor((w - 1.2) / (big * 1.2)));
+    const desc = S.show('description') ? wrapWords(t(f.devices[tag]?.description ?? ''), per) : [];
+    return [`-${tag}`, ...desc].slice(0, fit);
+  };
+  return (
+    <g>
+      <Title title={`${t('Collegamenti in campo')} -${f.strip}`} sub={sub} size={S.titleSize} />
+      <text x={FIELD.left - 2} y={yT + termH / 2 + big * 0.35} fontSize={big * 1.15} fontWeight={600} textAnchor="end" fill={look.ink}>{`-${f.strip}`}</text>
+      {placed.map(({ c, xs }, ci) => {
+        const x0 = xs[0] - P / 2 + 1, x1 = xs[xs.length - 1] + P / 2 - 1;
+        // Tratti dello stesso dispositivo uno accanto all'altro: un riquadro per tratto
+        const runs: { dev: string; from: number; to: number }[] = [];
+        c.cols.forEach((k, i) => { const r = runs[runs.length - 1]; if (k.dev && r && r.dev === k.dev && r.to === i - 1) r.to = i; else if (k.dev) runs.push({ dev: k.dev, from: i, to: i }); });
+        const cableText = [c.type, c.section && !c.type.includes(c.section) ? c.section : '', c.length !== undefined ? `${String(c.length).replace('.', ',')} m` : '', c.shield ? t('schermato') : ''].filter(Boolean).join(' · ');
+        return (
+          <g key={ci}>
+            {/* Morsetti con il numero filo sopra */}
+            {c.cols.map((k, i) => (
+              <g key={i}>
+                <rect x={xs[i] - (P - 1) / 2} y={yT} width={P - 1} height={termH} fill={look.c.paper} stroke={look.ink} strokeWidth={0.3} />
+                <text x={xs[i]} y={yT + termH / 2 + size * 0.35} fontSize={Math.min(size, (P - 1.5) / (Math.max(1, k.term.length) * 0.55))} textAnchor="middle" fill={look.ink}>{k.term}</text>
+                {S.show('wireNo') && k.wireNo && <text x={xs[i] + size * 0.35} y={yT - 1.2} fontSize={size} transform={v(xs[i] + size * 0.35, yT - 1.2)} fill={look.ink}>{k.wireNo}</text>}
+                {/* Conduttore: dal morsetto al pin del dispositivo (o libero) */}
+                <line x1={xs[i]} y1={yT + termH} x2={xs[i]} y2={k.dev ? yD : yD - 6} stroke={look.ink} strokeWidth={0.25} />
+                {!k.dev && <circle cx={xs[i]} cy={yD - 5.2} r={0.8} fill={look.c.paper} stroke={look.ink} strokeWidth={0.25} />}
+                <rect x={xs[i] + 0.3} y={yT + termH + 1.2} width={size * 0.9} height={Math.max(2, k.cond.length * size * 0.6)} fill={look.c.paper} />
+                <text x={xs[i] + 0.3 + size * 0.75} y={yT + termH + 1.4} fontSize={size * 0.9} textAnchor="end" transform={v(xs[i] + 0.3 + size * 0.75, yT + termH + 1.4)} fill={MUTED}>{k.cond}</text>
+              </g>
+            ))}
+            {/* Cavo: riquadro tratteggiato, schermo, sigla e tipo in verticale a sinistra */}
+            <rect x={x0} y={yC0} width={x1 - x0} height={yC1 - yC0} rx={1.5} fill="none" stroke={look.ink} strokeWidth={0.3} strokeDasharray="1.6 0.9" />
+            {c.shield && <ellipse cx={(x0 + x1) / 2} cy={yC0 + 4} rx={(x1 - x0) / 2 + 0.8} ry={1.4} fill="none" stroke={look.ink} strokeWidth={0.25} />}
+            <text x={x0 - 1.2 - (S.show('cableText') && cableText ? size * 1.1 : 0)} y={yC0 + 1} fontSize={big} fontWeight={600} textAnchor="end" transform={v(x0 - 1.2 - (S.show('cableText') && cableText ? size * 1.1 : 0), yC0 + 1)} fill={look.ink}>{`-${c.tag}`}</text>
+            {S.show('cableText') && cableText && <text x={x0 - 1.2} y={yC0 + 1} fontSize={size} textAnchor="end" transform={v(x0 - 1.2, yC0 + 1)} fill={look.ink}>{cut(cableText, (yC1 - yC0 + 8) / (size * 0.55))}</text>}
+            {/* Dispositivi in campo */}
+            {runs.map((r, ri) => {
+              const bx0 = xs[r.from] - P / 2 + 0.6, bx1 = xs[r.to] + P / 2 - 0.6;
+              const lines = devLines(r.dev, bx1 - bx0);
+              return (
+                <g key={ri}>
+                  <rect x={bx0} y={yD} width={bx1 - bx0} height={yD1 - yD} fill="none" stroke={look.ink} strokeWidth={0.4} />
+                  {c.cols.slice(r.from, r.to + 1).map((k, i) => <text key={i} x={xs[r.from + i]} y={yD + size + 1} fontSize={size} textAnchor="middle" fill={look.ink}>{k.pin}</text>)}
+                  {lines.map((s, li) => {
+                    const lx = bx0 + 1 + big * 0.85 + li * big * 1.2, ly = yD1 - 1.5;
+                    return <text key={li} x={lx} y={ly} fontSize={li ? big * 0.85 : big} fontWeight={li ? undefined : 600} transform={v(lx, ly)} fill={look.ink}>{s}</text>;
+                  })}
+                </g>
+              );
+            })}
           </g>
         );
       })}

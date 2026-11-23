@@ -29,6 +29,7 @@ const pins2 = (a: string, b: string, len = 16): PinDef[] => [P('1', 0, 0, a), P(
  * successivo c'è posto per 10 fili sulla griglia di 4 mm (componenti, fotocellule e sigle)
  */
 export const PLC_GROUP_STEP = 40, PLC_GROUP_H = 28;
+type PlcBoxField = 'plcAddress' | 'plcSymbol' | 'plcComment' | 'plcCard' | 'plcPlace' | 'plcPins';
 /** Morsetti per canale dei gruppi I/O PLC: 1, 2, oppure 4 (prese M12 delle stazioni I/O) */
 export type PlcTerms = 1 | 2 | 4;
 /** Passo dei canali secondo i morsetti: con 4 morsetti (uno ogni 16 mm) il canale è largo 64 mm */
@@ -57,13 +58,13 @@ function plcSlice(id: string, io: 'DI' | 'DO', n: PlcTerms): SymbolDef {
   // Con più morsetti per canale uno ogni 16 mm a destra del primo
   const xs = Array.from({ length: n }, (_, i) => i * 16);
   // Posizioni indicative (per l'editor dei simboli): sullo schema i testi seguono il riquadro textBox
-  const row = (f: 'plcAddress' | 'plcSymbol' | 'plcComment', y: number) => ({ f, x: x0 + 1.2, y: top + y, size: 2.5, anchor: 'start' as const });
+  const row = (f: PlcBoxField, y: number) => ({ f, x: x0 + 1.2, y: top + y, size: 2.5, anchor: 'start' as const });
   return {
     id, name: `Canale di gruppo ${io === 'DI' ? 'ingressi' : 'uscite'} PLC (${n} morsetti)`, category: 'PLC', letter: 'A', role: 'plc', io, hidden: true,
     prims: [L(x0, top, x1, top), L(x0, bottom, x1, bottom), L(x0, top, x0, bottom), L(x1, top, x1, bottom), ...xs.map(x => L(x, stub[0], x, stub[1]))],
     pins: xs.map((x, i) => P(String(i + 1), x, pinY, '', io === 'DI' ? 'up' : 'down')),
     tagPos: { x: x0 - 2, y: top + 6 },
-    fields: [row('plcAddress', 3.2), row('plcSymbol', 6.5), row('plcComment', 9.8)],
+    fields: [row('plcAddress', 3.2), row('plcSymbol', 6.5), row('plcComment', 9.8), row('plcCard', 13.1), row('plcPlace', 16.4), row('plcPins', 19.7)],
     textBox: { x: x0 + 1.2, y: top + 0.5, w: x1 - x0 - 2.4, h: H - 1 },
   };
 }
@@ -91,12 +92,12 @@ function plcSocketParts(up: boolean): SymbolDef[] {
   };
   const channel = (part: 'a' | 'b', io: 'DI' | 'DO'): SymbolDef => {
     const [bx0, bx1] = part === 'a' ? [x0, mid] : [mid, x1];
-    const row = (f: 'plcAddress' | 'plcSymbol' | 'plcComment', y: number) => ({ f, x: bx0 + 1.2, y: top + y, size: 2.5, anchor: 'start' as const });
+    const row = (f: PlcBoxField, y: number) => ({ f, x: bx0 + 1.2, y: top + y, size: 2.5, anchor: 'start' as const });
     return {
       id: `plc_m12_${part}_${io.toLowerCase()}_${side}`, name: `Canale ${part.toUpperCase()} della presa M12 (${io === 'DI' ? 'ingresso' : 'uscita'}, pin ${part === 'a' ? 4 : 2})`,
       category: 'PLC', letter: 'A', role: 'plc', io, hidden: true,
       prims: stubs(PLC_SOCKET_PINS[part]), pins: pins(PLC_SOCKET_PINS[part]), tagPos: { x: x0 - 2, y: top + 6 },
-      fields: [row('plcAddress', 3.2), row('plcSymbol', 6.5), row('plcComment', 9.8)],
+      fields: [row('plcAddress', 3.2), row('plcSymbol', 6.5), row('plcComment', 9.8), row('plcCard', 13.1), row('plcPlace', 16.4), row('plcPins', 19.7)],
       textBox: { x: bx0 + 1.2, y: top + 0.5, w: bx1 - bx0 - 2.4, h: H - 1 },
     };
   };

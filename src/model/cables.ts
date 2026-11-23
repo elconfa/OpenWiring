@@ -242,8 +242,10 @@ export function cableInfos(project: Project, nets?: { wireNet: Map<string, Net> 
   for (const c of project.cables ?? []) fixedNames.set(c.id, new Set(Object.values(c.fixed ?? {})));
   // Bus fili con il nome del cavo: il conduttore scritto nel bus (WH, BN…) vale per il cavo
   const busCond = new Map<string, Map<string, string>>();
+  let busTaps: ReturnType<typeof bundleTaps> | undefined;
   if (project.cables?.length && project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && isBundle(e)))) {
-    const { taps, names } = bundleTaps(project);
+    busTaps = bundleTaps(project);
+    const { taps, names } = busTaps;
     for (const t of taps) {
       const n = names.get(t.group)?.trim().replace(/^-/, '');
       const net = t.name && n ? nl.wireNet.get(t.wire.id) : undefined;
@@ -316,6 +318,23 @@ export function cableInfos(project: Project, nets?: { wireNet: Map<string, Net> 
         info.conductors.push(cond);
         remember(net, cond);
       }
+    }
+  }
+  // Bus fili con il nome del cavo, senza linea del cavo sui fili: il bus è il cavo. Ogni conduttore
+  // che entra nel bus (nome scritto dove il filo entra) è un conduttore del cavo, una volta per potenziale
+  if (busTaps) {
+    const byTag = new Map([...out.values()].map(i => [i.cable.tag, i]));
+    for (const t of busTaps.taps) {
+      const info = byTag.get(busTaps.names.get(t.group)?.trim().replace(/^-/, '') ?? '');
+      const name = t.name?.trim();
+      const net = nl.wireNet.get(t.wire.id);
+      if (!info || !name || !net) continue;
+      if (info.conductors.some(c => c.net?.id === net.id)) continue;
+      const pg = project.pages.find(p => p.id === t.pageId)!;
+      const cond = mk(info.cable, name, t.wire, pg, t.at, net, t.bundle.id);
+      if (info.conductors.some(c => c.name === name)) cond.problem = `conduttore ${name} usato due volte`;
+      else if (!info.cable.conductors.includes(name)) cond.problem = `il cavo non ha il conduttore ${name}`;
+      info.conductors.push(cond);
     }
   }
   for (const info of out.values()) {
@@ -465,3 +484,19 @@ export function pinDeviceOptions(project: Project, cableId: string): string[] {
   return [...out].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 }
 
+
+/**
+ * Toglie dall'elenco i cavi indicati che non hanno più linee nello schema (dopo aver eliminato le loro
+ * linee o la pagina): restavano nell'elenco e la stessa sigla, riusata, risultava usata da due cavi.
+ * Guarda solo i cavi delle linee tolte, con un giro sugli elementi. Restituisce le sigle tolte.
+ */
+export function dropOrphanCables(project: Project, cableIds: string[]): string[] {
+  if (!cableIds.length || !project.cables?.length) return [];
+  const left = new Set(cableIds);
+  for (const pg of project.pages) for (const e of pg.elements) if (e.kind === 'cable') left.delete(e.cableId);
+  if (!left.size) return [];
+  const gone = project.cables.filter(c => left.has(c.id));
+  project.cables = project.cables.filter(c => !left.has(c.id));
+  if (project.calcs?.cables) for (const c of gone) delete project.calcs.cables[c.id];
+  return gone.map(c => c.tag);
+}

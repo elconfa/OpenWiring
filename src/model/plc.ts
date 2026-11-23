@@ -381,8 +381,18 @@ export function ioAssignments(project: Project, library: Part[] = [], includeFre
         const others = el.sym.pins.flatMap(p => pinNet.get(`${el.inst.id}|${p.id}`)?.pins ?? []).filter(p => p.el.inst.id !== el.inst.id);
         connected = [...new Set(others.map(p => `-${p.ref}`))].join(', ');
         if (!comment) {
-          // Descrizione del primo dispositivo collegato (es. "Marcia pompa")
-          const dev = others.find(p => p.el.inst.description || p.el.inst.partNr);
+          // Descrizione del primo dispositivo collegato (es. "Marcia pompa"), anche oltre i pin dei
+          // connettori (presa M12 sulla scheda → cavo → spina sul sensore): i pin non hanno descrizione
+          const reach = [...others], seen = new Set(others.map(p => p.el.inst.id));
+          for (let i = 0; i < reach.length && i < 200; i++) {
+            const p = reach[i];
+            if (p.el.sym.role !== 'pin') continue;
+            for (const q of p.el.sym.pins) for (const o of pinNet.get(`${p.el.inst.id}|${q.id}`)?.pins ?? []) {
+              if (o.el.inst.id === el.inst.id || seen.has(o.el.inst.id)) continue;
+              seen.add(o.el.inst.id); reach.push(o);
+            }
+          }
+          const dev = reach.find(p => p.el.sym.role !== 'pin' && (p.el.inst.description || p.el.inst.partNr));
           comment = dev?.el.inst.description ?? (dev?.el.inst.partNr ? parts.get(dev.el.inst.partNr)?.descr1 ?? '' : '');
         }
       }

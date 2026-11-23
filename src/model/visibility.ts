@@ -7,13 +7,20 @@ import type { ProjectSettings, SymbolDef, Wire } from './types';
 export type SymVisKey =
   | 'tag' | 'func' | 'loc' | 'description' | 'techData' | 'manufacturer' | 'typeNr' | 'orderNr' | 'partNr' | 'note'
   | 'pins' | 'xref' | 'refs' | 'plcAddress' | 'plcSymbol' | 'plcComment' | 'netAddress'
+  /** Riquadro del canale PLC completo: scheda e foglio, stazione/rack/slot, morsetti (vedi plcChannelBox) */
+  | 'plcCard' | 'plcPlace' | 'plcPins'
   /** Morsetti: sigla della morsettiera (senza scelta solo sul primo morsetto della morsettiera nella pagina) */
-  | 'strip';
+  | 'strip'
+  /** Tabella materiali del componente (luogo, sigla, articoli): solo se scelta (senza scelta no) */
+  | 'parts';
 /** Proprietà di un filo che si possono scrivere sullo schema */
 /** cable: sigla del cavo sui collegamenti di rete */
 export type WireVisKey = 'number' | 'cross' | 'color' | 'cable';
 
 export type ShowMap<K extends string> = Partial<Record<K, boolean>>;
+
+/** Campi del riquadro del canale PLC completo: si vedono con «Riquadro del canale PLC: completo» */
+export const PLC_BOX_KEYS = ['plcCard', 'plcPlace', 'plcPins'] as const;
 
 /** Dati del dispositivo scritti sotto la sigla, in quest'ordine */
 export const DEVICE_LINE_KEYS = ['description', 'techData', 'manufacturer', 'typeNr', 'orderNr', 'partNr', 'note'] as const;
@@ -25,10 +32,12 @@ export const DEVICE_LINE_KEYS = ['description', 'techData', 'manufacturer', 'typ
  * (descrizione, costruttore…), che si vedono sempre salvo scelta contraria.
  */
 export function symShown(show: ShowMap<SymVisKey> | undefined, key: SymVisKey, ctx: {
-  showTexts?: boolean; settings?: Pick<ProjectSettings, 'showDeviceTexts'>; sym?: Pick<SymbolDef, 'fields'>;
+  showTexts?: boolean; settings?: Pick<ProjectSettings, 'showDeviceTexts' | 'plcChannelBox'>; sym?: Pick<SymbolDef, 'fields'>;
 } = {}): boolean {
   const own = show?.[key];
   if (own !== undefined) return own;
+  if (key === 'parts') return false;
+  if ((PLC_BOX_KEYS as readonly string[]).includes(key)) return ctx.settings?.plcChannelBox === 'full';
   if (ctx.sym?.fields?.some(f => f.f === key)) return true;
   if (key === 'description' || key === 'techData') return ctx.showTexts ?? ctx.settings?.showDeviceTexts ?? true;
   return !(DEVICE_LINE_KEYS as readonly string[]).includes(key);

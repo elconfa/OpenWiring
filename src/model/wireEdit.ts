@@ -78,10 +78,36 @@ export function dragWireSegment(pts: Pt[], k: number, delta: Pt): Pt[] {
 }
 
 /**
+ * Elementi da spostare con quelli scelti: i morsetti e i pin dei connettori appoggiati direttamente
+ * (senza filo) su un punto di connessione di un simbolo spostato lo seguono, come se fossero incollati
+ * (es. la presa M12 sul canale del PLC). Il contrario no: spostato da solo, il morsetto si stacca.
+ */
+export function withAttachedTerminals(p: Project, pg: Page, ids: Set<string>): Set<string> {
+  const isTerm = (role?: string) => role === 'terminal' || role === 'pin';
+  const pts: Pt[] = [];
+  for (const e of pg.elements) {
+    if (e.kind !== 'symbol' || !ids.has(e.id)) continue;
+    const sym = getSymbol(e.symbolId, p);
+    if (sym && !isTerm(sym.role)) pts.push(...pinsWorld(e, sym));
+  }
+  if (!pts.length) return ids;
+  const out = new Set(ids);
+  for (const e of pg.elements) {
+    if (e.kind !== 'symbol' || out.has(e.id)) continue;
+    const sym = getSymbol(e.symbolId, p);
+    if (!sym || !isTerm(sym.role)) continue;
+    if (pinsWorld(e, sym).some(q => pts.some(m => samePt(m, q)))) out.add(e.id);
+  }
+  return out;
+}
+
+/**
  * Sposta gli elementi selezionati e adatta i fili collegati (non selezionati) restando ortogonali.
+ * I morsetti e i pin dei connettori appoggiati sui simboli spostati li seguono (withAttachedTerminals).
  * Un filo con entrambi gli estremi sugli elementi spostati si sposta tutto.
  */
-export function moveWithWires(p: Project, pg: Page, ids: Set<string>, dx: number, dy: number) {
+export function moveWithWires(p: Project, pg: Page, ids0: Set<string>, dx: number, dy: number) {
+  const ids = withAttachedTerminals(p, pg, ids0);
   const moved: Pt[] = [];
   const movedSegs: [Pt, Pt][] = [];
   for (const e of pg.elements) {

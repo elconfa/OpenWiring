@@ -1,5 +1,8 @@
 // Export DXF R12 di una pagina (scala 1:1, millimetri, asse Y verso l'alto).
 import type { Project, Page, Prim, Part, TextMoveKey } from '../model/types';
+import { voltageTableDrawing } from '../model/voltages';
+import { stationMiniDrawing } from '../model/stationMini';
+import { revGridDrawing } from '../model/revisionGrid';
 import { PAGE_H, PAGE_W, FRAME, COLUMNS, WIRE_LINE_TYPES, primLineType, plotPrims } from '../model/types';
 import { titleBlockPrims } from '../model/titleBlocks';
 import { getSymbol, toWorld, readableText, pinLabelPlace } from '../model/geometry';
@@ -129,6 +132,24 @@ export function pageToDxf(project: Project, page: Page, library: Part[] = []): s
       line(e.x, e.y, e.x + e.w, e.y, 'IMMAGINI'); line(e.x + e.w, e.y, e.x + e.w, e.y + e.h, 'IMMAGINI');
       line(e.x + e.w, e.y + e.h, e.x, e.y + e.h, 'IMMAGINI'); line(e.x, e.y + e.h, e.x, e.y, 'IMMAGINI');
       text(e.x + 1, e.y + 3, e.name ?? 'immagine', 2.5, 'IMMAGINI');
+    } else if (e.kind === 'nofit') {
+      // Riquadro «Non montato»: bordo e scritta
+      line(e.x, e.y, e.x + e.w, e.y, 'NONMONTATO'); line(e.x + e.w, e.y, e.x + e.w, e.y + e.h, 'NONMONTATO');
+      line(e.x + e.w, e.y + e.h, e.x, e.y + e.h, 'NONMONTATO'); line(e.x, e.y + e.h, e.x, e.y, 'NONMONTATO');
+      text(e.x + 1, e.y + 3, 'NON MONTATO', 2.5, 'NONMONTATO');
+    } else if (e.kind === 'block' && (e.block === 'station' || e.block === 'revgrid')) {
+      // Miniatura della stazione PLC (moduli, frecce e scritte) e stato revisione fogli (griglia e scritte)
+      const d = e.block === 'revgrid' ? revGridDrawing(project, e) : stationMiniDrawing(project, e);
+      for (const r of d.rects) { line(r.x, r.y, r.x + r.w, r.y, 'TABELLE'); line(r.x + r.w, r.y, r.x + r.w, r.y + r.h, 'TABELLE'); line(r.x + r.w, r.y + r.h, r.x, r.y + r.h, 'TABELLE'); line(r.x, r.y + r.h, r.x, r.y, 'TABELLE'); }
+      for (const l of d.lines) line(l.x1, l.y1, l.x2, l.y2, 'TABELLE');
+      for (const a of d.arrows) { line(a.x - 0.9, a.y - 1.6, a.x, a.y, 'TABELLE'); line(a.x + 0.9, a.y - 1.6, a.x, a.y, 'TABELLE'); }
+      for (const t of d.texts) text(t.anchor === 'middle' ? t.x - t.s.length * t.size * 0.3 : t.x, t.y, t.s, t.size, 'TABELLE', t.rot ? -t.rot : 0);
+    } else if (e.kind === 'block') {
+      // Tabella delle tensioni: griglia, testi e campioni delle linee
+      const d = voltageTableDrawing(project, e);
+      for (const l of d.lines) line(l.x1, l.y1, l.x2, l.y2, 'TABELLE');
+      for (const s of d.samples) line(s.x1, s.y, s.x2, s.y, 'TABELLE');
+      for (const t of d.texts) text(t.anchor === 'middle' ? t.x - t.s.length * t.size * 0.3 : t.x, t.y, t.s, t.size, 'TABELLE');
     } else {
       const sym = getSymbol(e.symbolId, project);
       if (!sym) continue;

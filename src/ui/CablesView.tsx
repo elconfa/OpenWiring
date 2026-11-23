@@ -3,6 +3,7 @@
 // (numeri o colori), sezione o lunghezza. Sotto, i conduttori del cavo scelto, uno per riga, anche
 // quelli non ancora usati: nome (numero o colore) modificabile, filo, estremità e pagina.
 import { useEffect, useMemo, useState } from 'react';
+import { cableEnds } from '../model/cableEnds';
 import { useStore } from '../model/store';
 import { cableByPiece, pinDeviceOptions, cableInfos, cableSection, conductorColors, conductorEnds, conductorsFor, isPeName, markingOf, type CableInfo, type Conductor } from '../model/cables';
 import { partsIndex } from '../model/devices';
@@ -33,7 +34,8 @@ export function ConductorSwatch({ name }: { name: string }) {
   return <span className="cond-swatch" style={{ background: bg }} />;
 }
 
-const pagesOf = (i: CableInfo) => [...new Set(i.lines.map(l => l.loc.split('.')[0]))];
+// Pagine delle linee del cavo e dei bus fili con il suo nome
+const pagesOf = (i: CableInfo) => [...new Set([...i.lines.map(l => l.loc.split('.')[0]), ...i.conductors.map(c => c.pageName)])];
 const num = (v: string) => (v.trim() ? parseFloat(v.replace(',', '.')) : undefined);
 /** Valore comune a tutti i cavi scelti, undefined se diverso */
 const common = <T,>(list: Cable[], f: (c: Cable) => T) => (list.length && list.every(c => f(c) === f(list[0])) ? f(list[0]) : undefined);
@@ -267,6 +269,13 @@ export function CablesView() {
                   {!many && (
                     <>
                       <tr><td className="prop-name">{tx('Da')}</td><td className="prop-value"><Field value={c.from ?? ''} placeholder={tx('es. -X1')} onCommit={v => st().updateCable(c.id, { from: v.trim() || undefined })} /></td></tr>
+                      {(() => {
+                        // Connettori che fanno parte del cavo (preconfezionato): le estremità del cavo
+                        const e = cableEnds(project).get(c.id);
+                        return e?.conns.length ? <tr><td className="prop-name">{tx('Estremità')}</td><td className="prop-value small">{e.conns.map(x => (
+                          <div key={x.conn}>{`${x.side}: ${x.type || `-${x.conn}`} → ${[...new Set(x.towards.map(t => t.split(':')[0]))].join(', ') || '—'}`} <span className="muted">{`(-${x.conn})`}</span></div>
+                        ))}</td></tr> : null;
+                      })()}
                       <tr><td className="prop-name">A</td><td className="prop-value"><Field value={c.to ?? ''} placeholder={tx('es. -M1')} onCommit={v => st().updateCable(c.id, { to: v.trim() || undefined })} /></td></tr>
                       <tr><td className="prop-name">{tx('Descrizione')}</td><td className="prop-value"><Field value={c.description ?? ''} onCommit={v => st().updateCable(c.id, { description: v.trim() || undefined })} /></td></tr>
                     </>

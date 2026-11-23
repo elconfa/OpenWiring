@@ -1,6 +1,8 @@
 // Controlli di progetto (come la «Verifica» di EPLAN): sigle, contatti, rimandi,
 // fili aperti, morsetti, PLC. Ogni problema porta alla posizione nello schema.
+import { notFitted } from './notFitted';
 import { deviceLetter } from './letterCodes';
+import { cableEnds } from './cableEnds';
 import { pairRepresentations } from './pairs';
 import { projectionSource } from './projection';
 import { bundleTaps, type BundleTap } from './bundles';
@@ -9,7 +11,7 @@ import { columnOf, FRAME, PAGE_W, PAGE_H } from './types';
 import { distSlots } from './distributors';
 import { computeNetlist, withNetlistCache, type Net, type NetPin } from './netlist';
 import { getSymbol, instanceBounds } from './geometry';
-import { buildDevices, allPlaced, locationOf, partsIndex, deviceInfo, type PlacedElement } from './devices';
+import { buildDevices, allPlaced, locationOf, partsIndex, deviceInfo, stripOf, type PlacedElement } from './devices';
 import { allowedRots } from './rotations';
 import { nextTagFor } from './numbering';
 import { linkPartners, isIncomingLink, NO_PARTNER } from './links';
@@ -55,6 +57,7 @@ export type IssueFix = { label: string } & (
   | { kind: 'allowRot'; symbolId: string; rot: 0 | 90 | 180 | 270 }
   | { kind: 'fitRot'; pageId: string; id: string }
   | { kind: 'cableFromPart'; cableId: string }
+  | { kind: 'deleteCable'; cableId: string }
   | { kind: 'clearCardOrder'; cardId: string }
   | { kind: 'busCableTag'; wireIds: string[]; tag: string }
 );
@@ -86,7 +89,14 @@ export function contactKind(ft: FunctionTemplate): 'NO' | 'NC' | 'CO' | undefine
 }
 
 export function checkProject(project: Project, library: Part[] = []): Issue[] {
-  return withNetlistCache(project, () => checkProjectNow(project, library));
+  const all = withNetlistCache(project, () => checkProjectNow(project, library));
+  // Parti nei riquadri «Non montato»: i controlli non le segnalano (elemento non montato o dispositivo
+  // non montato citato nel messaggio)
+  const nf = notFitted(project);
+  if (!nf.ids.size) return all;
+  const tags = [...nf.devices].map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const re = tags.length ? new RegExp(`(^|[^\\w.+-])-(${tags.join('|')})(?![\\w.])`) : undefined;
+  return all.filter(i => !(i.elementId && nf.ids.has(i.elementId)) && !(re && !i.elementId && re.test(i.msg)));
 }
 
 function checkProjectNow(project: Project, library: Part[]): Issue[] {
@@ -303,6 +313,28 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
 
   // Connettori
   for (const m of connectorProblems(project, library)) out.push({ level: 'error', kind: tx('Connettori'), msg: m.msg, pageId: m.pageId, elementId: m.elementId, loc: m.loc });
+  // Connettori che fanno parte di un cavo: collegati a un cavo, con i pin solo dove arriva il cavo
+  if (Object.values(project.connectors ?? {}).some(d => d.ofCable)) {
+    const ofCable = new Map<string, { cable: string; pages: Set<string> }>();
+    const infos = new Map(cableInfos(project).map(i => [i.cable.id, i]));
+    for (const e of cableEnds(project).values()) for (const c of e.conns) {
+      const i = infos.get(e.cable.id);
+      ofCable.set(c.conn, { cable: e.cable.tag, pages: new Set([...(i?.conductors.map(k => k.pageId) ?? []), ...(i?.lines.map(l => l.pageId) ?? [])]) });
+    }
+    const pinEls = allPlaced(project).filter(e => e.sym.role === 'pin' && e.inst.tag.includes(':'));
+    for (const [conn, d] of Object.entries(project.connectors ?? {})) {
+      if (!d.ofCable) continue;
+      const mine = pinEls.filter(e => stripOf(e.inst.tag) === conn);
+      if (!mine.length) continue;
+      const c = ofCable.get(conn);
+      if (!c) {
+        out.push({ level: 'warn', kind: tx('Connettori'), msg: tx('-{0} fa parte di un cavo ma non è collegato ai conduttori di nessun cavo', conn), pageId: mine[0].page.id, elementId: mine[0].inst.id, loc: locationOf(mine[0]) });
+        continue;
+      }
+      const away = mine.filter(e => !c.pages.has(e.page.id));
+      if (away.length) out.push({ level: 'error', kind: tx('Connettori'), msg: tx('-{0} del cavo -{1} ha pin anche a pagina {2}, dove il cavo non arriva: sono di un altro connettore? Dagli un\'altra sigla', conn, c.cable, [...new Set(away.map(e => e.page.name))].join(', ')), pageId: away[0].page.id, elementId: away[0].inst.id, loc: locationOf(away[0]) });
+    }
+  }
 
   // Fili con un estremo libero (non collegato a un punto di connessione né a un altro filo); il punto di
   // connessione dello schermo di un cavo conta come collegato
@@ -339,7 +371,7 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
   // Cavi: conduttori esauriti o ripetuti, cavi senza linea o senza conduttori
   for (const ci of cableInfos(project)) {
     const c = ci.cable;
-    if (!ci.lines.length) out.push({ level: 'warn', kind: tx('Cavi'), msg: tx('-{0}: cavo senza linea di definizione nello schema', c.tag) });
+    if (!ci.lines.length) out.push({ level: 'warn', kind: tx('Cavi'), msg: tx('-{0}: cavo senza linea di definizione nello schema', c.tag), fix: { kind: 'deleteCable', cableId: c.id, label: tx('Togli dall\'elenco cavi') } });
     else if (!ci.conductors.length) out.push({ level: 'warn', kind: tx('Cavi'), msg: tx('-{0}: la linea del cavo non attraversa fili', c.tag), pageId: ci.lines[0].pageId, elementId: ci.lines[0].line.id, loc: ci.lines[0].loc });
     for (const k of ci.conductors) if (k.problem) out.push({ level: 'error', kind: tx('Cavi'), msg: `-${c.tag}: ${k.problem}`, pageId: k.pageId, elementId: k.lineId, loc: k.loc });
     // Articolo cambiato dopo averlo scelto: il cavo ha ancora i conduttori di prima
@@ -354,9 +386,12 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
     }
   }
   // Sigle dei cavi ripetute: ogni cavo dopo il primo è segnalato dove è disegnato (un clic ci porta)
-  const cableTags = new Map<string, { pageId?: string; elementId?: string; loc?: string }[]>();
-  const addTag = (t: string, where: { pageId?: string; elementId?: string; loc?: string }) => cableTags.set(t, [...(cableTags.get(t) ?? []), where]);
-  for (const ci of cableInfos(project)) { const l = ci.lines[0]; addTag(ci.cable.tag, l ? { pageId: l.pageId, elementId: l.line.id, loc: l.loc } : {}); }
+  type TagAt = { pageId?: string; elementId?: string; loc?: string; orphan?: string };
+  const cableTags = new Map<string, TagAt[]>();
+  const addTag = (t: string, where: TagAt) => cableTags.set(t, [...(cableTags.get(t) ?? []), where]);
+  // I cavi senza linee (rimasti nell'elenco) vanno in fondo: è quello il cavo da togliere
+  const infos = cableInfos(project).sort((a, b) => Number(!a.lines.length) - Number(!b.lines.length));
+  for (const ci of infos) { const l = ci.lines[0]; addTag(ci.cable.tag, l ? { pageId: l.pageId, elementId: l.line.id, loc: l.loc } : { orphan: ci.cable.id }); }
   if (project.pages.some(pg => pg.elements.some(e => e.kind === 'wire' && e.bus && e.busCable?.tag))) {
     const pageOf = new Map(project.pages.map(pg => [pg.id, pg]));
     for (const g of busCableGroups(project, nl.nets)) {
@@ -369,7 +404,9 @@ function checkProjectNow(project: Project, library: Part[]): Issue[] {
   for (const [t, list] of cableTags) {
     if (list.length < 2) continue;
     const where = list.map(x => x.loc ? `/${x.loc}` : '').filter(Boolean).join(' ');
-    for (const x of list.slice(1)) out.push({ level: 'error', kind: tx('Cavi'), msg: tx('Sigla -{0} usata da {1} cavi{2}', t, list.length, where ? ` (${where})` : ''), ...x });
+    for (const { orphan, ...x } of list.slice(1)) out.push(orphan
+      ? { level: 'error', kind: tx('Cavi'), msg: tx('Sigla -{0} usata anche da un cavo rimasto nell\'elenco senza linee nello schema', t), fix: { kind: 'deleteCable', cableId: orphan, label: tx('Togli dall\'elenco cavi') } }
+      : { level: 'error', kind: tx('Cavi'), msg: tx('Sigla -{0} usata da {1} cavi{2}', t, list.length, where ? ` (${where})` : ''), ...x });
   }
   // Cavo di rete disegnato in più tratti uniti dai rimandi: la sigla dev'essere la stessa
   for (const r of busCableRows(project)) if (r.otherTags) {

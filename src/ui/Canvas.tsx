@@ -1,9 +1,13 @@
 // Area di disegno: zoom/pan, selezione, spostamento, disegno fili, inserimento simboli.
 import { pasteAt } from './pasteChooser';
+import { fitMenu } from './fitMenu';
+import { blockBox } from '../model/voltages';
+import { layoutPartTables, partTableDropTarget } from '../model/partTables';
+import { sameDeviceIds } from '../model/devices';
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { isListPage } from '../model/lists';
 import { useStore } from '../model/store';
-import type { Pt, Wire, Element, Page, Project, SymbolDef, TextItem, TextMoveKey, ImageItem, Zone, CableLine } from '../model/types';
+import type { Pt, Wire, Element, Page, Project, SymbolDef, TextItem, TextMoveKey, ImageItem, Zone, NoFitArea, CableLine, SymbolInstance } from '../model/types';
 import { PAGE_W, PAGE_H, lookOf } from '../model/types';
 import { getSymbol, instanceBounds, pinsWorld, snapPt, distToSegment, samePt, onSegmentInterior, uid, getGridSize, polylineTouchesBox, pairScale, pairCenter } from '../model/geometry';
 import { PageContent, SymbolGraphic, SEL, WireTick } from './PageSvg';
@@ -23,6 +27,7 @@ import { TB_AREA } from '../model/titleBlocks';
 import { saveMacroFromSelection, duplicatePageAsk } from './actions';
 import { potentialOf } from '../model/netlist';
 import { chooseLinkPartner } from './linkChooser';
+import { chooseConnectorForPin, chooseConnectorForPlacement } from './connectorChooser';
 import { chooseAuxDevice } from './auxChooser';
 import { chooseRepresentation } from './representationChooser';
 import { addCableLineAsk } from './cableChooser';
@@ -92,9 +97,10 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
     const pg = st.project.pages.find(p => p.elements.some(e => e.id === id));
     if (pg) { st.setPage(pg.id); st.setSelection([id]); }
   };
-  const left = Math.min(menu.cx, window.innerWidth - 220), top = Math.min(menu.cy, window.innerHeight - 380);
+  // Posizione del clic; il menu si sposta da solo se esce dalla finestra (fitMenu)
+  const left = menu.cx, top = menu.cy;
   return (
-    <div className="ctx-menu" style={{ left, top }} onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}>
+    <div className="ctx-menu" ref={fitMenu} style={{ left, top }} onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}>
       {page && isListPage(page) && <>{item(tx('Personalizza la lista…'), () => st.openListStyleOf(page))}<hr /></>}
       {page && one?.kind === 'zone' && one.panelId !== page.panelId && (() => {
         // Riquadro di un altro quadro: la sua pagina proiettata (si crea o si apre)
@@ -115,8 +121,37 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
       {item(tx('Allinea le lineette di sezione e colore con una linea'), () => st.setTool({ kind: 'wireTicks' }), { k: keyLabel('wireTicks') })}
       {item(tx('Morsetti in fila sui fili…'), () => startTerminalRow(), { k: 'M' })}
       {item(tx('Elimina'), () => st.deleteSelection(), { k: 'Canc', disabled: !sel.length })}
+      {one?.kind === 'nofit'
+        ? item(tx('Togli il riquadro «Non montato» (le parti tornano montate)'), () => st.deleteSelection())
+        : sel.some(id => page?.elements.some(e => e.id === id && e.kind !== 'nofit')) && item(tx('Non montato: metti nel riquadro grigio'), () => st.noFitAroundSelection())}
       {item(tx('Crea macro dalla selezione…'), () => void saveMacroFromSelection(), { disabled: !sel.length })}
       {sym && one?.kind === 'symbol' && sym.role !== 'potential' && sym.role !== 'link' && item(tx('Copia proprietà'), () => st.copyDeviceProps(one.id))}
+      {sym?.role === 'pin' && one?.kind === 'symbol' && one.tag.includes(':') && (() => {
+        // Connettore: riquadro e «fa parte del cavo» anche dal tasto destro
+        const conn = one.tag.slice(0, one.tag.indexOf(':'));
+        const d = st.project.connectors?.[conn] ?? {};
+        return <>
+          <hr />
+          {item(d.frame === false ? tx('Mostra il riquadro del connettore -{0}', conn) : tx('Nascondi il riquadro del connettore -{0}', conn), () => st.updateConnector(conn, { frame: d.frame === false ? undefined : false }))}
+          {item(d.ofCable ? tx('Il connettore -{0} non fa parte del cavo', conn) : tx('Il connettore -{0} fa parte del cavo', conn), () => st.setConnectorOfCable(conn, !d.ofCable))}
+        </>;
+      })()}
+      {(() => {
+        // Gruppo I/O PLC: separa in canali; canali singoli scelti: riunisci in un gruppo
+        const els = page?.elements.filter(e => e.kind === 'symbol' && sel.includes(e.id)) as SymbolInstance[] | undefined;
+        const gids = new Set(els?.flatMap(e => (e.plcGroup && !e.plcGroup.socket ? [e.plcGroup.id] : [])));
+        const singles = els?.filter(e => e.symbolId.startsWith('plc_ch_') && !e.plcGroup) ?? [];
+        return <>
+          {gids.size === 1 && item(tx('Separa in canali'), () => st.splitPlcGroup([...gids][0]))}
+          {singles.length > 1 && item(tx('Riunisci in un gruppo'), () => st.joinPlcChannels(singles.map(e => e.id)))}
+        </>;
+      })()}
+      {sym && one?.kind === 'symbol' && !['potential', 'link', 'terminal', 'pin'].includes(sym.role) && one.tag && (() => {
+        // Tabella materiali del dispositivo (luogo, sigla, articoli): si aggiunge o si toglie
+        const ids = new Set(sameDeviceIds(st.project, one.id));
+        const on = st.project.pages.some(pg => pg.elements.some(e => e.kind === 'symbol' && ids.has(e.id) && e.show?.parts));
+        return item(on ? tx('Togli la tabella materiali') : tx('Aggiungi la tabella materiali'), () => st.setPartTable(one.id, !on));
+      })()}
       {st.propClipboard && symIds.length > 0 && item(tx('Incolla proprietà di -{0}', st.propClipboard.tag), () => st.pasteDeviceProps(symIds))}
       {sym && one?.kind === 'symbol' && canReplace(one) && item(tx('Sostituisci simbolo…'), () => void chooseReplacement(sym).then(id => { if (id) useStore.getState().replaceSymbol(one.id, id); }))}
       {sym && item(tx('Modifica il componente…'), () => {
@@ -198,6 +233,7 @@ type Drag =
   /** Scritta di una linea di definizione dei fili trascinata */
   | { kind: 'wdLabel'; defId: string; start: Pt; to: Pt }
   | { kind: 'cabLabel'; lineId: string; start: Pt; to: Pt }
+  | { kind: 'connLabel'; conn: string; start: Pt; to: Pt }
   /** Scritta «+codice» del riquadro di luogo trascinata (il righino la segue) */
   | { kind: 'zoneLabel'; zoneId: string; start: Pt; to: Pt }
   /** Riquadro di luogo ridimensionato con una maniglia (angolo o metà lato) */
@@ -241,10 +277,19 @@ function hitTest(page: Page, project: Project, p: Pt, tol: number): Element | un
     const onHeader = p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1;
     if (onEdge || onHeader) return e;
   }
+  // Riquadri «Non montato»: sul bordo o sulla scritta (dentro si prendono le parti)
+  for (let i = page.elements.length - 1; i >= 0; i--) {
+    const e = page.elements[i];
+    if (e.kind !== 'nofit') continue;
+    const onEdge = [[e.x, e.y, e.x + e.w, e.y], [e.x + e.w, e.y, e.x + e.w, e.y + e.h], [e.x, e.y + e.h, e.x + e.w, e.y + e.h], [e.x, e.y, e.x, e.y + e.h]]
+      .some(([x1, y1, x2, y2]) => distToSegment(p, { x: x1, y: y1 }, { x: x2, y: y2 }) < tol);
+    if (onEdge || (p.x >= e.x && p.x <= e.x + 30 && p.y >= e.y && p.y <= e.y + 4.1)) return e;
+  }
   // Immagini: in tutto il riquadro, ma dopo gli altri elementi (spesso stanno sotto i simboli)
   for (let i = page.elements.length - 1; i >= 0; i--) {
     const e = page.elements[i];
     if (e.kind === 'image' && p.x >= e.x && p.x <= e.x + e.w && p.y >= e.y && p.y <= e.y + e.h) return e;
+    if (e.kind === 'block') { const b = blockBox(project, e); if (p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1) return e; }
   }
   return undefined;
 }
@@ -270,7 +315,8 @@ function elementBounds(e: Element, project: Project) {
     return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
   }
   if (e.kind === 'text') return textBounds(e);
-  if (e.kind === 'zone' || e.kind === 'image') return { x0: e.x, y0: e.y, x1: e.x + e.w, y1: e.y + e.h };
+  if (e.kind === 'zone' || e.kind === 'image' || e.kind === 'nofit') return { x0: e.x, y0: e.y, x1: e.x + e.w, y1: e.y + e.h };
+  if (e.kind === 'block') return blockBox(project, e);
   const sym = getSymbol(e.symbolId, project);
   return sym ? instanceBounds(e, sym) : { x0: e.x, y0: e.y, x1: e.x, y1: e.y };
 }
@@ -340,7 +386,8 @@ export function MacroGhost({ clip, width = 0.35 }: { clip: { elements: Element[]
       {clip.elements.map(e => {
         if (e.kind === 'wire' || e.kind === 'cable' || e.kind === 'wiredef') return <polyline key={e.id} points={e.points.map(p => `${p.x},${p.y}`).join(' ')} />;
         if (e.kind === 'text') return <text key={e.id} x={e.x} y={e.y} fontSize={e.size} fill={SEL} stroke="none">{e.text}</text>;
-        if (e.kind === 'zone' || e.kind === 'image') return <rect key={e.id} x={e.x} y={e.y} width={e.w} height={e.h} strokeDasharray="2 1" />;
+        if (e.kind === 'zone' || e.kind === 'image' || e.kind === 'nofit') return <rect key={e.id} x={e.x} y={e.y} width={e.w} height={e.h} strokeDasharray="2 1" />;
+        if (e.kind === 'block') { const b = blockBox(project, e); return <rect key={e.id} x={b.x0} y={b.y0} width={b.x1 - b.x0} height={b.y1 - b.y0} strokeDasharray="2 1" />; }
         const sym = getSymbol(e.symbolId, project) ?? (clip.symbols as SymbolDef[]).find(s => s.id === e.symbolId);
         return sym ? <g key={e.id} transform={`translate(${e.x} ${e.y}) rotate(${e.rot})${e.mirror ? ' scale(-1 1)' : ''}`}><SymbolGraphic sym={sym} /></g> : null;
       })}
@@ -392,7 +439,7 @@ export function Canvas({ derived }: { derived: Derived }) {
   }, [menu]);
   const selSet = useMemo(() => new Set(selection), [selection]);
   const oneImage = selection.length === 1 ? page.elements.find((e): e is ImageItem => e.id === selection[0] && e.kind === 'image') : undefined;
-  const oneZone = selection.length === 1 ? page.elements.find((e): e is Zone => e.id === selection[0] && e.kind === 'zone') : undefined;
+  const oneZone = selection.length === 1 ? page.elements.find((e): e is Zone | NoFitArea => e.id === selection[0] && (e.kind === 'zone' || e.kind === 'nofit')) : undefined;
   const oneCable = selection.length === 1 ? page.elements.find((e): e is CableLine => e.id === selection[0] && e.kind === 'cable') : undefined;
   /** Maniglia del riquadro o estremo della linea del cavo selezionati sotto il cursore */
   const handleAt = (p: Pt, tol: number): { zone: ZoneHandle } | { end: 0 | 1 } | undefined => {
@@ -464,6 +511,8 @@ export function Canvas({ derived }: { derived: Derived }) {
     setVb({ x: -10, y: -10 - m, w: W, h: H + m });
   }, []);
   // Zoom per la barra di stato (100% = pagina intera) e zoom scelto da lì, attorno al centro
+  // Pin di connettore preso dalla libreria senza sigla: prima si sceglie il connettore (nuovo o esistente)
+  useEffect(() => { if (tool.kind === 'place' && !tool.tag) void chooseConnectorForPlacement(); }, [tool]);
   useEffect(() => { useStore.setState({ zoom: Math.round(((PAGE_W + 20) / vb.w) * 100) }); }, [vb]);
   useEffect(() => () => useStore.setState({ zoom: null }), []);
   useEffect(() => {
@@ -612,11 +661,12 @@ export function Canvas({ derived }: { derived: Derived }) {
       st.placeMacro(tool.macroId, snapPt(raw));
       return;
     }
-    if (tool.kind === 'zone') {
+    if (tool.kind === 'zone' || tool.kind === 'nofit') {
       const p = snapPt(raw);
       if (!wirePts.length) { setWirePts([p]); return; }
       const a = wirePts[0];
-      if (Math.abs(p.x - a.x) >= 8 && Math.abs(p.y - a.y) >= 8) st.addZone(Math.min(a.x, p.x), Math.min(a.y, p.y), Math.abs(p.x - a.x), Math.abs(p.y - a.y));
+      if (tool.kind === 'nofit') { if (Math.abs(p.x - a.x) >= 4 && Math.abs(p.y - a.y) >= 4) st.addNoFit(Math.min(a.x, p.x), Math.min(a.y, p.y), Math.abs(p.x - a.x), Math.abs(p.y - a.y)); }
+      else if (Math.abs(p.x - a.x) >= 8 && Math.abs(p.y - a.y) >= 8) st.addZone(Math.min(a.x, p.x), Math.min(a.y, p.y), Math.abs(p.x - a.x), Math.abs(p.y - a.y));
       setWirePts([]);
       return;
     }
@@ -693,6 +743,12 @@ export function Canvas({ derived }: { derived: Derived }) {
     const hd = !ev.shiftKey ? handleAt(raw, Math.max(0.8, 6 / pxPerMm())) : undefined;
     if (hd && 'zone' in hd) { setDrag({ kind: 'zoneSize', zoneId: oneZone!.id, handle: hd.zone, to: raw }); return; }
     if (hd && 'end' in hd) { setDrag({ kind: 'cableEnd', lineId: oneCable!.id, index: hd.end, to: oneCable!.points[hd.end] }); return; }
+    // Scritta del riquadro di un connettore: si trascina (spostamento salvato nel connettore, per pagina)
+    const cnl = (ev.target as globalThis.Element | null)?.closest?.('[data-connlabel]')?.getAttribute('data-connlabel');
+    if (cnl && !ev.shiftKey) {
+      setDrag({ kind: 'connLabel', conn: cnl, start: raw, to: raw });
+      return;
+    }
     // Testi della linea del cavo: si trascinano (spostamento salvato sulla linea)
     const cbl = (ev.target as globalThis.Element | null)?.closest?.('[data-cablabel]')?.getAttribute('data-cablabel');
     if (cbl && !ev.shiftKey) {
@@ -811,7 +867,7 @@ export function Canvas({ derived }: { derived: Derived }) {
         setDrag({ ...drag, w, h });
       }
     }
-    else if (drag.kind === 'wireLabel' || drag.kind === 'wireTick' || drag.kind === 'devText' || drag.kind === 'wdLabel' || drag.kind === 'cabLabel' || drag.kind === 'zoneLabel' || drag.kind === 'repCol') setDrag({ ...drag, to: raw });
+    else if (drag.kind === 'wireLabel' || drag.kind === 'wireTick' || drag.kind === 'devText' || drag.kind === 'wdLabel' || drag.kind === 'cabLabel' || drag.kind === 'connLabel' || drag.kind === 'zoneLabel' || drag.kind === 'repCol') setDrag({ ...drag, to: raw });
     else if (drag.kind === 'zoneSize') setDrag({ ...drag, to: snapPt(raw) });
     else if (drag.kind === 'cableEnd') {
       // La linea resta orizzontale o verticale come era (Maiusc: libera)
@@ -845,10 +901,26 @@ export function Canvas({ derived }: { derived: Derived }) {
     if (drag?.kind === 'imgSize') st.updateElement(drag.imgId, { w: drag.w, h: drag.h });
     if (drag?.kind === 'devText') {
       const o = movedOffset(drag);
-      if (o) st.setTextOffset(drag.instId, drag.key, o);
+      if (o && drag.key === 'parts') {
+        // Tabella materiali lasciata sotto un'altra: le si aggancia, altrimenti resta dove è stata lasciata
+        const inst = page.elements.find(e => e.id === drag.instId);
+        const tables = derived.pages.get(page.id)?.partTables ?? [];
+        const at = inst?.kind === 'symbol' ? { x: inst.x + o.x, y: inst.y + o.y } : undefined;
+        const target = at && partTableDropTarget(tables, layoutPartTables(tables, page.elements), drag.instId, at, page.elements);
+        st.setPartTablePlace(drag.instId, target ? undefined : o, target);
+      } else if (o) st.setTextOffset(drag.instId, drag.key, o);
     }
     if (drag?.kind === 'wdLabel') { const l = wdLabelMoved(drag); if (l) st.updateElement(drag.defId, { label: l }); }
     if (drag?.kind === 'cabLabel') { const o = cabLabelMoved(drag); if (o) st.updateElement(drag.lineId, { labelOffset: o.x || o.y ? o : undefined }); }
+    if (drag?.kind === 'connLabel') {
+      const o = connLabelMoved(drag);
+      if (o) {
+        const d = project.connectors?.[drag.conn];
+        const offs = { ...(d?.labelOffsets ?? {}) };
+        if (o.x || o.y) offs[page.id] = o; else delete offs[page.id];
+        st.updateConnector(drag.conn, { labelOffsets: Object.keys(offs).length ? offs : undefined });
+      }
+    }
     if (drag?.kind === 'zoneLabel') { const l = zoneLabelMoved(drag); if (l) st.updateElement(drag.zoneId, { label: l }); }
     if (drag?.kind === 'zoneSize') { const z = zoneResized(drag); if (z) st.updateElement(drag.zoneId, z); }
     if (drag?.kind === 'cableEnd') { const pts = cableEndMoved(drag); if (pts) st.updateElement(drag.lineId, { points: pts }); }
@@ -910,10 +982,10 @@ export function Canvas({ derived }: { derived: Derived }) {
   /** Riquadro con la maniglia trascinata; la scritta spostata a mano resta dov'era sulla pagina */
   function zoneResized(d: Extract<Drag, { kind: 'zoneSize' }>): Partial<Zone> | undefined {
     const z = page.elements.find(x => x.id === d.zoneId);
-    if (z?.kind !== 'zone') return undefined;
+    if (z?.kind !== 'zone' && z?.kind !== 'nofit') return undefined;
     const n = resizeZone(z, d.handle, d.to);
     if (n.x === z.x && n.y === z.y && n.w === z.w && n.h === z.h) return undefined;
-    return { ...n, ...(z.label ? { label: { x: z.label.x + z.x - n.x, y: z.label.y + z.y - n.y } } : {}) };
+    return { ...n, ...(z.kind === 'zone' && z.label ? { label: { x: z.label.x + z.x - n.x, y: z.label.y + z.y - n.y } } : {}) };
   }
 
   /** Punti della linea del cavo con l'estremo trascinato (undefined se non cambia o la linea sparisce) */
@@ -924,6 +996,12 @@ export function Canvas({ derived }: { derived: Derived }) {
   }
 
   /** Nuovo spostamento dei testi della linea del cavo trascinati, a passi di 0,5 mm (undefined se non si sono mossi) */
+  function connLabelMoved(d: Extract<Drag, { kind: 'connLabel' }>): Pt | undefined {
+    if (d.to.x === d.start.x && d.to.y === d.start.y) return undefined;
+    const cur = project.connectors?.[d.conn]?.labelOffsets?.[page.id] ?? { x: 0, y: 0 }, r = (v: number) => Math.round(v * 2) / 2;
+    return { x: r(cur.x + d.to.x - d.start.x), y: r(cur.y + d.to.y - d.start.y) };
+  }
+
   function cabLabelMoved(d: Extract<Drag, { kind: 'cabLabel' }>): Pt | undefined {
     const e = page.elements.find(x => x.id === d.lineId);
     if (e?.kind !== 'cable' || (d.to.x === d.start.x && d.to.y === d.start.y)) return undefined;
@@ -935,7 +1013,9 @@ export function Canvas({ derived }: { derived: Derived }) {
   function movedOffset(d: Extract<Drag, { kind: 'devText' }>): Pt | undefined {
     const inst = page.elements.find(e => e.id === d.instId);
     if (inst?.kind !== 'symbol' || (d.to.x === d.start.x && d.to.y === d.start.y)) return undefined;
-    const cur = inst.textOffsets?.[d.key] ?? { x: 0, y: 0 };
+    // Tabella materiali: parte da dove è adesso (in colonna, agganciata sotto un'altra o già spostata)
+    const now = d.key === 'parts' ? layoutPartTables(derived.pages.get(page.id)?.partTables, page.elements).get(inst.id) : undefined;
+    const cur = now ? { x: now.x - inst.x, y: now.y - inst.y } : inst.textOffsets?.[d.key] ?? { x: 0, y: 0 };
     const r = (v: number) => Math.round(v * 2) / 2;
     return { x: r(cur.x + d.to.x - d.start.x), y: r(cur.y + d.to.y - d.start.y) };
   }
@@ -1007,7 +1087,7 @@ export function Canvas({ derived }: { derived: Derived }) {
     }
     if (drag?.kind === 'devText') {
       const o = movedOffset(drag);
-      if (o) return { ...page, elements: page.elements.map(e => (e.id === drag.instId && e.kind === 'symbol' ? { ...e, textOffsets: { ...e.textOffsets, [drag.key]: o } } : e)) };
+      if (o) return { ...page, elements: page.elements.map(e => (e.id === drag.instId && e.kind === 'symbol' ? { ...e, textOffsets: { ...e.textOffsets, [drag.key]: o }, ...(drag.key === 'parts' ? { partsLink: undefined } : {}) } : e)) };
     }
     if (drag?.kind === 'textW') return { ...page, elements: page.elements.map(e => (e.id === drag.textId && e.kind === 'text' ? { ...e, w: drag.w } : e)) };
     if (drag?.kind === 'wdLabel') {
@@ -1020,7 +1100,7 @@ export function Canvas({ derived }: { derived: Derived }) {
     }
     if (drag?.kind === 'zoneLabel' || drag?.kind === 'zoneSize') {
       const patch = drag.kind === 'zoneLabel' ? (l => l && { label: l })(zoneLabelMoved(drag)) : zoneResized(drag);
-      if (patch) return { ...page, elements: page.elements.map(e => (e.id === drag.zoneId && e.kind === 'zone' ? { ...e, ...patch } : e)) };
+      if (patch) return { ...page, elements: page.elements.map(e => (e.id === drag.zoneId && (e.kind === 'zone' || (e.kind === 'nofit' && drag.kind === 'zoneSize')) ? { ...e, ...patch } as typeof e : e)) };
     }
     if (drag?.kind === 'cableEnd') {
       const pts = cableEndMoved(drag);
@@ -1034,7 +1114,9 @@ export function Canvas({ derived }: { derived: Derived }) {
   const oneWire = selection.length === 1 ? shown.elements.find(e => e.id === selection[0] && e.kind === 'wire') as Wire | undefined : undefined;
   const ghostSym = tool.kind === 'place' ? getSymbol(tool.symbolId, project) : undefined;
   const ghostAt = ghostSym ? placeAt(cursor) : cursor;
-  const pd = derived.pages.get(page.id)!;
+  const pd0 = derived.pages.get(page.id)!;
+  // Scritta del riquadro di un connettore mentre si trascina
+  const pd = drag?.kind === 'connLabel' && pd0.connFrames ? { ...pd0, connFrames: pd0.connFrames.map(f => (f.conn === drag.conn ? { ...f, labelAt: { x: f.labelAt.x + drag.to.x - drag.start.x, y: f.labelAt.y + drag.to.y - drag.start.y } } : f)) } : pd0;
   const potential = useMemo(() => (highlight ? potentialOf(project, derived.netlist, highlight) : undefined), [highlight, project, derived]);
   const r = svgRef.current?.getBoundingClientRect();
   const showGrid = r && gridMode !== 'off' ? vb.w / r.width < 0.6 : false;
@@ -1069,6 +1151,7 @@ export function Canvas({ derived }: { derived: Derived }) {
         const inst = st.placeSymbol(id, p, 0);
         if (inst) st.setSelection([inst.id]);
         if (inst && sym.role === 'link') void chooseLinkPartner(inst.id);
+        if (inst && sym.role === 'pin') void chooseConnectorForPin(inst.id);
         if (inst && sym.role === 'aux') void chooseAuxDevice(inst.id);
       }}
     >
@@ -1105,7 +1188,7 @@ export function Canvas({ derived }: { derived: Derived }) {
       })()}
       {tool.kind === 'select' && (() => {
         // Maniglie del riquadro di luogo (angoli e lati) e degli estremi della linea del cavo
-        const z = oneZone && shown.elements.find((e): e is Zone => e.id === oneZone.id && e.kind === 'zone');
+        const z = oneZone && shown.elements.find((e): e is Zone | NoFitArea => e.id === oneZone.id && (e.kind === 'zone' || e.kind === 'nofit'));
         const c = oneCable && shown.elements.find((e): e is CableLine => e.id === oneCable.id && e.kind === 'cable');
         const pts = z ? zoneHandles(z).map(([, q]) => q) : c ? c.points : [];
         return pts.length > 0 && (
@@ -1174,7 +1257,7 @@ export function Canvas({ derived }: { derived: Derived }) {
           </g>
         );
       })()}
-      {tool.kind === 'zone' && wirePts.length > 0 && (
+      {(tool.kind === 'zone' || tool.kind === 'nofit') && wirePts.length > 0 && (
         <rect x={Math.min(wirePts[0].x, cursor.x)} y={Math.min(wirePts[0].y, cursor.y)} width={Math.abs(cursor.x - wirePts[0].x)} height={Math.abs(cursor.y - wirePts[0].y)}
           fill="none" stroke={SEL} strokeWidth={0.4} strokeDasharray="4 1 1 1" pointerEvents="none" />
       )}

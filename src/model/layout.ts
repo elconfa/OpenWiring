@@ -29,11 +29,17 @@ export const SCALES = [1, 2, 2.5, 5, 10, 20, 25, 50];
 
 /** Scala normalizzata (1:n) e origine della piastra sulla pagina */
 export function layoutView(l: Layout): { n: number; ox: number; oy: number; k: number } {
-  const need = Math.max(l.plate.w / AREA.w, l.plate.h / AREA.h);
+  // Con la legenda accanto la piastra usa la parte sinistra del foglio
+  const aw = AREA.w - (l.legend ? LEGEND_W + 6 : 0);
+  const need = Math.max(l.plate.w / aw, l.plate.h / AREA.h);
   const n = SCALES.find(s => s >= need) ?? Math.ceil(need);
   const k = 1 / n;
-  return { n, k, ox: AREA.x + (AREA.w - l.plate.w * k) / 2, oy: AREA.y + (AREA.h - l.plate.h * k) / 2 };
+  return { n, k, ox: AREA.x + (aw - l.plate.w * k) / 2, oy: AREA.y + (AREA.h - l.plate.h * k) / 2 };
 }
+
+/** Larghezza della legenda accanto alla piastra e sua posizione (angolo in alto a sinistra) */
+export const LEGEND_W = 110;
+export const legendBox = () => ({ x: AREA.x + AREA.w - LEGEND_W, y: AREA.y, w: LEGEND_W, h: AREA.h });
 
 export const layoutOf = (pg: Page): Layout => ({ ...DEFAULT_LAYOUT, ...(pg.layout ?? {}) });
 
@@ -140,6 +146,11 @@ export function layoutProblems(project: Project): LayoutIssue[] {
       }
     }
     for (const u of railUsage(l)) if (u.free < 0) out.push({ msg: `Pag. ${pg.name}: guida piena, mancano ${-u.free} mm`, pageId: pg.id, itemId: u.rail.id });
+  }
+  for (const d of duplicatePositions(project)) {
+    const pg = project.pages.find(x => x.layout?.items.some(it => it.pos === d.pos && it.ref === d.tags[1]));
+    const it = pg?.layout?.items.find(x => x.pos === d.pos && x.ref === d.tags[1]);
+    if (pg) out.push({ msg: tx('Posizione {0}{1} usata da più apparecchi: {2} (Rinumera nel layout)', d.pos, d.panel ? ` +${d.panel}` : '', d.tags.map(t => `-${t}`).join(', ')), pageId: pg.id, itemId: it?.id });
   }
   for (const f of ductFill(project)) {
     if (f.percent > DUCT_FILL_MAX) out.push({ msg: tx('Pag. {0}: canalina {1} piena al {2}% ({3} fili; consigliato al massimo {4}%)', f.pageName, f.duct.label ?? '', f.percent, f.wires, DUCT_FILL_MAX), pageId: f.pageId, itemId: f.duct.id });
@@ -342,4 +353,93 @@ export function autoLayout(project: Project, l: Layout, library: Part[] = [], pa
     placed++;
   }
   return { placed, missing };
+}
+
+// ── Numeri di posizione e legenda (punto 174) ──────────────────────────────────────────────────
+// Ogni apparecchio o morsettiera posato riceve un numero (bollino sul layout); la legenda «n° –
+// descrizione – sigla» è accanto alla piastra o nella lista «Legenda posizioni quadro», raggruppata
+// per zona (il titolo della pagina di layout: piastra, porta, fianchi…). I numeri sono continui tra le
+// pagine di layout dello stesso luogo e restano fissi: «Numera» dà il numero solo a quelli nuovi,
+// «Rinumera» li rifà tutti nell'ordine di lettura.
+
+const numbered = (it: LayoutItem) => it.kind === 'device' || it.kind === 'strip';
+
+/** Apparecchi e morsettiere in ordine di lettura: per file dall'alto (centri entro 20 mm), poi da sinistra */
+export function readingOrder(items: LayoutItem[]): LayoutItem[] {
+  const list = items.filter(numbered).sort((a, b) => (a.y + a.h / 2) - (b.y + b.h / 2));
+  const rows: LayoutItem[][] = [];
+  for (const it of list) {
+    const row = rows[rows.length - 1], cy = it.y + it.h / 2;
+    if (row && Math.abs(cy - (row[0].y + row[0].h / 2)) <= 20) row.push(it); else rows.push([it]);
+  }
+  return rows.flatMap(r => r.sort((a, b) => a.x - b.x));
+}
+
+/** Pagine di layout dello stesso luogo della pagina data, nell'ordine del progetto */
+const zonePages = (p: Project, pageId: string): Page[] => {
+  const pg = p.pages.find(x => x.id === pageId);
+  return pg ? p.pages.filter(x => x.type === 'layout' && (x.panelId ?? '') === (pg.panelId ?? '')) : [];
+};
+
+/** Numera le posizioni del luogo della pagina: solo quelle senza numero, o tutte da capo; torna quante ne ha numerate */
+export function numberPositions(p: Project, pageId: string, all = false): number {
+  const pages = zonePages(p, pageId);
+  for (const pg of pages) pg.layout = layoutOf(pg);
+  if (all) for (const pg of pages) for (const it of pg.layout!.items) delete it.pos;
+  let next = Math.max(0, ...pages.flatMap(pg => pg.layout!.items.map(it => it.pos ?? 0))) + 1, n = 0;
+  for (const pg of pages) for (const it of readingOrder(pg.layout!.items)) if (it.pos === undefined) { it.pos = next++; n++; }
+  return n;
+}
+
+export interface PositionRow { pos: number; tag: string; description: string; partNr: string; zone: string; panel: string; pageName: string; itemId: string }
+
+/** Righe della legenda: tutte le posizioni numerate del progetto (o di una pagina), per luogo, zona e numero */
+export function positionRows(project: Project, library: Part[] = [], pageId?: string): PositionRow[] {
+  const parts = partsIndex(project, library);
+  const devs = buildDevices(project);
+  const panels = new Map((project.panels ?? []).map(p => [p.id, p.code]));
+  const out: PositionRow[] = [];
+  for (const pg of project.pages) {
+    if (pg.type !== 'layout' || (pageId && pg.id !== pageId)) continue;
+    for (const it of pg.layout?.items ?? []) {
+      if (it.pos === undefined || !numbered(it) || !it.ref) continue;
+      let description = '', partNr = '';
+      if (it.kind === 'device') {
+        const d = devs.get(it.ref);
+        if (d) { const info = deviceInfo(d.elements, d.main, parts); description = info.description ?? d.elements[0].sym.name; partNr = info.part?.partNr ?? ''; }
+        else { const c = project.plc.cards.find(x => x.tag === it.ref); description = c?.description ?? (c ? 'Scheda PLC' : ''); partNr = c?.partNr ?? ''; }
+      } else {
+        const d = stripData(project, it.ref);
+        description = `Morsettiera · ${new Set(stripRows(project, it.ref).map(r => r.base)).size} morsetti`;
+        partNr = d.partNr ?? '';
+      }
+      out.push({ pos: it.pos, tag: it.ref, description, partNr, zone: pg.title, panel: pg.panelId ? panels.get(pg.panelId) ?? '' : '', pageName: pg.name, itemId: it.id });
+    }
+  }
+  const order = new Map(project.pages.map((pg, i) => [pg.name, i]));
+  return out.sort((a, b) => a.panel.localeCompare(b.panel, undefined, { numeric: true }) || a.pos - b.pos || (order.get(a.pageName) ?? 0) - (order.get(b.pageName) ?? 0));
+}
+
+/** Numeri usati due volte nello stesso luogo (per i controlli del layout) */
+export function duplicatePositions(project: Project): { panel: string; pos: number; tags: string[] }[] {
+  const m = new Map<string, string[]>();
+  for (const r of positionRows(project)) { const k = `${r.panel}|${r.pos}`; m.set(k, [...(m.get(k) ?? []), r.tag]); }
+  return [...m].filter(([, t]) => t.length > 1).map(([k, tags]) => ({ panel: k.split('|')[0], pos: Number(k.split('|')[1]), tags }));
+}
+
+/** Bollini di una pagina: centro e numero, sopra l'apparecchio; i vicini si alternano più in alto con una linea di richiamo */
+export const BALLOON_R = 1.7;
+export function balloons(l: Layout, v = layoutView(l)): { x: number; y: number; ax: number; ay: number; pos: number; id: string }[] {
+  const out: { x: number; y: number; ax: number; ay: number; pos: number; id: string }[] = [];
+  if (l.balloons === false) return out;
+  const r = BALLOON_R;
+  for (const it of readingOrder(l.items)) {
+    if (it.pos === undefined) continue;
+    const ax = v.ox + (it.x + it.w / 2) * v.k, ay = v.oy + it.y * v.k;
+    let y = ay - r - 0.8;
+    // Bollino troppo vicino a uno già messo sulla stessa fila: un gradino più in alto
+    while (out.some(b => Math.abs(b.x - ax) < 2 * r + 0.3 && Math.abs(b.y - y) < 2 * r + 0.3)) y -= 2 * r + 0.4;
+    out.push({ x: ax, y, ax, ay, pos: it.pos, id: it.id });
+  }
+  return out;
 }

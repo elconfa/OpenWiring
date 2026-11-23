@@ -1,5 +1,6 @@
 // Libreria simboli e articoli (pannello a destra, come un "workbench" di FreeCAD).
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { fitMenu } from './fitMenu';
 import { useStore } from '../model/store';
 import { BUILTIN_SYMBOLS, SYMBOL_CATEGORIES } from '../model/symbols';
 import type { SymbolDef } from '../model/types';
@@ -50,7 +51,7 @@ function SymItem({ s, label, title, size = 44, menu }: { s: SymbolDef; label: st
       <span>{label}</span>
       {at && menu && (
         <div className="ctx-back" onClick={e => e.stopPropagation()} onMouseDown={e => { e.stopPropagation(); setAt(null); }} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setAt(null); }}>
-          <div className="ctx-menu" style={{ left: Math.min(at.x, window.innerWidth - 240), top: Math.min(at.y, window.innerHeight - 200) }} onMouseDown={e => e.stopPropagation()}>
+          <div className="ctx-menu" ref={fitMenu} style={{ left: Math.min(at.x, window.innerWidth - 240), top: Math.min(at.y, window.innerHeight - 200) }} onMouseDown={e => e.stopPropagation()}>
             <button onClick={run(() => st().openSymbolEditor(s))}><span>{tx('Modifica il simbolo…')}</span></button>
             {menu.map(m => <button key={m.label} disabled={m.disabled} onClick={run(m.run)}><span>{m.label}</span></button>)}
           </div>

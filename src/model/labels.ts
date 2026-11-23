@@ -10,6 +10,8 @@ import { devicePanels, busCableRows, portText, panelOfElement } from './network'
 import { allPlaced } from './devices';
 import { pinsWorld } from './geometry';
 import { tn } from '../i18n/ui';
+import { settingsOf } from './numbering';
+import { wireShown } from './visibility';
 
 export type LabelSet = 'terminals' | 'wires' | 'devices' | 'cables';
 export type LabelProfile = 'mprint' | 'genius' | 'generic';
@@ -122,7 +124,7 @@ export function rowsToCsv(rows: string[][]): string {
 export interface WireMarkOptions {
   /** Quadro di un capo: quello del foglio dove è disegnato (di serie) o quello del dispositivo (+luogo, poi la pagina della bobina) */
   by?: 'sheet' | 'device';
-  /** Anche i capi dei conduttori dei cavi (di serie no: hanno il colore o il numero del cavo) */
+  /** Anche i capi dei conduttori dei cavi con il numero nascosto (di serie solo quelli con il numero visibile) */
   cables?: boolean;
 }
 
@@ -136,13 +138,15 @@ const NOT_AN_END = new Set(['link', 'potential', 'netnode', 'oneline']);
  * Numeri filo da stampare: un'etichetta per ogni capo di filo che arriva su un punto di
  * connessione di un simbolo o di un morsetto (due fili sullo stesso morsetto = due etichette; i
  * fili che finiscono su un altro filo, a T, non hanno etichetta a quel capo). Non contano i rimandi,
- * i punti di potenziale, i conduttori dei cavi (hanno colore o numero del cavo) e i collegamenti di
+ * i punti di potenziale, i conduttori dei cavi con il numero filo nascosto sullo schema (hanno colore o
+ * numero del cavo; quelli con il numero visibile hanno estremità libere da siglare) e i collegamenti di
  * rete. Ogni capo conta nel quadro del suo dispositivo (per i morsetti quello della morsettiera),
  * anche quando il conduttore va da un quadro all'altro.
  * Raggruppate per quadro, numero filo e sezione, con i fogli del quadro dove sono i capi.
  */
 export function wireMarkers(project: Project, o: WireMarkOptions = {}): WireMarkRow[] {
   const by = o.by ?? 'sheet';
+  const settings = settingsOf(project);
   const nl = computeNetlist(project);
   const inCable = new Set(!o.cables ? cableInfos(project, nl).flatMap(i => i.conductors.map(c => c.wire.id)) : []);
   const devPanel = devicePanels(project);
@@ -167,7 +171,9 @@ export function wireMarkers(project: Project, o: WireMarkOptions = {}): WireMark
     const pins = pinsByPage.get(pg.id);
     if (!pins) continue;
     for (const w of pg.elements) {
-      if (w.kind !== 'wire' || w.bus || inCable.has(w.id) || w.points.length < 2) continue;
+      // Conduttore di un cavo: l'etichetta solo se il suo numero è visibile sullo schema (estremità libere in
+      // morsettiera o nel connettore); con il numero nascosto il conduttore ha il colore o il numero del cavo
+      if (w.kind !== 'wire' || w.bus || (inCable.has(w.id) && !wireShown(w, 'number', settings)) || w.points.length < 2) continue;
       const net = nl.wireNet.get(w.id);
       if (!net?.wireNo) continue;
       const cross = w.cross ?? gCross.get(net.group) ?? '';
