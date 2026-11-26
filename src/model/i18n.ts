@@ -352,6 +352,9 @@ const BUILTIN: Record<string, [string, string]> = {
   'massimo': ['Maximum', 'Maximum'],
   'rete macchina': ['Machine network', 'Maschinennetz'],
   'non montato': ['Not fitted', 'Nicht bestückt'],
+  'variabile': ['Variable', 'Variable'],
+  'rack': ['Rack', 'Rack'],
+  'slot': ['Slot', 'Steckplatz'],
 };
 
 const PREPOSITIONS = new Set(['di', 'del', 'della', 'dello', 'dei', 'degli', 'delle', 'per', 'da']);

@@ -1,29 +1,31 @@
 // Lista I/O in Excel da modificare e reimportare: tutti i canali di tutte le schede con i loro dati.
-// Si modificano pin della scheda (morsetti 1…5), nome simbolico e commento; le altre colonne sono
+// Si modificano i morsetti (Segnale 1 e 2, Comune 1…3), nome simbolico e commento; le altre colonne sono
 // informative e si ignorano reimportando. La riga si riconosce da scheda e canale.
 import type { Part, Project, SymbolInstance } from './types';
 import { cardType, defaultSymbol, ioAssignments, sanitizeSymbol, channelsOf } from './plc';
+import { channelTerms, termsAfter, TERM_COLS } from './plcTerms';
 
-/** Pin della scheda per canale (presa M12: +24 V, canale B, 0 V, canale A, FE) */
+/** Morsetti per canale: Segnale 1 e 2, Comune 1…3 (vedi plcTerms.ts) */
 export const MAX_CHANNEL_PINS = 5;
 
-const PIN_COLS = Array.from({ length: MAX_CHANNEL_PINS }, (_, i) => `Morsetto ${i + 1}`);
+/** Nomi delle colonne usati dai file di versioni precedenti, per colonna */
+const OLD_TERM_COLS: string[][] = [['Segnale', 'Morsetto 1'], ['Morsetto 2'], ['Comune +24 V', 'Morsetto 3'], ['Comune FE', 'Morsetto 4'], ['Comune 0 V', 'Morsetto 5']];
 
 /** Nome del foglio (senza «/», che Excel non accetta nei nomi dei fogli) */
 export const IO_SHEET_NAME = 'Lista IO';
 export const IO_SHEET_COLUMNS = [
   'Stazione', 'Scheda', 'Rack', 'Slot', 'Tipo scheda', 'Articolo', 'Canale', 'Tipo', 'Indirizzo',
-  ...PIN_COLS, 'Nome simbolico', 'Commento', 'Descrizione dal dispositivo', 'Collegato a', 'Posizione',
+  ...TERM_COLS, 'Nome simbolico', 'Commento', 'Descrizione dal dispositivo', 'Collegato a', 'Posizione',
 ];
 /** Colonne che si modificano nel file e si rileggono */
-export const IO_SHEET_EDITABLE = [...PIN_COLS, 'Nome simbolico', 'Commento'];
+export const IO_SHEET_EDITABLE = [...TERM_COLS, 'Nome simbolico', 'Commento'];
 
 /** Righe del foglio: intestazione e un canale per riga (anche quelli liberi) */
 export function ioSheetRows(project: Project, library: Part[] = []): string[][] {
   const rows = ioAssignments(project, library).map(r => [
     r.card.station ?? '', `-${r.card.tag}`, r.card.rack != null ? String(r.card.rack) : '', r.card.slot != null ? String(r.card.slot) : '',
     cardType(r.card).name, r.card.partNr ?? '', r.channel, r.kind, r.address,
-    ...Array.from({ length: MAX_CHANNEL_PINS }, (_, i) => r.pins[i] ?? ''),
+    ...channelTerms(project, r).values,
     r.symbolIsDefault ? '' : r.symbol, r.ownComment, r.ownComment ? '' : r.comment, r.connected, r.location,
   ]);
   return [IO_SHEET_COLUMNS, ...rows];
@@ -33,7 +35,9 @@ export function ioSheetRows(project: Project, library: Part[] = []): string[][] 
 export const IO_SHEET_HELP: string[][] = [
   ['Lista I/O da modificare e reimportare (vista PLC ▸ Importa lista I/O)'],
   [''],
-  ['Si rileggono: Morsetto 1…5 (pin della scheda), Nome simbolico e Commento.'],
+  ['Si rileggono: Segnale 1 e 2 (pin della scheda), Comune 1, 2 e 3, Nome simbolico e Commento.'],
+  ['Prese M12: Segnale 1 è il pin del canale; Comune 1, 2 e 3 sono +24 V (pin 1), FE (pin 5) e 0 V (pin 3) della presa, uguali per i due canali: basta cambiarli su una delle due righe.'],
+  ['I canali a 1 o 2 morsetti non hanno comuni: le colonne Comune restano vuote e si ignorano.'],
   ['La riga si riconosce da Scheda e Canale: non cambiarli. Le altre colonne sono solo informative.'],
   ['Una cella vuota toglie il valore (il nome simbolico torna quello automatico, il commento torna la descrizione del dispositivo).'],
   ['Si possono togliere righe o colonne: le righe che mancano e le colonne assenti restano come sono nel progetto.'],
@@ -66,8 +70,8 @@ export function applyIoSheet(project: Project, sheet: string[][]): IoSheetResult
   const col = (name: string) => head.indexOf(norm(name));
   const cTag = col('Scheda'), cCh = col('Canale');
   if (cTag < 0 || cCh < 0) return res;
-  const cPins = PIN_COLS.map(col);
-  const hasPins = cPins.some(c => c >= 0);
+  const cTerms = TERM_COLS.map((n, i) => [n, ...OLD_TERM_COLS[i]].map(col).find(c => c >= 0) ?? -1);
+  const hasTerms = cTerms.some(c => c >= 0);
   const cSym = col('Nome simbolico'), cCom = col('Commento');
   // Valori attuali di ogni canale: si scrive solo quello che cambia davvero
   const now = new Map(ioAssignments(project).map(r => [`${r.card.tag}|${r.channel}`, r]));
@@ -77,6 +81,8 @@ export function applyIoSheet(project: Project, sheet: string[][]): IoSheetResult
     const k = `${e.tag}|${e.plcChannel}`;
     placed.set(k, [...(placed.get(k) ?? []), e]);
   }
+  /** Comuni delle prese come erano nel progetto prima di leggere il file */
+  const before = new Map<string, string>();
   const trim = (l: string[]) => { const x = [...l]; while (x.length && !x[x.length - 1]) x.pop(); return x; };
   for (const row of sheet.slice(1)) {
     const tag = (row[cTag] ?? '').trim().replace(/^-/, '');
@@ -89,8 +95,24 @@ export function applyIoSheet(project: Project, sheet: string[][]): IoSheetResult
     const insts = placed.get(`${tag}|${channel}`) ?? [];
     const cur = { ...(card.io?.[channel] ?? {}) };
     let changed = false;
-    if (hasPins) {
-      const list = trim(cPins.map((c, i) => (c >= 0 ? (row[c] ?? '').trim() : cur0.pins[i] ?? '')));
+    let commonsChanged = false;
+    if (hasTerms) {
+      // Morsetti: segnali sul canale della scheda, comuni sulla presa M12 disegnata (solo quelli che cambiano)
+      const terms = channelTerms(project, cur0);
+      let pins = cur0.pins.map(x => x ?? '');
+      cTerms.forEach((c, k) => {
+        if (c < 0) return;
+        const ch = termsAfter(terms, pins, k, row[c] ?? '');
+        if (ch.pins) pins = ch.pins;
+        if (ch.common) {
+          // I due canali della presa hanno gli stessi comuni: vale la riga che li cambia rispetto al progetto
+          const key = `${ch.common.body.id}|${ch.common.id}`;
+          if (!before.has(key)) before.set(key, ch.common.body.pinLabels[ch.common.id] ?? '');
+          if (ch.common.value === before.get(key)) return;
+          ch.common.body.pinLabels = { ...ch.common.body.pinLabels, [ch.common.id]: ch.common.value }; commonsChanged = true;
+        }
+      });
+      const list = trim(pins);
       if (JSON.stringify(list) !== JSON.stringify(trim(cur0.pins.map(x => x ?? '')))) {
         changed = true;
         if (list.length) cur.pins = list; else delete cur.pins;
@@ -119,7 +141,7 @@ export function applyIoSheet(project: Project, sheet: string[][]): IoSheetResult
         else if (comment) cur.comment = comment; else delete cur.comment;
       }
     }
-    if (!changed) continue;
+    if (!changed) { if (commonsChanged) res.changed++; continue; }
     res.changed++;
     const io = { ...(card.io ?? {}) };
     if (Object.keys(cur).length) io[channel] = cur; else delete io[channel];

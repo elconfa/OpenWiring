@@ -43,7 +43,7 @@ export function placeableTexts(sym: SymbolDef): TextMoveKey[] {
   const out: TextMoveKey[] = [];
   if (term) out.push('termStrip', 'termNum');
   else if (sym.role !== 'link') out.push('tag', 'lines');
-  if (!sym.textBox) for (const f of sym.fields ?? []) out.push(f.f);
+  if (!sym.textBox && !sym.plcCells) for (const f of sym.fields ?? []) out.push(f.f);
   if (!net && !term) for (const p of sym.pins) out.push(`pin:${p.id}`);
   return out;
 }

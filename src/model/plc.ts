@@ -429,6 +429,18 @@ export function plcProblems(project: Project): string[] {
     if (seen.has(key)) out.push(`-${e.inst.tag}:${e.inst.plcChannel} usato due volte (${seen.get(key)} e ${locationOf(e)})`);
     else seen.set(key, locationOf(e));
   }
+  // Morsetto di segnale (il primo pin del canale) uguale su due canali dello stesso tipo della stessa
+  // scheda: un errore di scrittura (i comuni ripetuti e lo stesso pin come ingresso e uscita vanno bene)
+  for (const card of project.plc.cards) {
+    const bySignal = new Map<string, string[]>();
+    for (const [chId, io] of Object.entries(card.io ?? {})) {
+      const sig = io.pins?.[0]?.trim(), ch = parseChannel(chId);
+      if (!sig || !ch) continue;
+      const k = `${ch.kind === 'DI' || ch.kind === 'AI' ? 'I' : 'O'}${ch.kind.startsWith('D') ? 'D' : 'A'}|${sig}`;
+      bySignal.set(k, [...(bySignal.get(k) ?? []), chId]);
+    }
+    for (const [k, list] of bySignal) if (list.length > 1) out.push(`-${card.tag}: morsetto di segnale ${k.slice(k.indexOf('|') + 1)} su più canali (${list.join(', ')})`);
+  }
   const names = new Map<string, number>();
   for (const r of ioAssignments(project, [], false)) names.set(r.symbol.toLowerCase(), (names.get(r.symbol.toLowerCase()) ?? 0) + 1);
   for (const [n, c] of names) if (c > 1) out.push(`Nome simbolico "${n}" usato ${c} volte`);

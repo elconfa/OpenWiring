@@ -1,5 +1,6 @@
 // Opzioni dell'export PDF e della stampa, con il riepilogo dei controlli del progetto e l'anteprima delle
 // pagine scelte.
+import { INDEX_TITLE } from '../model/reports';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { derive } from '../model/derive';
 import { releaseCheck } from '../model/checks';
@@ -53,7 +54,9 @@ export function PdfDialog() {
   const project = useStore(s => s.project);
   const pageId = useStore(s => s.pageId);
   const st = useStore.getState;
-  const [o, setO] = useState<PdfOptions>(loadOpts);
+  // Il progetto ha già le sue pagine «Indice delle pagine»: la pagina indice del PDF di serie no (sarebbe un doppione prima della copertina)
+  const ownIndex = project.pages.some(pg => pg.type === 'report' && pg.report === INDEX_TITLE);
+  const [o, setO] = useState<PdfOptions>(() => { const x = loadOpts(); return ownIndex ? { ...x, index: false } : x; });
   const [mode, setMode] = useState<'all' | 'current' | 'one' | 'range'>(() => (o.pages === 'all' || o.pages === 'current' ? o.pages : 'range'));
   const [range, setRange] = useState(o.pages !== 'all' && o.pages !== 'current' ? o.pages : '');
   const [one, setOne] = useState('');
@@ -192,7 +195,8 @@ export function PdfDialog() {
         <fieldset>
           <legend>{tx('Contenuto')}</legend>
           {!print && <>
-          <label><input type="checkbox" checked={o.index} onChange={e => setO({ ...o, index: e.target.checked })} /> {tx('Pagina indice iniziale (cliccabile)')}</label>
+          <label title={tx('Elenco cliccabile di pagine e liste all\'inizio del PDF, prima della copertina; continua su più pagine se serve')}><input type="checkbox" checked={o.index} onChange={e => setO({ ...o, index: e.target.checked })} /> {tx('Pagina indice iniziale (cliccabile)')}</label>
+          {ownIndex && o.index && <p className="muted small" style={{ paddingLeft: 22 }}>{tx('Il progetto ha già le pagine «Indice delle pagine»: questa pagina in più va prima della copertina.')}</p>}
           <label title={tx('I file PDF collegati agli articoli usati (schede tecniche, dichiarazioni CE e UL, manuali…), con una pagina di elenco; si scelgono i tipi da allegare, per esempio solo le dichiarazioni per il fascicolo tecnico; solo nell\'app desktop')}><input type="checkbox" checked={!!o.attachDocs} onChange={e => setO({ ...o, attachDocs: e.target.checked })} /> {tx('Documenti degli articoli allegati in fondo')}</label>
           {o.attachDocs && <div style={{ paddingLeft: 22 }}>
             {DOC_KINDS.map(k => {

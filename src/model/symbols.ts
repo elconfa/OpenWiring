@@ -1,6 +1,7 @@
 // Libreria simboli in stile IEC 60617. Orientamento verticale (flusso dall'alto
 // verso il basso), punti di connessione sulla griglia di 4 mm.
 import type { Prim, PinDef, SymbolDef, Part } from './types';
+import { plcCellLines, type PlcCellBox } from './plcCells';
 
 const L = (x1: number, y1: number, x2: number, y2: number, dash = false): Prim => ({ t: 'line', x1, y1, x2, y2, dash });
 const T = (x: number, y: number, s: string, size = 2.5, anchor: 'start' | 'middle' | 'end' = 'middle'): Prim => ({ t: 'text', x, y, s, size, anchor });
@@ -28,12 +29,15 @@ const pins2 = (a: string, b: string, len = 16): PinDef[] => [P('1', 0, 0, a), P(
  * Passo dei canali nei gruppi I/O PLC e altezza del loro riquadro (mm): tra un canale e il
  * successivo c'è posto per 10 fili sulla griglia di 4 mm (componenti, fotocellule e sigle)
  */
-export const PLC_GROUP_STEP = 40, PLC_GROUP_H = 28;
+export const PLC_GROUP_STEP = 40, PLC_GROUP_H = 38;
 type PlcBoxField = 'plcAddress' | 'plcSymbol' | 'plcComment' | 'plcCard' | 'plcPlace' | 'plcPins';
 /** Morsetti per canale dei gruppi I/O PLC: 1, 2, oppure 4 (prese M12 delle stazioni I/O) */
 export type PlcTerms = 1 | 2 | 4;
 /** Passo dei canali secondo i morsetti: con 4 morsetti (uno ogni 16 mm) il canale è largo 64 mm */
 export const plcGroupStep = (n: PlcTerms) => (n === 4 ? 64 : PLC_GROUP_STEP);
+
+/** Linee interne del riquadro a celle, sottili */
+const cellPrims = (b: PlcCellBox): Prim[] => plcCellLines(b).map(l => ({ t: 'line', ...l, lw: 0.18 }) as Prim);
 
 const shiftPrim = (p: Prim, dx: number): Prim => {
   switch (p.t) {
@@ -57,48 +61,70 @@ function plcSlice(id: string, io: 'DI' | 'DO', n: PlcTerms): SymbolDef {
   const pinY = io === 'DI' ? 0 : bottom + 4, stub = io === 'DI' ? [0, 4] : [bottom, bottom + 4];
   // Con più morsetti per canale uno ogni 16 mm a destra del primo
   const xs = Array.from({ length: n }, (_, i) => i * 16);
-  // Posizioni indicative (per l'editor dei simboli): sullo schema i testi seguono il riquadro textBox
+  // Riquadro a celle fisse (plcCells.ts); le posizioni dei campi servono solo all'editor dei simboli
+  const cells: PlcCellBox = { x: x0, y: top, w: x1 - x0, h: H };
   const row = (f: PlcBoxField, y: number) => ({ f, x: x0 + 1.2, y: top + y, size: 2.5, anchor: 'start' as const });
   return {
     id, name: `Canale di gruppo ${io === 'DI' ? 'ingressi' : 'uscite'} PLC (${n} morsetti)`, category: 'PLC', letter: 'A', role: 'plc', io, hidden: true,
-    prims: [L(x0, top, x1, top), L(x0, bottom, x1, bottom), L(x0, top, x0, bottom), L(x1, top, x1, bottom), ...xs.map(x => L(x, stub[0], x, stub[1]))],
+    prims: [L(x0, top, x1, top), L(x0, bottom, x1, bottom), L(x0, top, x0, bottom), L(x1, top, x1, bottom), ...xs.map(x => L(x, stub[0], x, stub[1])), ...cellPrims(cells)],
     pins: xs.map((x, i) => P(String(i + 1), x, pinY, '', io === 'DI' ? 'up' : 'down')),
     tagPos: { x: x0 - 2, y: top + 6 },
-    fields: [row('plcAddress', 3.2), row('plcSymbol', 6.5), row('plcComment', 9.8), row('plcCard', 13.1), row('plcPlace', 16.4), row('plcPins', 19.7)],
-    textBox: { x: x0 + 1.2, y: top + 0.5, w: x1 - x0 - 2.4, h: H - 1 },
+    fields: [row('plcAddress', 6), row('plcSymbol', 14), row('plcComment', 22)],
+    plcCells: cells,
   };
 }
 
 /**
- * Presa M12 a 2 canali (stazioni I/O con doppia assegnazione, es. ET 200eco PN): passo 80 mm, pin 1
- * (+24 V) a x 0, 4 (canale A) a 16, 3 (0 V) a 32, 2 (canale B) a 48, 5 (FE) a 64. La presa disegna il
- * riquadro e i pin comuni; i due canali sono simboli a parte con il loro pin e i testi nella loro metà.
+ * Presa M12 a 2 canali (stazioni I/O con doppia assegnazione, es. ET 200eco PN): passo 80 mm. Il ruolo
+ * lo dice la posizione, il numero del pin si cambia: segnale del canale A (di serie pin 4) a x 0 sotto
+ * la metà A, segnale del canale B (pin 2) a x 64 sotto la metà B, e al centro i comuni a 12 mm l'uno
+ * dall'altro in un riquadro tratteggiato: +24 V (pin 1) a 20, FE (pin 5) a 32, 0 V (pin 3) a 44, con
+ * le loro sigle (+, ⏚, −, modificabili). La presa disegna il riquadro e i comuni; i due canali sono
+ * simboli a parte con il loro pin e i testi nella loro metà.
  * up: pin in alto (come gli ingressi), altrimenti in basso (come le uscite)
  */
 export const PLC_SOCKET_STEP = 80;
-export const PLC_SOCKET_PINS = { body: [['1', 0], ['3', 32], ['5', 64]], a: [['4', 16]], b: [['2', 48]] } as const;
-function plcSocketParts(up: boolean): SymbolDef[] {
-  const H = PLC_GROUP_H, x0 = -4, x1 = PLC_SOCKET_STEP - 4, mid = 40;
+export const PLC_SOCKET_PINS = { body: [['1', 20], ['5', 32], ['3', 44]], a: [['4', 0]], b: [['2', 64]] } as const;
+/** Sigle di serie dei comuni della presa (pin 1, 5, 3) */
+export const PLC_SOCKET_COMMONS: Record<string, string> = { 1: '+', 5: '⏚', 3: '−' };
+/** Fascia dei comuni dentro la presa, dal lato dei pin (mm) */
+export const PLC_SOCKET_BAND = 7;
+/** Riquadro della presa (coordinate del simbolo) e posizione delle sigle dei comuni */
+export function plcSocketGeom(up: boolean) {
+  const H = PLC_GROUP_H, x0 = -8, x1 = PLC_SOCKET_STEP - 8, mid = 32;
   const top = up ? 4 : 14 - H, bottom = top + H;
+  const band = up ? { y0: top + 1, y1: top + PLC_SOCKET_BAND } : { y0: bottom - PLC_SOCKET_BAND, y1: bottom - 1 };
+  return { H, x0, x1, mid, top, bottom, band, labelY: (band.y0 + band.y1) / 2 + 0.9, bandX: [16, 48] as const };
+}
+function plcSocketParts(up: boolean): SymbolDef[] {
+  const { H, x0, x1, mid, top, bottom, band, bandX } = plcSocketGeom(up);
   const pinY = up ? 0 : bottom + 4, stub = up ? [0, 4] : [bottom, bottom + 4];
   const dir = up ? 'up' : 'down';
   const side = up ? 'up' : 'down';
   const stubs = (xs: readonly (readonly [string, number])[]) => xs.map(([, x]) => L(x, stub[0], x, stub[1]));
   const pins = (xs: readonly (readonly [string, number])[]) => xs.map(([id, x]) => P(id, x, pinY, '', dir));
+  // Comuni: stub dal bordo al riquadro tratteggiato; linea tra le due metà dal riquadro al bordo opposto
+  const commonStubs = PLC_SOCKET_PINS.body.map(([, x]) => (up ? L(x, 0, x, band.y0) : L(x, band.y1, x, bottom + 4)));
   const body: SymbolDef = {
     id: `plc_m12_body_${side}`, name: 'Presa M12 della stazione I/O (+24 V, 0 V, FE)', category: 'PLC', letter: 'A', role: 'plc', hidden: true,
-    prims: [L(x0, top, x1, top), L(x0, bottom, x1, bottom), L(x0, top, x0, bottom), L(x1, top, x1, bottom), L(mid, top, mid, bottom, true), ...stubs(PLC_SOCKET_PINS.body)],
+    prims: [L(x0, top, x1, top), L(x0, bottom, x1, bottom), L(x0, top, x0, bottom), L(x1, top, x1, bottom),
+      up ? L(mid, band.y1, mid, bottom) : L(mid, top, mid, band.y0),
+      L(bandX[0], band.y0, bandX[1], band.y0, true), L(bandX[1], band.y0, bandX[1], band.y1, true), L(bandX[1], band.y1, bandX[0], band.y1, true), L(bandX[0], band.y1, bandX[0], band.y0, true),
+      ...commonStubs],
     pins: pins(PLC_SOCKET_PINS.body), tagPos: { x: x0 - 2, y: top + 6 },
   };
   const channel = (part: 'a' | 'b', io: 'DI' | 'DO'): SymbolDef => {
     const [bx0, bx1] = part === 'a' ? [x0, mid] : [mid, x1];
-    const row = (f: PlcBoxField, y: number) => ({ f, x: bx0 + 1.2, y: top + y, size: 2.5, anchor: 'start' as const });
+    // Celle nella metà del canale, fuori dalla fascia dei comuni
+    const ty = up ? top + PLC_SOCKET_BAND + 0.5 : top;
+    const cells: PlcCellBox = { x: bx0, y: ty, w: bx1 - bx0, h: H - PLC_SOCKET_BAND - 0.5, small: true };
+    const row = (f: PlcBoxField, y: number) => ({ f, x: bx0 + 1.2, y: ty + y, size: 2.5, anchor: 'start' as const });
     return {
       id: `plc_m12_${part}_${io.toLowerCase()}_${side}`, name: `Canale ${part.toUpperCase()} della presa M12 (${io === 'DI' ? 'ingresso' : 'uscita'}, pin ${part === 'a' ? 4 : 2})`,
       category: 'PLC', letter: 'A', role: 'plc', io, hidden: true,
-      prims: stubs(PLC_SOCKET_PINS[part]), pins: pins(PLC_SOCKET_PINS[part]), tagPos: { x: x0 - 2, y: top + 6 },
-      fields: [row('plcAddress', 3.2), row('plcSymbol', 6.5), row('plcComment', 9.8), row('plcCard', 13.1), row('plcPlace', 16.4), row('plcPins', 19.7)],
-      textBox: { x: bx0 + 1.2, y: top + 0.5, w: bx1 - bx0 - 2.4, h: H - 1 },
+      prims: [...stubs(PLC_SOCKET_PINS[part]), ...cellPrims(cells)], pins: pins(PLC_SOCKET_PINS[part]), tagPos: { x: x0 - 2, y: top + 6 },
+      fields: [row('plcAddress', 5), row('plcSymbol', 12), row('plcComment', 20)],
+      plcCells: cells,
     };
   };
   const parts = [body, channel('a', 'DI'), channel('a', 'DO'), channel('b', 'DI'), channel('b', 'DO')];
@@ -106,7 +132,7 @@ function plcSocketParts(up: boolean): SymbolDef[] {
     id: `plc_grp_m12_${side}`, name: `Gruppo 4 prese M12 a 2 canali (pin ${up ? 'in alto, ingressi' : 'in basso, uscite'})`, category: 'PLC', letter: 'A', role: 'plc', io: up ? 'DI' : 'DO',
     prims: Array.from({ length: 4 }, (_, i) => [...body.prims, ...parts[1].prims, ...parts[3].prims].map(p => shiftPrim(p, i * PLC_SOCKET_STEP))).flat(),
     pins: [], tagPos: body.tagPos, plcGroup: { slice: body.id, count: 4, socket: true },
-    description: 'Ogni presa ha +24 V (pin 1), 0 V (pin 3), FE (pin 5) e due canali: A sul pin 4 e B sul pin 2, ognuno ingresso, uscita o non usato',
+    description: 'Ogni presa ha due canali, A (pin 4) a sinistra e B (pin 2) a destra, ognuno ingresso, uscita o non usato, e al centro i comuni +24 V (pin 1), FE (pin 5) e 0 V (pin 3)',
   };
   return [...parts, group];
 }
@@ -559,6 +585,8 @@ export const BUILTIN_SYMBOLS: SymbolDef[] = [
       id: `plc_grp_${k}${n}`, name: `Gruppo ${count} ${what} PLC (${n} ${n === 1 ? 'morsetto' : 'morsetti'} per canale)`, category: 'PLC', letter: 'A', role: 'plc', io,
       prims: Array.from({ length: count }, (_, i) => slice.prims.map(p => shiftPrim(p, i * plcGroupStep(n)))).flat(),
       pins: [], tagPos: slice.tagPos, plcGroup: { slice: slice.id, count },
+      // Con 4 morsetti per canale: sostituito dalle prese M12 (resta per i progetti che lo usano)
+      ...(n === 4 ? { hidden: true } : {}),
       description: 'Si sceglie la scheda e il primo canale; indirizzi automatici, pin, variabili e commenti modificabili per ogni canale',
     };
     return [slice, group];

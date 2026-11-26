@@ -3,6 +3,7 @@ import type { Project, Page, Prim, Part, TextMoveKey } from '../model/types';
 import { voltageTableDrawing } from '../model/voltages';
 import { stationMiniDrawing } from '../model/stationMini';
 import { revGridDrawing } from '../model/revisionGrid';
+import { socketCommonMarks } from '../model/plcSocket';
 import { PAGE_H, PAGE_W, FRAME, COLUMNS, WIRE_LINE_TYPES, primLineType, plotPrims } from '../model/types';
 import { titleBlockPrims } from '../model/titleBlocks';
 import { getSymbol, toWorld, readableText, pinLabelPlace } from '../model/geometry';
@@ -211,13 +212,20 @@ export function pageToDxf(project: Project, page: Page, library: Part[] = []): s
       const tag = sym.role === 'potential' || sym.role === 'link' ? (vis('tag') ? e.tag : '') : e.tag ? (pd.designations.get(e.id) ?? `-${e.tag}`) : '';
       text(t0.x < e.x ? tp.x - tag.length * 1.6 : tp.x, tp.y, tag, 2.5, 'SIGLE');
       (pd.deviceLines.get(e.id) ?? []).forEach((l, i) => text(t0.x < e.x ? lp.x - l.length * 1.15 : lp.x, lp.y + 2.6 * (i + 1), l, 1.9, 'TESTI'));
+      if (e.plcGroup?.socket === 'body') {
+        // Prese M12: sigle dei comuni e segno di terra
+        const m = socketCommonMarks(e);
+        for (const [a, b] of m.lines) line(a.x, a.y, b.x, b.y, 'SIMBOLI');
+        for (const t of m.texts) text(t.x - t.s.length * (t.s.length > 1 ? 0.75 : 1), t.y, t.s, t.s.length > 1 ? 2.5 : 3.4, 'TESTI');
+      }
       if (sym.textBox) {
         // Testi nel riquadro, a capo come sullo schema
         const size = pd.textStyles?.plcText.size ?? 2.5;
         const vals = (sym.fields ?? []).map(f => pd.deviceFields.get(e.id)?.[f.f] ?? '');
         for (const l of flowLines(sym.textBox, vals, size)) { const w = toWorld(e, l); text(w.x, w.y, l.s, size, 'TESTI'); }
       }
-      for (const f of sym.textBox ? [] : sym.fields ?? []) {
+      if (sym.plcCells) for (const l of pd.plcCells?.get(e.id) ?? []) { const w = toWorld(e, l); text(w.x, w.y, l.s, l.size, 'TESTI'); }
+      for (const f of sym.textBox || sym.plcCells ? [] : sym.fields ?? []) {
         const v = pd.deviceFields.get(e.id)?.[f.f];
         if (!v) continue;
         const w = toWorld(e, f), h = f.size ?? 1.9, a = f.anchor ?? 'start';

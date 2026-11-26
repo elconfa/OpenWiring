@@ -1,4 +1,5 @@
 // Liste di progetto: distinta materiali, lista dispositivi, morsetti, connessioni.
+import { channelTerms, TERM_COLS } from './plcTerms';
 import { notFitted, fittedProject } from './notFitted';
 import { SEQ_MODE_NAMES } from './wiringOrder';
 import { cableEnds, cableEndsText, isCableConnector } from './cableEnds';
@@ -447,8 +448,8 @@ export function plcIoReport(project: Project, library: Part[] = []): Table {
   const io = ioAssignments(project, library);
   return {
     title: 'Lista I/O PLC',
-    columns: ['Scheda', 'Canale', 'Morsetto 1', 'Morsetto 2', 'Morsetto 3', 'Morsetto 4', 'Morsetto 5', 'Indirizzo', 'Nome simbolico', 'Commento', 'Collegato a', 'Posizione'],
-    rows: io.map(r => [`-${r.card.tag}`, r.channel, ...[0, 1, 2, 3, 4].map(k => r.pins[k] ?? ''), r.address, r.inst || !r.symbolIsDefault ? r.symbol : '', r.comment, r.connected, r.location]),
+    columns: ['Scheda', 'Canale', ...TERM_COLS, 'Indirizzo', 'Nome simbolico', 'Commento', 'Collegato a', 'Posizione'],
+    rows: io.map(r => [`-${r.card.tag}`, r.channel, ...channelTerms(project, r).values, r.address, r.inst || !r.symbolIsDefault ? r.symbol : '', r.comment, r.connected, r.location]),
     goto: io.map(r => ({ 11: r.location ? pageOfLocation(r.location) : undefined })),
   };
 }

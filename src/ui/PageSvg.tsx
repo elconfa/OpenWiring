@@ -3,6 +3,7 @@ import type { ReportSheet, RevisionCloud } from '../model/derive';
 import { blockBox, voltageTableDrawing } from '../model/voltages';
 import { stationMiniDrawing, type StationMiniDrawing } from '../model/stationMini';
 import { revGridDrawing } from '../model/revisionGrid';
+import { socketCommonMarks } from '../model/plcSocket';
 import { REPORT_DEFAULTS, REPORT_X, reportColumns, styledHeadH, type ReportCol } from '../model/reportStyle';
 import { memo, type ReactNode } from 'react';
 import type { Project, Page, Prim, SymbolInstance, SymbolDef, Pt, FieldKey, TextItem, CableLine, StripStyle } from '../model/types';
@@ -276,6 +277,8 @@ export interface PageDerived {
   mono?: boolean;
   /** Punti I/O PLC: indirizzo, nome simbolico (vuoto se non assegnato) e rimando alla panoramica */
   plcTexts: Map<string, { address: string; symbol: string; ref?: string }>;
+  /** Testi dei riquadri a celle dei canali PLC (coordinate del simbolo) */
+  plcCells?: Map<string, import('../model/plcCells').PlcCellText[]>;
   /** Contenuto della pagina panoramica PLC (solo per le pagine di tipo "plc") */
   overview?: OverviewData;
   /** Linee di definizione cavo: sigla, tipo e conduttori sugli incroci */
@@ -605,7 +608,15 @@ export const SymbolView = memo(function SymbolView({ inst, sym, derived, selecte
             return <text key={`b${i}`} x={w.x} y={w.y} fontSize={st.size} fill={st.fill} fontWeight={fs[l.index]?.f === 'plcAddress' ? 600 : undefined}>{l.s}</text>;
           });
         })()}
-        {!sym.textBox && sym.fields?.map((f, i) => {
+        {sym.plcCells && (() => {
+          // Riquadro a celle: nome del campo in piccolo e valore sotto
+          const st = ts('plcText');
+          return (derived.plcCells?.get(inst.id) ?? []).map((l, i) => {
+            const w = toWorld(inst, l);
+            return <text key={`c${i}`} x={w.x} y={w.y} fontSize={l.size} fill={st.fill} opacity={l.caption ? 0.75 : undefined} fontWeight={l.bold ? 600 : undefined}>{l.s}</text>;
+          });
+        })()}
+        {!sym.textBox && !sym.plcCells && sym.fields?.map((f, i) => {
           const v = derived.deviceFields.get(inst.id)?.[f.f];
           if (!v) return null;
           const r = textPlace(inst, sym, f.f)!;
@@ -624,6 +635,14 @@ export const SymbolView = memo(function SymbolView({ inst, sym, derived, selecte
         // L'immagine dei contatti si trascina dove si vuole
         const o = off('contacts');
         return <g transform={o.x || o.y ? `translate(${o.x} ${o.y})` : undefined} {...movable('contacts')}>{mirrorBox}</g>;
+      })()}
+      {inst.plcGroup?.socket === 'body' && (() => {
+        // Prese M12: sigle dei comuni (+, ⏚, −) nel riquadro tratteggiato
+        const m = socketCommonMarks(inst);
+        return <g>
+          {m.lines.map(([a, b], i) => <line key={`cl${i}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={color} strokeWidth={0.25} />)}
+          {m.texts.map((t, i) => <text key={`ct${i}`} x={t.x} y={t.y} fontSize={t.s.length > 1 ? 2.5 : 3.4} fontWeight={600} textAnchor="middle" fill={color}>{t.s}</text>)}
+        </g>;
       })()}
       {sym.role === 'plc' && sym.io && <PlcLabel inst={inst} sym={sym} derived={derived} color={color} vis={vis} />}
     </g>

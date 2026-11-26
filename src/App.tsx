@@ -1,3 +1,4 @@
+import { PlcInsertHost } from './ui/PlcInsertDialog';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore, restoreLibrary } from './model/store';
 import { startSymbolFolder } from './ui/symbolFolderSync';
@@ -412,6 +413,7 @@ export function App() {
       <PdfDialog />
       <SearchDialog />
       <AskHost />
+      <PlcInsertHost />
       <SymbolSyncHost />
       <UnifySymbolsHost />
       <BranchPickerHost />

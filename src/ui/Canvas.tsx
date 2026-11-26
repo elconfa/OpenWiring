@@ -1,4 +1,5 @@
 // Area di disegno: zoom/pan, selezione, spostamento, disegno fili, inserimento simboli.
+import { isPlcGroupSymbol } from '../model/plcInsert';
 import { pasteAt } from './pasteChooser';
 import { fitMenu } from './fitMenu';
 import { blockBox } from '../model/voltages';
@@ -141,16 +142,37 @@ function ContextMenu({ menu, derived, onClose }: { menu: Menu; derived: Derived;
         const els = page?.elements.filter(e => e.kind === 'symbol' && sel.includes(e.id)) as SymbolInstance[] | undefined;
         const gids = new Set(els?.flatMap(e => (e.plcGroup && !e.plcGroup.socket ? [e.plcGroup.id] : [])));
         const singles = els?.filter(e => e.symbolId.startsWith('plc_ch_') && !e.plcGroup) ?? [];
+        // Prese M12: separa il gruppo in prese; prese scelte di gruppi diversi: riunisci
+        const sock = els?.filter(e => e.plcGroup?.socket) ?? [];
+        const sockGids = new Set(sock.map(e => e.plcGroup!.id));
+        const sockets = new Set(sock.map(e => `${e.plcGroup!.id}|${e.plcGroup!.index}`));
         return <>
           {gids.size === 1 && item(tx('Separa in canali'), () => st.splitPlcGroup([...gids][0]))}
           {singles.length > 1 && item(tx('Riunisci in un gruppo'), () => st.joinPlcChannels(singles.map(e => e.id)))}
+          {sockGids.size === 1 && sock.some(e => e.plcGroup!.count > 1) && item(tx('Separa in prese'), () => st.splitSocketGroup([...sockGids][0]))}
+          {sockGids.size > 1 && sockets.size > 1 && item(tx('Riunisci le prese in un gruppo'), () => st.joinSockets(sock.map(e => e.id)))}
+          {(gids.size > 0 || sockGids.size > 0) && item(tx('Reimposta i numeri dei pin'), () => st.resetPlcPins([...gids, ...sockGids]))}
         </>;
       })()}
-      {sym && one?.kind === 'symbol' && !['potential', 'link', 'terminal', 'pin'].includes(sym.role) && one.tag && (() => {
-        // Tabella materiali del dispositivo (luogo, sigla, articoli): si aggiunge o si toglie
-        const ids = new Set(sameDeviceIds(st.project, one.id));
-        const on = st.project.pages.some(pg => pg.elements.some(e => e.kind === 'symbol' && ids.has(e.id) && e.show?.parts));
-        return item(on ? tx('Togli la tabella materiali') : tx('Aggiungi la tabella materiali'), () => st.setPartTable(one.id, !on));
+      {(() => {
+        // Tabella materiali dei dispositivi scelti (luogo, sigla, articoli): si aggiunge o si toglie, anche a più insieme
+        const devs = (page?.elements.filter(e => e.kind === 'symbol' && sel.includes(e.id)) as SymbolInstance[] | undefined ?? [])
+          .filter(e => { const s = getSymbol(e.symbolId, st.project); return !!e.tag && !!s && !['potential', 'link', 'terminal', 'pin'].includes(s.role); });
+        const seen = new Set<string>();
+        const list = devs.flatMap(e => {
+          if (seen.has(e.id)) return [];
+          const ids = sameDeviceIds(st.project, e.id);
+          ids.forEach(x => seen.add(x));
+          const idSet = new Set(ids);
+          return [{ id: e.id, on: st.project.pages.some(pg => pg.elements.some(x => x.kind === 'symbol' && idSet.has(x.id) && x.show?.parts)) }];
+        });
+        if (!list.length) return null;
+        const off = list.filter(d => !d.on), on = list.filter(d => d.on);
+        const n = (k: number) => (list.length > 1 ? ` (${k})` : '');
+        return <>
+          {off.length > 0 && item(tx('Aggiungi la tabella materiali') + n(off.length), () => st.setPartTables(off.map(d => d.id), true))}
+          {on.length > 0 && item(tx('Togli la tabella materiali') + n(on.length), () => st.setPartTables(on.map(d => d.id), false))}
+        </>;
       })()}
       {st.propClipboard && symIds.length > 0 && item(tx('Incolla proprietà di -{0}', st.propClipboard.tag), () => st.pasteDeviceProps(symIds))}
       {sym && one?.kind === 'symbol' && canReplace(one) && item(tx('Sostituisci simbolo…'), () => void chooseReplacement(sym).then(id => { if (id) useStore.getState().replaceSymbol(one.id, id); }))}
@@ -637,7 +659,7 @@ export function Canvas({ derived }: { derived: Derived }) {
     if (tool.kind === 'place' && tool.pairOf) { st.placeRepresentation(tool.pairOf, placeAt(snapPt(raw)), tool.rot); return; }
     if (tool.kind === 'place') {
       const p = placeAt(snapPt(raw));
-      const inst = st.placeSymbol(tool.symbolId, p, tool.rot, tool.partNr, tool.tag);
+      const inst = st.placeSymbol(tool.symbolId, p, tool.rot, tool.partNr, tool.tag, tool.plc);
       // Rimando: si sceglie subito il corrispondente libero
       const role = inst && getSymbol(inst.symbolId, st.project)?.role;
       if (role === 'link') void chooseLinkPartner(inst!.id);
@@ -1148,6 +1170,8 @@ export function Canvas({ derived }: { derived: Derived }) {
         if (!sym) return;
         let p = snapPt(toPage(e.clientX, e.clientY));
         if (page?.type === 'multiline' && sym.role === 'plc' && (sym.io || sym.plcGroup)) p = plcSlot(settingsOf(st.project), p, sym.io) ?? p;
+        // Gruppo PLC: prima la finestra con scheda e canali, poi si posa qui
+        if (isPlcGroupSymbol(st.project, id)) { useStore.setState({ plcInsert: { symbolId: id, rot: 0, at: p } }); return; }
         const inst = st.placeSymbol(id, p, 0);
         if (inst) st.setSelection([inst.id]);
         if (inst && sym.role === 'link') void chooseLinkPartner(inst.id);

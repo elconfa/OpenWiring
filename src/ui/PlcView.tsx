@@ -1,7 +1,8 @@
 // Vista PLC: schede con indirizzi, lista di assegnazione I/O, controlli ed export.
 import { useMemo, useState, useEffect } from 'react';
 import { useStore } from '../model/store';
-import type { PlcCard, PlcAddressFormat, IoKind } from '../model/types';
+import type { PlcCard, PlcAddressFormat, IoKind, SymbolInstance } from '../model/types';
+import { channelTerms, termsAfter, TERM_COLS, SOCKET_COMMON_NAMES } from '../model/plcTerms';
 import {
   PLC_CARD_TYPES, IO_KINDS, FORMAT_LABELS, cardType, channelsOf, channelAddress, ioAssignments,
   plcProblems, usedChannels, sanitizeSymbol, tiaTagRows, codesysGvl, canExportTia, canExportGvl,
@@ -73,10 +74,11 @@ export function PlcView() {
     rack: c => c.rack ?? 0, slot: c => c.slot, used: c => usedChannels(project, c.tag).size, description: c => c.description, orderNr: c => c.orderNr,
   });
   type IoRow = typeof shown[number];
-  // Colonne dei pin: 2, o quante ne usa il canale con più pin (prese M12 fino a 5)
-  const pinCols = Array.from({ length: Math.min(5, Math.max(2, ...shown.map(r => r.pins.length))) }, (_, k) => k);
+  // Colonne dei morsetti: sempre 5 (Segnale 1 e 2, Comune 1…3); i comuni delle prese M12 sono quelli della presa
+  const pinCols = [0, 1, 2, 3, 4];
+  const termsOf = (r: IoRow) => channelTerms(project, r);
   const ig = useGrid<IoRow>('plc-io', shown, {
-    card: r => r.card.tag, channel: r => r.channel, pin1: r => r.pins[0] ?? '', pin2: r => r.pins[1] ?? '', pin3: r => r.pins[2] ?? '', pin4: r => r.pins[3] ?? '', pin5: r => r.pins[4] ?? '', address: r => r.address, symbol: r => r.symbol,
+    card: r => r.card.tag, channel: r => r.channel, pin1: r => termsOf(r).values[0], pin2: r => termsOf(r).values[1], pin3: r => termsOf(r).values[2], pin4: r => termsOf(r).values[3], pin5: r => termsOf(r).values[4], address: r => r.address, symbol: r => r.symbol,
     comment: r => r.comment, connected: r => r.connected, pos: r => r.location,
   });
 
@@ -199,6 +201,10 @@ export function PlcView() {
                       <button key={k} title={k === 'DI' ? tx('Inserisci nello schema un gruppo di ingressi di questa scheda (dal primo canale libero)') : tx('Inserisci nello schema un gruppo di uscite di questa scheda (dal primo canale libero)')}
                         onClick={() => { st().setView('schema'); st().setTool({ kind: 'place', symbolId: k === 'DI' ? 'plc_grp_di1' : 'plc_grp_do1', rot: 0, tag: c.tag }); }}>{k === 'DI' ? tx('+ Gruppo DI') : tx('+ Gruppo DO')}</button>
                     ))}
+                    {(['DI', 'DO'] as const).filter(k => (cardType(c).channels[k] ?? 0) > 0).map(k => (
+                      <button key={`m12${k}`} title={tx('Inserisci nello schema prese M12 a 2 canali di questa scheda')}
+                        onClick={() => { st().setView('schema'); st().setTool({ kind: 'place', symbolId: k === 'DI' ? 'plc_grp_m12_up' : 'plc_grp_m12_down', rot: 0, tag: c.tag }); }}>{k === 'DI' ? tx('+ M12 DI') : tx('+ M12 DO')}</button>
+                    ))}
                     <button onClick={() => st().movePlcCard(c.id, -1)} title={tx('Sposta su')}>↑</button>
                     <button onClick={() => st().movePlcCard(c.id, 1)} title={tx('Sposta giù')}>↓</button>
                     <button onClick={async () => {
@@ -235,7 +241,7 @@ export function PlcView() {
       <div className="table-wrap">
         <table {...gridProps(ig)}>
           <thead><tr>
-            <Th g={ig} k="card">{tx('Scheda')}</Th><Th g={ig} k="channel">{tx('Canale')}</Th>{pinCols.map(k => <Th key={k} g={ig} k={`pin${k + 1}` as 'pin1'}>{tx('Morsetto {0}', k + 1)}</Th>)}<Th g={ig} k="address">{tx('Indirizzo')}</Th>
+            <Th g={ig} k="card">{tx('Scheda')}</Th><Th g={ig} k="channel">{tx('Canale')}</Th>{pinCols.map(k => <Th key={k} g={ig} k={`pin${k + 1}` as 'pin1'}>{tx(TERM_COLS[k])}</Th>)}<Th g={ig} k="address">{tx('Indirizzo')}</Th>
             <Th g={ig} k="symbol">{tx('Nome simbolico')}</Th><Th g={ig} k="comment">{tx('Commento')}</Th><Th g={ig} k="connected">{tx('Collegato a')}</Th><Th g={ig} k="pos">{tx('Posizione')}</Th>
           </tr></thead>
           <tbody>
@@ -255,12 +261,24 @@ export function PlcView() {
                 <tr key={`${r.card.id}|${r.channel}`} className={r.inst ? '' : 'free'}>
                   <td>-{r.card.tag}</td>
                   <td>{r.channel}</td>
-                  {pinCols.map(k => (
-                    <td key={`pin${k}`} title={tx('Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O')}>
-                      <Cell value={r.pins[k] ?? ''} width={56} placeholder={k === 0 ? '—' : ''}
-                        onCommit={v => { const list = [...r.pins]; while (list.length < pinCols.length) list.push(''); list[k] = v; st().setChannelPins(r.card.id, r.channel, list); }} />
-                    </td>
-                  ))}
+                  {(() => {
+                    const terms = termsOf(r);
+                    return pinCols.map(k => (
+                      <td key={`pin${k}`} title={k < 2
+                        ? tx('Pin della scheda dove si cabla il filo del canale: vale anche nello schema, nelle panoramiche e nella Lista I/O')
+                        : terms.socket ? tx('Comune della presa M12: {0}. Vale per i due canali della presa', SOCKET_COMMON_NAMES[k - 2])
+                          : terms.editable[k] ? tx('Morsetto {0} del canale', k + 1) : tx('Il canale non ha comuni')}>
+                        {terms.editable[k]
+                          ? <Cell value={terms.values[k]} width={56} placeholder={k === 0 ? '—' : ''}
+                              onCommit={v => {
+                                const ch = termsAfter(terms, r.pins, k, v);
+                                if (ch.pins) st().setChannelPins(r.card.id, r.channel, ch.pins);
+                                if (ch.common) st().updateInstance(ch.common.body.id, { pinLabels: { ...ch.common.body.pinLabels, [ch.common.id]: ch.common.value } });
+                              }} />
+                          : <span className="muted">—</span>}
+                      </td>
+                    ));
+                  })()}
                   <td className="mono">{r.address}</td>
                   <td><Cell value={r.symbolIsDefault ? '' : r.symbol} placeholder={r.inst ? r.symbol : 'libero'} onCommit={setSym} /></td>
                   <td><Cell value={r.ownComment} placeholder={r.inst ? r.comment : ''} onCommit={setComment} /></td>

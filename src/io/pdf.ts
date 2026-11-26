@@ -6,6 +6,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Project, Part, Page } from '../model/types';
 import { PAGE_W, PAGE_H, FRAME, duplexShift } from '../model/types';
+import { indexLayout } from './pdfIndex';
 import { PageContent } from '../ui/PageSvg';
 import { monoSvg, monoPdf } from './mono';
 
@@ -50,13 +51,15 @@ export async function exportPdf(project: Project, tables: Table[], library: Part
   // L'indice delle pagine del PDF è già la sua pagina iniziale
   const tail = new Set(opts.tailLists ?? []);
   const listTables = tables.filter(t => t.rows.length && t.title !== INDEX_TITLE && tail.has(t.title));
-  const offset = opts.index ? 1 : 0;
+  // Indice su tante pagine quante servono (prima si fermava alla fine della prima, a metà elenco)
+  const indexPages = opts.index ? indexLayout(pages.length, listTables.length).pages : 0;
+  const offset = indexPages;
   // Pagina del PDF per ogni pagina di schema esportata
   const pdfPageOf = new Map(pages.map((p, i) => [p.name, i + 1 + offset]));
   const d = plan.derived;
   let links = 0;
 
-  if (opts.index) drawIndexHeader(doc, project);
+  if (opts.index) for (let k = 0; k < indexPages; k++) { if (k) doc.addPage([PAGE_W, PAGE_H], sheetOrientation()); drawIndexHeader(doc, project); }
 
   // Contenitore nascosto per disegnare le pagine (solo se ce ne sono: senza pagine il PDF si fa anche fuori dal browser)
   const host = pages.length ? document.createElement('div') : undefined;
@@ -64,7 +67,7 @@ export async function exportPdf(project: Project, tables: Table[], library: Part
   try {
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
-      if (i > 0 || opts.index) doc.addPage([PAGE_W, PAGE_H], sheetOrientation());
+      if (i > 0 || indexPages) doc.addPage([PAGE_W, PAGE_H], sheetOrientation());
       const pageIndex = project.pages.indexOf(page);
       const pd = d.pages.get(page.id)!;
       const derived = opts.mono ? { ...pd, drawWireColors: false, mono: true } : pd;
@@ -196,17 +199,17 @@ function drawIndexHeader(doc: jsPDF, project: Project) {
   frame(doc, translator(project).t(i.name), [i.company, i.customer, i.drawingNr && `${translateFixed(project, 'Dis.')} ${i.drawingNr}`, i.revision && `Rev. ${i.revision}`, i.date].filter(Boolean).join('  ·  '));
 }
 
-/** Indice (prima pagina): elenco cliccabile di pagine di schema e liste */
+/** Indice (pagine iniziali): elenco cliccabile di pagine di schema e liste */
 function drawIndexBody(doc: jsPDF, pages: Page[], pdfPageOf: Map<string, number>, tables: { title: string; page: number }[], project: Project): number {
-  doc.setPage(1);
-  let y = FRAME.top + 22;
   let links = 0;
   const x0 = FRAME.left + 6;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
   const F = (s: string) => translateFixed(project, s);
   const { t: tr } = translator(project);
-  doc.text(F('Indice'), x0, y); y += 8;
-  const row = (left: string, title: string, target: number) => {
+  const head = (text: string, y: number) => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(27, 31, 36);
+    doc.text(text, x0, y);
+  };
+  const row = (left: string, title: string, target: number, y: number) => {
     doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
     doc.setTextColor(11, 92, 173);
     doc.text(left, x0, y);
@@ -216,18 +219,15 @@ function drawIndexBody(doc: jsPDF, pages: Page[], pdfPageOf: Map<string, number>
     doc.text(`${F('pag. PDF')} ${target}`, FRAME.right - 8, y, { align: 'right' });
     doc.link(x0 - 1, y - 4, FRAME.right - FRAME.left - 10, 5.5, { pageNumber: target });
     links++;
-    y += 6;
   };
-  for (const p of pages) {
-    if (y > PAGE_H - 20) break;
-    row(p.name, tr(p.title), pdfPageOf.get(p.name)!);
+  for (const it of indexLayout(pages.length, tables.length).items) {
+    doc.setPage(it.sheet + 1);
+    if (it.kind === 'head') head(F('Indice'), it.y);
+    else if (it.kind === 'listHead') head(F('Liste'), it.y);
+    else if (it.kind === 'page') { const p = pages[it.i]; row(p.name, tr(p.title), pdfPageOf.get(p.name)!, it.y); }
+    else { const t = tables[it.i]; row('—', t.title, t.page, it.y); }
   }
-  if (tables.length) {
-    y += 4;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(27, 31, 36);
-    doc.text(F('Liste'), x0, y); y += 8;
-    for (const t of tables) { if (y > PAGE_H - 20) break; row('—', t.title, t.page); }
-  }
+  doc.setPage(1);
   // Tabella delle revisioni a destra
   const revs = project.revisions ?? [];
   if (revs.length) {

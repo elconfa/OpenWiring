@@ -1,3 +1,4 @@
+import { insertCard, isPlcGroupSymbol, socketCfgOf, type PlcInsertCfg } from './plcInsert';
 import { deviceLetter } from './letterCodes';
 import { cableEnds } from './cableEnds';
 import { syncPairs, newRepresentation, placeSideReps, setContactPlace, type ContactPlace } from './pairs';
@@ -55,7 +56,7 @@ import { nameTapsInOrder } from './bundles';
 import { withShow, type WireVisKey, type SymVisKey } from './visibility';
 import { partTables, partTableTail, PART_TABLE } from './partTables';
 import { applyCardsSheet, applyIoSheet, isCardsSheet, isIoSheet, type CardsSheetResult, type IoSheetResult } from './plcIoSheet';
-import { buildSocketGroup, socketConfig, socketMembers, type PlcSocketCfg } from './plcSocket';
+import { buildSocketGroup, joinSockets, splitSocketGroup, resetGroupPins, defaultSocketChannels, socketCardFits, socketConfig, socketMembers, type PlcSocketCfg } from './plcSocket';
 import { buildPlcGroup, firstFreeChannel, groupConfig, groupMembers, newGroupId, termsOf, splitPlcGroup, joinPlcChannels, type PlcGroupCfg } from './plcGroup';
 import { nextTerminal, nextToPlace, parseTerminalNo, terminalNo, ensureStrip, renumberStrip as renumberStripModel, renameStrip as renameStripModel, renameTerminals as renameTerminalsModel, addLevel, addJumper as addJumperModel, removeFromJumpers, addSpares as addSparesModel, removeSpares as removeSparesModel, setSparePart, syncStripPages, allStrips } from './terminals';
 import { nextTagFor, renumberDevices, settingsOf } from './numbering';
@@ -70,7 +71,7 @@ export type Tool =
   /** bus: protocollo per i collegamenti di rete (es. "Profinet") */
   | { kind: 'wire'; bus?: string; bundle?: boolean }
   /** tag: sigla imposta (es. il piano successivo di un morsetto, "X1:1B") */
-  | { kind: 'place'; symbolId: string; rot: SymbolInstance['rot']; partNr?: string; tag?: string; pairOf?: string }
+  | { kind: 'place'; symbolId: string; rot: SymbolInstance['rot']; partNr?: string; tag?: string; pairOf?: string; /** Gruppo PLC: scelte della finestra di inserimento */ plc?: PlcInsertCfg }
   | { kind: 'text' }
   /** Linea di definizione cavo: due clic attraverso i fili */
   | { kind: 'cable' }
@@ -302,7 +303,11 @@ export interface State {
   setView(v: View): void;
   setCursor(p: Pt): void;
 
-  placeSymbol(symbolId: string, at: Pt, rot: SymbolInstance['rot'], partNr?: string, tag?: string): SymbolInstance | undefined;
+  placeSymbol(symbolId: string, at: Pt, rot: SymbolInstance['rot'], partNr?: string, tag?: string, plc?: PlcInsertCfg): SymbolInstance | undefined;
+  /** Finestra «Inserisci gruppo PLC» aperta: simbolo, scheda proposta, punto (trascinato dalla libreria) */
+  plcInsert?: { symbolId: string; rot: SymbolInstance['rot']; tag?: string; at?: Pt };
+  /** Chiude la finestra del gruppo PLC: con le scelte posa il gruppo (nel punto o con il cursore) */
+  finishPlcInsert(cfg: PlcInsertCfg | null): void;
   /** Riferimento a coppie: il clic successivo disegna la rappresentazione del contatto (anche su un'altra pagina) */
   startRepresentation(instId: string): void;
   placeRepresentation(realId: string, at: Pt, rot: SymbolInstance['rot']): SymbolInstance | undefined;
@@ -339,6 +344,8 @@ export interface State {
   setPartTablePlace(instId: string, off: Pt | undefined, link: string | undefined): void;
   /** Aggiunge o toglie la tabella materiali del dispositivo dell'elemento */
   setPartTable(instId: string, on: boolean): void;
+  /** Tabella materiali aggiunta o tolta a più dispositivi insieme (un solo passo da annullare) */
+  setPartTables(instIds: string[], on: boolean): void;
   /** Tutti i testi dei simboli indicati di nuovo nella posizione del simbolo */
   resetTextOffsets(instIds: string[]): void;
   /** Mette un altro simbolo al posto di quello dell'elemento: sigla, dati e fili restano */
@@ -383,6 +390,12 @@ export interface State {
   splitPlcGroup(gid: string): void;
   /** Riunisce in un gruppo i canali singoli scelti (stessa scheda, stesso tipo) */
   joinPlcChannels(ids: string[]): void;
+  /** Prese M12: ogni presa diventa un gruppo a sé */
+  splitSocketGroup(gid: string): void;
+  /** Rimette i numeri dei pin automatici nei gruppi I/O e nelle prese M12 indicati */
+  resetPlcPins(gids: string[]): void;
+  /** Prese M12 scelte (anche di gruppi diversi) riunite in un gruppo */
+  joinSockets(ids: string[]): void;
   /** Cambia il gruppo di prese M12 a 2 canali */
   updatePlcSocket(gid: string, patch: Partial<PlcSocketCfg>): void;
   /** Mostra o nasconde sullo schema una proprietà di tutti i canali del gruppo */
@@ -1240,7 +1253,23 @@ export const useStore = create<State>((set, get) => {
         get().logMsg(tx('Simbolo eliminato dalla libreria: per usarlo spostalo prima nell\'albero dei simboli'), 'warn');
         return;
       }
+      // Gruppo PLC: prima la finestra con scheda, canali e prese, poi si posa
+      if (t.kind === 'place' && !t.plc && !t.pairOf && isPlcGroupSymbol(get().project, t.symbolId)) {
+        set({ plcInsert: { symbolId: t.symbolId, rot: t.rot, tag: t.tag }, tool: { kind: 'select' } });
+        return;
+      }
       set({ tool: t, selection: t.kind === 'select' ? get().selection : [] });
+    },
+    finishPlcInsert(cfg) {
+      const req = get().plcInsert;
+      set({ plcInsert: undefined });
+      if (!req || !cfg) return;
+      if (req.at) {
+        const inst = get().placeSymbol(req.symbolId, req.at, req.rot, undefined, undefined, cfg);
+        if (inst) get().setSelection(get().selection.length ? get().selection : [inst.id]);
+        return;
+      }
+      set({ tool: { kind: 'place', symbolId: req.symbolId, rot: req.rot, plc: cfg }, selection: [] });
     },
     setSelection(ids) {
       // Un canale di un gruppo I/O PLC si seleziona con tutto il gruppo
@@ -1253,7 +1282,7 @@ export const useStore = create<State>((set, get) => {
     setView(v) { set({ view: v }); },
     setCursor(c) { set({ cursor: c }); },
 
-    placeSymbol(symbolId, at, rot, partNr, presetTag) {
+    placeSymbol(symbolId, at, rot, partNr, presetTag, plc) {
       const { project, pageId } = get();
       const sym = getSymbol(symbolId, project);
       if (!sym) return;
@@ -1273,24 +1302,45 @@ export const useStore = create<State>((set, get) => {
         });
         return inst;
       }
+      if (plc && sym.plcGroup && sym.io) {
+        // Gruppo con le scelte della finestra: scheda (anche nuova), canali, prese
+        const got = insertCard(project, plc);
+        if (!got) return undefined;
+        const { card, created } = got;
+        const gid = newGroupId();
+        let ids: string[] = [];
+        let warnings: string[] = [];
+        get().commit(p => {
+          if (created) p.plc.cards.push(card);
+          const pg = currentPage(p, pageId);
+          const c = cardByTag(p, card.tag)!;
+          ({ ids, warnings } = plc.socket
+            ? buildSocketGroup(p, pg, gid, socketCfgOf(plc, c), { at, rot })
+            : buildPlcGroup(p, pg, gid, { tag: c.tag, kind: plc.io, first: plc.first, count: plc.count, terms: plc.terms ?? 1, unused: [] }, { at, rot }));
+          autoConnect(p, pg, ids);
+        });
+        if (created) get().logMsg(tx('Creata la scheda PLC -{0} ({1})', card.tag, cardType(card).name));
+        for (const w of warnings) get().logMsg(w, 'warn');
+        // Il gruppo si posa una volta: i canali scelti ora sono usati
+        if (get().tool.kind === 'place') set({ tool: { kind: 'select' } });
+        get().setSelection(ids);
+        const pg = currentPage(get().project, pageId);
+        return pg.elements.find(e => e.id === ids[0]) as SymbolInstance | undefined;
+      }
       if (sym.plcGroup?.socket && sym.io) {
         // Prese M12 a 2 canali: la scheda indicata o quella del primo canale libero; canale A dal primo
         // libero, canale B 8 dopo (doppia assegnazione), tutti del tipo del gruppo
         let card = presetTag ? cardByTag(project, presetTag) : undefined;
         let created = false;
+        const io: 'DI' | 'DO' = sym.io === 'DO' ? 'DO' : 'DI';
+        const count = sym.plcGroup.count;
+        // Senza scheda indicata: prima una scheda dove ci stanno anche i canali B (8 dopo i canali A)
+        if (!card) card = project.plc.cards.find(c => socketCardFits(project, c, io, count));
         if (!card || !(cardType(card).channels[sym.io] ?? 0)) {
           const alloc = allocateChannel(project, sym.io, letter => nextTagFor(project, letter, page, at.x));
           card = alloc.card; created = alloc.created;
         }
-        const io: 'DI' | 'DO' = sym.io === 'DO' ? 'DO' : 'DI';
-        const max = cardType(card).channels[io] ?? 0;
-        const count = sym.plcGroup.count;
-        const first = created ? 0 : firstFreeChannel(project, card, io, count);
-        const second = first + 8 < max ? first + 8 : first + count;
-        const cfg: PlcSocketCfg = {
-          tag: card.tag, count, up: io === 'DI', first, second, name: 'X1',
-          kinds: Array.from({ length: count }, (_, s) => ({ a: first + s < max ? io : null, b: second + s < max ? io : null })),
-        };
+        const cfg: PlcSocketCfg = { tag: card.tag, count, up: io === 'DI', name: 'X1', ...defaultSocketChannels(project, card, io, count, created) };
         const gid = newGroupId();
         let ids: string[] = [];
         let warnings: string[] = [];
@@ -1552,6 +1602,17 @@ export const useStore = create<State>((set, get) => {
         if (get().past.length === n + 1) set(s => ({ past: s.past.slice(0, -1) }));
       }
     },
+    setPartTables(instIds, on) {
+      // Un dispositivo una volta sola, anche se ne sono scelti più simboli
+      const done = new Set<string>();
+      const n = get().past.length;
+      for (const id of instIds) {
+        if (done.has(id)) continue;
+        for (const x of sameDeviceIds(get().project, id)) done.add(x);
+        get().setPartTable(id, on);
+      }
+      if (get().past.length > n + 1) set(s => ({ past: s.past.slice(0, n + 1) }));
+    },
     resetTextOffsets(instIds) {
       const pageId = get().pageId;
       get().commit(p => { for (const e of currentPage(p, pageId).elements) if (e.kind === 'symbol' && instIds.includes(e.id)) delete e.textOffsets; });
@@ -1730,13 +1791,16 @@ export const useStore = create<State>((set, get) => {
       });
     },
     setWireNumber(wireId, number) {
-      // Il numero vale per tutto il conduttore: lo tengo su un solo filo della rete
+      // Il numero vale per tutto il conduttore, anche attraverso i morsetti (gruppo di numerazione):
+      // lo tengo sul filo scelto e lo tolgo dagli altri, altrimenti un numero vecchio rimasto su un altro
+      // tratto (quello più in alto) vincerebbe su quello nuovo
       const nl = computeNetlist(get().project);
       const net = nl.wireNet.get(wireId);
-      const ids = new Set(net?.wires.map(w => w.wire.id) ?? [wireId]);
+      const group = net ? nl.nets.filter(n => n.group === net.group) : [];
+      const ids = new Set(group.length ? group.flatMap(n => n.wires.map(w => w.wire.id)) : [wireId]);
       // Conduttore con un rimando: il numero è il nome del rimando, quindi si rinomina il rimando
       // (e il suo corrispondente) invece di scrivere il numero sul filo
-      const linkIds = new Set(number ? net?.linkIds ?? [] : []);
+      const linkIds = new Set(number ? group.flatMap(n => n.linkIds ?? []) : []);
       if (linkIds.size) for (const id of [...linkIds]) for (const o of linkPartners(get().project).get(id) ?? []) linkIds.add(o.inst.id);
       get().commit(p => {
         for (const pg of p.pages) for (const e of pg.elements) {
@@ -1791,12 +1855,43 @@ export const useStore = create<State>((set, get) => {
       for (const w of r.warnings ?? []) get().logMsg(w, 'warn');
       if (r.gid) get().setSelection(groupMembers(currentPage(get().project, pageId), r.gid).map(e => e.id));
     },
+    resetPlcPins(gids) {
+      const { pageId } = get();
+      let n = 0;
+      get().commit(p => { for (const gid of gids) n += resetGroupPins(p, currentPage(p, pageId), gid); });
+      get().logMsg(n ? tx('Numeri dei pin rimessi automatici ({0} elementi)', n) : tx('I numeri dei pin sono già quelli automatici'));
+    },
+    splitSocketGroup(gid) {
+      const { pageId } = get();
+      let ids: string[] = [];
+      get().commit(p => { ids = splitSocketGroup(currentPage(p, pageId), gid); });
+      set({ selection: ids });
+      get().logMsg(tx('Gruppo separato in {0} prese: ognuna si sposta da sola', new Set(currentPage(get().project, pageId).elements.filter(e => e.kind === 'symbol' && ids.includes(e.id)).map(e => (e as SymbolInstance).plcGroup!.id)).size));
+    },
+    joinSockets(ids) {
+      const { pageId } = get();
+      const probe = joinSockets(structuredClone(currentPage(get().project, pageId)), ids);
+      if (probe.error) { get().logMsg(tx(probe.error), 'warn'); return; }
+      let r: ReturnType<typeof joinSockets> = {};
+      get().commit(p => { r = joinSockets(currentPage(p, pageId), ids); });
+      if (r.gid) get().setSelection(socketMembers(currentPage(get().project, pageId), r.gid).map(e => e.id));
+    },
     updatePlcSocket(gid, patch) {
       const { pageId } = get();
       const cfg = socketConfig(currentPage(get().project, pageId), gid);
       if (!cfg) return;
+      // Scheda cambiata: canali A e B di serie sulla nuova scheda (quelli della vecchia non valgono più)
+      const card = patch.tag && patch.tag !== cfg.tag ? cardByTag(get().project, patch.tag) : undefined;
+      if (card && patch.first === undefined && patch.second === undefined && !patch.kinds)
+        patch = { ...patch, ...defaultSocketChannels(get().project, card, cfg.up ? 'DI' : 'DO', patch.count ?? cfg.count) };
       let warnings: string[] = [];
-      get().commit(p => { warnings = buildSocketGroup(p, currentPage(p, pageId), gid, { ...cfg, ...patch }).warnings; });
+      // Nome, primi canali o scheda scelti per tutto il gruppo: le prese riunite tornano in sequenza
+      const reset = ['name', 'first', 'second', 'tag'].some(k => k in patch);
+      get().commit(p => {
+        const pg = currentPage(p, pageId);
+        if (reset) for (const e of socketMembers(pg, gid)) if (e.plcGroup!.own) { const { own: _o, ...g } = e.plcGroup!; e.plcGroup = g; }
+        warnings = buildSocketGroup(p, pg, gid, { ...cfg, ...patch }).warnings;
+      });
       for (const w of warnings) get().logMsg(w, 'warn');
       get().setSelection(socketMembers(currentPage(get().project, pageId), gid).map(e => e.id));
     },

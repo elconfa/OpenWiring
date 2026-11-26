@@ -58,6 +58,7 @@ import { REV_GRID } from '../model/revisionGrid';
 import { symShown, withShow, type SymVisKey, type WireVisKey } from '../model/visibility';
 import { groupConfig, groupMembers, firstFreeChannel } from '../model/plcGroup';
 import { socketConfig, socketMembers, socketName, type SocketKind } from '../model/plcSocket';
+import { PLC_SOCKET_COMMONS } from '../model/symbols';
 import { connectorGroup, connectorType, isConnectorPart } from '../model/connectorTypes';
 import { editRichText } from './RichTextEditor';
 
@@ -255,7 +256,7 @@ export function PropertyPanel({ derived }: { derived: Derived }) {
             <span className="muted small">{tx('Numero nascosto: filo più corto di {0} mm (Impostazioni ▸ Numeri filo). Accendi l\'occhio per mostrarlo su questo filo.', String(settingsOf(project).wireNoMinLength).replace('.', ','))}</span>
           </Row>
         )}
-        <Row label={tx('Rete')}>{net?.name ?? '—'}{net?.links?.length ? tx(' (numero dal rimando)') : net?.wires.some(x => x.wire.number) ? tx(' (numero manuale)') : ''}</Row>
+        <Row label={tx('Rete')}>{net?.name ?? '—'}{net?.plcNamed ? tx(' (nome dall\'indirizzo PLC: i fili PLC automatici sono accesi)') : net?.links?.length ? tx(' (numero dal rimando)') : net?.wires.some(x => x.wire.number) ? tx(' (numero manuale)') : ''}</Row>
         <Row label={tx('Collega')}>{net?.pins.map(p => `-${p.ref}`).join(', ') || '—'}</Row>
         <Row label={tx('Potenziale')}>
           {highlight === w.id
@@ -1374,11 +1375,6 @@ function PlcProps({ inst, io, vis }: { inst: SymbolInstance; io: IoKind; vis: (k
           onCommit={v => upd({ plcSymbol: v.trim() ? sanitizeSymbol(v.trim()) : undefined })} />
       </Row>
       <Row label={tx('Commento')} vis={vis('plcComment')}><Field value={inst.plcComment ?? ''} placeholder={tx('descrizione del dispositivo collegato')} onCommit={v => upd({ plcComment: v.trim() || undefined })} /></Row>
-      {getSymbol(inst.symbolId, project)?.fields?.some(f => f.f === 'plcCard') && <>
-        <Row label={tx('Scheda e foglio')} vis={vis('plcCard')} />
-        <Row label={tx('Stazione, rack e slot')} vis={vis('plcPlace')} />
-        <Row label={tx('Morsetti del canale')} vis={vis('plcPins')} />
-      </>}
       <Row label={tx('Gestione')}><button onClick={() => st().setView('plc')}>{tx('Apri vista PLC')}</button></Row>
     </Group>
   );
@@ -1425,20 +1421,18 @@ function PlcGroupProps({ gid }: { gid: string }) {
         <Row label={tx('Morsetti per canale')}>
           <select value={cfg.terms} onChange={e => st().updatePlcGroup(gid, { terms: e.target.value === '4' ? 4 : e.target.value === '2' ? 2 : 1 })}>
             <option value={1}>1</option><option value={2}>{tx('2 (es. schede safety, alimentazione del sensore)')}</option>
-            <option value={4}>{tx('4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)')}</option>
+            {cfg.terms === 4 && <option value={4}>{tx('4 (es. prese M12: +24 V, segnale, 0 V, secondo segnale)')}</option>}
           </select>
         </Row>
         <Row label={tx('Numeri dei pin')} vis={vis('pins')} />
         <Row label={tx('Indirizzi')} vis={vis('plcAddress')} />
         <Row label={tx('Variabili')} vis={vis('plcSymbol')} />
         <Row label={tx('Commenti')} vis={vis('plcComment')} />
-        <Row label={tx('Scheda e foglio')} vis={vis('plcCard')} />
-        <Row label={tx('Stazione, rack e slot')} vis={vis('plcPlace')} />
-        <Row label={tx('Morsetti del canale')} vis={vis('plcPins')} />
         <Row label={tx('Azioni')}>
           <button onClick={() => st().rotateSelection()}>{tx('Ruota')}</button>{' '}
           <button onClick={() => st().deleteSelection()}>{tx('Elimina')}</button>{' '}
-          <button onClick={() => st().setView('plc')}>{tx('Apri vista PLC')}</button>{' '}
+          <button onClick={() => st().setView('plc')}>{tx('Apri vista PLC')}</button>
+          {' '}<button onClick={() => st().resetPlcPins([gid])} title={tx('Rimette i numeri dei pin automatici in tutto il gruppo (quelli scritti a mano si perdono)')}>{tx('Reimposta i numeri dei pin')}</button>{' '}
           <button onClick={() => st().splitPlcGroup(gid)}
             title={tx('Ogni canale diventa un punto I/O a sé (stesso canale, pin, variabile e commento) da mettere sotto il suo circuito; si riuniscono selezionandoli e con il tasto destro ▸ Riunisci in un gruppo')}>{tx('Separa in canali')}</button>
         </Row>
@@ -1540,6 +1534,12 @@ function PlcSocketProps({ gid }: { gid: string }) {
         <Row label={tx('Nome della prima presa')}>
           <Field value={cfg.name} placeholder="X1" onCommit={v => { if (v.trim()) st().updatePlcSocket(gid, { name: v.trim() }); }} />
         </Row>
+        {([['1', tx('Sigla comune pin 1 (+24 V)')], ['5', tx('Sigla comune pin 5 (FE)')], ['3', tx('Sigla comune pin 3 (0 V)')]] as const).map(([id, label]) => (
+          <Row key={id} label={label}>
+            <Field value={cfg.commons?.[id] ?? PLC_SOCKET_COMMONS[id]} placeholder={PLC_SOCKET_COMMONS[id]}
+              onCommit={v => st().updatePlcSocket(gid, { commons: { ...PLC_SOCKET_COMMONS, ...(cfg.commons ?? {}), [id]: v.trim() } })} />
+          </Row>
+        ))}
         <Row label={tx('Canale A (pin 4) della prima presa')}>
           <select value={cfg.first} onChange={e => {
             // Il canale B segue il canale A (stessa distanza, di serie 8: pin 2 = canale A + 8)
@@ -1559,13 +1559,13 @@ function PlcSocketProps({ gid }: { gid: string }) {
         <Row label={tx('Indirizzi')} vis={vis('plcAddress')} />
         <Row label={tx('Variabili')} vis={vis('plcSymbol')} />
         <Row label={tx('Commenti')} vis={vis('plcComment')} />
-        <Row label={tx('Scheda e foglio')} vis={vis('plcCard')} />
-        <Row label={tx('Stazione, rack e slot')} vis={vis('plcPlace')} />
-        <Row label={tx('Morsetti del canale')} vis={vis('plcPins')} />
         <Row label={tx('Azioni')}>
           <button onClick={() => st().rotateSelection()}>{tx('Ruota')}</button>{' '}
           <button onClick={() => st().deleteSelection()}>{tx('Elimina')}</button>{' '}
           <button onClick={() => st().setView('plc')}>{tx('Apri vista PLC')}</button>
+          {' '}<button onClick={() => st().resetPlcPins([gid])} title={tx('Rimette i numeri dei pin automatici in tutto il gruppo (quelli scritti a mano si perdono)')}>{tx('Reimposta i numeri dei pin')}</button>
+          {cfg.count > 1 && <>{' '}<button onClick={() => st().splitSocketGroup(gid)}
+            title={tx('Ogni presa diventa un gruppo a sé (stessi canali, pin, variabili e commenti) da spostare dove serve; si riuniscono selezionandole e con il tasto destro ▸ Riunisci le prese in un gruppo')}>{tx('Separa in prese')}</button></>}
         </Row>
       </Group>
       {Array.from({ length: cfg.count }, (_, s) => {
@@ -2297,13 +2297,6 @@ export function DrawingSection() {
       <Row label={tx('Testi dei morsetti')}>
         <select value={s.terminalText ?? 'auto'} onChange={e => st().updateSettings({ terminalText: e.target.value === 'auto' ? undefined : e.target.value as TerminalTextDir })}>
           {TERM_TEXT_DIRS.map(([v, l]) => <option key={v} value={v}>{tx(l)}</option>)}
-        </select>
-      </Row>
-      <Row label={tx('Riquadro del canale PLC')}>
-        <select value={s.plcChannelBox ?? ''} onChange={e => st().updateSettings({ plcChannelBox: e.target.value === 'full' ? 'full' : undefined })}
-          title={tx('Completo: nei canali dei gruppi I/O anche la scheda con il foglio della panoramica, la stazione con rack e slot e i morsetti del canale; ogni campo si nasconde anche sul singolo canale (occhio nelle proprietà)')}>
-          <option value="">{tx('semplice (indirizzo, variabile, commento)')}</option>
-          <option value="full">{tx('completo (anche scheda e foglio, stazione/rack/slot, morsetti)')}</option>
         </select>
       </Row>
       <Row label={tx('Riquadri dei connettori sullo schema')}>

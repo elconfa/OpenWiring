@@ -47,6 +47,23 @@ describe('tabelle materiali', () => {
     expect(partTables(st().project).get(pg.id)!.map(t => t.instId)).toEqual([k2]);
   });
 
+  it('più simboli insieme: una tabella per dispositivo, un solo passo da annullare', async () => {
+    const { st, k1, k2, els } = await store();
+    const k1no = els().find((e: any) => e.symbolId === 'no').id;
+    const pg = () => st().project.pages[0];
+    const n = st().past.length;
+    // Bobina e contatto di K1 scelti insieme a K2: due tabelle, agganciate in colonna
+    st().setPartTables([k1, k1no, k2], true);
+    expect(partTables(st().project).get(pg().id)!.map(t => t.instId).sort()).toEqual([k1, k2].sort());
+    expect(st().past.length).toBe(n + 1);
+    st().setPartTables([k1no, k2], false);
+    expect(partTables(st().project).get(pg().id) ?? []).toEqual([]);
+    st().undo();
+    expect(partTables(st().project).get(pg().id)!.length).toBe(2);
+    st().undo();
+    expect(partTables(st().project).get(pg().id) ?? []).toEqual([]);
+  });
+
   it('in colonna sul margine destro, trascinata resta legata al simbolo, agganciata segue la madre', async () => {
     const { st, k1, k2 } = await store();
     st().setPartTable(k1, true); st().setPartTable(k2, true);

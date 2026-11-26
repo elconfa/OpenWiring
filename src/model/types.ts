@@ -204,6 +204,8 @@ export interface SymbolDef {
    * dei «Testi dei gruppi I/O PLC» del progetto (le posizioni dei campi non contano)
    */
   textBox?: { x: number; y: number; w: number; h: number };
+  /** Riquadro a celle fisse dei canali PLC (vedi plcCells.ts): indirizzo, morsetti, variabile, commento, scheda, stazione, rack e slot */
+  plcCells?: import('./plcCells').PlcCellBox;
   /** Rotazioni ammesse sullo schema (assente = tutte); vedi rotations.ts */
   rotations?: (0 | 90 | 180 | 270)[];
   /** Il simbolo non si specchia sullo schema */
@@ -301,6 +303,10 @@ export interface SymbolInstance {
      * Sulla presa: primo canale A, scarto del canale B e nome della prima presa (es. X10)
      */
     socket?: 'body' | 'a' | 'b'; first?: number; second?: number; name?: string;
+    /** Sulla presa: sigle dei comuni per pin (di serie 1 «+», 5 «⏚», 3 «−»), uguali per tutte le prese del gruppo */
+    commons?: Record<string, string>;
+    /** Prese M12: numeri dei pin diversi da quelli di serie (id del pin → numero, es. { 4: '2' }) */
+    pinNos?: Record<string, string>;
   };
   /** Nome simbolico della variabile PLC (es. "Pompa_Marcia") */
   plcSymbol?: string;

@@ -1,3 +1,4 @@
+import { plcCellTexts, type PlcCellText } from './plcCells';
 import { pairRepresentations } from './pairs';
 import { positionRows, type PositionRow } from './layout';
 import { fittedProject } from './notFitted';
@@ -231,6 +232,12 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
   for (const pg of project.pages) for (const e of pg.elements) if (e.kind === 'symbol' && e.show) show.set(e.id, e.show);
   const parts = partsIndex(project, library);
   const L = translator(project);
+  // Primo canale di ogni gruppo I/O nella pagina (la sigla della scheda va solo lì)
+  const firstOfGroup = new Map<string, number>();
+  for (const pg of project.pages) for (const e of pg.elements) if (e.kind === 'symbol' && e.plcGroup) {
+    const k = `${pg.id}|${e.plcGroup.id}`, i = firstOfGroup.get(k);
+    if (i === undefined || e.plcGroup.index < i) firstOfGroup.set(k, e.plcGroup.index);
+  }
   for (const d of buildDevices(project).values()) {
     if (d.elements.every(e => e.sym.role === 'terminal')) continue;
     const info = deviceInfo(d.elements, d.main, parts);
@@ -240,7 +247,8 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
     const func = vis('func') ? info.func : undefined, loc = vis('loc') ? info.loc : undefined;
     for (const e of d.elements) {
       // Punti PLC: la sigla della scheda si mostra o si nasconde su ogni punto (nei gruppi I/O solo sul primo canale)
-      const tagOn = e.sym.role === 'plc' ? e.inst.show?.tag !== false : vis('tag');
+      // (senza scelta: nei gruppi solo sul primo canale della pagina, come fanno i gruppi nuovi)
+      const tagOn = e.sym.role === 'plc' ? e.inst.show?.tag ?? (!e.inst.plcGroup || firstOfGroup.get(`${e.page.id}|${e.inst.plcGroup.id}`) === e.inst.plcGroup.index) : vis('tag');
       if (!tagOn) designations.set(e.inst.id, '');
       else if (func || loc) designations.set(e.inst.id, designation(d.tag, func, loc));
     }
@@ -275,6 +283,7 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
   }
   // Punti I/O PLC: indirizzo e nome simbolico
   const plcTexts = new Map<string, { address: string; symbol: string; ref?: string }>();
+  const plcCells = new Map<string, PlcCellText[]>();
   const refs = overviewRefs(project);
   // Lo stesso canale disegnato in più punti (es. presa M12 e gruppo a morsetti, o un errore segnalato
   // dai controlli): indirizzo e testi su ognuno, non solo sull'ultimo
@@ -309,6 +318,15 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
       const place = [r.card.station, r.card.rack !== undefined ? `R${r.card.rack}` : '', r.card.slot !== undefined ? `S${r.card.slot}` : ''].filter(Boolean).join(' · ');
       const pl = labels.get(r.inst.id) ?? {};
       const pins = sym.pins.map(p => pl[p.id] ?? p.label).filter(Boolean);
+      if (sym.plcCells) {
+        // Riquadro a celle fisse: tutte le celle con il nome del campo, anche vuote
+        plcCells.set(r.inst.id, plcCellTexts(sym.plcCells, {
+          address: vis('plcAddress') ? r.address : '', pins: pins.join(', '),
+          symbol: vis('plcSymbol') ? r.symbol : '', comment: vis('plcComment') && r.comment ? L.t(r.comment) : '',
+          card: `-${r.card.tag}${ref ? ` /${ref}` : ''}`, station: r.card.station ?? '',
+          rack: r.card.rack !== undefined ? String(r.card.rack) : '', slot: r.card.slot !== undefined ? String(r.card.slot) : '',
+        }, s => L.t(s)));
+      }
       deviceFields.set(r.inst.id, {
         ...deviceFields.get(r.inst.id), plcAddress: vis('plcAddress') ? r.address : undefined,
         plcSymbol: vis('plcSymbol') ? fit('plcSymbol', r.symbol) : undefined, plcComment: vis('plcComment') ? fit('plcComment', r.comment ? L.t(r.comment) : undefined) : undefined,
@@ -410,7 +428,7 @@ function deriveNow(project: Project, library: Part[], given?: Table[]): Derived 
       if (gap) gaps.set(e.id, gap);
     }
     const wireLabelPos = texts.size ? placeWireLabels(project, pg, texts, designations, deviceLines, netlist.junctions.get(pg.id) ?? [], sizes, gaps) : undefined;
-    const pd: PageDerived = { wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireTicks, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', contactImageText: settingsOf(project).contactImageStyle === 'text', pairLines: pairLines.get(pg.id), terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg), partTables: pTables.get(pg.id) };
+    const pd: PageDerived = { wireLabelPos, labels, xrefs, linkTargets, linkWaiting, stripLabel, wireNumbers, wireTicks, wireRefs, bundleTaps: bundles.taps.filter(t => t.pageId === pg.id && t.name).map(t => ({ at: t.at, next: t.next, name: t.name!, size: t.bundle.tapSize, color: t.bundle.tapColor })), designations, deviceLines, deviceFields, show, textStyles, plcTexts, plcCells, drawWireColors: settingsOf(project).drawWireColors, contactImageBottom: settingsOf(project).contactImage !== 'symbol', contactImageText: settingsOf(project).contactImageStyle === 'text', pairLines: pairLines.get(pg.id), terminalText: settingsOf(project).terminalText, freeTexts: settingsOf(project).freeSymbolTexts, overview: pg.cardId ? overviews.get(pg.cardId) : undefined, stripSheet: strips.get(pg.id), cableMarks, revisionClouds: clouds.get(pg.id), connFrames: settingsOf(project).connectorFrames === false ? undefined : connectorFrames(project, pg), junctions: netlist.junctions.get(pg.id) ?? [], tNodes: pageTNodes(pg), partTables: pTables.get(pg.id) };
     if (pg.type === 'report') Object.defineProperty(pd, 'reportSheet', { get: () => sheets().get(pg.id), enumerable: true, configurable: true });
     // Layout con la legenda accanto: righe delle posizioni della pagina
     if (pg.type === 'layout' && pg.layout?.legend) {
